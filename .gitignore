@@ -1,0 +1,8 @@
+# Editor's temp files:
+.fuse_hidden*
+*.*~
+*.*#
+
+# output directory, except *.pdf
+out/*
+!out/*.pdf
