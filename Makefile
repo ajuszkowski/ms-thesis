@@ -1,15 +1,10 @@
-TEXFILE=thesis
+TEXFILE=ms-thesis
+OUTPUT=out
 
 all:
-	pdflatex $(TEXFILE).tex
-	biber $(TEXFILE)
-	pdflatex $(TEXFILE).tex
-	pdflatex $(TEXFILE).tex
-	pdflatex $(TEXFILE).tex
+	pdflatex --interaction=nonstopmode --output-directory=$(OUTPUT)  $(TEXFILE).tex
+	biber $(TEXFILE) --output-directory=$(OUTPUT)
 
 clean:
-	rm -rf $(TEXFILE).bbl $(TEXFILE).aux $(TEXFILE).tex.blg \
-		$(TEXFILE).log $(TEXFILE).bcf $(TEXFILE).out \
-		$(TEXFILE).toc $(TEXFILE).run.xml \
-		$(TEXFILE).pdf
+	rm -f {,$(OUTPUT)/}{*.bbl,*.aux,*.blg,*.log,*.bcf,*.out,*.toc,*.run,*.xml,*.pdf,*.synctex.gz}
 

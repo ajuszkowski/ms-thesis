@@ -1,0 +1,26 @@
+\chapter{Weak Memory Models}
+\label{section:wmm}
+
+briefly what it is, as in Intro
+
+Some examples of what wmms allow to do
+
+Lamport's sequentially consistent memory model -- global order "a global order, even if they are actually executed in different threads running in parallel in different processors. In this model, each read from some memory location is guaranteed to see a value written by the last write to this location." ([c11 by natasha]). Produces same result as sequential program.
+
+
+\section{The CAT language}
+
+the CAT language [ref to Jade's paper] (hard part: to decipher the Alglave's paper).
+
+the event representation
+
+\section{Examples of WMM}
+
+briefly known hw memory models: X86-TSO, Alpha, POWER, -- ref to Jade;
+language memory models: Java, C++;
+library-level kernel memory model, ref to github with tests
+
+Relationship between different models %http://wiki.expertiza.ncsu.edu/index.php/CSC/ECE_506_Spring_2013/10c_ks
+
+\section{The CAT language}
+\label{section:wmm:cat}

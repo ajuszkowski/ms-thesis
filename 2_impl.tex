@@ -1,0 +1,59 @@
+\chapter{Implementation}
+\label{section:impl}
+
+This chapter describes the architecture of the tool \texttt{mousquitaires} ...
+
+language: java
+
+
+\section{Program Requirements}
+\label{section:impl:requirements}
+
+- stability (tests)
+- scalability (new features of language, new models, new tasks for a program -- e.g.!)
+- transparency
+- efficiency
+
+\section{Program Components}
+\label{section:impl:comp}
+
+Big view
+
+\subsection{C11 to YTree parser}
+\label{section:impl:comp:ytree}
+
+- The language-dependent syntax tree:
+        - for now it's the C subset language which I called 'Cmin'; as a base, I used the C11 grammar from ANTLR github repository, then I simplified it a lot, cutting off many unnecessary C syntax features and making it more convenient for parsing. When developing the Cmin language, I kept in mind C elements that are necessary for processing the linux kernel code, though for now not the whole grammar element described in file 'Cmin.g4' are being implemented;
+        - later I am going to add the litmus grammar as well;
+        - in future, it will be not a problem to add any new C-like language;
+
+- The language-independent abstract syntax tree (aliased 'Ytree', where 'Y' resembles branching of the tree):
+        - all tree nodes in my code are prefixed with 'Y', see tentative (yet almost complete) class hierarchy in picture 'YEntity.png';
+        - this AST contains very basic language elements according to the C execution model (statements and expressions);
+        - converting the language-dependent syntax tree to the language-independent syntax tree is performed by Visitor pattern (e.g., for Cmin->Ytree conversion is made by 'CminToYtreeConverterVisitor')
+        - minor changes are performed by converting to ytree representation: desugaring the target code, etc.
+
+
+\subsection{YTree to XGraph event converter}
+\label{section:impl:comp:xgraph}
+
+- Then, the AST is being interpreted and converted to event-based representation (aliased 'Xrepr' for eXecution representation):
+        - more low-level code representation (or high-level assembly);
+        - I try to keep this representation close to the one you described in your papers: basic load \& store events, branching events, fence events;
+        - this representation is being implementing these days, I've just started doing it (see current class hierarchy in the picture 'XEntity.png');
+        
+- After we acquired the event-based representation, we can perform some modifications/simplifications/optimisations on it (separately, allowing user to manage them):
+        - converting to SSA form as one of necessary steps before encoding;
+        - (more? -- I'm not thinking about it yet);
+
+
+\subsection{XGraph to ZFormula (SMT) encoder}
+\label{section:impl:comp:zformula}
+
+- Then, this modified event-representation is being encoded to SMT formula and sent to the solver.
+
+
+
+\section{Optimisations}
+
+... in each stage

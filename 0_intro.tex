@@ -1,0 +1,32 @@
+\chapter{Introduction}
+\label{section:introduction}
+
+problems of concurrency
+
+necessity of Weak Memory Models
+\begin{itemize}
+\item hardware wmms
+\item wmms of programming languages
+\item specific wmms like for kernel
+\end{itemize}
+
+wmm as a formal way to define guaranties that a hw, programming language, execution environment provide for programmers.
+
+considering wmm as a set of allowed behaviours, the latter wmms are the supersets
+
+wmm allows and disallows optimisations: partial sync of memory buffers, out-of-order execution (reordering), <more> => more behaviours that are unallowed in SC.
+
+question possible to answer with wmm: which behaviours (in addition to SC) are allowed? which new states are allowed? Consequently, correctness, absence of data races, deadlocks or portability issues, etc.
+
+existing tools: herd, diy7 -- exhaustive search approach for exploring the state space.
+
+another approach: using smt solver, e.g. for answering questions like 
+
+base paper: aims to investigate portability of small programs written in a C-like pseudocode and provides the proof-of-concept tool PORTHOS [link]. As input, it takes a program and two memory models in CAT language. Then it encodes programs and memory models into an smt formula and tries to solve it via z3. Current thesis aims to extend this tool functionality to process the real C code, therefore it proposes different modula program architecture and multiple optimisations.
+
+
+
+\section{Thesis structure}
+\label{section:introduction:structure}
+
+...
