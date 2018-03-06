@@ -1,106 +1,158 @@
-@inproceedings{Author:06,
-	title    = {Some publication title},
-	author   = {First Author and Second Author},
-	crossref = {conference:06},
-	pages    = {330—331},
+@article{Porthos17,
+  author    = {Hern{\'{a}}n {Ponce de Le{\'{o}}n} and
+               Florian Furbach and
+               Keijo Heljanko and
+               Roland Meyer},
+  title     = {Portability Analysis for Axiomatic Memory Models. {PORTHOS:} One Tool
+               for all Models},
+  journal   = {CoRR},
+  volume    = {abs/1702.06704},
+  year      = {2017},
+  url       = {http://arxiv.org/abs/1702.06704},
+  archivePrefix = {arXiv},
+  eprint    = {1702.06704},
+  timestamp = {Wed, 07 Jun 2017 14:41:34 +0200},
+  biburl    = {https://dblp.org/rec/bib/journals/corr/LeonFHM17},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
 }
 
-@proceedings{conference:06,
-	editor    = {First Editor and Second Editor},
-	title     = {Proceedings of the Xth Conference on XYZ},
-	booktitle = {Proceedings of the Xth Conference on XYZ},
-	year      = {2006},
-	month     = oct,
+@book{aho2007compilers,
+  title={Compilers: Principles, Techniques, \& Tools},
+  author={Aho, A.V.},
+  isbn={9780321486813},
+  lccn={2006024333},
+  series={Addison-Wesley series in computer science},
+  year={2007},
+  publisher={Pearson/Addison Wesley}
 }
 
-@online{Doe:2009,
-	author = {Doe, John},
-	title = {Test entry},
-	month = 10,
-	year = {2009},
-	url = {http://www.test.org/doe/}
+@inbook{aho2007compilers::loop_unrolling,
+chapter = {9.6 Loops in Flow Graphs},
+crossref = {aho2007compilers}
 }
 
-@article{Doe:2010,
-	author = {John Doe},
-	journal = {Some journal},
-	year = {2010},
-	title = {Title},
-	doi = {10.1.1/abc001},
-	issn = {1234-5678-9012},
+
+@inbook{aho2007compilers::handling_irreducible,
+chapter = {9.7.6 Handling Nonreducible Flow Graphs},
+crossref = {aho2007compilers}
 }
 
+@book{Dasgupta:2006:ALG:1177299,
+ author = {Dasgupta, Sanjoy and Papadimitriou, Christos H. and Vazirani, Umesh},
+ title = {Algorithms},
+ year = {2008},
+ isbn = {0073523402, 9780073523408},
+ edition = {1},
+ publisher = {McGraw-Hill, Inc.},
+ address = {New York, NY, USA}
+}
+@inbook{Dasgupta:2006:ALG:1177299::dfs,
+  chapter = {3.3 Depth-first search in directed graphs},
+  crossref = {Dasgupta:2006:ALG:1177299}
+} 
+
+%@inproceedings{Author:06,
+%	title    = {Some publication title},
+%	author   = {First Author and Second Author},
+%	crossref = {conference:06},
+%	pages    = {330—331},
+%}
+%
+%@proceedings{conference:06,
+%	editor    = {First Editor and Second Editor},
+%	title     = {Proceedings of the Xth Conference on XYZ},
+%	booktitle = {Proceedings of the Xth Conference on XYZ},
+%	year      = {2006},
+%	month     = oct,
+%}
+%
+%@online{Doe:2009,
+%	author = {Doe, John},
+%	title = {Test entry},
+%	month = 10,
+%	year = {2009},
+%	url = {http://www.test.org/doe/}
+%}
+%
+%@article{Doe:2010,
+%	author = {John Doe},
+%	journal = {Some journal},
+%	year = {2010},
+%	title = {Title},
+%	doi = {10.1.1/abc001},
+%	issn = {1234-5678-9012},
+%}
 
 
 % Seminar on Network Security, BiBTeX template 
 % Example entries 
-
-@Book{Com00,
-  author =	 {Douglas E. Comer},
-  title =	 {Internetworking with TCP/IP, Volume I},
-  publisher =	 {Prentice-Hall Inc},
-  year =	 {2000},
-  edition =	 {4th},
-  annote =	 {ISBN: 0-13-018380-6},
-  annote =	 {Good basic book about TCP/IP and its applications;
-                  Includes IP, ARP, ICMP, CIDR, TCP, UDP, Routing with
-                  BGP, RIP, OSPF, HELLO, Multicast, ATM, Mobile IP,
-                  NAT, VPN, Sockets, DHCP, DNS, Telnet, FTP,
-                  Electronic Mail, WWW, VoIP, SNMP, IPsec, IPv6, but
-                  only in the basic level for students}
-}
-
-@InProceedings{HTS03,
-  author =	 {{Tim Hsin-ting Hu and Binh Thai and Aruna
-                  Seneviratne}},
-  title =	 {{Supporting Mobile Devices in Gnutella File 
-                  Sharing Network with Mobile Agents}},
-  booktitle =	 {IEEE International Symposium on Computers
-                  and Communication},
-  pages =	 {1530-1346},
-  year =	 {2003},
-  volume =	 {3},
-  month =	 {April}
-}
-
-@PhdThesis{Nik99,
-  author =	 {Pekka Nikander},
-  title =	 {An Architecture for Authorization and Delegation
-                  in Distributed Object-Oriented Agent Systems},
-  school =	 {Helsinki University of Technology},
-  year =	 {1999},
-  month =	 {March},
-  annote =	 {Describes distributed software architecture that
-                  uses delegated access permissions. Delegating
-                  authorizations to Java agents}
-}
-
-@TechReport{RFC2408,
-  author =	 {D. Maughan and M. Schertler and M. Schneider and
-                  J. Turner},
-  title =	 {{Internet Security Association and Key
-                  Management Protocol (ISAKMP)}},
-  institution =	 {The Internet Engineering Task Force},
-  year =	 {1998},
-  key =		 {rfc2408},
-  type =	 {RFC},
-  number =	 {2408},
-  month =	 {November},
-  note =	 {http://ietf.org/rfc/rfc2408.txt}
-}
-
-@MastersThesis{Suo98,
-  author =	 {Sanna Suoranta},
-  title =	 {{An Object-Oriented Implementation of an
-                  Authentication Protocol}},
-  school =	 {Helsinki University of Technology},
-  year =	 {1998},
-  month =	 {November},
-  annote =	 {An ISAKMP implementation using Jacob framework
-                  implementation that is based on conduits+
-                  framework.}
-}
-
+%
+%@Book{Com00,
+%  author =	 {Douglas E. Comer},
+%  title =	 {Internetworking with TCP/IP, Volume I},
+%  publisher =	 {Prentice-Hall Inc},
+%  year =	 {2000},
+%  edition =	 {4th},
+%  annote =	 {ISBN: 0-13-018380-6},
+%  annote =	 {Good basic book about TCP/IP and its applications;
+%                  Includes IP, ARP, ICMP, CIDR, TCP, UDP, Routing with
+%                  BGP, RIP, OSPF, HELLO, Multicast, ATM, Mobile IP,
+%                  NAT, VPN, Sockets, DHCP, DNS, Telnet, FTP,
+%                  Electronic Mail, WWW, VoIP, SNMP, IPsec, IPv6, but
+%                  only in the basic level for students}
+%}
+%
+%@InProceedings{HTS03,
+%  author =	 {{Tim Hsin-ting Hu and Binh Thai and Aruna
+%                  Seneviratne}},
+%  title =	 {{Supporting Mobile Devices in Gnutella File 
+%                  Sharing Network with Mobile Agents}},
+%  booktitle =	 {IEEE International Symposium on Computers
+%                  and Communication},
+%  pages =	 {1530-1346},
+%  year =	 {2003},
+%  volume =	 {3},
+%  month =	 {April}
+%}
+%
+%@PhdThesis{Nik99,
+%  author =	 {Pekka Nikander},
+%  title =	 {An Architecture for Authorization and Delegation
+%                  in Distributed Object-Oriented Agent Systems},
+%  school =	 {Helsinki University of Technology},
+%  year =	 {1999},
+%  month =	 {March},
+%  annote =	 {Describes distributed software architecture that
+%                  uses delegated access permissions. Delegating
+%                  authorizations to Java agents}
+%}
+%
+%@TechReport{RFC2408,
+%  author =	 {D. Maughan and M. Schertler and M. Schneider and
+%                  J. Turner},
+%  title =	 {{Internet Security Association and Key
+%                  Management Protocol (ISAKMP)}},
+%  institution =	 {The Internet Engineering Task Force},
+%  year =	 {1998},
+%  key =		 {rfc2408},
+%  type =	 {RFC},
+%  number =	 {2408},
+%  month =	 {November},
+%  note =	 {http://ietf.org/rfc/rfc2408.txt}
+%}
+%
+%@MastersThesis{Suo98,
+%  author =	 {Sanna Suoranta},
+%  title =	 {{An Object-Oriented Implementation of an
+%                  Authentication Protocol}},
+%  school =	 {Helsinki University of Technology},
+%  year =	 {1998},
+%  month =	 {November},
+%  annote =	 {An ISAKMP implementation using Jacob framework
+%                  implementation that is based on conduits+
+%                  framework.}
+%}
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % The most common BiBTeX entry types
 %

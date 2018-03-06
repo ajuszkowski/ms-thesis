@@ -14,6 +14,11 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[finnish,swedish,english]{babel}
+%\usepackage[english]{babel}
+
+\usepackage[section]{placeins}
+
+\usepackage{mathtools}
 
 % Font selection
 %\usepackage{palatino}
@@ -42,6 +47,9 @@
 % documentation.
 \usepackage[medium]{titlesec}
 
+\usepackage{subcaption}
+\usepackage{graphicx}
+
 \usepackage{tikz}
 \usetikzlibrary{positioning}
 \usetikzlibrary{calc}
@@ -49,6 +57,38 @@
 \usetikzlibrary{decorations.pathmorphing,decorations.markings}
 \usetikzlibrary{shapes}
 \usetikzlibrary{patterns}
+\usetikzlibrary{automata}
+
+\tikzset{initial text={}}
+\tikzset{%
+  zeroarrow/.style = {-stealth,dashed},
+  onearrow/.style = {-stealth,solid},
+  c/.style = {circle,draw,solid,minimum width=2em,
+    minimum height=2em},
+  r/.style = {rectangle,draw,solid,minimum width=2em,
+    minimum height=2em}
+}
+\tikzset{
+c/.style={
+  circle,
+  inner sep=0pt,
+  text width=6mm,
+  align=center,
+  draw=black,
+  fill=white
+  }
+}
+
+\usepackage{amsthm}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\renewcommand{\algorithmicrequire}[1]{\textbf{Input:} {#1}\\}
+\renewcommand{\algorithmicensure}[1]{\textbf{Output:} {#1}}
+\renewcommand{\algorithmicforall}{\textbf{for each}}
+\newcommand{\Break}{\State\algorithmicbreak}
 
 % Microtype for better typography
 \usepackage[stretch=30,protrusion=true,final,expansion,tracking=true,kerning,spacing]{microtype}
@@ -69,7 +109,7 @@
 \usepackage[labelfont={bf},textfont={it}]{caption}
 
 % Multiple figures inside one figure. See figure in 1lipsum.tex for example
-\usepackage{subfig}
+%\usepackage{subfig}
 
 % Inconsolata monospace font for verbatim environment
 \usepackage{inconsolata}
@@ -270,7 +310,7 @@
 % ------------------------------------------------------------------
 % Options: finnish, english, and swedish
 % These control in which language the cover-page information is shown
-\coverpage{english}
+  \coverpage{english}
 
 
 % Abstracts
