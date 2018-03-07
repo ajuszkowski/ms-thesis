@@ -1,14 +1,22 @@
 \chapter{Introduction}
 \label{section:introduction}
 
-problems of concurrency
+Most modern computer systems contain large parts working concurrently. Though system parallelising can improve its performance drastically, it opens numerous of problems connected to correctness, robustness and reliability, which makes the concurrent program design one of the most difficult areas of programming~\cite{mckenney2017parallel}.
+% Most articles, presentations and books on concurrent programming start with words how hard it is.
 
-necessity of Weak Memory Models
-\begin{itemize}
-\item hardware wmms
-\item wmms of programming languages
-\item specific wmms like for kernel
-\end{itemize}
+Traditionally, studies related to concurrent programming concern mostly classical cases of implementing race-free and lock-free parallel programs, asynchronous data structures and synchronisation primitives of a programming language. Unfortunately, 
+when it comes to 
+%in cases of 
+analysis of the real-world concurrent programs, the algorithmic level of abstraction is not enough for guaranteeing their properties of correctness and reliability. The reasons of this fact lie in the code optimisations that both compiler and hardware perform in order to increase performance as much as possible. For instance, some processor architecture performs reordering of memory access instructions in a thread, while it should not be considered as a valid code transformation with respect to the logic of program (//TODO: example). It is said that this kind of processor exploits \textit{relaxed}, or \textit{weak memory model~(WMM)}, that allow certain amount of memory operations reordering while preserving consistency. Weak memory models serve as set of guarantees made by designers of hardware (programming language, compiler, operation environment, etc.) for programmers on which behaviours of their concurrent code they should expect.
+
+In last decades, the problem of formalising WMMs of different 
+%hardware
+architectures has been developed significantly. The research is aimed, firstly, at formalising the weak memory models, providing systematic, sound and complete formal approach of defining WMMs in order to be able to verify systems with respect to these models. Secondly, the researchers work on extracting hardware memory models from the public specifications written in natural language and thus suffering from ambiguities and incompletenesses. Thirdly, important research direction targets the problem of verifying (or at least finding bugs in) existing software systems with respect to weak memory models. 
+
+while the first two have been developed .... 
+The latter approach still suffers from the exponent.... (need this?)
+Kernel.
+
 
 wmm as a formal way to define guaranties that a hw, programming language, execution environment provide for programmers.
 
