@@ -1,11 +1,27 @@
 \chapter{Weak Memory Models}
-\label{section:wmm}
+\label{ch:wmm}
 
-briefly what it is, as in Intro
+Over the last decades, the problem of formalisation of the weak memory models
+%for different software systems and hardware architectures
+has been developed significantly. Research of WMM aimes, firstly, to formalise the weak memory models and provide systematic, sound and complete formal approach of defining WMMs in order to be able to verify systems with respect to them. 
+//the cat language here.
 
-Some examples of what wmms allow to do
+Secondly, researchers work on extracting the formal hardware memory models from existing implementations of from their specifications, that are written in natural language and thus suffer from ambiguities and incompletenesses. Over last decade the memory models have been extracted for most mainstream multiprocessor architectures, such as x86-TSO (\textit{Total Store Order}) model for x86 architecture formalised in 2009~\cite{owens2009better}, SPARC-TSO for Sparc architecture~\cite{?!?!?!}, much more relaxed memory model ??? for Power and ARM architectures defined in ???~\cite{sarkar2011understanding}, Alpha (???). Moreover, in 2005 <who?Milner> started the work on developing the weak memory model for C++ language, which was introduced in C++11 (?) standard~\cite{???} (//todo: C11 MM ~\cite{batty2011mathematizing}). The memory model for Java that is based on the \textit{happens-before} principle was introduced in JVM??? in ??<year>. 
 
-Lamport's sequentially consistent memory model -- global order "a global order, even if they are actually executed in different threads running in parallel in different processors. In this model, each read from some memory location is guaranteed to see a value written by the last write to this location." ([c11 by natasha]). Produces same result as sequential program.
+Thirdly, important research direction targets the problem of verifying (or at least finding bugs in) existing software systems with respect to weak memory models. In this <area> the notable works <are on> defining the Linux kernel memory model <that is being actively developing these days~\cite{kernel_wmm_1}>. Distributed databases <also need the wmm, see transaction consistency~\cite{bailis2013highly}>
+
+%wmm as a formal way to define guaranties that a hw, programming language, execution environment provide for programmers.
+%considering wmm as a set of allowed behaviours, the latter wmms are the supersets
+%wmm allows and disallows optimisations: partial sync of memory buffers, out-of-order execution (reordering), <more> => more behaviours that are unallowed in SC.
+%question possible to answer with wmm: which behaviours (in addition to SC) are allowed? which new states are allowed? Consequently, correctness, absence of data races, deadlocks or portability issues, etc.
+
+One important question that rises naturally when talking about weak memory models is whether a program is portable from one processor architecture to another. This can be solved ...<ref to PORTHOS>
+
+% more examples of what wmms allow to do?
+
+\section{The Litmus tests}
+
+Test Execution Diagrams
 
 
 \section{The CAT language}
@@ -14,7 +30,15 @@ the CAT language [ref to Jade's paper] (hard part: to decipher the Alglave's pap
 
 the event representation
 
-\section{Examples of WMM}
+\section{Some known WMM}
+
+\subsection{x86-TSO}
+\label{ch:wmm:x86}
+// exmaple with reordering
+// ex. with 
+// Rev-29 Example 7-6. Stores Are Transitively Visible. %see http://www.cl.cam.ac.uk/~pes20/weakmemory/x86tso-paper.pdf
+
+There is a barrier instruction \texttt{mfence} that may be used for flushing the buffers into the main memory.
 
 briefly known hw memory models: X86-TSO, Alpha, POWER, -- ref to Jade;
 language memory models: Java, C++;

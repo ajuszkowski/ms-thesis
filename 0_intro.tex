@@ -1,40 +1,57 @@
 \chapter{Introduction}
-\label{section:introduction}
+\label{ch:introduction}
 
-Most modern computer systems contain large parts working concurrently. Though system parallelising can improve its performance drastically, it opens numerous of problems connected to correctness, robustness and reliability, which makes the concurrent program design one of the most difficult areas of programming~\cite{mckenney2017parallel}.
+Most modern computer systems contain large parts that operate concurrently. Though system parallelising can improve its performance drastically, it opens numerous of problems connected to correctness, robustness and reliability, which makes the concurrent program design one of the most difficult problems of programming~\cite{mckenney2017parallel}.
 % Most articles, presentations and books on concurrent programming start with words how hard it is.
 
-Traditionally, studies related to concurrent programming concern mostly classical cases of implementing race-free and lock-free parallel programs, asynchronous data structures and synchronisation primitives of a programming language. Unfortunately, 
+Traditionally, studies related to concurrent programming concern on more fundamental theoretical questions of designing race-free and lock-free parallel algorithms, asynchronous data structures and synchronisation primitives of a programming language. Unfortunately,
 when it comes to 
 %in cases of 
-analysis of the real-world concurrent programs, the algorithmic level of abstraction is not enough for guaranteeing their properties of correctness and reliability. The reasons of this fact lie in the code optimisations that both compiler and hardware perform in order to increase performance as much as possible. For instance, some processor architecture performs reordering of memory access instructions in a thread, while it should not be considered as a valid code transformation with respect to the logic of program (//TODO: example). It is said that this kind of processor exploits \textit{relaxed}, or \textit{weak memory model~(WMM)}, that allow certain amount of memory operations reordering while preserving consistency. Weak memory models serve as set of guarantees made by designers of hardware (programming language, compiler, operation environment, etc.) for programmers on which behaviours of their concurrent code they should expect.
+the real-world concurrent programs, the algorithmic level of abstraction is not enough for guaranteeing their properties of correctness and reliability. The reasons of this fact lie in the code optimisations that both compiler and hardware perform in order to increase performance as much as possible. For instance, Figure~\ref{example:simple_wmm} provides simple example of
+unexpected state `\texttt{(0:EAX=0~/\textbackslash~1:EAX=0)}' reachable in x86 machines (such little examples that illustrate specific behaviours of a WMM are called \textit{litmus tests}).
+%reordering of memory access instructions within single process allowed by the x86-TSO weak memory model, which potentially breaks the program logic. 
+This behaviour is caused by write buffers used by all processors in x86 architecture. These buffers cache writes to shared variables, so that the writes to shared memory does not become visible by other processes immediately. In the example, the write `\texttt{MOV~[x],1}' performed in the process \texttt{P0} stores value~\texttt{1} into the shared variable~\texttt{[x]} in the write buffer of process~\texttt{P0}. Meanwhile, the write cache of the process \texttt{P1} may not have updated version of the variable~\texttt{[x]}, neither may have the main memory, so that the read `\texttt{MOV~EBX,[x]}' performed in the process~\texttt{P1} may read the initial value~\texttt{0}, even if this variable has been already updated in another thread. More presice description of x86-TSO memory model is given in Chapter~\ref{ch:wmm:x86}.
 
-In last decades, the problem of formalising WMMs of different 
-%hardware
-architectures has been developed significantly. The research is aimed, firstly, at formalising the weak memory models, providing systematic, sound and complete formal approach of defining WMMs in order to be able to verify systems with respect to these models. Secondly, the researchers work on extracting hardware memory models from the public specifications written in natural language and thus suffering from ambiguities and incompletenesses. Thirdly, important research direction targets the problem of verifying (or at least finding bugs in) existing software systems with respect to weak memory models. 
+\begin{figure}
+\small \ttfamily
+\begin{tabular}{ |l|l| }
+\hline
+\multicolumn{2}{|l|}{ \{ x=0; y=0; \}} \tabularnewline \hline
+P0 & P1 \\ \hline
+MOV [x],1 & MOV [y],1 \\
+MOV EAX,[y] & MOV EBX,[x] \\
+\hline
+%\multicolumn{2}{|l|}{locations [x;y;]} \tabularnewline
+\multicolumn{2}{|l|}{exists (0:EAX=0~/\textbackslash~1:EAX=0)} \tabularnewline
+\hline
+\multicolumn{2}{|l|}{x86-TSO: allow} \tabularnewline
+\hline
 
-while the first two have been developed .... 
-The latter approach still suffers from the exponent.... (need this?)
-Kernel.
+\end{tabular}
+\caption{Litmus test of memory operations reordering allowed by the x86-TSO weak memory model}
+\label{example:simple_wmm}
+\end{figure}
 
+The first memory model for concurrent systems was formulated by Leslie Lamport back in 1979~\cite{lamport1979make}. This memory model, called the \textit{sequential consistency (SC) model}, allows only those executions (interleavings) that produce the same result as if the operations had been executed by single process. This means that the order of operations executed by a process is strictly defined by the program it executes. The SC model does requires the write to a shared variable performed in one process to become visible by all other processes not instantly, but simultaneously. This means each process communicates to the shared memory directly, without local buffering. Another important requirement of SC memory model is that it forbids memory operations reordering within single process (the order is strictly defined by the program).
 
-wmm as a formal way to define guaranties that a hw, programming language, execution environment provide for programmers.
+The SC model is considered to be the strong memory model in the sence that it provides strong guarantees regarding the ordering and caused effect of memory operations. Different relaxations of this model lead to the class of \textit{weak memory models~(WMM)}.
+%while preserving consistency
+WMMs serve as set of guarantees made by designers of execution environment (hardware, programming language, compiler, database, operation system, etc.) to programmers on which behaviours of their concurrent code they may expect. 
 
-considering wmm as a set of allowed behaviours, the latter wmms are the supersets
+Although weak memory studies is rather young research area, there exist frameworks and tools for exploring WMMs and examining simple programs with respect to the them. The state-of-the-art tool is \texttt{diy} (for \textit{do it yourself}), developed by the researchers from INRIA institute, France, and University of Cambridge, UK, and firstly released back in 2010. It is the sofware suite for designing and testing weak memory models, it consists of the litmus tests generators \texttt{diy7}, \texttt{diycross7} and \texttt{diyone7}, the litmus tests concrete executor \texttt{litmus7} that runs tests on a physical machine while collecting its behaviours, and the weak memory models simulator \texttt{herd7} that implements reachability analysis for capturing states allowed by the WMM. The latter tool uses systematic exhaustive search in a state space, which may be inefficient when analysing real-world programs, therefore more sophisticated search techniques should be applied for this problem. 
 
-wmm allows and disallows optimisations: partial sync of memory buffers, out-of-order execution (reordering), <more> => more behaviours that are unallowed in SC.
+One possible approach is to use an efficient implementation of an SMT-solver (a SAT-solver extended by satisfiability modulo theories)~\cite{Porthos17}. % <-- TODO
+This approach allows to capture symbolically the semantics of both the program and the weak memory model while encoding it into a single SMT-formula.
+Most modern SMT-solvers are efficient enough to be able to operate the state space of size~??? [CITATION-?].
 
-question possible to answer with wmm: which behaviours (in addition to SC) are allowed? which new states are allowed? Consequently, correctness, absence of data races, deadlocks or portability issues, etc.
+%In the work of Finnish and German researchers ... names ...
+In the work~\cite{Porthos17}, the SMT-based approach was defined for analysing the portability of a program from one hardware architechture to another, which is defined as ``an execution that is consistent with the target but inconsistent with the source memory model". Although encoding the control-flow and the data-flow of a program into an SMT-formula seems to be a trivial problem of symbolic execution, encoding of the weak memory model is more tedious. The reason is that some relations of WMMs are defined as mutually-recursive and need to be linearised in order to be encoded into an equivalent logical formula.
+%"a bounded model checking method that reduces the portability analysis problem to satisfiability modulo theorie" [Porthos17]
+%"A portability bug is an execution that is consistent with the target but inconsistent with the source memory model. We capture this alternation with a single existential query. Consistency is specified in terms of acyclicity (and irreflexivity) of relations. Hence, an execution is inconsistent if a derived relation of the (source) memory model contains a cycle (or is not irreflexive)."
 
-existing tools: herd, diy7 -- exhaustive search approach for exploring the state space.
-
-another approach: using smt solver, e.g. for answering questions like 
-
-base paper: aims to investigate portability of small programs written in a C-like pseudocode and provides the proof-of-concept tool PORTHOS [link]. As input, it takes a program and two memory models in CAT language. Then it encodes programs and memory models into an smt formula and tries to solve it via z3. Current thesis aims to extend this tool functionality to process the real C code, therefore it proposes different modula program architecture and multiple optimisations.
-
-
+Current thesis aims to improve the proof-of-concept tool \texttt{PORTHOS} firstly introduced in April 2017 in the work~\cite{Porthos17} by extending the input language, which currently represents the minimum subset of C, and revising the general architecture of the tool in order to enhance performance, reliability and mantainability.
 
 \section{Thesis structure}
-\label{section:introduction:structure}
+\label{ch:introduction:structure}
 
-...
+The Chapter~\ref{ch:wmm} gives more detailed description of the weak memory models analysis and provides description of memory models for some common architectures (x86, ARM and POWER, Sparc, ???). Chapter~...

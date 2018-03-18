@@ -1,5 +1,5 @@
 \chapter{Implementation}
-\label{section:impl}
+\label{ch:impl}
 
 This chapter describes the architecture of the tool \texttt{mousquitaires} ...
 
@@ -7,7 +7,7 @@ language: java
 
 
 \section{Program Requirements}
-\label{section:impl:requirements}
+\label{ch:impl:requirements}
 
 - stability (tests)
 
@@ -18,11 +18,11 @@ language: java
 - efficiency
 
 \section{Program Components}
-\label{section:impl:comp}
+\label{ch:impl:comp}
 Big view
 
 \section{C11 to YTree parser}
-\label{section:impl:ytree}
+\label{ch:impl:ytree}
 
 below: mostly mock text.
 
@@ -39,7 +39,7 @@ below: mostly mock text.
 
 
 \section{YTree to XGraph event converter}
-\label{section:impl:comp:xgraph}
+\label{ch:impl:comp:xgraph}
 
 - Then, the AST is being interpreted and converted to event-based representation (aliased 'Xrepr' for eXecution representation):
         - more low-level code representation (or high-level assembly);
@@ -123,7 +123,7 @@ The original program encoded into the \texttt{XGraph} represents a \textit{flow 
 
 
 \section{XGraph to ZFormula (SMT) encoder}
-\label{section:impl:comp:zformula}
+\label{ch:impl:comp:zformula}
 
 - Then, this modified event-representation is being encoded to SMT formula and sent to the solver.
 

@@ -45,7 +45,8 @@
 % a bit smaller than what is the default. You can fine-tune the
 % title fonts and sizes by using the package options. See the package
 % documentation.
-\usepackage[medium]{titlesec}
+%\usepackage[medium]{titlesec}
+\usepackage[medium,raggedright]{titlesec}
 
 \usepackage{subcaption}
 \usepackage{graphicx}
@@ -106,7 +107,7 @@ c/.style={
 \usepackage[backend=biber,style=numeric-verb,sortcites=true,sorting=none]{biblatex}
 
 % Nicer looking caption for figures, tables, etc.
-\usepackage[labelfont={bf},textfont={it}]{caption}
+\usepackage[labelfont={bf},textfont={it},justification={raggedright},singlelinecheck={false}]{caption}
 
 % Multiple figures inside one figure. See figure in 1lipsum.tex for example
 %\usepackage{subfig}
@@ -116,6 +117,8 @@ c/.style={
 
 % For rotating figures
 \usepackage{rotating}
+
+\usepackage{hyphenat} % for using \nohyphens
 
 % Separate multiple citations with space instead of comma
 % E.g. "[1] [2] [3]" instead of "[1], [2], [3]"
@@ -181,7 +184,7 @@ c/.style={
 % You can just fix the texts there. Just remember to check all the language
 % variants you use (they are all there in the same place).
 % ------------------------------------------------------------------
-\newcommand{\TITLE}{Automated Analysis of Weak Memory Models} % TODO
+\newcommand{\TITLE}{\nohyphens{Automated Analysis of Weak Memory Models}} % TODO
 \newcommand{\FTITLE}{?} % TODO
 \newcommand{\SUBTITLE}{}
 \newcommand{\FSUBTITLE}{}
