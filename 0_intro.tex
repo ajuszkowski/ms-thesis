@@ -7,7 +7,7 @@ Most modern computer systems contain large parts that operate concurrently. Thou
 Traditionally, studies related to concurrent programming concern on more fundamental theoretical questions of designing race-free and lock-free parallel algorithms, asynchronous data structures and synchronisation primitives of a programming language. Unfortunately,
 when it comes to 
 %in cases of 
-the real-world concurrent programs, the algorithmic level of abstraction is not enough for guaranteeing their properties of correctness and reliability. The reasons of this fact lie in the code optimisations that both compiler and hardware perform in order to increase performance as much as possible. For instance, Figure~\ref{example:simple_wmm} provides simple example of
+the real-world concurrent programs, the algorithmic level of abstraction is not enough for guaranteeing their properties of correctness and reliability. The reasons of this fact lie in the code optimisations that both compiler and hardware perform in order to increase performance as much as possible. For instance, Figure~\ref{simple_wmm_x86} provides simple example of
 unexpected state `\texttt{(0:EAX=0~/\textbackslash~1:EAX=0)}' reachable in x86 machines (such little examples that illustrate specific behaviours of a WMM are called \textit{litmus tests}).
 %reordering of memory access instructions within single process allowed by the x86-TSO weak memory model, which potentially breaks the program logic. 
 This behaviour is caused by write buffers used by all processors in x86 architecture. These buffers cache writes to shared variables, so that the writes to shared memory does not become visible by other processes immediately. In the example, the write `\texttt{MOV~[x],1}' performed in the process \texttt{P0} stores value~\texttt{1} into the shared variable~\texttt{[x]} in the write buffer of process~\texttt{P0}. Meanwhile, the write cache of the process \texttt{P1} may not have updated version of the variable~\texttt{[x]}, neither may have the main memory, so that the read `\texttt{MOV~EBX,[x]}' performed in the process~\texttt{P1} may read the initial value~\texttt{0}, even if this variable has been already updated in another thread. More presice description of x86-TSO memory model is given in Chapter~\ref{ch:wmm:x86}.
@@ -19,7 +19,7 @@ This behaviour is caused by write buffers used by all processors in x86 architec
 \multicolumn{2}{|l|}{ \{ x=0; y=0; \}} \tabularnewline \hline
 P0 & P1 \\ \hline
 MOV [x],1 & MOV [y],1 \\
-MOV EAX,[y] & MOV EBX,[x] \\
+MOV EAX,[y] & MOV EAX,[x] \\
 \hline
 %\multicolumn{2}{|l|}{locations [x;y;]} \tabularnewline
 \multicolumn{2}{|l|}{exists (0:EAX=0~/\textbackslash~1:EAX=0)} \tabularnewline
@@ -29,7 +29,7 @@ MOV EAX,[y] & MOV EBX,[x] \\
 
 \end{tabular}
 \caption{Litmus test of memory operations reordering allowed by the x86-TSO weak memory model}
-\label{example:simple_wmm}
+\label{simple_wmm_x86}
 \end{figure}
 
 The first memory model for concurrent systems was formulated by Leslie Lamport back in 1979~\cite{lamport1979make}. This memory model, called the \textit{sequential consistency (SC) model}, allows only those executions (interleavings) that produce the same result as if the operations had been executed by single process. This means that the order of operations executed by a process is strictly defined by the program it executes. The SC model does requires the write to a shared variable performed in one process to become visible by all other processes not instantly, but simultaneously. This means each process communicates to the shared memory directly, without local buffering. Another important requirement of SC memory model is that it forbids memory operations reordering within single process (the order is strictly defined by the program).
