@@ -37,7 +37,8 @@ The first memory model for concurrent systems was formulated by Leslie Lamport b
 
 The SC model is considered to be the strong memory model in the sence that it provides strong guarantees regarding the ordering and caused effect of memory operations. Different relaxations of this model lead to the class of \textit{weak memory models~(WMM)}.
 %while preserving consistency
-WMMs serve as set of guarantees made by designers of execution environment (hardware, programming language, compiler, database, operation system, etc.) to programmers on which behaviours of their concurrent code they may expect. 
+They specify how threads interact through shared memory, when a write becomes visible to other threads and what value a read can return. 
+Therefore, WMMs serve as set of guarantees made by designers of execution environment (hardware, programming language, compiler, database, operation system, etc.) to programmers on which behaviours of their concurrent code they may expect. 
 
 Although weak memory studies is rather young research area, there exist frameworks and tools for exploring WMMs and examining simple programs with respect to the them. The state-of-the-art tool is \texttt{diy} (for \textit{do it yourself}), developed by the researchers from INRIA institute, France, and University of Cambridge, UK and firstly released back in 2010. It is the sofware suite for designing and testing weak memory models, it consists of the litmus tests generators \texttt{diy7}, \texttt{diycross7} and \texttt{diyone7}, the litmus tests concrete executor \texttt{litmus7} that runs tests on a physical machine while collecting its behaviours, and the weak memory models simulator \texttt{herd7} that implements reachability analysis for exploring states reachable under specified~WMM.
 

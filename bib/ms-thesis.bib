@@ -68,12 +68,21 @@
   publisher={VLDB Endowment}
 }
 
-@misc{kernel_wmm_1,
-  title = {A formal kernel memory-ordering model (part 1)},
-  author = {Jade Alglave, Luc Maranget, Paul E. McKenney, Andrea Parri, and Alan Stern},
-  url = {https://lwn.net/Articles/718628/},  
+@misc{kernel1,
+  title = {A formal kernel memory-ordering model (part~1)},
+  author = {McKenney, Paul E. and Alglave, Jade and Maranget, Luc and Parri, Andrea and Stern, Alan},
+  url = {https://lwn.net/Articles/718628/},
+  year = {2017},
 }
 
+@book{manson2005java,
+  title={The Java memory model},
+  author={Manson, Jeremy and Pugh, William and Adve, Sarita V},
+  volume={40},
+  number={1},
+  year={2005},
+  publisher={ACM}
+}
 
 @article{Porthos17,
   author    = {Hern{\'{a}}n {Ponce de Le{\'{o}}n} and
@@ -96,7 +105,7 @@
 @article{alglave2010shared,
   title={A shared memory poetics},
   author={Alglave, Jade},
-  journal={These de doctorat, L’universit{\'e} Paris Denis Diderot},
+  journal={Th{\`e}se de doctorat, L’universit{\'e} Paris Denis Diderot},
   year={2010}
 }
 
@@ -107,14 +116,27 @@
   year={2016}
 }
 
-@inproceedings{collavizza2006exploration,
-  title={Exploration of the capabilities of constraint programming for software verification},
-  author={Collavizza, H{\'e}lene and Rueher, Michel},
-  booktitle={International Conference on Tools and Algorithms for the Construction and Analysis of Systems},
-  pages={182--196},
-  year={2006},
-  organization={Springer}
+@inproceedings{alglave2009semantics,
+  title={The semantics of Power and ARM multiprocessor machine code},
+  author={Alglave, Jade and Fox, Anthony and Ishtiaq, Samin and Myreen, Magnus O and Sarkar, Susmit and Sewell, Peter and Nardelli, Francesco Zappa},
+  booktitle={Proceedings of the 4th workshop on Declarative aspects of multicore programming},
+  pages={13--24},
+  year={2009},
+  organization={ACM}
 }
+
+@article{lamport1978time,
+  title={Time, clocks, and the ordering of events in a distributed system},
+  author={Lamport, Leslie},
+  journal={Communications of the ACM},
+  volume={21},
+  number={7},
+  pages={558--565},
+  year={1978},
+  publisher={ACM}
+}
+
+
 
 @inproceedings{wickerson2017automatically,
   title={Automatically comparing memory consistency models},
@@ -229,35 +251,35 @@ crossref = {aho2007compilers}
 }
 
 %@inproceedings{Author:06,
-%	title    = {Some publication title},
-%	author   = {First Author and Second Author},
-%	crossref = {conference:06},
-%	pages    = {330—331},
+% title    = {Some publication title},
+% author   = {First Author and Second Author},
+% crossref = {conference:06},
+% pages    = {330—331},
 %}
 %
 %@proceedings{conference:06,
-%	editor    = {First Editor and Second Editor},
-%	title     = {Proceedings of the Xth Conference on XYZ},
-%	booktitle = {Proceedings of the Xth Conference on XYZ},
-%	year      = {2006},
-%	month     = oct,
+% editor    = {First Editor and Second Editor},
+% title     = {Proceedings of the Xth Conference on XYZ},
+% booktitle = {Proceedings of the Xth Conference on XYZ},
+% year      = {2006},
+% month     = oct,
 %}
 %
 %@online{Doe:2009,
-%	author = {Doe, John},
-%	title = {Test entry},
-%	month = 10,
-%	year = {2009},
-%	url = {http://www.test.org/doe/}
+% author = {Doe, John},
+% title = {Test entry},
+% month = 10,
+% year = {2009},
+% url = {http://www.test.org/doe/}
 %}
 %
 %@article{Doe:2010,
-%	author = {John Doe},
-%	journal = {Some journal},
-%	year = {2010},
-%	title = {Title},
-%	doi = {10.1.1/abc001},
-%	issn = {1234-5678-9012},
+% author = {John Doe},
+% journal = {Some journal},
+% year = {2010},
+% title = {Title},
+% doi = {10.1.1/abc001},
+% issn = {1234-5678-9012},
 %}
 
 
@@ -265,13 +287,13 @@ crossref = {aho2007compilers}
 % Example entries 
 %
 %@Book{Com00,
-%  author =	 {Douglas E. Comer},
-%  title =	 {Internetworking with TCP/IP, Volume I},
-%  publisher =	 {Prentice-Hall Inc},
-%  year =	 {2000},
-%  edition =	 {4th},
-%  annote =	 {ISBN: 0-13-018380-6},
-%  annote =	 {Good basic book about TCP/IP and its applications;
+%  author =  {Douglas E. Comer},
+%  title =   {Internetworking with TCP/IP, Volume I},
+%  publisher =   {Prentice-Hall Inc},
+%  year =  {2000},
+%  edition =   {4th},
+%  annote =  {ISBN: 0-13-018380-6},
+%  annote =  {Good basic book about TCP/IP and its applications;
 %                  Includes IP, ARP, ICMP, CIDR, TCP, UDP, Routing with
 %                  BGP, RIP, OSPF, HELLO, Multicast, ATM, Mobile IP,
 %                  NAT, VPN, Sockets, DHCP, DNS, Telnet, FTP,
@@ -280,52 +302,52 @@ crossref = {aho2007compilers}
 %}
 %
 %@InProceedings{HTS03,
-%  author =	 {{Tim Hsin-ting Hu and Binh Thai and Aruna
+%  author =  {{Tim Hsin-ting Hu and Binh Thai and Aruna
 %                  Seneviratne}},
-%  title =	 {{Supporting Mobile Devices in Gnutella File 
+%  title =   {{Supporting Mobile Devices in Gnutella File 
 %                  Sharing Network with Mobile Agents}},
-%  booktitle =	 {IEEE International Symposium on Computers
+%  booktitle =   {IEEE International Symposium on Computers
 %                  and Communication},
-%  pages =	 {1530-1346},
-%  year =	 {2003},
-%  volume =	 {3},
-%  month =	 {April}
+%  pages =   {1530-1346},
+%  year =  {2003},
+%  volume =  {3},
+%  month =   {April}
 %}
 %
 %@PhdThesis{Nik99,
-%  author =	 {Pekka Nikander},
-%  title =	 {An Architecture for Authorization and Delegation
+%  author =  {Pekka Nikander},
+%  title =   {An Architecture for Authorization and Delegation
 %                  in Distributed Object-Oriented Agent Systems},
-%  school =	 {Helsinki University of Technology},
-%  year =	 {1999},
-%  month =	 {March},
-%  annote =	 {Describes distributed software architecture that
+%  school =  {Helsinki University of Technology},
+%  year =  {1999},
+%  month =   {March},
+%  annote =  {Describes distributed software architecture that
 %                  uses delegated access permissions. Delegating
 %                  authorizations to Java agents}
 %}
 %
 %@TechReport{RFC2408,
-%  author =	 {D. Maughan and M. Schertler and M. Schneider and
+%  author =  {D. Maughan and M. Schertler and M. Schneider and
 %                  J. Turner},
-%  title =	 {{Internet Security Association and Key
+%  title =   {{Internet Security Association and Key
 %                  Management Protocol (ISAKMP)}},
-%  institution =	 {The Internet Engineering Task Force},
-%  year =	 {1998},
-%  key =		 {rfc2408},
-%  type =	 {RFC},
-%  number =	 {2408},
-%  month =	 {November},
-%  note =	 {http://ietf.org/rfc/rfc2408.txt}
+%  institution =   {The Internet Engineering Task Force},
+%  year =  {1998},
+%  key =     {rfc2408},
+%  type =  {RFC},
+%  number =  {2408},
+%  month =   {November},
+%  note =  {http://ietf.org/rfc/rfc2408.txt}
 %}
 %
 %@MastersThesis{Suo98,
-%  author =	 {Sanna Suoranta},
-%  title =	 {{An Object-Oriented Implementation of an
+%  author =  {Sanna Suoranta},
+%  title =   {{An Object-Oriented Implementation of an
 %                  Authentication Protocol}},
-%  school =	 {Helsinki University of Technology},
-%  year =	 {1998},
-%  month =	 {November},
-%  annote =	 {An ISAKMP implementation using Jacob framework
+%  school =  {Helsinki University of Technology},
+%  year =  {1998},
+%  month =   {November},
+%  annote =  {An ISAKMP implementation using Jacob framework
 %                  implementation that is based on conduits+
 %                  framework.}
 %}

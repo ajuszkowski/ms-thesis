@@ -103,7 +103,15 @@ c/.style={
 \usepackage{booktabs}
 
 % Use biber instead of bibtex as it supports UTF-8 among other things
-\usepackage[backend=biber,style=numeric-verb,sortcites=true,sorting=none]{biblatex}
+\usepackage[backend=biber,
+%style=numeric-verb,
+style=alphabetic,
+sortcites=true,
+%sorting=none
+sorting=ydnt%Sort by year (descending), name, title 
+%sorting=ynt %Sort by year, name, title. 
+%sorting=nyt Sort by name, year, title. %see https://tex.stackexchange.com/a/51439
+]{biblatex}
 
 % Nicer looking caption for figures, tables, etc.
 \usepackage[labelfont={bf},textfont={it},justification={raggedright},singlelinecheck={false}]{caption}
