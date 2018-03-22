@@ -1,5 +1,5 @@
 \chapter{Introduction}
-\label{ch:introduction}
+\label{ch:intro}
 
 Most modern computer systems contain large parts that operate concurrently. Though system parallelising can improve its performance drastically, it opens numerous of problems connected to correctness, robustness and reliability, which makes the concurrent program design one of the most difficult problems of programming~\cite{mckenney2017parallel}.
 % Most articles, presentations and books on concurrent programming start with words how hard it is.
@@ -40,18 +40,21 @@ WMMs serve as set of guarantees made by designers of execution environment (hard
 
 Although weak memory studies is rather young research area, there exist frameworks and tools for exploring WMMs and examining simple programs with respect to the them. The state-of-the-art tool is \texttt{diy} (for \textit{do it yourself}), developed by the researchers from INRIA institute, France, and University of Cambridge, UK, and firstly released back in 2010. It is the sofware suite for designing and testing weak memory models, it consists of the litmus tests generators \texttt{diy7}, \texttt{diycross7} and \texttt{diyone7}, the litmus tests concrete executor \texttt{litmus7} that runs tests on a physical machine while collecting its behaviours, and the weak memory models simulator \texttt{herd7} that implements reachability analysis for capturing states allowed by the WMM. The latter tool uses systematic exhaustive search in a state space, which may be inefficient when analysing real-world programs, therefore more sophisticated search techniques should be applied for this problem. 
 
+%TODO: BMC
 One possible approach is to use an efficient implementation of an SMT-solver (a SAT-solver extended by satisfiability modulo theories)~\cite{Porthos17}. % <-- TODO
 This approach allows to capture symbolically the semantics of both the program and the weak memory model while encoding it into a single SMT-formula.
-Most modern SMT-solvers are efficient enough to be able to operate the state space of size~??? [CITATION-?].
+Most modern SMT-solvers are efficient enough to be able to operate the state space of size~[CITATION-?].
 
 %In the work of Finnish and German researchers ... names ...
 In the work~\cite{Porthos17}, the SMT-based approach was defined for analysing the portability of a program from one hardware architechture to another, which is defined as ``an execution that is consistent with the target but inconsistent with the source memory model". Although encoding the control-flow and the data-flow of a program into an SMT-formula seems to be a trivial problem of symbolic execution, encoding of the weak memory model is more tedious. The reason is that some relations of WMMs are defined as mutually-recursive and need to be linearised in order to be encoded into an equivalent logical formula.
 %"a bounded model checking method that reduces the portability analysis problem to satisfiability modulo theorie" [Porthos17]
 %"A portability bug is an execution that is consistent with the target but inconsistent with the source memory model. We capture this alternation with a single existential query. Consistency is specified in terms of acyclicity (and irreflexivity) of relations. Hence, an execution is inconsistent if a derived relation of the (source) memory model contains a cycle (or is not irreflexive)."
 
-Current thesis aims to improve the proof-of-concept tool \texttt{PORTHOS} firstly introduced in April 2017 in the work~\cite{Porthos17} by extending the input language, which currently represents the minimum subset of C, and revising the general architecture of the tool in order to enhance performance, reliability and mantainability.
+Current work aims to improve the proof-of-concept tool \texttt{PORTHOS} firstly introduced in April 2017 in the work~\cite{Porthos17} by extending the input language, which currently represents the minimum subset of C, and revising the general architecture of the tool in order to enhance performance, reliability and mantainability.
 
 \section{Thesis structure}
-\label{ch:introduction:structure}
+\label{ch:intro:structure}
 
 The Chapter~\ref{ch:wmm} gives more detailed description of the weak memory models analysis and provides description of memory models for some common architectures (x86, ARM and POWER, Sparc, ???). Chapter~...
+
+% TODO: Add intro to the bounded reachability analysis using SAT -- ?

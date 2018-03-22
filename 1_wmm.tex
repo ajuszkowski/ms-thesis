@@ -1,10 +1,10 @@
 \chapter{Weak Memory Models}
 \label{ch:wmm}
 
-Over the last decades, the problem of formalisation of the weak memory models
-%for different software systems and hardware architectures
-has been developed significantly. Research of WMM aimes, firstly, to formalise the weak memory models and provide systematic, sound and complete formal approach of defining WMMs in order to be able to verify systems with respect to them. 
-//the cat language here.
+%"Semantics and verification under weak memory models have been the subject of study at least since 2007." [PORTHOS]
+The \textit{weak memory model} is a set of predicative constraints on possible executions of a concurrent program. The study of formalisation the weak memory models for different architectures is being rapidly developed over last decade. Research of WMM aimes, firstly, to formalise the weak memory models and provide systematic, sound and complete formal approach of defining WMMs in order to be able to verify systems with respect to them.
+
+%The generic framework of program analysis under weak memory models presented in~\ref{alglave2010shared} is discussed in Section~\ref{ch:wmm:event}.
 
 Secondly, researchers work on extracting the formal hardware memory models from existing implementations of from their specifications, that are written in natural language and thus suffer from ambiguities and incompletenesses. Over last decade the memory models have been extracted for most mainstream multiprocessor architectures, such as x86-TSO (\textit{Total Store Order}) model for x86 architecture formalised in 2009~\cite{owens2009better}, SPARC-TSO for Sparc architecture~\cite{?!?!?!}, much more relaxed memory model ??? for Power and ARM architectures defined in ???~\cite{sarkar2011understanding}, Alpha (???). Moreover, in 2005 <who?Milner> started the work on developing the weak memory model for C++ language, which was introduced in C++11 (?) standard~\cite{???} (//todo: C11 MM ~\cite{batty2011mathematizing}). The memory model for Java that is based on the \textit{happens-before} principle was introduced in JVM??? in ??<year>. 
 
@@ -20,13 +20,17 @@ Thirdly, important research direction targets the problem of verifying (or at le
 % more examples of what wmms allow to do?
 
 \section{The event-based program representation}
+\label{ch:wmm:event}
+
+%"The semantics of a program is a set of executions" https://johnwickerson.github.io/papers/memalloy.pdf
+
 
 The classical approach to model the concurrent programs is to use the \textit{global time}, a single order of interleavings of all actions happened in different threads. However these models are easy to understand, it may be hard to consider \textit{all} possible states, number of which is exponentially large. Another way to do this is to to use non-deterministic computation-centric models defined in~\cite{fri97}, one of which represents the program as the graph of \textit{memory events}. The idea in this class of models is based on the fact that the behaviour of a concurrent system is defined only by the interleavings of shared-memory operations, while being independant from the order of local computation events. These models may be further restricted by constraints of a weak memory model, adding \textit{relations} to the memory events.
 %Perhaps, the most convenient way to model the non-deterministic properties of concurrent programs is to use the program representation based on \textit{memory events}.
 %In order to model the non-deterministic properties of concurrent programs 
 
 The event-based program model represents the directed graph (\textit{event-graph}), where vertices represent \textit{events}, and edges represent \textit{relations} over the events. An event is something, that, after being executed, changes the state of an abstract machine executing the concurrent program. 
-An \textit{execution} (trace, run) of a given program is an order of events.
+An \textit{execution} (trace, run) of a given program is an ordered set of events.
 %associated with the instructions of the program
 %the path in the event-graph. 
 An execution is considered to be \textit{valid} if the memory events follow a single global timeline, i.e., can be embedded in a single partial order allowed by the memory model restrictions~\cite{alglave2010shared}. An execution to be checked on validity is called the \textit{candidate execution}.
@@ -64,11 +68,15 @@ Figure~\ref{simple_wmm_x86_pic} illustrates the candidate execution for the Exam
 \label{simple_wmm_x86_pic}
 % TODO: re-generate with new name, not 'SO'
 
+\subsection{Executions}
+\label{ch:wmm:model:executions}
 
+The semantics of a concurrent program is represented by the set of allowed executions.
+An execution is uniquely defined by the set $\mathbb{X}$ of events have been executed in each thread (the \textit{control-flow} of a program), and the relations $\mathtt{rf}$ and $\mathtt{co}$ (\textit{data-flow} of a program)~\ref{alglave2010shared}. As it was shown in~\ref{wickerson2017automatically}, it is enough for memory models to constrain the executions independently instead of constraining the program as a whole.
 
 \section{The CAT language}
 
-the CAT language [ref to Jade's paper] (hard part: to decipher the Alglave's paper).
+The Porthos tool uses the language \texttt{CAT}~\ref{alglave2016syntax} for defining weak memory models.
 
 the event representation
 
@@ -87,5 +95,3 @@ language memory models: Java, C++;
 library-level kernel memory model, ref to github with tests
 
 Relationship between different models \url{http://wiki.expertiza.ncsu.edu/index.php/CSC/ECE_506_Spring_2013/10c_ks}
-
-  

@@ -1,0 +1,55 @@
+\chapter{Portability of Concurrent Software}
+%\chapter{The Concurrent Software Portability Analysis as a Bounded Model Checking Problem}
+\label{ch:port}
+
+As it was discussed in Chapter~\ref{ch:intro}, the program may behave differently when compiled for different parallel hardware architectures. This can cause the portability bugs, the behaviour allowed under one architecture and forbidden under another. 
+The concurrent software portability analysis may be stated as a Bounded Model Checking~(BMC) problem, which in turn can be reduced to the problem of satisfiability modulo theories (SMT)~\cite{Porthos17}.
+
+\section{The model checking problem}
+\label{ch:port:mc}
+
+The classical model checking algorithms explore the state space of an abstract automata or a transition system in order to find states that violate the specification. The general schema of model checking is the following: firstly, the analysing system is being represented as a transition system, a finite directed graph with labeled nodes representing states of the system such that each state corresponds to the unique subset of atomic propositions, that characterise the behavioral properties of each state. 
+Then, the system constraints are being defined in terms of a modal temporal logic with respect to the atomic propositions. Commonly, the Linear Temporal Logic~(LTL) or Computational Tree Logic~(CTL), along with their extensions, are used as a specification language due to the expressiveness and verifiability of their statements. 
+In the described schema, the model checking problem is reducible to the reachability analysis, an iterative process of a systematic exhaustive search in the state space. This approach is called \textit{unbounded model checking (UMC)}.
+
+However, all model checking techniques are exposed to the \textit{state explosion problem} as the size of the state space grows exponentially with respect to the number of state variables of the system. In case of modeling concurrent systems, this problem becomes much more considerable due to exponential number of possible interleavings of states.
+Therefore, the research in model checking over past 40 years was aimed at tackling the state explosion problem, mostly by optimising search space, search strategy or basic data structures of existing algorithms.
+
+%[-- TODO: REPHRASE
+One of the first major optimising technique was symbolic model checking with binary decision diagrams (BDDs). In this approach, a set of states is represented by a BDD instead of by listing each state individually~\cite{clarke2012model}.
+%--]
+The BDD representation can be linear of size of variables it encodes if the ordering of variables is optimal, otherwise the size of BDD is exponential. The problem of finding such an optimal ordering is known as NP-complete problem, which makes this approach inapplicable in some cases.
+
+The other idea is to use satisfiability solvers for symbolic exploration of state space~\cite{clarke2001bounded}. In this approach, the state space exploration consists of sequence of queries to the SAT-solver, represented as boolean formulas that encode the constraints of the model and the finite path to a state in the corresponding transition system.  
+%This approach uses an iterative process of constructing queries to the SAT-solver as a boolean formula which encodes the constraints of the model and the finite path to a state in the corresponding transition system. 
+Due to the SAT-solver. This technique is called \textit{bounded model checking (BMC)}, because the search process is being repeated up to user-defined bound $k$, which may result to incomplete analysis in general case. However, there exist numerous techniques for making BMC complete for finite-state systems~(e.g.,~\cite{shtrichman2000tuning}).
+
+%For instance, the idea of grouping states with similar properties into equivalence classes lead to the concept of traces in concurrent systems proposed by A.~Mazurkiewicz in 1986~\cite{mazurkiewicz1986trace}. 
+
+\section{The portability as a BMC problem}
+\label{ch:port:enc}
+
+A program $P$ is called portable from the source weak memory model $\mathcal{M_S}$ to the target memory model $\mathcal{M_T}$ if all executions consistent under $\mathcal{M_T}$ are consistent under $\mathcal{M_S}$~\cite{Porthos17}:
+
+\begin{definition}[Portability]
+Let $\mathcal{M_S}$, $\mathcal{M_T}$ be two weak memory models. A program $P$ is portable from $\mathcal{M_S}$ to $\mathcal{M_T}$ if 
+$cons_{\mathcal{M_T}}(P) \subseteq cons{\mathcal{M_S}}(P)$
+\end{definition}
+
+Note, that the formulation of portability requirements against \textit{executions} is strong enough, as it implies the portability against \textit{states} (the \textit{state-portability})~\cite{Porthos17}.
+
+It is possible to formulate this requirement as an SMT formula, so that the portability analysis problem becomes reduced to the BMC problem. The full SMT formula $\phi$ should contain encodings of control-flow ($\phi_{CF}$) and data-flow ($\phi_{DF}$) of the program, and assertions of both memory models: $\phi = \phi_{CF} \land \phi_{DF} \land \phi_{\mathcal{M_T}} \land \phi_{\lnot\mathcal{M_S}}$. The control-flow and data-flow encodings are standard for BMC~\cite{collavizza2006exploration}, they are described below. However, encoding of memory models requires additional techniques due to recursive definitions of relations, that were proposed in~\cite{Porthos17}.
+%$The \phi_{\mathcal{M_T}}$ is an encoding of the derived relations and all assertions of
+%, and φ ¬M S 
+
+\subsection{Encoding of the control-flow constraints}
+\label{ch:port:enc:cf}
+
+
+\subsection{Encoding of the data-flow constraints}
+\label{ch:port:enc:cf}
+
+
+\subsection{Encoding of the memory model constraints}
+\label{ch:port:enc:wmm}
+
