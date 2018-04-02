@@ -33,6 +33,13 @@
 % snippets (although you can also use the listings package to get
 % automatic code formatting).
 \usepackage{verbatim}
+\usepackage{listings}
+\newcommand{\m}[1]{$#1$} % quick inlined math
+\newcommand{\tool}[1]{\texttt{#1}}
+
+\newcommand*{\fx}{\ensuremath{\mathbf{x}}}%x}}}
+\newcommand*{\fv}{\ensuremath{\mathbf{v}}} %v}}}
+
 
 % Longtable provides a tabular environment that can span multiple
 % pages. This is used in the example abbreviations file.
@@ -60,19 +67,22 @@
 \usetikzlibrary{automata}
 
 \tikzset{initial text={}}
-\tikzset{%
-  zeroarrow/.style = {-stealth,dashed},
-  onearrow/.style = {-stealth,solid},
-  c/.style = {circle,draw,solid,minimum width=2em,
-    minimum height=2em},
-  r/.style = {rectangle,draw,solid,minimum width=2em,
-    minimum height=2em}
-}
+%\tikzset{%
+%  zeroarrow/.style = {-stealth,dashed},
+%  onearrow/.style = {-stealth,solid},
+%  c/.style = {circle,draw,solid,
+%    minimum width=3cm,
+%    minimum height=3cm,
+%    },
+%  r/.style = {rectangle,draw,solid,minimum width=2em,
+%    minimum height=2em}
+%}
 \tikzset{
 c/.style={
-  circle,
+  circle,solid,
   inner sep=0pt,
-  text width=6mm,
+  %text width=1mm,
+  minimum width=7mm,
   align=center,
   draw=black,
   fill=white

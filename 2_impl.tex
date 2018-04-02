@@ -39,7 +39,7 @@ below: mostly mock text.
 
 
 \section{YTree to XGraph event converter}
-\label{ch:impl:comp:xgraph}
+\label{ch:impl:xtoy}
 
 - Then, the AST is being interpreted and converted to event-based representation (aliased 'Xrepr' for eXecution representation):
         - more low-level code representation (or high-level assembly);
@@ -51,6 +51,10 @@ below: mostly mock text.
         - (more? -- I'm not thinking about it yet);
         
 \subsection{Loop unrolling}
+\label{ch:impl:xtoy:unrolling}
+% If the analysing program contains a loop, then its control-flow graph represents the cyclic directed graph. Although, in order to be able to encode such a cyclic structure as a boolean formula, this graph needs to be  
+% In order to be
+
 The original program encoded into the \texttt{XGraph} represents a \textit{flow graph}, a connected cyclic directed graph with single source node \texttt{[ENTRY]} (usually for convenience all leaves are connected to the sink node \texttt{[EXIT]}). The cycles are caused by low-level jump instructions, obtained from non-linear high-level control-flow statements (such as \texttt{while}, \texttt{do-while}, \texttt{for}, etc.). However, the cyclic flow graph cannot be encoded into SMT formula since ...
 //TODO:REFERENCE.%TODO
 
@@ -118,7 +122,7 @@ The original program encoded into the \texttt{XGraph} represents a \textit{flow 
 ;
 \end{tikzpicture}
 \label{fig:loop-unwind}
-\caption{Example of the flow graph from the Figure~\ref{fig:merged-loop}, unwinded up to the bound $k = 6$} 
+\caption{Example of the flow graph from the Figure~\ref{fig:merged-loop.....}, unwinded up to the bound $k = 6$} 
 \end{figure}
 
 

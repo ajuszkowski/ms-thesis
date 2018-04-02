@@ -22,15 +22,17 @@ Thirdly, important research direction targets the problem of verifying (or at le
 
 %"The semantics of a program is a set of executions" https://johnwickerson.github.io/papers/memalloy.pdf
 
+
+
 The classical approach to model the concurrent programs is to use the \textit{global time}, a single order of interleavings of all actions happened in different threads. However these models are easy to understand, it may be hard to consider \textit{all} possible states, number of which is exponentially large. Another way to do this is to to use non-deterministic computation-centric models defined in~\cite{fri97}, one of which represents the program as the graph of \textit{memory events}. The idea in this class of models is based on the fact that the behaviour of a concurrent system is defined only by the interleavings of shared-memory operations, while being independant from the order of local computation events. These models may be further restricted by constraints of a weak memory model, adding \textit{relations} to the memory events.
 %Perhaps, the most convenient way to model the non-deterministic properties of concurrent programs is to use the program representation based on \textit{memory events}.
 %In order to model the non-deterministic properties of concurrent programs 
 
 The event-based program model represents the directed graph (\textit{event-graph}), where vertices represent \textit{events}, and edges represent \textit{relations} over the events. An event is something, that, after being executed, changes the state of an abstract machine executing the concurrent program. 
-An \textit{execution} (trace, run) of a given program is an ordered set of events.
+An \textit{execution} (trace, run) of a given program is an ordered set of events. The order of events in particular execution is denoted as `$\rightarrow$', an empty execution is denoted as $\emptyset$.
 %associated with the instructions of the program
 %the path in the event-graph. 
-An execution is considered to be \textit{valid} if the memory events follow a single global timeline, i.e., can be embedded in a single partial order allowed by the memory model restrictions~\cite{alglave2010shared}. An execution to be checked on validity is called the \textit{candidate execution}.
+An execution is considered to be \textit{valid} if the memory events follow a single global timeline, textit.e., can be embedded in a single partial order allowed by the memory model restrictions~\cite{alglave2010shared}. An execution to be checked on validity is called the \textit{candidate execution}.
 
 Below we describe some basic types of events and relations.
 
@@ -38,20 +40,22 @@ Below we describe some basic types of events and relations.
 \label{ch:wmm:model:events}
 
 A \textit{memory event} $e_m \in \mathbb{E}$ represents the fact of access to the memory. Since memory is the crucial low-level resource shared by multiple processes, most relations are defined over memory events. 
-The processes can access a shared memory location (denoted by~$l_i$, for \textit{location}), or a local one (denoted by~$r_i$, for \textit{register}). A memory event is specified by its direction with respect to the shared variable, its location~$\texttt{loc}(e_m)$, its processor label~$\texttt{proc}(e_m)$, and a unique event label~$\texttt{id}(e_m)$~\cite{alglave2010shared}. 
+The processes can access a shared memory location (denoted by~$l_i$, for \textit{location}), or a local one (denoted by~$r_i$, for \textit{register}). A memory event is specified by its direction with respect to the shared variable, its location~$\mathtt{loc}(e_m)$, its processor label~$\mathtt{proc}(e_m)$, and a unique event label~$\mathtt{id}(e_m)$~\cite{alglave2010shared}. 
 %\texttt{load} for read the value of a shared-memory location, or \texttt{store} for write, or neither of them if both locations are local
 The set of memory events $\mathbb{M}$ is devided into write events $\mathbb{W}$ (that write values to shared-memory locations) and read events $\mathbb{R}$ (that read values stored in shared-memory locations).
-We add a restriction that each memory event uses at most one shared location, so that the write event $e_m = write(l_1, l_2)$ that writes value from shared location $l_2$ to the shared location $l_1$ is represented as two consequent events $e_m'~=~\texttt{load}(r_1 \leftarrow l_2); \ e_m''~=~\texttt{store}(l_1 \leftarrow r_1)$.
+We add a restriction that each memory event uses at most one shared location, so that the write event $e_m = write(l_1, l_2)$ that writes value from shared location $l_2$ to the shared location $l_1$ is represented as two consequent events $e_m'~=~\mathtt{load}(r_1 \leftarrow l_2); \ e_m''~=~\mathtt{store}(l_1 \leftarrow r_1)$.
 
-A \textit{computation event} $e_c \in \mathbb{C} \subseteq \mathbb{E}$, represents a low-level assembly computation operation performed solely on local-memory arguments. An example of computation event may be the event $e_c = r_3 \leftarrow add(r_1, r_2)$ that writes the sum of values stored in registers $r_1$ and $r_2$ to the register $r_3$. The \textit{control-flow} instructions (conditional and unconditional jumps) are encoded to the model directly, without additional events, as the $po$-relation (for \textit{program order}; see Chapter~\ref{ch:wmm:model:relations} for detailed definition of relations).
+A \textit{computation event} $e_c \in \mathbb{C} \subseteq \mathbb{E}$, represents a low-level assembly computation operation performed solely on local-memory arguments. An example of computation event may be the event $e_c = r_1 \leftarrow add(r_2, 1)$ that writes the sum of values stored in register $r_2$ and constant $1$ (emulated as a register as well) to the register $r_1$. For modelling branching statements, we distinguish the set $\mathbb{C_{p}} \subseteq \mathbb{C}$ of \textit{predicative} computation events, that are evaluated as a boolean value.%TODO: TAUTOLOGY HERE.
 
-The third class of events is \textit{barrier events}, events caused by the synchronisation instructions (called \textit{fences}). Barrier events do not perform any computation or memory value transfer, instead, they add new relations to the model that restrict the set of allowed behaviours. Technically, a fence may either serve as a synchronisation barrier, or flush local memory caches, etc.
+%The \textit{control-flow} instructions (conditional and unconditional jumps) are encoded into the model directly, without additional events, as the $po$-relation (for \textit{program order}; see Chapter~\ref{ch:wmm:model:relations} for detailed definition of relations).
+
+The third class of events is \textit{barrier events}, events caused by the synchronisation instructions (called \textit{fences}). Barrier events do not perform any computation or memory value transfer, instead, they add new relations to the program model that restrict the set of allowed behaviours. Technically, a fence may be represented either as a synchronisation barrier, or a flush local memory caches, etc.
 
 
 \subsection{Relations}
 \label{ch:wmm:model:relations}
 
-The basic relation in the event-based program model is the \texttt{po}-relation $\subset~\mathbb{E}~\times~\mathbb{E}$ (\textit{program-order}), which represents the total order of memory events \textit{within single process}, which never relates events from different processes. Thus, if a program specifies the memory instruction $i_2$ to follow immideately the memory instruction $i_2$, then there exist an edge $e_1 \xrightarrow{\texttt{po}} e_2$ in the event-graph where event $e_1$ is caused by the instruction $i_1$ and $e_2$ is caused by the instruction $i_2$. This relation encodes the control-flow of the program into the event-graph.
+The basic relation in the event-based program model is the \texttt{po}-relation $\subset~\mathbb{E}~\times~\mathbb{E}$ (\textit{program-order}), which represents the total order of memory events \textit{within single process}, which never relates events from different processes. Thus, if a program specifies the memory instruction $i_2$ to follow immideately the memory instruction $i_2$, then there exist an edge $e_1 \xrightarrow{\mathtt{po}} e_2$ in the event-graph where event $e_1$ is caused by the instruction $i_1$ and $e_2$ is caused by the instruction $i_2$. This relation encodes the control-flow of the program into the event-graph.
 %Some new relations may be acquired : dp, po-loc
 
 The data-flow of a program is encoded by the \textit{communication relations}: the \texttt{rf}-relation $\subset~\mathbb{W}~\times~\mathbb{R}$ (\textit{read-from} relation) that maps a write to a read reading its value, the \texttt{co}-relation $\subset~\mathbb{W}~\times~\mathbb{W}$ (\textit{coherence order}, sometimes called \texttt{ws}-relation for \textit{write serialisation}) defines the total order on writes to the same location across all processes, and the \texttt{fr}-relation $\subset~\mathbb{R}~\times~\mathbb{W}$ (\textit{from-read order}) that maps a read to possible writes preceding the current write event.
@@ -60,6 +64,8 @@ The data-flow of a program is encoded by the \textit{communication relations}: t
 Figure~\ref{simple_wmm_x86_pic} illustrates the candidate execution for the Example~\ref{simple_wmm_x86}, that reaches the state \texttt{(0:EAX=0~/\textbackslash~1:EAX=0)} within x86-TSO memory model (the picture is generated by the \texttt{herd7} tool, version 7.47). 
 %The event $b$:\texttt{(Ry=0)} reads value \texttt{0} at the shared location \texttt{y} from the initial write event $e$\texttt{(Wy=0)} (the red edge of \texttt{rf}-relation), consequently, 
 %the event $d$:\texttt{(Rx=0)} reads value \texttt{0} at the shared location \texttt{x} from the initial write event $f$\texttt{(Wx=0)} (the red edge of \texttt{rf}-relation). 
+
+// TODO: a bit more relations here
 
 \includegraphics[width=0.4\textwidth]{img/my/simple_wmm_x86.png}
 \label{simple_wmm_x86_pic}
