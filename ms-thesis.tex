@@ -104,14 +104,19 @@ c/.style={
 
 % Use biber instead of bibtex as it supports UTF-8 among other things
 \usepackage[backend=biber,
+maxnames=5,
 %style=numeric-verb,
-style=alphabetic,
+style=alphabetic-verb, %numeric-comp %[1-3]
+minalphanames=3,
+maxalphanames=3,
 sortcites=true,
 %sorting=none
 sorting=ydnt%Sort by year (descending), name, title 
 %sorting=ynt %Sort by year, name, title. 
 %sorting=nyt Sort by name, year, title. %see https://tex.stackexchange.com/a/51439
 ]{biblatex}
+\renewcommand*{\labelalphaothers}{\textsuperscript{+}} %make the plus sign in bibliography references superscript
+
 
 % Nicer looking caption for figures, tables, etc.
 \usepackage[labelfont={bf},textfont={it},justification={raggedright},singlelinecheck={false}]{caption}
