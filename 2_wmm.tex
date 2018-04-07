@@ -2,10 +2,12 @@
 \label{ch:wmm}
 
 %"Semantics and verification under weak memory models have been the subject of study at least since 2007." [PORTHOS]
-The \textit{weak memory model} is a set of predicative constraints on possible executions of a concurrent program. The study of formalisation weak memory models for different architectures has been rapidly developed over last decade. 
+A \textit{weak memory model} is a set of predicative constraints over so-called \textit{derived relations}, which defines the set of possible executions of a concurrent program.
+Usually, these constraints include requirements of the reflexivity or acyclicity of derived relations.
+The study of formalisation weak memory models for different architectures has been rapidly developed over last decade. 
 
 Firstly, the research of WMM aimes to formalise the weak memory models and provide systematic, sound and complete formal approach of defining WMMs in order to be able to verify systems with respect to them.
-A generic framework of program analysis with respect to weak memory models was presented in 2010~\cite{alglave2010shared}. Similar approach is used \texttt{PORTHOS} as it is described
+A generic framework of program analysis with respect to weak memory models was presented in 2010~\cite{alglave2010shared}. Similar approach is used \Porthos as it is described
 % in Section~\cite{ch:wmm:event}. 
 further in current Chapter.
 
@@ -26,10 +28,10 @@ The classical approach to model the concurrent programs is to use the \textit{gl
 %Perhaps, the most convenient way to model the non-deterministic properties of concurrent programs is to use the program representation based on \textit{memory events}.
 %In order to model the non-deterministic properties of concurrent programs 
 
-The event-based program model represents the directed graph (\textit{event-graph}), where vertices represent \textit{events}, and edges represent \textit{relations} over the events. An event is something, that, after being executed, changes the state of an abstract machine executing the concurrent program. 
+The event-based program model represents the directed graph (the \textit{event-flow graph}), where vertices represent \textit{events}, and edges represent \textit{relations} over the events. An event is something, that, after being executed, changes the state of an abstract machine executing the concurrent program. 
 An \textit{execution} (trace, run) of a given program is an ordered set of events. The order of events in particular execution is denoted as `$\rightarrow$', an empty execution is denoted as $\emptyset$.
 %associated with the instructions of the program
-%the path in the event-graph. 
+%the path in the event-flow graph. 
 An execution is considered to be \textit{valid} if the memory events follow a single global timeline, textit.e., can be embedded in a single partial order allowed by the memory model restrictions~\cite{alglave2010shared}. An execution to be checked on validity is called the \textit{candidate execution}.
 
 Below we describe some basic types of events and relations.
@@ -51,15 +53,17 @@ The third class of events is \textit{barrier events}, events caused by the synch
 \subsection{Relations}
 \label{ch:wmm:model:relations}
 
+In this section, we describe basic derived relations used in memory model-awared program analysis.
+
 %The \textit{control-flow} instructions (conditional and unconditional jumps) are encoded into the model directly, without additional events, as the $po$-relation (for \textit{program order}; see Chapter~\ref{ch:wmm:model:relations} for detailed definition of relations).
 The \textit{control-flow} of a program is defined by \texttt{po}-relation $\subset~\mathbb{E}~\times~\mathbb{E}$ (\textit{program-order}), which represents the total order of events \textit{from same process}, which never relates events from different processes.
-Thus, if a program specifies the memory instruction $i_2$ to follow immideately the memory instruction $i_2$, then there exist an edge $e_1 \xrightarrow{\mathtt{po}} e_2$ in the event-graph where event $e_1$ is caused by the instruction $i_1$ and $e_2$ is caused by the instruction $i_2$. This relation encodes the control-flow of the program into the event-graph.
+Thus, if a program specifies the memory instruction $i_2$ to follow immideately the memory instruction $i_2$, then there exist an edge $e_1 \xrightarrow{\mathtt{po}} e_2$ in the event-flow graph where event $e_1$ is caused by the instruction $i_1$ and $e_2$ is caused by the instruction $i_2$. This relation encodes the control-flow of the program into the event-flow graph.
 %Some new relations may be acquired : dp, po-loc
 
-The \textit{data-flow} of a program is defined by \textit{communication relations}: the \texttt{rf}-relation $\subset~\mathbb{W}~\times~\mathbb{R}$ (\textit{read-from} relation) that maps a write to a read reading its value, the \texttt{co}-relation $\subset~\mathbb{W}~\times~\mathbb{W}$ (\textit{coherence order}, sometimes called \texttt{ws}-relation for \textit{write serialisation}) defines the total order on writes to the same location across all processes, and the \texttt{fr}-relation $\subset~\mathbb{R}~\times~\mathbb{W}$ (\textit{from-read order}) that maps a read to possible writes preceding the current write event (this relation is the inversion of the \texttt{rf}-relation: $\mathtt{rf} = \mathtt{fr}^{-1}$).
+The \textit{data-flow} of a program is defined by \textit{communication relations}: the \rf-relation $\subset~\mathbb{W}~\times~\mathbb{R}$ (\textit{read-from} relation) that maps a write to a read reading its value, the \co-relation $\subset~\mathbb{W}~\times~\mathbb{W}$ (\textit{coherence order}, sometimes called \texttt{ws}-relation for \textit{write serialisation}) defines the total order on writes to the same location across all processes, and the \fr-relation $\subset~\mathbb{R}~\times~\mathbb{W}$ (\textit{from-read order}) that maps a read to possible writes preceding the current write event (this relation is the inversion of the \rf-relation: $\mathtt{rf} = \mathtt{fr}^{-1}$).
 %TODO: perephrase last sentence! alglave thesis, p. 36
 
-Figure~\ref{simple_wmm_x86_pic} illustrates the candidate execution for the Example~\ref{simple_wmm_x86}, that reaches the state \texttt{(0:EAX=0~/\textbackslash~1:EAX=0)} within x86-TSO memory model as it forbids cycles over \texttt{po}$\cup$\texttt{rf} (union) relation (the picture is generated by the \texttt{herd7} tool, version 7.47). 
+Figure~\ref{simple_wmm_x86_pic} illustrates the candidate execution for the Example~\ref{simple_wmm_x86}, that reaches the state \texttt{(0:EAX=0~/\textbackslash~1:EAX=0)} within x86-TSO memory model as it forbids cycles over \po$\cup$\rf (union) relation (the picture is generated by the \texttt{herd7} tool, version 7.47). 
 %The event $b$:\texttt{(Ry=0)} reads value \texttt{0} at the shared location \texttt{y} from the initial write event $e$\texttt{(Wy=0)} (the red edge of \texttt{rf}-relation), consequently, 
 %the event $d$:\texttt{(Rx=0)} reads value \texttt{0} at the shared location \texttt{x} from the initial write event $f$\texttt{(Wx=0)} (the red edge of \texttt{rf}-relation). 
 %However, the Power memory model allows such cycles, therefore %TODO: include load buffering example, see presentation pdf
@@ -96,4 +100,7 @@ library-level kernel memory model, ref to github with tests
 
 \section{Some examples of WMM}
 
-//to be done
+//axioms of TSO wmm
+
+// example of sets: rf, co, ... for the code snipped used before
+

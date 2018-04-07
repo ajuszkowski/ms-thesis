@@ -56,22 +56,22 @@ The result SMT formula $\phi$ of the portability problem should contain encoding
 %The control-flow and data-flow encodings are standard for BMC~\cite{collavizza2006exploration}, they are described below. 
 %However, encoding of memory models requires additional techniques due to recursive definitions of relations, that were proposed in~\cite{Porthos17}.
 
-\subsection{Encoding the control-flow constraints}
+\subsection{The control-flow encoding} %Encoding the control-flow constraints}
 \label{ch:port:enc:cf}
 
 The control-flow of a program is represented in the \textit{control-flow graph}, a directed acyclic connected graph with single source and multiple sink nodes, obtained by the \textit{loop unrolling} (see Section~\ref{ch:impl:x2y:unrolling}).%TODO: footnote why multiple sinks
 In control-flow graph, there are two types of edges: \textit{primary edges} that denote unconditional jumps or if-true-transitions (pictured with solid lines), and \textit{alternative edges} that denote if-false-transitions (pictured with dotted lines). Each node on graph can have either one successor (primary) or two successors (primary and alternative); only computation events can serve as a branching point). However, each merge node can have any positive number of predecessors, where each edge may be either primary or alternative.
 
-While working on the \tool{mousquetaires}, we applied some optimisations of the encoding scheme for the control-flow in order to decrease the size of result formula. 
-The \tool{PORTHOS} tool encodes the \textit{instructions}, which have recursive nature, in a recursive manner. This means, it adds synthetic composite instructions for both linear (sequential) and non-linear (branching) instructions. 
-For instance, control-flow of the sequential instruction \m{i_1 := i_2; i_3} is encoded as 
+While working on the \tool{mousquetaires}, we applied some modifications of the encoding scheme for the control-flow. The changes are conditioned by the need to be able to process an arbitrary control-flow produced by conditional and unconditional jumps of C language. 
+For that, we compile the recursive abstract syntax tree~(AST) of the parsed C-code to the plain (non-recursive) event-flow graph.
+We show%TODO! to show, actually
+that the new encoding is smaller than the old one used in \Porthos since it does not produces new variables for each high-level statement of the input language.
+%The \tool{PORTHOS} tool encodes the \textit{instructions}, which have recursive nature, in a recursive manner. This means, it adds synthetic composite instructions for both linear (sequential) and non-linear (branching) instructions. 
+For instance, in old scheme the control-flow of the sequential instruction \m{i_1 := i_2; i_3} was encoded as 
 \m{\phi_{CF}(i_2;i_3) = (cf_{i_1} \Leftrightarrow (cf_{i_2} \land cf_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)}, 
-and control-flow of the branching instruction \m{i_1 := \{c \, ? \, i_2 \, : \, i_3\}} is encoded as 
+and control-flow of the branching instruction \m{i_1 := \{c \, ? \, i_2 \, : \, i_3\}} was encoded as 
 \m{\phi_{CF}( \, c \, ? \, i_2 \, : \, i_3) = (cf_{i_1} \Leftrightarrow (cf_{i_2} \lor cf_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)} (here we used the notation of C-like ternary operator `\texttt{x?y:z}' for defining the conditional expression `\texttt{if} $x$ \texttt{then} $y$ \texttt{else} z').
-
-In contrast, the \tool{mousquetaires} firstly compiles the recursive high-level code into the linear low-level event-based representation,
-% (similar to an assembly language)
-that is then encoded into SMT formula. The encoding of branching nodes depends on the \textit{guards}, the value of conditional variable on the branching state, which in turn is encoded as data-flow constraint (see further in current Chapter).
+In contrast, the new scheme implemented in \tool{mousquetaires} firstly compiles the recursive high-level code into the linear low-level event-based representation, that is then encoded into an SMT-formula. The encoding of branching nodes depends on the \textit{guards}, the value of conditional variable on the branching state, which in turn is encoded as data-flow constraint (see further in current Chapter).
 %linearly as it shown in
 
 Let \m{\fx : \mathbb{E} \rightarrow \{0,1\}} be the predicate that signifies the fact that the event has been e\textbf{x}ecuted (and, consequently, has changed the state of the system). 
@@ -139,24 +139,59 @@ Consider the following possible mutual arrangement of nodes in a control-flow gr
 
 For listed cases, below we propose the encoding scheme that uniquely encodes each node of graph and allows to encode partially executed program.
 The Equation~\ref{enc:cf:seq} for encoding the sequential control-flow represented on Figure~\ref{encode:cf:seq} reflects the fact that the event $e_2$ can be executed iff the event $e_1$ was executed. The Equation~\ref{enc:cf:br} for encoding the branching control-flow depicted on Figure~\ref{encode:cf:br} allows only following executions: $\{\emptyset, (e_1), (e_1 \rightarrow e_2), (e_1 \rightarrow e3) \}$. In encoding~\ref{enc:cf:merge} of the merge-point represented on Figure~\ref{encode:cf:merge}, the event $e_k$ is executed if either of its predecessors was executed, regardless of type of the transition.
+%TODO: maybe add the overall formula \phi_{CF} ?
 
 \begin{align}
 %\phi_{CF_{(e_1;e_2)}}     =
 %\phi_{CF_{(e_1?e_2:e_3)}} =
 \phi_{CF_{seq}}   = \ & \fx(e_2) \rightarrow \fx(e_1) \label{enc:cf:seq} \\
-\phi_{CF_{br}}    = \ & [\fx(e_2) \rightarrow \fx(e_1)] \land [\fx(e_2) \rightarrow \fv(e_1)] \nonumber \\
-				  & \land  [\fx(e_3) \rightarrow \fx(e_1)] \land [\fx(e_3) \rightarrow \lnot\fv(e_1)] \nonumber \\
-				  & \land \lnot [\fx(e_2) \land \fx(e_3)]  \label{enc:cf:br} \\
+\phi_{CF_{br}}    = \ & [\fx(e_2) \rightarrow \fx(e_1)] \land [\fx(e_3) \rightarrow \fx(e_1)] \land \nonumber \\
+				  &  [\fx(e_2) \rightarrow \fv(e_1)] \land [\fx(e_3) \rightarrow \lnot\fv(e_1)] \land \nonumber \\
+				  & \lnot [\fx(e_2) \land \fx(e_3)]  \label{enc:cf:br} \\
 \phi_{CF_{merge}} = \ & \fx(e_k) \rightarrow (\bigvee\limits_{e_p \in \mathtt{pred}(e_k)}^{} \fx(e_p)) \label{enc:cf:merge}
 \end{align}
 
-\subsection{Encoding the data-flow constraints}
+\subsection{The data-flow encoding} %constraints}
 \label{ch:port:enc:df}
 
-While encoding the data-flow constraints, we use the \textit{Static Single-Assignment (SSA) form} in order to be able to capture an arbitrary data-flow into a single SMT-formula. The single-assignment requires that a variable is not assigned once it has been accessed (either read or written). That is, on each state of the program a variable (either local or shared) is mapped to its indexed reference, which represents a new boolean variable in the formula. On merge-points, the $\phi$-function is emulated as the disjunction of values of the variable, that is computed as the reaching definition. For that, we keep track of the map that for each event stores mapping from all declared variables to their SSA-indexes. All indexes are globally unique within single program analysis.
+While encoding the data-flow constraints, we use the \textit{Static Single-Assignment~(SSA) form} in order to be able to capture an arbitrary data-flow into a single SMT-formula. The SSA form requires each variable to be assigned only once within entire program. That is, on each state of the program a variable (either local or shared) is mapped to its indexed reference, which represents a new boolean variable in the formula. On merge-points, the $\phi$-function is emulated as the disjunction of values of the variable that is computed as the \textit{reaching definition}. For that, we carry the map that for each event stores mapping from all declared variables to their SSA-indices. All indices are globally unique within single program analysis.
 
-As it is implemented in~\cite{Porthos17}, the SSA-indexes of variables are computed in accordance with the following rules: (1) any access to a shared variable (both read and write) increments its SSA-index; (2) only writes to a local variable increment its SSA-index (reads preserve indexes); (3) no access to a constant variable or computed expression changes their SSA-index.
+As it is implemented in~\cite{Porthos17}, the SSA-indices of variables are computed in accordance with the following rules: (1) any access to a shared variable (both read and write) increments its SSA-index; (2) only writes to a local variable increment its SSA-index (reads preserve indices); (3) no access to a constant variable or computed expression changes their SSA-index.
+These rules determine the following encoding of load, store and computation events within single thread:
+%TODO: maybe add the overall formula \phi_{DF} ?
 
-\subsection{Encoding the memory model constraints}
+\begin{align}
+\phi_{DF_{e = \mathtt{load}(r \leftarrow l)}} = \ & \fx(e) \rightarrow (r_{i+1} = l_{i+1}) \\
+\phi_{DF_{e = \mathtt{store}(l \leftarrow r)}} = \ & \fx(e) \rightarrow (l_{i+1} = r_i) \\
+\phi_{DF_{e = \mathtt{compute}(...)}} = \ & \fx(e) \rightarrow \fv(e) % \\
+\end{align}
+
+Comparing to the old \Porthos version, the algorithm of converting the program into the SSA form was also adapted for processing the plain flow-graph data structure. That is, for each node we keep track the set of its predecessors, and then, while traversing the graph in topological order, we propagate the SSA-indices for each variable defined so far, and update these indices according the rules listed above. 
+
+The time of described algorithm is linear of the size of event-flow graph since it performs only single traverse of the graph. Notwithstanding the overhead of storing (or, equivalently but undesirably, computing with%TODO: are you sure that 'with'?
+linear time) the predecessors of each node in order to be able to convert the program into an SSA form, the time of such a tranformation reduced%TODO: How much ????
+comparing to the algorithm implemented in \Porthos, which recomputed SSA-indices recursively for each instruction.%TODO: PROOF OR REMOVE !  Maybe, some words of copying, merging SSA maps ?
+
+Moreover, the data-flow encoding scheme used in \Porthos faced the problem when the branching statements had different number of assignments of certain variable in their branches. //TODO: why? why don't we have this problem now? 
+
+As it has been stated before, the \rf-relation links the parts%TODO: another word?
+of data-flow stored in equivalence assertions over the SSA-variables. 
+%The encoding of the \rf-relation, which links the SSA-variables to the original variables, 
+The encoding of this linkage left untouch as it is implemented in \Porthos: for each pair of events $e_1$ and $e_2$ linked by the \rf-relation, we add the following constraint:
+
+\begin{align}
+\phi_{DF_{mem}}(e_1, e_2) = \ & \mathtt{rf}(e_1, e_2) \rightarrow (l_i = l_j) 
+\end{align}
+
+where the variable of location $l$ is mapped to the SSA-variable $l_i$ for event $e_1$, and to the SSA-variable $l_j$ for event $e_2$; and the predicate $\mathtt{rf}(e_1, e_2)$ is encoded as a boolean variable, which itself equals $true$ if $e_2$ reads the shared variable that was written in $e_1$.
+
+
+\subsection{The memory model encoding} %Encoding the memory model constraints}
 \label{ch:port:enc:wmm}
 
+The encoding of a weak memory model itself does not depend on the analysing program. The problem here...
+
+recursive definitions and Kleene iteration
+
+As it is described in~\cite{Porthos17}, the is based ...
+%~\cite{Porthos17}%, Section "Programs and Memory Models", subsection "Encoding Derived Relations"
