@@ -20,6 +20,10 @@
 
 \usepackage{mathtools}
 
+
+%\newcommand{\pvec}[1]{\vec{#1}\mkern2mu\vphantom{#1}} %for primed vectors, see https://tex.stackexchange.com/a/120034
+\newcommand{\pvec}[1]{\vec{#1}\,}
+
 % Font selection
 %\usepackage{palatino}
 %\usepackage[sc]{mathpazo}
@@ -464,12 +468,12 @@ ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;
 % The contents of the thesis are separated to their own files.
 % Edit the content in these files, rename them as necessary.
 % ------------------------------------------------------------------
-\input{0_intro.tex}
-\input{1_wmm.tex}
-\input{1_2_encod.tex}
-\input{2_impl.tex}
-\input{3_eval.tex}
-\input{4_summary.tex}
+\input{1_intro.tex}
+\input{2_wmm.tex}
+\input{3_encod.tex}
+\input{4_impl.tex}
+\input{5_eval.tex}
+\input{6_summary.tex}
 
 % Fix numbering of bibliography section
 \cleardoublepage
