@@ -1,0 +1,123 @@
+\chapter{The ANTLR grammar of input language used in \Porthos}
+\label{apx:in_grammar_pts}
+
+%\vspace{-3em}
+\begin{figure}[h!]%[H]
+\begin{multicols}{2}
+\begin{lstlisting}[mathescape=true,
+        basicstyle=\ttfamily\scriptsize,
+        breaklines=true]
+grammar Porthos;
+
+main
+  :   program
+  ;
+
+bool_expression
+  :   bool_atom
+  |   bool_atom BOOL_OP bool_atom
+  ;
+
+bool_atom
+  :   'true'
+  |   'false'
+  |   '(' arith_expr COMP_OP arith_expr ')'
+  |   '(' bool_expression ')'
+  ;
+
+arith_expr
+  :   arith_atom ARITH_OP arith_atom
+  |   arith_atom
+  ;
+
+arith_atom
+  :   DIGIT
+  |   register
+  |   '(' arith_expr ')'
+  ;
+
+register
+  :   WORD
+  ;
+
+location
+  :   WORD
+  ;
+
+local
+  :   register '<-' arith_expr
+  ;
+
+load
+  :   register '<:-' location
+  ;
+
+store
+  :   location ':=' register
+  ;
+
+read
+  :   register '=' location '.' 'load' '(' ATOMIC ')'
+  ;
+
+write
+  :   location '.' 'store' '(' ATOMIC ',' register ')'
+  ;
+
+statement
+  :   expression
+  |   sequential_stmt
+  |   while_stmt
+  |   if_stmt
+  ;
+
+expression
+  :   local
+  |   load
+  |   store
+  |   FENCE
+  |   read
+  |   write
+  ;
+
+sequential_stmt
+  :   expression  ';' statement
+  |   while_stmt  ';' statement
+  |   if_stmt     ';' statement
+  ;
+
+if_stmt
+  :   'if' bool_expression 'then' '{' statement '}' ('else' '{' statement '}')?
+  ;
+
+while_stmt
+  :   'while' bool_expression '{' statement '}'
+  ;
+
+program
+  :   '{' location (',' location)* '}'
+       ('thread t' DIGIT '{' statement '}'
+         ('exists' (location '=' DIGIT ','
+         | DIGIT ':' register '=' DIGIT ',')   
+         )*
+       )*
+  ;
+
+ATOMIC
+  :   '_na' | '_sc' | '_rx' | '_acq' | '_rel' | '_con'
+  ;
+
+FENCE
+  :   'mfence' | 'sync' | 'lwsync' | 'isync'
+  ;
+    
+COMP_OP : '==' | '!=' | '<=' | '<' | '>=' | '>';
+ARITH_OP : '+' | '-' | '*' | '/' | '%';
+BOOL_OP : 'and' | 'or'; 
+
+DIGIT : [0-9];
+WORD : (LETTER | DIGIT)+;
+LETTER : 'a'..'z' | 'A'..'Z';
+\end{lstlisting}
+\end{multicols}
+\end{figure}

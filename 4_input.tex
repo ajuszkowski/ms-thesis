@@ -4,30 +4,38 @@
 The \Porthos tool used a small subset of C as an input language as described on Figure~\ref{syntax:porthos}\cite{Porthos17}:
 
 \begin{figure}[H]
+\begin{multicols}{2}
 \begin{lstlisting}[mathescape=true,
         caption={Syntax of an input language of \Porthos},
-        captionpos=b,
+        % captionpos=b,
         label={syntax:porthos},
-        basicstyle=\ttfamily\footnotesize,
-        keywordstyle=\bfseries,
-        literate={<--}{$\leftarrow{}$}{1},%{::=}{???},%:\!:\!=},
-        morekeywords={if,then,else,return,while,program,thread,mfence,sync,lwsync,isync}]
+        % basicstyle=\ttfamily\scriptsize,
+        % keywordstyle=\bfseries\color{blue},
+        %literate={<--}{$\leftarrow{}${}1},%{::=}{???},%:\!:\!=},
+        %morekeywords={if,then,else,return,while,program,thread,mfence,sync,lwsync,isync}
+        %alsoletter={:,|,;},%
+        %morekeywords={:,|,;},%
+        %keywordstyle={\color{red}},% 
+        breaklines=true,
+        % xleftmargin=5mm,framexleftmargin=5mm
+        ]
 <prog>  : program <thrd>*
 <thrd>  : thread <tid> <inst>
 <inst>  : <atom> 
-        | <inst> ; <inst>
-        | while <pred> <inst>
-        | if <pred > then <inst> else <inst>
+    | <inst> ; <inst>
+    | while <pred> <inst>
+    | if <pred > then <inst> else <inst>
 <atom>  : <reg> <-- <exp> 
-        | <reg> <-- <loc>
-        | <loc> := <reg> 
-        | mfence
-        | sync
-        | lwsync
-        | isync
+    | <reg> <-- <loc>
+    | <loc> := <reg> 
+    | mfence
+    | sync
+    | lwsync
+    | isync
 \end{lstlisting}
 %\caption={Syntax of an input language of \Porthos}
 %\label={syntax:porthos}
+\end{multicols}
 \end{figure}
 
 // todo: old syntax more precisely

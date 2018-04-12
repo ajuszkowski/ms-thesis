@@ -19,7 +19,7 @@
 \usepackage[section]{placeins}
 
 \usepackage{mathtools}
-
+\usepackage{appendix}
 
 %\newcommand{\pvec}[1]{\vec{#1}\mkern2mu\vphantom{#1}} %for primed vectors, see https://tex.stackexchange.com/a/120034
 \newcommand{\pvec}[1]{\vec{#1}\,}
@@ -37,8 +37,20 @@
 % snippets (although you can also use the listings package to get
 % automatic code formatting).
 \usepackage{verbatim}
+\usepackage{multicol} % for using multiple columns in listings
 \usepackage{listings}
 \renewcommand{\lstlistingname}{Figure}  %perhaps, it's not a gute Idee to change all the listings to Figures
+
+\lstset{ 
+    columns=[l]fullflexible,
+    keepspaces=true,
+    basicstyle=\ttfamily\scriptsize,
+    %numbers=left,
+    tabsize=2,
+    captionpos=b,
+    escapeinside={[*}{*]},
+    %keywordstyle={\ttfamily\color{red}},
+}
 \newcommand{\m}[1]{$#1$} % quick inlined math
 \newcommand{\tool}[1]{\texttt{#1}}
 
@@ -474,6 +486,8 @@ ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;
 % Add headings to pages (the chapter title is shown)
 \pagestyle{headings}
 
+\definecolor{dkblue}{rgb}{0,0.1,0.4}
+
 % The contents of the thesis are separated to their own files.
 % Edit the content in these files, rename them as necessary.
 % ------------------------------------------------------------------
@@ -494,9 +508,22 @@ ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;
 
 % Appendices go here
 % ------------------------------------------------------------------
-% If you do not have appendices, comment out the following lines
+% Fix numbering of bibliography section
+%\cleardoublepage
+\titleformat{\chapter}[display]
+  {\normalfont\large\bfseries}% <- font for label "Appendix A", default \huge
+  {\chaptertitlename\ \thechapter}
+  {0ex}
+  {\large}% <- font for title, default \Huge
+%\renewcommand{\thesection}{A.\arabic{section}}
+
+
+\cleardoublepage\makeatletter\@openrightfalse\makeatother
+\phantomsection
 \appendix
-\input{appendices.tex}
+\addcontentsline{toc}{chapter}{Appendices}
+\appendixpage
+\input{98_appendix.tex}
 
 % End of document!
 % ------------------------------------------------------------------
