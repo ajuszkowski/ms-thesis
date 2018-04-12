@@ -166,7 +166,7 @@ These rules determine the following encoding of load, store and computation even
 \phi_{DF_{e = \mathtt{compute}(...)}} = \ & \fx(e) \rightarrow \fv(e) % \\
 \end{align}
 
-Comparing to the old \Porthos version, the algorithm of converting the program into the SSA form was also adapted for processing the plain flow-graph data structure. That is, for each node we keep track the set of its predecessors, and then, while traversing the graph in topological order, we propagate the SSA-indices for each variable defined so far, and update these indices according the rules listed above. 
+Unlikely the \Porthos tool, the \mousquetaires uses the algorithm of converting the program into the SSA form was also adapted for processing the plain flow-graph data structure. That is, for each node we keep track the set of its predecessors, and then, while traversing the graph in topological order, we propagate the SSA-indices for each variable defined so far, and update these indices according the rules listed above. 
 
 The time of described algorithm is linear of the size of event-flow graph since it performs only single traverse of the graph. Notwithstanding the overhead of storing (or, equivalently but undesirably, computing with%TODO: are you sure that 'with'?
 linear time) the predecessors of each node in order to be able to convert the program into an SSA form, the time of such a tranformation reduced%TODO: How much ????
