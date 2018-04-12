@@ -38,6 +38,7 @@
 % automatic code formatting).
 \usepackage{verbatim}
 \usepackage{listings}
+\renewcommand{\lstlistingname}{Figure}  %perhaps, it's not a gute Idee to change all the listings to Figures
 \newcommand{\m}[1]{$#1$} % quick inlined math
 \newcommand{\tool}[1]{\texttt{#1}}
 
@@ -64,6 +65,7 @@
 % documentation.
 %\usepackage[medium]{titlesec}
 \usepackage[medium,raggedright]{titlesec}
+%\usepackage{pxfonts} %for listings
 
 \usepackage{subcaption}
 \usepackage{graphicx}
@@ -481,7 +483,7 @@ ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;
 \input{4_input.tex}
 \input{5_impl.tex}
 \input{6_eval.tex}
-\input{10_summary.tex}
+\input{99_summary.tex}
 
 % Fix numbering of bibliography section
 \cleardoublepage

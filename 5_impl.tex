@@ -1,28 +1,49 @@
-\chapter{\nohyphens{The~\texttt{mousquetaires}:~implementation}}
+\chapter{\nohyphens{The~\mousquetaires:~implementation}}
 \label{ch:impl}
 
-This Chapter describes the architecture of the tool \texttt{mousquitaires} ...
+This Chapter describes the architecture of the tool \mousquetaires.
 
 language: java
 
-% why: https://stackoverflow.com/a/13968707/4977823
+% why not AST: https://stackoverflow.com/a/13968707/4977823
 
-\section{Program Requirements}
+\section{Requirements}
 \label{ch:impl:requirements}
 
-- stability (tests)
+The main reason for starting the work on re-implementing the \Porthos tool was the need to extend input language to be able to process real C programs in perspective. 
 
-- scalability (new features of language, new models, new tasks for a program )
 
-- transparency
+The target requirements for the new tool was set up as following (in descending order of priority):
 
-- efficiency
+\begin{enumerate}
+        \item stability and transparency (KISS principle)
+                \begin{itemize}
+                        \item choice in favour of simplicity and readability at every step;
+                        \item usage of software design patterns if necessary;
+                        \item usage of immutable data structures for intermediate representations;
+                        \item high code coverage of unit and functional tests;
+                \end{itemize}                
+        \item efficiency
+                \begin{itemize}
+                        %\item usage of time- and memory-optimised data structures;
+                        \item keeping the trade-off between execution time and memory consumption;
+                \end{itemize}
+        \item extensibility
+                \begin{itemize}
+                        \item clear modular architecture
+                \end{itemize}
+\end{enumerate}
+
+
+
+
 
 \section{Program Components}
 \label{ch:impl:comp}
-Big view
 
-\section{C11 to YTree parser}
+Generally, \mousquetaires uses following 
+
+\section{Parsing the input language as YTree}
 \label{ch:impl:ytree}
 
 below: mostly mock text.

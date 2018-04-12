@@ -1,7 +1,39 @@
 \chapter{The input language}
 \label{ch:impl}
 
-the old input language syntax
+The \Porthos tool used a small subset of C as an input language as described on Figure~\ref{syntax:porthos}\cite{Porthos17}:
 
-new one iwth changes highlighted
+\begin{figure}[H]
+\begin{lstlisting}[mathescape=true,
+        caption={Syntax of an input language of \Porthos},
+        captionpos=b,
+        label={syntax:porthos},
+        basicstyle=\ttfamily\footnotesize,
+        keywordstyle=\bfseries,
+        literate={<--}{$\leftarrow{}$}{1},%{::=}{???},%:\!:\!=},
+        morekeywords={if,then,else,return,while,program,thread,mfence,sync,lwsync,isync}]
+<prog>  : program <thrd>*
+<thrd>  : thread <tid> <inst>
+<inst>  : <atom> 
+        | <inst> ; <inst>
+        | while <pred> <inst>
+        | if <pred > then <inst> else <inst>
+<atom>  : <reg> <-- <exp> 
+        | <reg> <-- <loc>
+        | <loc> := <reg> 
+        | mfence
+        | sync
+        | lwsync
+        | isync
+\end{lstlisting}
+%\caption={Syntax of an input language of \Porthos}
+%\label={syntax:porthos}
+\end{figure}
 
+// todo: old syntax more precisely
+
+The input language of \Porthos supported recursive definitions of control-flow instructions, which needed to be extended to support arbitrary jumps expressible in C. Also, for the purpose of simplicity, all kinds of fence instructions and different types of variable assignments (shared variable assignment `\texttt{:=}' or local variable assignment `$\mathtt{\rightarrow}$') were defined directly in the grammar for \Porthos, whereas the semantics of function invocations need to be determined dynamically during the interpretation
+% according to the set of known functions
+(see Chapter~\ref{???}).
+
+//todo: new syntax
