@@ -1,47 +1,42 @@
 \chapter{The input language}
 \label{ch:impl}
 
-The \Porthos tool used a small subset of C as an input language as described on Figure~\ref{syntax:porthos}\cite{Porthos17}:
+The \Porthos tool used a small subset of C as an input language as described on Figure~\ref{syntax:in_grammar_pts}~\cite{Porthos17}:
 
 \begin{figure}[H]
-\begin{multicols}{2}
+%\begin{multicols}{2}
 \begin{lstlisting}[mathescape=true,
         caption={Syntax of an input language of \Porthos},
-        % captionpos=b,
-        label={syntax:porthos},
-        % basicstyle=\ttfamily\scriptsize,
-        % keywordstyle=\bfseries\color{blue},
-        %literate={<--}{$\leftarrow{}${}1},%{::=}{???},%:\!:\!=},
-        %morekeywords={if,then,else,return,while,program,thread,mfence,sync,lwsync,isync}
-        %alsoletter={:,|,;},%
-        %morekeywords={:,|,;},%
-        %keywordstyle={\color{red}},% 
+        label={syntax:in_grammar_pts},
+        literate={<--}{{$\leftarrow$}}1,
+        morekeywords={if,then,else,return,while,program,thread,mfence,sync,lwsync,isync}
         breaklines=true,
-        % xleftmargin=5mm,framexleftmargin=5mm
         ]
-<prog>  : program <thrd>*
-<thrd>  : thread <tid> <inst>
-<inst>  : <atom> 
-    | <inst> ; <inst>
-    | while <pred> <inst>
-    | if <pred > then <inst> else <inst>
-<atom>  : <reg> <-- <exp> 
-    | <reg> <-- <loc>
-    | <loc> := <reg> 
-    | mfence
-    | sync
-    | lwsync
-    | isync
+<prog> : program <thrd>*
+       ;
+<thrd> : thread <tid> <inst>
+       ;
+<inst> : <atom> 
+       | <inst> ; <inst>
+       | while <pred> <inst>
+       | if <pred > then <inst> else <inst>
+       ;
+<atom> : <reg> <-- <exp> 
+       | <reg> <-- <loc>
+       | <loc> := <reg> 
+       | mfence
+       | sync
+       | lwsync
+       | isync
+       ;
 \end{lstlisting}
-%\caption={Syntax of an input language of \Porthos}
-%\label={syntax:porthos}
-\end{multicols}
+%\end{multicols}
 \end{figure}
 
-// todo: old syntax more precisely
 
-The input language of \Porthos supported recursive definitions of control-flow instructions, which needed to be extended to support arbitrary jumps expressible in C. Also, for the purpose of simplicity, all kinds of fence instructions and different types of variable assignments (shared variable assignment `\texttt{:=}' or local variable assignment `$\mathtt{\rightarrow}$') were defined directly in the grammar for \Porthos, whereas the semantics of function invocations need to be determined dynamically during the interpretation
+The input language of \Porthos supported recursive definitions of control-flow instructions, that were directly encoded into SMT-formula. In \mousquetaires, the set of supported instructions is extended in order to support expressions valid in C.%TODO: examples, which  we extended
+ Also, for the purpose of simplicity, all kinds of fence instructions and different types of variable assignments (shared variable assignment~`\texttt{:=}' or local variable assignment~`$\mathtt{\leftarrow}$') were defined directly in the grammar for \Porthos, whereas the semantics of function invocations need to be determined dynamically during the interpretation
 % according to the set of known functions
 (see Chapter~\ref{???}).
 
-//todo: new syntax
+Both \Porthos and \mousquetaires \ use the parser generator ANTLR~\cite{parr2013definitive}, the powerfull language processing tool. The (hand-written) ANTLR grammar used in \Porthos is available at Appendix~\ref{apx:in_grammar_pts}, whereas the \mousquetaires uses the grammar of C language proposed in the C11 standard~\cite{jtc2011sc22} (the ANTLR grammar can be found in the official ANTLR repository on GitHub~\footnote{\url{https://github.com/antlr/grammars-v4}}).

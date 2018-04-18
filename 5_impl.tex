@@ -3,30 +3,29 @@
 
 This Chapter describes the architecture of the tool \mousquetaires.
 
-language: java
-
-% why not AST: https://stackoverflow.com/a/13968707/4977823
+The programming language choice for \mousquetaires was made in favour of java in order to reuse some parts of its predecessor \Porthos that was written in java. However this language does not show best results in performance benchmarks (comparing to, for example, C++)~\cite{TODO}, the performance cornerstone of \mousquetaires (as well as any other SMT-based code analyser) is the phase of solving the SMT-formula, which is left to the third-party SMT-solver called from \mousquetaires via java API. However, considering the perspective of using \mousquetaires as a static analyser for real-world programs, we also must to take into account memory problems at both encoding and solving stages. 
 
 \section{Requirements}
 \label{ch:impl:requirements}
 
-The main reason for starting the work on re-implementing the \Porthos tool was the need to extend input language to be able to process real C programs in perspective. 
+The main reason for starting the work on re-implementing the \Porthos tool was the need to extend input language to be able to process real C programs in perspective. The existing \Porthos architecture mixes high-level recursive \textit{instructions} (statements of C) with low-level non-recursive \textit{events}, to which the high-level instructions are compiled (see classes of package `\texttt{dartagnan.program}' in the \Porthos project~\footnote{Project web page: \url{http://github.com/hernanponcedeleon/PORTHOS}}). Both instructions and events are then encoded into the SMT-formula. However, this approach is poorly extensible as to adding support for a high-level control-flow instruction (say, the \texttt{do-while} loop in C) requires making changes in many places of code from parser to encoder. Moreover, we encounter serious problems when we need to add support for control-flow jumps (as \texttt{continue}, \texttt{break}, \texttt{goto} in C).
 
+Therefore, while planning the architecture of \mousquetaires, we decided to clearly separate high-level recursive code representation as Abstract Syntax Tree (AST) and low-level compiled event-based representation as a flow-graph. Such a modular architecture allows to use multiple input-language parsers and convert parsed syntax trees to our AST, thus having support for multiple languages (for instance, the original input language of \Porthos tool, two syntaxes of litmus tests used by \tool{herd}, and even assembly language for any supported architecture).
 
-The target requirements for the new tool was set up as following (in descending order of priority):
+The target \textbf{requirements} for the new tool was set up as following (in descending order of priority):
 
-\begin{enumerate}
+\begin{enumerate}[nolistsep]
         \item stability and transparency (KISS principle)
                 \begin{itemize}
                         \item choice in favour of simplicity and readability at every step;
-                        \item usage of software design patterns if necessary;
-                        \item usage of immutable data structures for intermediate representations;
-                        \item high code coverage of unit and functional tests;
+                        \item using software design patterns if necessary;
+                        \item using immutable data structures for intermediate representations;
+                        \item high code coverage by unit and functional tests;
                 \end{itemize}                
         \item efficiency
                 \begin{itemize}
                         %\item usage of time- and memory-optimised data structures;
-                        \item keeping the trade-off between execution time and memory consumption;
+                        \item keeping trade-off between execution time and memory consumption;
                 \end{itemize}
         \item extensibility
                 \begin{itemize}
@@ -34,14 +33,10 @@ The target requirements for the new tool was set up as following (in descending 
                 \end{itemize}
 \end{enumerate}
 
-
-
-
-
 \section{Program Components}
 \label{ch:impl:comp}
 
-Generally, \mousquetaires uses following 
+Generally, \mousquetaires uses following  ...
 
 \section{Parsing the input language as YTree}
 \label{ch:impl:ytree}
@@ -77,7 +72,7 @@ below: mostly mock text.
 % If the analysing program contains a loop, then its control-flow graph represents the cyclic directed graph. Although, in order to be able to encode such a cyclic structure as a boolean formula, this graph needs to be  
 % In order to be
 
-The original program encoded into the \texttt{XGraph} represents a \textit{flow graph}, a connected cyclic directed graph with single source node \texttt{[ENTRY]} (usually for convenience all leaves are connected to the sink node \texttt{[EXIT]}). The cycles are caused by low-level jump instructions, obtained from non-linear high-level control-flow statements (such as \texttt{while}, \texttt{do-while}, \texttt{for}, etc.). However, the cyclic flow graph cannot be encoded into SMT formula since ...
+The original program encoded into the \texttt{XGraph} represents a \textit{flow graph}, a connected cyclic directed graph with single source node \texttt{(ENTRY)} (usually for convenience all leaves are connected to the sink node \texttt{(EXIT)}). The cycles are caused by low-level jump instructions, obtained from non-linear high-level control-flow statements (such as \texttt{while}, \texttt{do-while}, \texttt{for}, etc.). However, the cyclic flow graph cannot be encoded into SMT formula since ...
 //TODO:REFERENCE.%TODO
 
 
