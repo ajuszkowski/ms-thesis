@@ -1,0 +1,2 @@
+herd SB.litmus  -show=all  -showlegend=false -showpo=true -showfr=true -showinitrf=true -showfinalrf=true -showinitwrites=true  -o=..  -showevents=mem -showthread=true -showobserved=true -splines=spline -graph=cluster -squished=true
+dot -Tpng -O ../SB.dot ; eog ../SB.dot.png
