@@ -1,4 +1,7 @@
 # Editor's temp files:
+/.idea/
+/*.iml
+
 .fuse_hidden*
 *.*~
 *.*#

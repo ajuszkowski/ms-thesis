@@ -1,8 +1,8 @@
-\chapter{Memory Model-Awared Program Analysis}
+\chapter{Memory Model-Aware Program Analysis}
 \label{ch:wmm}
 
 In general, analysis of concurrent programs with respect to axiomatic memory models is performed in several stages. Firstly, the control-flow and data-flow of a program is encoded as the set of possible \textit{candidate executions}. %possible communications between threads of the program.
-Obtainted model of the program is called an anarchic semantics, which is a truly parallel semantics with no global time that describes all possible computations with all possible communications~\cite{alglave2016syntax}. Thereafter, the anarchic semantics is constrained by the \textit{weak memory model} specification which is a set of axiomatic constraints for filtering out executions inconsistent in particular architecture.
+Obtained model of the program is called an anarchic semantics, which is a truly parallel semantics with no global time that describes all possible computations with all possible communications~\cite{alglave2016syntax}. Thereafter, the anarchic semantics is constrained by the \textit{weak memory model} specification which is a set of axiomatic constraints for filtering out executions inconsistent in particular architecture.
 
 
 \section{The event-based program representation}
@@ -21,10 +21,10 @@ One such model is the \textit{event-based} representation of a program, which mo
 % TODO: check this subseciton
 
 A \textit{memory event} $e_m \in \mathbb{E}$ represents the fact of access to the memory. Since memory is the crucial low-level resource shared by multiple processes, most relations are defined over memory events. 
-The processes can access a shared memory location (denoted by~$l_i$, for \textit{location}), or a local one (denoted by~$r_i$, for \textit{register}). A memory event can access at most one shared memory location, high-level instructions that address more than one shared variable must be transformed into a sequence of events. A memory event is specified by its direction with respect to the shared variable, its location~$\mathtt{loc}(e_m)$, its processor label~$\mathtt{proc}(e_m)$, and a unique event label~$\mathtt{id}(e_m)$~\cite{alglave2010shared}. 
+The processes can access a shared memory location (denoted by~$l_i$, for \textit{location}), or a local one (denoted by~$r_i$, for \textit{register}). A memory event can access at most one shared memory location, high-level instructions that address more than one shared variable must be transformed into a sequence of events. A memory event is specified by its direction with respect to the shared variable, its location~$\mathtt{loc}(e_m)$, its processor label~$\mathtt{proc}(e_m)$, and a unique event label~$\mathtt{id}(e_m)$~\cite{alglave2010shared}.
 %\texttt{load} for read the value of a shared-memory location, or \texttt{store} for write, or neither of them if both locations are local
 
-The set of memory events $\mathbb{M}$ is devided into write events $\mathbb{W}$ (that write values to shared-memory locations) and read events $\mathbb{R}$ (that read values stored in shared-memory locations).
+The set of memory events $\mathbb{M}$ is divided into write events $\mathbb{W}$ (that write values to shared-memory locations) and read events $\mathbb{R}$ (that read values stored in shared-memory locations).
 We add a restriction that each memory event uses at most one shared location, so that the write instruction $i = write(l_1, l_2)$, that encodes the write from the shared location $l_2$ to the shared location $l_1$, is represented as two consequent events $e_1~=~\mathtt{load}(r_1~\leftarrow~l_2); \ e_2~=~\mathtt{store}(l_1~\leftarrow~r_1)$.
 Also, it is important to separate the set of initial write events $\mathbb{IW}~\subset~\mathbb{W}$ that perform initialisation of program variables.
 
@@ -37,7 +37,7 @@ The synchronisation instructions (fences) cause the \textit{barrier events}, tha
 \subsection{Relations}
 \label{ch:wmm:model:relations}
 
-%In this section, we describe basic relations used in memory model-awared program analysis.
+%In this section, we describe basic relations used in memory model-aware program analysis.
 
 The relation~$\xrightarrow{r}\,:~\mathbb{E}~\times~\mathbb{E}$ is a binary function over events (set of pairs of events). There are two kinds of relations between events: \textit{basic relations} %retrieved from the 
 that capture semantics of the program, and \textit{derived relations} that are defined from the basic relations and events in the weak memory model specification. Constraints over relations that are specified by weak memory models are defined as requirements of acyclicity, irreflexivity or emptiness of specific relations~\cite{alglave2016syntax}.
