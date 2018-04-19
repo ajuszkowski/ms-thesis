@@ -4,5 +4,7 @@
 *.*#
 
 # output directory, except *.pdf
-out/*
-!out/*.pdf
+/out/*
+!/out/*.pdf
+/build/*
+!/build/*.pdf

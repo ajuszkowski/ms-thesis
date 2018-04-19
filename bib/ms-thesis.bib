@@ -1,3 +1,17 @@
+% Encoding: UTF-8
+
+@inbook{aho2007compilers::loop_unrolling,
+chapter = {9.6 Loops in Flow Graphs},
+crossref = {aho2007compilers}
+}
+@inbook{aho2007compilers::handling_irreducible,
+chapter = {9.7.6 Handling Nonreducible Flow Graphs},
+crossref = {aho2007compilers}
+}
+@inbook{Dasgupta:2006:ALG:1177299::dfs,
+  chapter = {3.3 Depth-first search in directed graphs},
+  crossref = {Dasgupta:2006:ALG:1177299}
+} 
 @book{mckenney2017parallel,
   title={Is parallel programming hard, and, if so, what can you do about it?(v2017. 01.02 a)},
   author={McKenney, Paul E},
@@ -14,8 +28,7 @@
   year={1979},
   publisher={IEEE}
 }
-
-@article{sewell2010x86,
+{sewell2010x86,
   title={x86-TSO: a rigorous and usable programmer's model for x86 multiprocessors},
   author={Sewell, Peter and Sarkar, Susmit and Owens, Scott and Nardelli, Francesco Zappa and Myreen, Magnus O},
   journal={Communications of the ACM},
@@ -111,11 +124,12 @@
   biburl    = {https://dblp.org/rec/bib/journals/corr/LeonFHM17},
   bibsource = {dblp computer science bibliography, https://dblp.org}
 }
-@article{alglave2010shared,
-  title={A shared memory poetics},
-  author={Alglave, Jade},
-  journal={Th{\`e}se de doctorat, L’universit{\'e} Paris Denis Diderot},
-  year={2010}
+
+@Article{alglave2010shared,
+  author  = {Alglave, Jade},
+  title   = {A shared memory poetics},
+  journal = {La Th{\`e}se de doctorat, L’universit{\'e} Paris Denis Diderot},
+  year    = {2010},
 }
 
 @article{alglave2016syntax,
@@ -187,15 +201,6 @@ month = oct}
   publisher={Pearson/Addison Wesley}
 }
 
-@inbook{aho2007compilers::loop_unrolling,
-chapter = {9.6 Loops in Flow Graphs},
-crossref = {aho2007compilers}
-}
-@inbook{aho2007compilers::handling_irreducible,
-chapter = {9.7.6 Handling Nonreducible Flow Graphs},
-crossref = {aho2007compilers}
-}
-
 @book{Dasgupta:2006:ALG:1177299,
  author = {Dasgupta, Sanjoy and Papadimitriou, Christos H. and Vazirani, Umesh},
  title = {Algorithms},
@@ -205,10 +210,6 @@ crossref = {aho2007compilers}
  publisher = {McGraw-Hill, Inc.},
  address = {New York, NY, USA}
 }
-@inbook{Dasgupta:2006:ALG:1177299::dfs,
-  chapter = {3.3 Depth-first search in directed graphs},
-  crossref = {Dasgupta:2006:ALG:1177299}
-} 
 
 @article{bccsoy2003bmc,
   title={Bounded model checking.},
@@ -287,97 +288,387 @@ crossref = {aho2007compilers}
   organization={Springer}
 }
 
-%@inproceedings{Author:06,
-% title    = {Some publication title},
-% author   = {First Author and Second Author},
-% crossref = {conference:06},
-% pages    = {330—331},
-%}
-%
-%@proceedings{conference:06,
-% editor    = {First Editor and Second Editor},
-% title     = {Proceedings of the Xth Conference on XYZ},
-% booktitle = {Proceedings of the Xth Conference on XYZ},
-% year      = {2006},
-% month     = oct,
-%}
-%
-%@online{Doe:2009,
-% author = {Doe, John},
-% title = {Test entry},
-% month = 10,
-% year = {2009},
-% url = {http://www.test.org/doe/}
-%}
-%
-%@article{Doe:2010,
-% author = {John Doe},
-% journal = {Some journal},
-% year = {2010},
-% title = {Title},
-% doi = {10.1.1/abc001},
-% issn = {1234-5678-9012},
-%}
+@Article{sewell2010x86,
+  author    = {Sewell, Peter and Sarkar, Susmit and Owens, Scott and Nardelli, Francesco Zappa and Myreen, Magnus O},
+  title     = {x86-TSO: a rigorous and usable programmer's model for x86 multiprocessors},
+  journal   = {Communications of the ACM},
+  year      = {2010},
+  volume    = {53},
+  number    = {7},
+  pages     = {89--97},
+  publisher = {ACM},
+}
 
+@Article{Alglave2014,
+  author        = {Alglave, Jade and Maranget, Luc and Tautschnig, Michael},
+  title         = {Herding cats: Modelling, simulation, testing, and data mining for weak memory},
+  journal       = {ACM Transactions on Programming Languages and Systems (TOPLAS)},
+  year          = {2014},
+  volume        = {36},
+  number        = {2},
+  pages         = {7},
+  __markedentry = {[ael:]},
+  publisher     = {ACM},
+}
 
-% Seminar on Network Security, BiBTeX template 
-% Example entries 
-%
-%@Book{Com00,
-%  author =  {Douglas E. Comer},
-%  title =   {Internetworking with TCP/IP, Volume I},
-%  publisher =   {Prentice-Hall Inc},
-%  year =  {2000},
-%  edition =   {4th},
-%  annote =  {ISBN: 0-13-018380-6},
-%  annote =  {Good basic book about TCP/IP and its applications;
-%                  Includes IP, ARP, ICMP, CIDR, TCP, UDP, Routing with
-%                  BGP, RIP, OSPF, HELLO, Multicast, ATM, Mobile IP,
-%                  NAT, VPN, Sockets, DHCP, DNS, Telnet, FTP,
-%                  Electronic Mail, WWW, VoIP, SNMP, IPsec, IPv6, but
-%                  only in the basic level for students}
-%}
-%
-%@InProceedings{HTS03,
-%  author =  {{Tim Hsin-ting Hu and Binh Thai and Aruna
-%                  Seneviratne}},
-%  title =   {{Supporting Mobile Devices in Gnutella File 
-%                  Sharing Network with Mobile Agents}},
-%  booktitle =   {IEEE International Symposium on Computers
-%                  and Communication},
-%  pages =   {1530-1346},
-%  year =  {2003},
-%  volume =  {3},
-%  month =   {April}
-%}
-%
-%@PhdThesis{Nik99,
-%  author =  {Pekka Nikander},
-%  title =   {An Architecture for Authorization and Delegation
-%                  in Distributed Object-Oriented Agent Systems},
-%  school =  {Helsinki University of Technology},
-%  year =  {1999},
-%  month =   {March},
-%  annote =  {Describes distributed software architecture that
-%                  uses delegated access permissions. Delegating
-%                  authorizations to Java agents}
-%}
-%
-%@TechReport{RFC2408,
-%  author =  {D. Maughan and M. Schertler and M. Schneider and
-%                  J. Turner},
-%  title =   {{Internet Security Association and Key
-%                  Management Protocol (ISAKMP)}},
-%  institution =   {The Internet Engineering Task Force},
-%  year =  {1998},
-%  key =     {rfc2408},
-%  type =  {RFC},
-%  number =  {2408},
-%  month =   {November},
-%  note =  {http://ietf.org/rfc/rfc2408.txt}
-%}
-%
-%@MastersThesis{Suo98,
+@Article{Alglave2016,
+  author        = {Alglave, Jade and Cousot, Patrick and Maranget, Luc},
+  title         = {Syntax and semantics of the weak consistency model specification language cat},
+  journal       = {arXiv preprint arXiv:1608.07531},
+  year          = {2016},
+  __markedentry = {[ael:]},
+}
+
+@Article{Alglave2015,
+  author        = {Alglave, Jade and Batty, Mark and Donaldson, Alastair F and Gopalakrishnan, Ganesh and Ketema, Jeroen and Poetzl, Daniel and Sorensen, Tyler and Wickerson, John},
+  title         = {GPU concurrency: Weak behaviours and programming assumptions},
+  journal       = {ACM SIGARCH Computer Architecture News},
+  year          = {2015},
+  volume        = {43},
+  number        = {1},
+  pages         = {577--591},
+  __markedentry = {[ael:]},
+  publisher     = {ACM},
+}
+
+@Article{Alglave,
+  author        = {Alglave, J and Cousot, P and Maranget, L},
+  title         = {Syntax and semantics of the cat language},
+  journal       = {HSA Foundation, Version},
+  volume        = {1},
+  pages         = {38},
+  __markedentry = {[ael:]},
+}
+
+@TechReport{Alglavea,
+  author        = {Alglave, Jade and Maranget, Luc},
+  title         = {Towards a formalization of the HSA memory model in the cat language},
+  institution   = {Technical report, 2016. HSA Foundation Specification Version 1. URL: http://www. hsafoundation. com},
+  __markedentry = {[ael:]},
+}
+
+@Article{Alglave2016a,
+  author        = {Alglave, Jade and Cousot, Patrick},
+  title         = {Syntax and analytic semantics of LISA},
+  journal       = {arXiv preprint arXiv:1608.06583},
+  year          = {2016},
+  __markedentry = {[ael:]},
+}
+
+@InProceedings{Alglave2016b,
+  author        = {Alglave, Jade},
+  title         = {Simulation and invariance for weak consistency},
+  booktitle     = {International Static Analysis Symposium},
+  year          = {2016},
+  pages         = {3--22},
+  organization  = {Springer},
+  __markedentry = {[ael:]},
+}
+
+@InProceedings{Alglave2015a,
+  author        = {Alglave, Jade},
+  title         = {Modeling of architectures},
+  booktitle     = {International School on Formal Methods for the Design of Computer, Communication and Software Systems},
+  year          = {2015},
+  pages         = {97--145},
+  organization  = {Springer},
+  __markedentry = {[ael:]},
+}
+
+@InProceedings{Alglave2017,
+  author        = {Alglave, Jade and Cousot, Patrick},
+  title         = {Ogre and pythia: an invariance proof method for weak consistency models},
+  booktitle     = {ACM SIGPLAN Notices},
+  year          = {2017},
+  volume        = {52},
+  number        = {1},
+  pages         = {3--18},
+  organization  = {ACM},
+  __markedentry = {[ael:]},
+}
+
+@Article{Maranget2015,
+  author        = {Maranget, Luc and Alglave, Jade},
+  title         = {Towards a Formalization of the HSA Memory Model in the cat Language},
+  year          = {2015},
+  __markedentry = {[ael:]},
+}
+
+@Article{Alglave2017a,
+  author        = {Alglave, Jade},
+  title         = {Coalition, intrigue, ambush, destruction and pride: herding cats can be challenging.},
+  journal       = {Formal Methods in Computer-Aided Design FMCAD 2017},
+  year          = {2017},
+  pages         = {6},
+  __markedentry = {[ael:]},
+}
+
+@InProceedings{Alglave2018,
+  author        = {Alglave, Jade and Maranget, Luc and McKenney, Paul E and Parri, Andrea and Stern, Alan},
+  title         = {Frightening small children and disconcerting grown-ups: Concurrency in the Linux kernel},
+  booktitle     = {Proceedings of the Twenty-Third International Conference on Architectural Support for Programming Languages and Operating Systems},
+  year          = {2018},
+  pages         = {405--418},
+  organization  = {ACM},
+  __markedentry = {[ael:]},
+}
+
+@InProceedings{Alglave2017b,
+  author        = {Alglave, Jade and Cousot, Patrick and Urban, Caterina},
+  title         = {Concurrency with Weak Memory Models (Dagstuhl Seminar 16471)},
+  booktitle     = {Dagstuhl Reports},
+  year          = {2017},
+  volume        = {6},
+  number        = {11},
+  organization  = {Schloss Dagstuhl-Leibniz-Zentrum fuer Informatik},
+  __markedentry = {[ael:]},
+}
+
+@Article{Alglavec,
+  author        = {Alglave, Jade and Cousot, Patrick},
+  title         = {The hierarchy of analytic semantics of weakly consistent parallelism},
+  __markedentry = {[ael:]},
+}
+
+@Article{Wickerson2015,
+  author        = {Wickerson, John and Batty, Mark},
+  title         = {Taming the complexities of the C11 and OpenCL memory models},
+  journal       = {arXiv preprint arXiv:1503.07073},
+  year          = {2015},
+  __markedentry = {[ael:]},
+}
+
+@Article{Alglave2015b,
+  author        = {Alglave, Jade and Batty, Mark and Donaldson, Alastair F and Gopalakrishnan, Ganesh and Ketema, Jeroen and Poetzl, Daniel and Sorensen, Tyler and Wickerson, John},
+  title         = {Full text document},
+  year          = {2015},
+  __markedentry = {[ael:]},
+}
+
+@InProceedings{Lustig2017,
+  author        = {Lustig, Daniel and Wright, Andrew and Papakonstantinou, Alexandros and Giroux, Olivier},
+  title         = {Automated synthesis of comprehensive memory model litmus test suites},
+  booktitle     = {Proceedings of the Twenty-Second International Conference on Architectural Support for Programming Languages and Operating Systems},
+  year          = {2017},
+  pages         = {661--675},
+  organization  = {ACM},
+  __markedentry = {[ael:]},
+}
+
+@Article{Batty2016,
+  author        = {Batty, Mark and Donaldson, Alastair F and Wickerson, John},
+  title         = {Overhauling SC atomics in C11 and OpenCL},
+  journal       = {ACM SIGPLAN Notices},
+  year          = {2016},
+  volume        = {51},
+  number        = {1},
+  pages         = {634--648},
+  __markedentry = {[ael:]},
+  publisher     = {ACM},
+}
+
+@InProceedings{Meyer2017,
+  author        = {Meyer, Roland},
+  title         = {Portability Analysis for Weak Memory Models},
+  booktitle     = {Static Analysis: 24th International Symposium, SAS 2017, New York, NY, USA, August 30--September 1, 2017, Proceedings},
+  year          = {2017},
+  volume        = {10422},
+  pages         = {299},
+  organization  = {Springer},
+  __markedentry = {[ael:]},
+}
+
+@Article{Alglave2010,
+  author        = {Alglave, Jade},
+  title         = {A shared memory poetics},
+  journal       = {These de doctorat, L’universit{\'e} Paris Denis Diderot},
+  year          = {2010},
+  __markedentry = {[ael:6]},
+}
+
+@Book{Hutcheon2003,
+  title         = {A poetics of postmodernism: history, theory, fiction},
+  publisher     = {Routledge},
+  year          = {2003},
+  author        = {Hutcheon, Linda and others},
+  __markedentry = {[ael:6]},
+}
+
+@Book{Curtis2017,
+  title         = {Mass atrocity, collective memory, and the law},
+  publisher     = {Routledge},
+  year          = {2017},
+  author        = {Curtis, Michael},
+  __markedentry = {[ael:6]},
+}
+
+@Article{Rigney2005,
+  author        = {Rigney, Ann},
+  title         = {Plenitude, scarcity and the circulation of cultural memory},
+  journal       = {Journal of European studies},
+  year          = {2005},
+  volume        = {35},
+  number        = {1},
+  pages         = {011--028},
+  __markedentry = {[ael:6]},
+  publisher     = {Sage Publications Sage CA: Thousand Oaks, CA},
+}
+
+@Article{Thelen1989,
+  author        = {Thelen, David},
+  title         = {Memory and American history},
+  journal       = {The Journal of American History},
+  year          = {1989},
+  volume        = {75},
+  number        = {4},
+  pages         = {1117--1129},
+  __markedentry = {[ael:6]},
+  publisher     = {JSTOR},
+}
+
+@Article{Kuhn2000,
+  author        = {Kuhn, Annette},
+  title         = {A journey through memory},
+  journal       = {Memory and methodology},
+  year          = {2000},
+  pages         = {179--96},
+  __markedentry = {[ael:6]},
+  publisher     = {Berg Oxford},
+}
+
+@Book{Docker2001,
+  title         = {1492: the poetics of diaspora},
+  publisher     = {Continuum Publishing Company},
+  year          = {2001},
+  author        = {Docker, John and others},
+  __markedentry = {[ael:6]},
+}
+
+@Book{Gunn2017,
+  title         = {Autobiography: Toward a poetics of experience},
+  publisher     = {University of Pennsylvania Press},
+  year          = {2017},
+  author        = {Gunn, Janet Varner},
+  __markedentry = {[ael:6]},
+}
+
+@Book{Abercrombie1998,
+  title         = {Pathways of memory and power: ethnography and history among an Andean people},
+  publisher     = {Univ of Wisconsin Press},
+  year          = {1998},
+  author        = {Abercrombie, Thomas Alan},
+  __markedentry = {[ael:6]},
+}
+
+@Book{Feld2012,
+  title         = {Sound and Sentiment: Birds, Weeping, Poetics, and Song in Kaluli Expression, with a new introduction by the author},
+  publisher     = {Duke University Press},
+  year          = {2012},
+  author        = {Feld, Steven},
+  __markedentry = {[ael:6]},
+}
+
+@Article{Gupta1992,
+  author        = {Gupta, Akhil and Ferguson, James},
+  title         = {Beyond “culture”: Space, identity, and the politics of difference},
+  journal       = {Cultural anthropology},
+  year          = {1992},
+  volume        = {7},
+  number        = {1},
+  pages         = {6--23},
+  __markedentry = {[ael:6]},
+  publisher     = {Wiley Online Library},
+}
+
+@InProceedings{Donaldson2011,
+  author        = {Donaldson, Alastair and Kaiser, Alexander and Kroening, Daniel and Wahl, Thomas},
+  title         = {Symmetry-aware predicate abstraction for shared-variable concurrent programs},
+  booktitle     = {International Conference on Computer Aided Verification},
+  year          = {2011},
+  pages         = {356--371},
+  organization  = {Springer},
+  __markedentry = {[ael:6]},
+}
+
+@Book{Dundjerovich2003,
+  title         = {The cinema of Robert Lepage: the poetics of memory},
+  publisher     = {Wallflower Press},
+  year          = {2003},
+  author        = {Dundjerovich, Aleksandar},
+  __markedentry = {[ael:6]},
+}
+
+@Article{Cunliffe2002,
+  author        = {Cunliffe, Ann L},
+  title         = {Social poetics as management inquiry: A dialogical approach},
+  journal       = {Journal of Management Inquiry},
+  year          = {2002},
+  volume        = {11},
+  number        = {2},
+  pages         = {128--146},
+  __markedentry = {[ael:6]},
+  publisher     = {Sage Publications Sage CA: Thousand Oaks, CA},
+}
+
+@Article{Nissley2002,
+  author        = {Nissley, Nick and Casey, Andrea},
+  title         = {The politics of the exhibition: Viewing corporate museums through the paradigmatic lens of organizational memory},
+  journal       = {British Journal of management},
+  year          = {2002},
+  volume        = {13},
+  number        = {S2},
+  __markedentry = {[ael:6]},
+  publisher     = {Wiley Online Library},
+}
+
+@Article{Fogu2006,
+  author        = {Fogu, Claudio and Kansteiner, Wulf},
+  title         = {The politics of memory and the poetics of history},
+  journal       = {The politics of memory in postwar Europe},
+  year          = {2006},
+  pages         = {284--310},
+  __markedentry = {[ael:6]},
+  publisher     = {Duke University Press Durham and London},
+}
+
+@Article{Ashuri2005,
+  author        = {Ashuri, Tamar},
+  title         = {The nation remembers: National identity and shared memory in television documentaries},
+  journal       = {Nations and Nationalism},
+  year          = {2005},
+  volume        = {11},
+  number        = {3},
+  pages         = {423--442},
+  __markedentry = {[ael:6]},
+  publisher     = {Wiley Online Library},
+}
+
+@PhdThesis{Prendergast2006,
+  author        = {Prendergast, Monica},
+  title         = {Audience in performance: A poetics and pedagogy of spectatorship},
+  year          = {2006},
+  __markedentry = {[ael:6]},
+}
+
+@Book{Herzfeld1988,
+  title         = {The poetics of manhood: contest and identity in a Cretan mountain village},
+  publisher     = {Princeton University Press},
+  year          = {1988},
+  author        = {Herzfeld, Michael},
+  __markedentry = {[ael:6]},
+}
+
+@Book{Watkins1995,
+  title         = {How to kill a dragon: aspects of Indo-European poetics},
+  publisher     = {Oxford University Press on Demand},
+  year          = {1995},
+  author        = {Watkins, Calvert},
+  __markedentry = {[ael:6]},
+}
+
+@Comment{jabref-meta: databaseType:bibtex;}
+
+{Suo98,
 %  author =  {Sanna Suoranta},
 %  title =   {{An Object-Oriented Implementation of an
 %                  Authentication Protocol}},
