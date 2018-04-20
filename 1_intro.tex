@@ -30,11 +30,13 @@ MOV EAX,[y] & MOV EAX,[x] \\
 \end{figure}
 
 Research of weak memory models firstly aims to \textit{formalise} develop the formal approach of understanding programs with respect to weak memory models which is systematic, sound and complete. The first (and so far the only) such a framework was presented in 2010~\cite{alglave2010shared}.
-%
-Secondly, researchers work on extracting the WMMs for hardware architectures from existing implementations of from their specifications, that are written in natural language and thus suffer from ambiguities and incompleteness. Over last decade the memory models have been extracted for most mainstream multiprocessor architectures, such as x86-TSO (\textit{Total Store Order}) model for x86 architecture formalised in 2009~\cite{owens2009better}, much more relaxed memory model for Power and ARM architectures~\cite{alglave2009semantics,sarkar2011understanding}, for Alpha~\cite{?} and Sparc~\cite{?} memory models were defined in the specification. Moreover, most modern high-level programming languages rely on relaxed memory model. Thus, the memory model for Java that is based on the \textit{happens-before} principle~\cite{lamport1978time} was introduced in J2SE 5.0 in 2004~\cite{manson2005java}; the C++11 standard~\cite{?} has introduced the set of hardware-independent synchronisation fences and atomic operations, whenever the C++17 memory model is based on the relation \textit{strongly happens-before}.
-%batty2011mathematizing
-Thirdly, important research direction targets the problem of verifying (or at least finding bugs in) existing software systems with respect to WMMs. Perhaps, the most notable work in this field is the project for defining the Linux kernel memory model, which is being actively developing these days~\cite{kernel1}.
-%Distributed databases <also need the wmm, see transaction consistency~\cite{bailis2013highly}>
+In addition to developing rather theoretical basis, researchers work on extracting the WMMs for hardware architectures from existing implementations of from their specifications, which are written in natural language and thus suffer from ambiguities and incompleteness.
+Over last decade the memory models have been defined for most mainstream multiprocessor architectures, such as x86-TSO and Sparc-TSO (for \textit{Total Store Order}) model for x86 and Sparc architecture formalised in 2009~\cite{owens2009better}, much more relaxed memory model for Power and ARM architectures~\cite{alglave2009semantics,sarkar2011understanding, alglave2014herding}, and others.
+There are projects for validating hardware architectures wrt. a memory model, e.g.~\cite{lustig2014pipecheck,lustig2016coatcheck}.
+
+Most modern high-level programming languages rely on relaxed memory model as well.
+Thus, the memory model for Java that is based on the \textit{happens-before} principle~\cite{lamport1978time} was introduced in J2SE 5.0 in 2004~\cite{manson2005java}; the C++11 standard~\cite{?} has introduced the set of hardware-independent synchronisation fences and atomic operations, whenever the C++17 memory model~\cite{batty2011mathematizing} is based on the relation \textit{strongly happens-before}. Weak memory are being formalised for even more abstract software environments, the notable project in this area is the project on formalising the Linux kernel memory model, which is being actively developing these days~\cite{kernel1}.
+Furthermore, there is a wide range of tools that perform program verification wrt memory models (see~\cite{alglave2013software}, \cite{Porthos17}).
 
 %experiments with kernel?
 
@@ -60,7 +62,7 @@ The first tool that performs the WMM-aware portability analysis is \Porthos intr
 
 Current work aims to rework the proof-of-concept tool \Porthos by extending the input language, which currently represents the minimum subset of C, and revising the general architecture of the tool in order to enhance performance, reliability and maintainability.
 %interprocedural analysis
-We called the new tool \textbf{the \tool{mousquetaires} framework} as now it not only performs the portability analysis, but can serve as the basis for SMT-solver driven weak memory model analysis.
+We called the new tool the~\tool{mousquetaires}~framework as now it not only performs the portability analysis, but can serve as the basis for SMT-solver driven weak memory model analysis.
 
 \section{Thesis structure}
 \label{ch:intro:structure}

@@ -1,5 +1,6 @@
-\chapter{The Portability of Concurrent Software}
-%\chapter{The Concurrent Software Portability Analysis as a Bounded Model Checking Problem}
+%\chapter{SMT-based program analysis}
+%\chapter{Portability of concurrent software}
+\chapter{Portability analysis as a SAT~problem}
 \label{ch:port}
 
 As it has been discussed in Chapter~\ref{ch:intro}, the program may behave differently when compiled for different parallel hardware architectures. This may cause the portability bugs, the behaviour that is allowed under one architecture and forbidden under another. 
@@ -9,10 +10,10 @@ As it has been discussed in Chapter~\ref{ch:intro}, the program may behave diffe
 %The first work that has investigated the practical approach of modeling and verification the real-world programs with respect to weak memory models was ~\cite{Porthos17}  
 In this Chapter, we describe the general task of analysing the concurrent software portability
 %may be stated 
-as a \textit{bounded reachability} problem, which in turn can be reduced to the satisfiability modulo theories (SMT) problem~\cite{Porthos17}.
+as a \textit{bounded reachability} problem, which in turn can be reduced to a SAT problem~\cite{Porthos17} (more precisely, to an SMT problem).
 
 
-\section{The model checking problem}
+\section{Model checking}
 \label{ch:port:mc}
 
 The classical model checking algorithms explore the state space of an abstract automata or a transition system in order to find states that violate the specification. The general schema of model checking is the following: firstly, the analysing system is being represented as a transition system, a finite directed graph with labeled nodes representing states of the system such that each state corresponds to the unique subset of atomic propositions, that characterise the behavioral properties of each state. 
@@ -32,15 +33,16 @@ Due to the SAT-solver. This technique is called \textit{bounded model checking (
 
 %For instance, the idea of grouping states with similar properties into equivalence classes lead to the concept of traces in concurrent systems proposed by A.~Mazurkiewicz in 1986~\cite{mazurkiewicz1986trace}. 
 
-\section{The portability as a bounded reachability problem}
+
+\section{Portability analysis as a bounded reachability problem}
 \label{ch:port:enc}
 
-In general, the BMC problem aims to examine the reachability of the "undesirable" states of a finite-state system. Let $\vec{x} = (x_1, x_2, ..., x_n)$ be a vector of $n$ variables that uniquely distinguishes states of the system; let $Init(\vec{x})$ be an \textit{initial-state predicate} that defines the set of initial states of the system; let $Trans(\vec{x}, \pvec{x}')$ be a \textit{transition predicate} that signifies whether there the transition from state $\vec{x}$ to state $\pvec{x}'$ is valid; let $Bad(\vec{x})$ be a \textit{bad-state predicate} that defines the set of undesirable states. Then, the BMC problem, stated as the reachability of the undesirable state withing $k$ steps is formulated as following:
+In general, a BMC problem aims to examine the reachability of the "undesirable" states of a finite-state system. Let $\vec{x} = (x_1, x_2, ..., x_n)$ be a vector of $n$ variables that uniquely distinguishes states of the system; let $Init(\vec{x})$ be an \textit{initial-state predicate} that defines the set of initial states of the system; let $Trans(\vec{x}, \pvec{x}')$ be a \textit{transition predicate} that signifies whether there the transition from state $\vec{x}$ to state $\pvec{x}'$ is valid; let $Bad(\vec{x})$ be a \textit{bad-state predicate} that defines the set of undesirable states. Then, the BMC problem, stated as the reachability of the undesirable state withing $k$ steps is formulated as following:
 %\begin{equation}
 $\mathtt{SAT}( Init(\vec{x_0}) \land Trans(\vec{x}_0, \vec{x}_1) \land \cdots \land Trans(\vec{x}_{k-1}, \vec{x}_k) \land Bad(\vec{x}_k) )$.
 %\end{equation}
 
-The portability probram may also be formulated as a reachability problem, where the undesirable state is the state reachable under the target~$\mathcal{M_T}$ memory model and unreachable under the source memory model~$\mathcal{M_S}$. However, unlikely the BMC problem, the portability analysis does not require to call the SMT-solver repeatedly, since (imperative) programs may be converted as acyclic state graph (by reducing the loops, see Section~\ref{ch:impl:x2y:unrolling}) and the $Trans$ predicate may be stated only for the final state of a program.
+Portability analysis problem may also be stated as a reachability problem, where the undesirable state is the state reachable under the target~$\mathcal{M_T}$ memory model and unreachable under the source memory model~$\mathcal{M_S}$. However, unlikely the BMC problem, the portability analysis does not require to call the SMT-solver repeatedly, since (imperative) programs may be converted as acyclic state graph (by reducing the loops, see Section~\ref{ch:impl:x2y:unrolling}) and the $Trans$ predicate may be stated only for the final state of a program.
 
 As we have said before, a program $P$ is called portable from the source architecture (defined as a memory model) $\mathcal{M_S}$ to the target architecture $\mathcal{M_T}$ if \textit{all} executions consistent under $\mathcal{M_T}$ are consistent under $\mathcal{M_S}$~\cite{Porthos17}:
 
@@ -49,92 +51,95 @@ Let $\mathcal{M_S}$, $\mathcal{M_T}$ be two weak memory models. A program $P$ is
 $cons_{\mathcal{M_T}}(P) \subseteq cons_{\mathcal{M_S}}(P)$
 \end{definition}
 
-Note, that the formulation of portability requirements against \textit{executions} is strong enough, as it implies the portability against \textit{states} (the \textit{state-portability})~\cite{Porthos17}.
+Note that the definition of portability requirements against \textit{executions} is strong enough, as it implies the portability against \textit{states} (the \textit{state-portability})~\cite{Porthos17}.
 
 %It is possible to formulate this requirement as an SMT formula, so that the portability analysis problem becomes reduced to the bounded reachability problem.
-The result SMT formula $\phi$ of the portability problem should contain encodings of control-flow ($\phi_{CF}$) and data-flow ($\phi_{DF}$) of the program, and assertions of both memory models: $\phi = \phi_{CF} \land \phi_{DF} \land \phi_{\mathcal{M_T}} \land \phi_{\lnot\mathcal{M_S}}$. If the formula is satisfiable, there exist a portability bug.
+The result SMT formula $\phi$ of the portability problem should contain both encodings of control-flow $\phi_{CF}$ and data-flow $\phi_{DF}$ of the program, and assertions of both memory models: $\phi = \phi_{CF} \land \phi_{DF} \land \phi_{\mathcal{M_T}} \land \phi_{\lnot\mathcal{M_S}}$. If the formula is satisfiable, there exist a portability bug.
 %The control-flow and data-flow encodings are standard for BMC~\cite{collavizza2006exploration}, they are described below. 
 %However, encoding of memory models requires additional techniques due to recursive definitions of relations, that were proposed in~\cite{Porthos17}.
 
-\subsection{The control-flow encoding} %Encoding the control-flow constraints}
+
+\subsection{Encoding for the control-flow} %Encoding the control-flow constraints}
 \label{ch:port:enc:cf}
 
 The control-flow of a program is represented in the \textit{control-flow graph}, a directed acyclic connected graph with single source and multiple sink nodes, obtained by the \textit{loop unrolling} (see Section~\ref{ch:impl:x2y:unrolling}).%TODO: footnote why multiple sinks
-In control-flow graph, there are two types of edges: \textit{primary edges} that denote unconditional jumps or if-true-transitions (pictured with solid lines), and \textit{alternative edges} that denote if-false-transitions (pictured with dotted lines). Each node on graph can have either one successor (primary) or two successors (primary and alternative); only computation events can serve as a branching point). However, each merge node can have any positive number of predecessors, where each edge may be either primary or alternative.
+In control-flow graph, there are two types of transitions (edges): \textit{primary transitions} that denote unconditional jumps or if-true-transitions (pictured with solid lines), and \textit{alternative transitions} that denote if-false-transitions (pictured with dotted lines). Each node on graph can have either one successor (primary) or two successors (both primary and alternative); only computation events can serve as a branching point). However, each merge node can have any positive number of predecessors, where each edge may be either primary or alternative.
 
 While working on the \tool{mousquetaires}, we applied some modifications of the encoding scheme for the control-flow. The changes are conditioned by the need to be able to process an arbitrary control-flow produced by conditional and unconditional jumps of C language. 
 For that, we compile the recursive abstract syntax tree~(AST) of the parsed C-code to the plain (non-recursive) event-flow graph.
-We show%TODO! to show, actually
+We show %TODO! to show, actually
 that the new encoding is smaller than the old one used in \Porthos since it does not produces new variables for each high-level statement of the input language.
 %The \tool{PORTHOS} tool encodes the \textit{instructions}, which have recursive nature, in a recursive manner. This means, it adds synthetic composite instructions for both linear (sequential) and non-linear (branching) instructions. 
-For instance, in old scheme the control-flow of the sequential instruction \m{i_1 := i_2; i_3} was encoded as 
-\m{\phi_{CF}(i_2;i_3) = (cf_{i_1} \Leftrightarrow (cf_{i_2} \land cf_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)}, 
-and control-flow of the branching instruction \m{i_1 := \{c \, ? \, i_2 \, : \, i_3\}} was encoded as 
-\m{\phi_{CF}( \, c \, ? \, i_2 \, : \, i_3) = (cf_{i_1} \Leftrightarrow (cf_{i_2} \lor cf_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)} (here we used the notation of C-like ternary operator `\texttt{x?y:z}' for defining the conditional expression `\texttt{if} $x$ \texttt{then} $y$ \texttt{else} z').
-In contrast, the new scheme implemented in \tool{mousquetaires} firstly compiles the recursive high-level code into the linear low-level event-based representation, that is then encoded into an SMT-formula. The encoding of branching nodes depends on the \textit{guards}, the value of conditional variable on the branching state, which in turn is encoded as data-flow constraint (see further in current Chapter).
-%linearly as it shown in
+For instance, \Porthos uses the encoding scheme where the control-flow of the sequential instruction $i_1 = i_2; i_3$ was encoded as
+$\phi_{CF}(i_2;i_3) = (cf_{i_1} \Leftrightarrow (cf_{i_2} \land cf_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)$,
+and control-flow of the branching instruction $i_1 = (c \, ? \, i_2 \, : \, i_3)$ was encoded as
+$\phi_{CF}( \, c \, ? \, i_2 \, : \, i_3) = (cf_{i_1} \Leftrightarrow (cf_{i_2} \lor cf_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)$
+(here we used the notation of C-like ternary operator \texttt{x?y:z} for defining the conditional expression $\mathtt{if} x \mathtt{then} y \mathtt{else} z$).
+In contrast, the new scheme implemented in \tool{mousquetaires} firstly compiles the recursive high-level code into the linear low-level event-based representation, that is then encoded into an SMT-formula. The encoding of branching nodes depends on the \textit{guards}, the value of conditional variable on the branching state, which in turn is encoded as data-flow constraint (see Section~\ref{ch:port:enc:df}).
 
-Let \m{\fx : \mathbb{E} \rightarrow \{0,1\}} be the predicate that signifies the fact that the event has been e\textbf{x}ecuted (and, consequently, has changed the state of the system). 
-Let \m{\fv : \mathbb{C} \rightarrow \mathbb{N}} be the function that returns the value of the computation event that will be computed once the event is executed (strictly speaking, it retuns the \textit{set} of values determined by the \texttt{rf}-relation; see Chapter~? for the relations encoding%TODO
-). We distinguish the function \m{\fv_p : \mathbb{C_p} \rightarrow \{0,1\}} that evaluates the predicative computation event. In the result formula, all symbols $\fx(e_i)$ and $\fv(e_i)$ are encoded as boolean variables.
+Let $\fx : \mathbb{E} \rightarrow \{0,1\}$ be the predicate that signifies the fact that the event has been e\textbf{x}ecuted (and, consequently, has changed the state of the system).
+Let $\fv : \mathbb{C} \rightarrow \mathbb{N}$ be the function that returns the value of the computation event that will be computed once the event is executed (strictly speaking, it retuns the \textit{set} of values determined by the \relation{rf}-relation; see Chapter~? for the relations encoding%TODO
+). We distinguish the function $\fv_p : \mathbb{C_p} \rightarrow \{0,1\}$ that evaluates the predicative computation event. In the result formula, all symbols $\fx(e_i)$ and $\fv(e_i)$ are encoded as boolean variables.
 
-Consider the following possible mutual arrangement of nodes in a control-flow grpah:
+Consider the following possible mutual arrangement of nodes in a control-flow graph:
+
 
 \begin{figure}[H]
-\centering
-\begin{subfigure}[b]{0.3\textwidth}
-\makebox[\textwidth]{
-  \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
-  \node[c] (1) [] {$e_1$};
-  \node[c] (2) [below of=1] {$e_2$};
-  \path[->]
-  (1) edge [] node {} (2)
-  ;
-  \end{tikzpicture}
-}
-\caption{Sequential events}
-\label{encode:cf:seq}
-\end{subfigure}
-~
-\begin{subfigure}[b]{0.35\textwidth}
-\makebox[\textwidth]{
-  \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
-  \node[c] (1) [] {$e_1$};
-  \node[c] (2) [below left of=1] {$e_2$};
-  \node[c] (3) [below right of=1] {$e_3$};
-  \path[->]
-  (1) edge [] node {} (2)
-  (1) edge [dotted] node {} (3)
-  ;
-  \end{tikzpicture}
-  }
-\caption{Conditional branching}
-\label{encode:cf:br}
-\end{subfigure}
-~
-\begin{subfigure}[b]{0.25\textwidth}
-\makebox[\textwidth]{
-  \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
-  \node[c] (i) [] {$e_i$};
-  \node[c,draw=none] (ii) [right=0.2cm of i] {};
-  \node[c,draw=none] (iii) [right=0.2cm of ii] {$...$};
-  \node[c,draw=none] (iv) [right=0.2cm of iii] {};
-  \node[c] (v) [right=0.2cm of iv] {$e_{i+j}$};
-  \node[c] (k) [below of=iii] {$e_k$};
-  \path[->]
-  (i) edge [] node {} (k)
-  (ii) edge [] node {} (k)
-  (iii) edge [dotted] node {} (k)
-  (iv) edge [dotted] node {} (k)
-  (v) edge [] node {} (k)
-  ;
-  \end{tikzpicture}
-}
-\caption{Branch merging}
-\label{encode:cf:merge}
-\end{subfigure}
-\caption{Linear and non-linear cases of control-flow graph}
-\label{encode:cf}
+    \centering
+    \begin{subfigure}[b]{0.3\textwidth}
+        \makebox[\textwidth]{
+        \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
+            \node[c] (1) [] {$e_1$};
+            \node[c] (2) [below of=1] {$e_2$};
+            \path[->]
+            (1) edge [] node {} (2)
+            ;
+        \end{tikzpicture}
+        }
+        \caption{Sequential events}
+        \label{encode:cf:seq}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{0.35\textwidth}
+        \makebox[\textwidth]{
+        \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
+            \node[c] (1) [] {$e_1$};
+            \node[c] (2) [below left of=1] {$e_2$};
+            \node[c] (3) [below right of=1] {$e_3$};
+            \path[->]
+            (1) edge [] node {} (2)
+            (1) edge [dotted] node {} (3)
+            ;
+        \end{tikzpicture}
+        }
+        \caption{Conditional branching}
+        \label{encode:cf:br}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{0.25\textwidth}
+        \makebox[\textwidth]{
+        \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
+            \node[c] (i) [] {$e_i$};
+            \node[c,draw=none] (ii) [right=0.2cm of i] {};
+            \node[c,draw=none] (iii) [right=0.2cm of ii] {$...$};
+            \node[c,draw=none] (iv) [right=0.2cm of iii] {};
+            \node[c] (v) [right=0.2cm of iv] {$e_{i+j}$};
+            \node[c] (k) [below of=iii] {$e_k$};
+            \path[->]
+            (i) edge [] node {} (k)
+            (ii) edge [] node {} (k)
+            (iii) edge [dotted] node {} (k)
+            (iv) edge [dotted] node {} (k)
+            (v) edge [] node {} (k)
+            ;
+        \end{tikzpicture}
+        }
+        \caption{Branch merging}
+        \label{encode:cf:merge}
+    \end{subfigure}
+    %
+    \caption{Linear and non-linear cases of control-flow graph}
+    \label{encode:cf}
 \end{figure}
 
 For listed cases, below we propose the encoding scheme that uniquely encodes each node of graph and allows to encode partially executed program.
@@ -142,8 +147,6 @@ The Equation~\ref{enc:cf:seq} for encoding the sequential control-flow represent
 %TODO: maybe add the overall formula \phi_{CF} ?
 
 \begin{align}
-%\phi_{CF_{(e_1;e_2)}}     =
-%\phi_{CF_{(e_1?e_2:e_3)}} =
 \phi_{CF_{seq}}   = \ & \fx(e_2) \rightarrow \fx(e_1) \label{enc:cf:seq} \\
 \phi_{CF_{br}}    = \ & [\fx(e_2) \rightarrow \fx(e_1)] \land [\fx(e_3) \rightarrow \fx(e_1)] \land \nonumber \\
 				  &  [\fx(e_2) \rightarrow \fv(e_1)] \land [\fx(e_3) \rightarrow \lnot\fv(e_1)] \land \nonumber \\
@@ -151,33 +154,92 @@ The Equation~\ref{enc:cf:seq} for encoding the sequential control-flow represent
 \phi_{CF_{merge}} = \ & \fx(e_k) \rightarrow (\bigvee\limits_{e_p \in \mathtt{pred}(e_k)}^{} \fx(e_p)) \label{enc:cf:merge}
 \end{align}
 
-\subsection{The data-flow encoding} %constraints}
+
+For the sake of encoding correctness, we require all branches to have at least one event. Thus, for branching statements that do not have any events in one of the branches (such a branch represents a conditional jump forward), we add the synthetic \texttt{nop}-event as it is shown in Figure~\ref{encode:branching:nop}:
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
+        \node[c] at (0,0) (1a) {$e_1$};
+        \node[c] at (0,-1.5) (2a) {$e_2$};
+        \node[c] at (0,-3) (3a) {$e_3$};
+        \node[c,draw=none] at (3,-1.5) (arr) {$\longrightarrow$};
+        \node[c] at (6,0) (1b) {$e_1$};
+        \node[c] at (6,-1.5) (2b) {$e_2$};
+        \node[c,fill=black!20] at (7.5,-1.5) (nop) {$e_{\mbox{\tiny NOP}}$}; %{\tiny{NOP}};
+        \node[c] at (6,-3) (3b) {$e_3$};
+        \path[->]
+        (1a) edge [] node {} (2a)
+        (2a) edge [] node {} (3a)
+        (1a) edge [dotted,bend left=60] node {} (3a)
+        (1b) edge [] node {} (2b)
+        (2b) edge [] node {} (3b)
+        (1b) edge [dotted,bend left] node {} (nop)
+        (nop) edge [dotted,bend left] node {} (3b)
+        ;
+    \end{tikzpicture}
+    \caption{Transformation of the empty-branch nonlinear control-flow}
+    \label{encode:branching:nop}
+\end{figure}
+
+
+\subsection{Encoding for the data-flow}
 \label{ch:port:enc:df}
 
-While encoding the data-flow constraints, we use the \textit{Static Single-Assignment~(SSA) form} in order to be able to capture an arbitrary data-flow into a single SMT-formula. The SSA form requires each variable to be assigned only once within entire program. That is, on each state of the program a variable (either local or shared) is mapped to its indexed reference, which represents a new boolean variable in the formula. On merge-points, the $\phi$-function is emulated as the disjunction of values of the variable that is computed as the \textit{reaching definition}. For that, we carry the map that for each event stores mapping from all declared variables to their SSA-indices. All indices are globally unique within single program analysis.
+To encode the data-flow constraints, we use the \textit{static single-assignment (SSA) form} in order to be able to capture an arbitrary data-flow into a single SMT-formula.
+The SSA form requires each variable to be assigned only once within entire program.
+In contrast, \Porthos used the dynamic single-assignment (DSA) form, that requires indices to be unique within a branch.
+Although the number of variable references (each of which is encoded as unique SMT-variable) on average is logarithmically less in case of the DSA form than the SSA form, the result SMT-formula still needs to be complemented by same number of equality assertions when encoding the data-flow in merge points~\cite{Porthos17}.
 
-As it is implemented in~\cite{Porthos17}, the SSA-indices of variables are computed in accordance with the following rules: (1) any access to a shared variable (both read and write) increments its SSA-index; (2) only writes to a local variable increment its SSA-index (reads preserve indices); (3) no access to a constant variable or computed expression changes their SSA-index.
+Following~\cite{Porthos17}, the indexed references of variables are computed in accordance with the following rules:
+(1)~any access to a shared variable (both read and write) increments its SSA-index;
+(2)~only writes to a local variable increment its SSA-index (reads preserve indices);
+(3)~no access to a constant variable or computed expression changes their SSA-index.
 These rules determine the following encoding of load, store and computation events within single thread:
 %TODO: maybe add the overall formula \phi_{DF} ?
-
 \begin{align}
-\phi_{DF_{e = \mathtt{load}(r \leftarrow l)}} = \ & \fx(e) \rightarrow (r_{i+1} = l_{i+1}) \\
-\phi_{DF_{e = \mathtt{store}(l \leftarrow r)}} = \ & \fx(e) \rightarrow (l_{i+1} = r_i) \\
-\phi_{DF_{e = \mathtt{compute}(...)}} = \ & \fx(e) \rightarrow \fv(e) % \\
+    \phi_{DF_{e = \mathtt{load}(r \leftarrow l)}} = \ & \fx(e) \rightarrow (r_{i+1} = l_{i+1}) \\
+    \phi_{DF_{e = \mathtt{store}(l \leftarrow r)}} = \ & \fx(e) \rightarrow (l_{i+1} = r_i) \\
+    \phi_{DF_{e = \mathtt{compute}(...)}} = \ & \fx(e) \rightarrow \fv(e) % \\
 \end{align}
 
-Unlikely the \Porthos tool, the \mousquetaires uses the algorithm of converting the program into the SSA form was also adapted for processing the plain flow-graph data structure. That is, for each node we keep track the set of its predecessors, and then, while traversing the graph in topological order, we propagate the SSA-indices for each variable defined so far, and update these indices according the rules listed above. 
+To convert the program into SSA form, for each event each variable that is declared so far (either local or shared) is mapped to its indexed reference; this information is stored in the SSA-map "event \textit{to} variable \textit{to} SSA-index". %for each event stores the map that each declared variable maps to its SSA-index
+%"$\{$ event : $\{$ variable : index $\}\}$",
+%"$\left\{$ event : $\left\{$ variable : index $\right\} \right\}$",
+The SSA-map is computed iteratively while traversing the event-flow graph in topological order as it is described in Algorithm~\ref{algorithm:ssa-map}:
 
-The time of described algorithm is linear of the size of event-flow graph since it performs only single traverse of the graph. Notwithstanding the overhead of storing (or, equivalently but undesirably, computing with%TODO: are you sure that 'with'?
-linear time) the predecessors of each node in order to be able to convert the program into an SSA form, the time of such a tranformation reduced%TODO: How much ????
-comparing to the algorithm implemented in \Porthos, which recomputed SSA-indices recursively for each instruction.%TODO: PROOF OR REMOVE !  Maybe, some words of copying, merging SSA maps ?
+\begin{algorithm}
+    \caption{Algorithm for computing the SSA-indices}\label{alg:compute-ssa}
+    \algorithmicrequire{The event-flow graph $G = \langle N, E \rangle$ where $V$ is the set of nodes (events), $E$ is the set of control-flow transitions, $e_0$ is the entry node}
+    \algorithmicensure{The SSA-map of the form "$\{$ event : $\{$ variable : index $\}\}$"}
+    \begin{algorithmic}[1]
+        \Function{ComputeSSA}{G}
+            \State {$S \gets$ empty map; $S[e_0] \gets$ empty map}
+            \ForAll {event $e_i \in G.N$ in topological order}
+                \ForAll {predecessor $e_j \in \mathtt{pred}(e_i)$}
+                    \State {$S[e_i] \gets \mathtt{copy}(S[e_j])$}
+                    \ForAll {variable $v_k \in$ set of variables accessed by $e_i$ }
+                        \State {$S[e_i][v_k] \gets \mathtt{max}(S[e_i][v_k], \ S[e_j][v_k])$}
+                        \If {need to update the index of $v_k$} \Comment {cases (1)-(2)}
+                            \State {$S[e_i][v_k] \gets S[e_i][v_k] + 1$}
+                        \EndIf
+                    \EndFor
+                \EndFor
+            \EndFor
+        \EndFunction
+    \end{algorithmic}
+    \label{algorithm:ssa-map}
+\end{algorithm}
 
-Moreover, the data-flow encoding scheme used in \Porthos faced the problem when the branching statements had different number of assignments of certain variable in their branches. //TODO: why? why don't we have this problem now? 
+The time of described algorithm is linear of the size of event-flow graph since it performs only single traverse of the graph.
+%Notwithstanding the overhead of storing (or, equivalently, computing with %TODO: are you sure that 'with'?
+%linear time) the predecessors of each node in order to be able to convert the program into an SSA form, the time of such a transformation reduced %TODO: How much ????
+%comparing to the algorithm implemented in \Porthos, which recomputed SSA-indices recursively for each instruction. %TODO: PROOF OR REMOVE !  Maybe, some words of copying, merging SSA maps ?
 
-As it has been stated before, the \rf-relation links the parts%TODO: another word?
+As it has been described before, the \rf-relation links data-flow between events %TODO: another word?
 of data-flow stored in equivalence assertions over the SSA-variables. 
 %The encoding of the \rf-relation, which links the SSA-variables to the original variables, 
-The encoding of this linkage left untouch as it is implemented in \Porthos: for each pair of events $e_1$ and $e_2$ linked by the \rf-relation, we add the following constraint:
+The encoding of this linkage left untouched as it is implemented in \Porthos: for each pair of events $e_1$ and $e_2$ linked by the \rf-relation, we add the following constraint:
 
 \begin{align}
 \phi_{DF_{mem}}(e_1, e_2) = \ & \mathtt{rf}(e_1, e_2) \rightarrow (l_i = l_j) 
@@ -186,12 +248,12 @@ The encoding of this linkage left untouch as it is implemented in \Porthos: for 
 where the variable of location $l$ is mapped to the SSA-variable $l_i$ for event $e_1$, and to the SSA-variable $l_j$ for event $e_2$; and the predicate $\mathtt{rf}(e_1, e_2)$ is encoded as a boolean variable, which itself equals $true$ if $e_2$ reads the shared variable that was written in $e_1$.
 
 
-\subsection{The memory model encoding} %Encoding the memory model constraints}
+\subsection{Encoding for the memory model} %Encoding the memory model constraints}
 \label{ch:port:enc:wmm}
 
-The encoding of a weak memory model itself does not depend on the analysing program. The problem here...
+%The encoding of a weak memory model itself does not depend on the analysing program. The problem here...
 
 recursive definitions and Kleene iteration
 
-As it is described in~\cite{Porthos17}, the is based ...
+As it is described in~\cite{Porthos17}, the is based . . .
 %~\cite{Porthos17}%, Section "Programs and Memory Models", subsection "Encoding Derived Relations"

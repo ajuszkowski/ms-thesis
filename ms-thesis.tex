@@ -45,28 +45,31 @@
 \lstset{ 
     columns=[l]fullflexible,
     keepspaces=true,
-    basicstyle=\ttfamily\scriptsize,
+    basicstyle=\ttfamily\small,
     %numbers=left,
     tabsize=2,
     captionpos=b,
     escapeinside={[*}{*]},
     %keywordstyle={\ttfamily\color{red}},
 }
-\newcommand{\m}[1]{$#1$} % quick inlined math
-\newcommand{\tool}[1]{\texttt{#1}}
+\newcommand{\tool}[1]{\texttt{#1}\,}
 
 \newcommand*{\fx}{\ensuremath{\mathbf{x}}}%x}}}
 \newcommand*{\fv}{\ensuremath{\mathbf{v}}} %v}}}
 
-\newcommand{\Porthos}{\tool{PORTHOS}\,}
+\newcommand{\Porthos}{\tool{PORTHOS}}
 \newcommand{\mousquetaires}{\tool{mousquetaires}}
-\newcommand{\rf}{\texttt{rf}\,}
-\newcommand{\fr}{\texttt{fr}\,}
-\newcommand{\po}{\texttt{po}\,}
-\newcommand{\co}{\texttt{co}\,}
-\newcommand{\sr}{\texttt{sr}\,}
-\newcommand{\cat}{\texttt{cat}\,}
+\newcommand{\rf}{\ensuremath{\,\mathtt{rf}\,}}
+\newcommand{\fr}{\ensuremath{\,\mathtt{fr}\,}}
+\newcommand{\po}{\ensuremath{\,\mathtt{po}\,}}
+\newcommand{\co}{\ensuremath{\,\mathtt{co}\,}}
+\newcommand{\sr}{\ensuremath{\,\mathtt{sr}\,}}
+\newcommand{\cat}{\texttt{cat}\;}
+\newcommand{\relation}[1]{\ensuremath{\overset{\mathtt{#1}}{\rightarrow}}}
+\newcommand{\relname}[1]{\ensuremath{\mathtt{#1}}}
 
+
+\usepackage{outlines} %for nested itemize lists
 
 % Longtable provides a tabular environment that can span multiple
 % pages. This is used in the example abbreviations file.
@@ -83,7 +86,7 @@
 %\usepackage{pxfonts} %for listings
 
 \usepackage[position=b]{subcaption}
-\captionsetup[sub]{font=scriptsize}
+\captionsetup[subfigure]{font=scriptsize,justification=centering}
 \usepackage{graphicx}
 
 \usepackage{tikz}
