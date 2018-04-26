@@ -10,7 +10,8 @@ Traditionally, studies related to concurrent programming concern on more fundame
 This state is allowed because in x86 architecture each processor may cache the write to shared memory variable into its local write buffer, so that they do not become visible by other processes immediately. In the example, the write `\texttt{MOV~[x],1}' performed by process \texttt{P0} stores value~\texttt{1} to the shared variable~\texttt{[x]} into the write buffer of process~\texttt{P0}. Meanwhile, the write cache of the process \texttt{P1} may not have updated version of the variable~\texttt{[x]}, neither may have the main memory, so that the read `\texttt{MOV~EBX,[x]}' performed in the process~\texttt{P1} may read the initial value~\texttt{0} even if this variable has been already updated in another thread. These problems have lead to the need for formalisation of semantics of memory operations within different concurrent architectures defined by \textit{weak	memory models (WMM)}.
 
 \begin{figure}
-\small \ttfamily
+\centering
+\ttfamily
 \begin{tabular}{ |l|l| }
 \hline
 \multicolumn{2}{|l|}{ \{ x=0; y=0; \}} \tabularnewline \hline
@@ -35,7 +36,7 @@ Over last decade the memory models have been defined for most mainstream multipr
 There are projects for validating hardware architectures wrt. a memory model, e.g.~\cite{lustig2014pipecheck,lustig2016coatcheck}.
 
 Most modern high-level programming languages rely on relaxed memory model as well.
-Thus, the memory model for Java that is based on the \textit{happens-before} principle~\cite{lamport1978time} was introduced in J2SE 5.0 in 2004~\cite{manson2005java}; the C++11 standard~\cite{?} has introduced the set of hardware-independent synchronisation fences and atomic operations, whenever the C++17 memory model~\cite{batty2011mathematizing} is based on the relation \textit{strongly happens-before}. Weak memory are being formalised for even more abstract software environments, the notable project in this area is the project on formalising the Linux kernel memory model, which is being actively developing these days~\cite{kernel1}.
+Thus, the memory model for Java is based on the \textit{happens-before} principle~\cite{lamport1978time}, it was introduced in J2SE 5.0 in 2004~\cite{manson2005java}; the C++11 standard~\cite{iso2012iec} has introduced the set of hardware-independent synchronisation fences and atomic operations, whenever the C++17 memory model~\cite{batty2011mathematizing} is based on the relation \textit{strongly happens-before}. Weak memory are being formalised for even more abstract software environments, the notable project in this area is the project on formalising the Linux kernel memory model, which is being actively developing these days~\cite{kernel1}.
 Furthermore, there is a wide range of tools that perform program verification wrt memory models (see~\cite{alglave2013software}, \cite{Porthos17}).
 
 %experiments with kernel?
