@@ -1,14 +1,21 @@
 \chapter{\nohyphens{The~\mousquetaires:~implementation}}
 \label{ch:impl}
 
-This Chapter describes the architecture of the tool \mousquetaires.
+% function invocations/calls: inlining with binding
+% contexts: for now, no ctxs
+% comparing to cprover (https://www.cprover.org/cbmc/doc/manual.pdf, page 45, absatz about 'goto') where "the loop is unwound a given number of times" , we SHOULD have 2 modes of unrolling: 1) number of times, and 2) number of high-level instructions executed
+% TODO(code): (https://www.cprover.org/cbmc/doc/manual.pdf, page 45) "The break and continue statements are replaced by equivalent goto statements as described in the ANSI-C standard."
+
+% TODO: arrays: cprover manual page 48
+
+This Chapter describes the architecture of the \mousquetaires framework.
 
 The programming language choice for \mousquetaires was made in favour of java in order to reuse some parts of its predecessor \Porthos that was written in java. However this language does not show best results in performance benchmarks (comparing to, for example, C++)~\cite{TODO}, the performance cornerstone of \mousquetaires (as well as any other SMT-based code analyser) is the phase of solving the SMT-formula, which is left to the third-party SMT-solver called from \mousquetaires via java API. However, considering the perspective of using \mousquetaires as a static analyser for real-world programs, we also must to take into account memory problems at both encoding and solving stages. 
 
 \section{Requirements}
 \label{ch:impl:requirements}
 
-The main reason for starting the work on re-implementing the \Porthos tool was the need to extend input language to be able to process real C programs in perspective. The existing \Porthos architecture mixes high-level recursive \textit{instructions} (statements of C) with low-level non-recursive \textit{events}, to which the high-level instructions are compiled (see classes of package `\texttt{dartagnan.program}' in the \Porthos project~\footnote{Project web page: \url{http://github.com/hernanponcedeleon/PORTHOS}}). Both instructions and events are then encoded into the SMT-formula. However, this approach is poorly extensible as to adding support for a high-level control-flow instruction (say, the \texttt{do-while} loop in C) requires making changes in many places of code from parser to encoder. Moreover, we encounter serious problems when we need to add support for control-flow jumps (as \texttt{continue}, \texttt{break}, \texttt{goto} in C).
+The main reason for starting the work on re-implementing the \Porthos tool was the need to extend input language to be able to process real C programs in perspective. The existing \Porthos architecture mixes high-level recursive \textit{instructions} (statements of C) with low-level non-recursive \textit{events}, to which the high-level instructions are compiled (see classes of package `\texttt{dartagnan.program}' in the \Porthos project~\footnote{Project web site: \url{http://github.com/hernanponcedeleon/PORTHOS}}). Both instructions and events are then encoded into the SMT-formula. However, this approach is poorly extensible as to adding support for a high-level control-flow instruction (say, the \texttt{do-while} loop in C) requires making changes in many places of code from parser to encoder. Moreover, we encounter serious problems when we need to add support for control-flow jumps (as \texttt{continue}, \texttt{break}, \texttt{goto} in C).
 
 Therefore, while planning the architecture of \mousquetaires, we decided to clearly separate high-level recursive code representation as Abstract Syntax Tree (AST) and low-level compiled event-based representation as a flow-graph. Such a modular architecture allows to use multiple input-language parsers and convert parsed syntax trees to our AST, thus having support for multiple languages (for instance, the original input language of \Porthos tool, two syntaxes of litmus tests used by \tool{herd}, and even assembly language for any supported architecture).
 
@@ -147,6 +154,10 @@ The original program encoded into the \texttt{XGraph} represents a \textit{flow 
 \label{ch:impl:comp:zformula}
 
 - Then, this modified event-representation is being encoded to SMT formula and sent to the solver.
+
+
+
+% say something about equals() and hashCode()
 
 
 

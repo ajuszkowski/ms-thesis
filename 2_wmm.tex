@@ -2,7 +2,9 @@
 %\chapter{A generic framework}
 \label{ch:wmm}
 
-In general, analysis of concurrent programs with respect to axiomatic memory models is performed in several stages. Firstly, the control-flow and data-flow of a program is encoded as the set of possible \textit{candidate executions}. %possible communications between threads of the program.
+In general, analysis of concurrent programs with respect to axiomatic memory models is performed in several stages. %TODO: site the 'Weak Memory Models with Matching Axiomatic and Operational Definitions' https://arxiv.org/pdf/1710.04259.pdf
+%TODO: cite also: "DENNIS SHASHA - Efficient and Correct Programs that Share" http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.142.2238&rep=rep1&type=pdf
+Firstly, the control-flow and data-flow of a program is encoded as the set of possible \textit{candidate executions}. %possible communications between threads of the program.
 Obtained model of the program is called an anarchic semantics, which is a truly parallel semantics with no global time that describes all possible computations with all possible communications~\cite{alglave2016syntax}. Thereafter, the anarchic semantics is constrained by the \textit{weak memory model} specification which is a set of axiomatic constraints for filtering out executions inconsistent in particular architecture.
 
 
@@ -17,6 +19,11 @@ However, there exist equivalence classes such that the result of execution diffe
 One such model is the \textit{event-based} representation of a program, which models a program as a directed graph of events (the \textit{event-flow graph}).
 The vertices of such a graph represent \textit{events} (independent low-level instructions; see Section~\ref{ch:wmm:model:events}), and edges represent \textit{relations} over the events (see Section~\ref{ch:wmm:model:relations}).
 
+% TODO: the event-based representation is a non-deterministic model
+
+% TODO: the semantics of the event-flow graph is given:  "alglave: Don’t sit on the fence A static analysis approach to automatic fence insertion" page 8 or 9
+%"To build the aeg , we define a semantics of goto-programs in terms of abstract events, ..."
+% TODO: OR from here: http://www.cprover.org/etaps/esop.pdf "Software Verification for Weak Memory via Program Transformation"
 
 \subsection{Events}
 \label{ch:wmm:model:events}
@@ -40,6 +47,7 @@ For modelling branching statements, we distinguish the set $\mathbb{C_{p}} \subs
 The synchronisation instructions (fences) cause the \textit{barrier events}, that do not perform any computation or memory value transfer, instead, they add new relations to the program model that restrict the set of allowed behaviours.
 Functionally, a fence may be a synchronisation barrier or a instruction of flushing the local memory caches, etc.
 
+% TODO: more fences: "On Power and ARM (see Sec. 6), we distinguish between control fence (which we write cfence), lightweight fence (lwfence) and full fence (ffence). On x86, implementing TSO, there is only one fence, called mfence." (herding cats, p. 14)
 
 \subsection{Relations}
 \label{ch:wmm:model:relations}
@@ -51,7 +59,8 @@ that capture semantics of the program, and \textit{derived relations} that are d
 
 \vspace{1em}
 The basic relations are the following~\cite{alglave2010shared}:
-
+%TODO: say that po and rf are  defined from the candidate execution:
+%TODO: say that 
 \begin{itemize}
     \item The \textit{control-flow} of a program is defined by the \textit{program-order} relation \po~$\subset~\mathbb{E}~\times~\mathbb{E}$, which represents the total order of events of same process.
 	For instance, if the instruction $i_1$ generates the event $e_1$ and the instruction $i_2$ follows $i_1$ and generates the event $e_2$, then $e_1 \relation{po} e_2$.
@@ -67,7 +76,8 @@ The basic relations are the following~\cite{alglave2010shared}:
     In contrast to the \tool{herd} tool, the \mousquetaires does not use hierarchy of scopes (depicted as the scope tree); instead, it uses simple lables that indicate which process has produced certain event.
 \end{itemize}
 
-%\vspace{0.5em}
+%TODO: add ppo = characteristics of memory model. "Architectures are instances of our model. An architecture is a triple of functions (ppo, fences, prop), which specifies the preserved program order ppo, the fences fences and the propagation order prop." (herding cats, p.13)
+
 Below we enumerate some derived relations~\cite{alglave2010shared}:
 
 \begin{itemize}
@@ -76,6 +86,7 @@ Below we enumerate some derived relations~\cite{alglave2010shared}:
     $r \relation{fr} w = (\exists w' . w' \relation{rf} r \land w' \relation{co} w)$.
 
     \item the \textit{data dependency} relation \texttt{dp}, which is a subset of \po-relation that always has a read at its source (it connects the read to the write which it depends on).
+    %TODO: say that po-relation is *static*
     %$\mathtt{com} = (\mathtt{rf} \cup \mathtt{co} \cup \mathtt{fr})$
 
     \item the \textit{external} (and \textit{internal}) \textit{read-from} relations that restrict the \rf-relation to the different (respectively, same) processes.
@@ -89,7 +100,7 @@ Below we enumerate some derived relations~\cite{alglave2010shared}:
 
 \end{itemize}
 
-The work~\cite{alglave2010shared} (Chapter~2) provides definition of basic properties of relations, such as \textit{reflexivity} and \textit{irreflexivity}, \textit{transitivity} and \textit{transitive closure}, \textit{acyclicity}.
+The work~\cite[Chapter~2]{alglave2010shared} provides definition of basic properties of relations, such as \textit{reflexivity} and \textit{irreflexivity}, \textit{transitivity} and \textit{transitive closure}, \textit{acyclicity}.
 Thereafter, weak memory models make asserts over these properties, thus restricting the set of allowed behaviours of the system.
 
 
@@ -165,14 +176,16 @@ The \cat language combines expressive power of a functional language (it is insp
 The derived relations can be defined via the keyword \texttt{let} and the following operations over relations~\cite{alglave2016syntax}: % 3.1.6 Relations between events
 
 \begin{itemize}
-	\item \textit{the union} of two relations \relname{r1} and \relname{r2} is \relname{r1\,|\,r2}
-	\item \textit{the intersection} of two relations \relname{r1} and \relname{r2} is \relname{r1\,\&\,r2}
-	\item \textit{the difference} of two relations \relname{r1} and \relname{r2} is $\mathtt{r1\,\backslash\,r2}$
-	\item \textit{the sequence}\footnote{The sequence of two relations \relname{r1} and \relname{r2} is defined as the set of pairs \relname{(x,y)} such that there exists an intervening \relname{z}, such that $\relname{(x,z)} \in \relname{r1}$ and $\relname{(z,y)} \in \relname{r2}$}
-	of two relations \relname{r1} and \relname{r2} is \relname{r1;r2}
+	\item \textit{the union} of two relations \rel{r1} and \rel{r2} is \rel{r1\,|\,r2}
+	\item \textit{the intersection} of two relations \rel{r1} and \rel{r2} is \rel{r1\,\&\,r2}
+	\item \textit{the difference} of two relations \rel{r1} and \rel{r2} is $\mathtt{r1\,\backslash\,r2}$
+	\item \textit{the sequence}\footnote{The sequence of two relations \rel{r1} and \rel{r2} is defined as the set of pairs \rel{(x,y)} such that there exists an intervening \rel{z}, such that $\rel{(x,z)} \in \rel{r1}$ and $\rel{(z,y)} \in \rel{r2}$}
+	of two relations \rel{r1} and \rel{r2} is \rel{r1;r2}
 \end{itemize}
 
-For instance, Figure~\ref{example:x86-cat} contains part of x86-TSO model~\cite{owens2009better} that asserts acyclicity of communication relation and \relname{po-loc} relation:
+For instance, the \fr-relation is defined as follows: $\mathr{fr} = (\mathr{rf}^{-1};\mathr{co})$.
+
+Figure~\ref{example:x86-cat} contains part of x86-TSO model~\cite{owens2009better} that asserts acyclicity of communication relation and \rel{po-loc} relation:
 
 \begin{figure}[!h]
 \begin{lstlisting}
@@ -185,25 +198,5 @@ acyclic po-loc | com
 \label{example:x86-cat}
 \end{figure}
 
-
-%// exmaple with reordering
-%// ex. with
-%// Rev-29 Example 7-6. Stores Are Transitively Visible. %see http://www.cl.cam.ac.uk/~pes20/weakmemory/x86tso-paper.pdf
-
-%There is a barrier instruction \relation{mfence} that may be used for flushing the buffers into the main memory.
-
-%briefly some hw memory models: X86-TSO, Alpha, POWER, ;
-
-%language memory models: Java, C++;
-
-%library-level kernel memory model, ref to github with tests
-
 %Relationship between different models \url{http://wiki.expertiza.ncsu.edu/index.php/CSC/ECE_506_Spring_2013/10c_ks}
-
-
-%\section{Some examples of WMM}
-
-%//axioms of TSO wmm
-
-%// example of sets: rf, co, ... for the code snipped used before
 

@@ -1,9 +1,17 @@
 \chapter{The input language}
 \label{ch:impl}
 
-The \Porthos tool used a small subset of C as an input language as described in Figure~\ref{syntax:in_grammar_pts}~\cite{Porthos17}:
+%TODO: say sth about 100500 litmus-tests for kernel
 
-\begin{figure}[H]
+The \Porthos tool used a small subset of C as an input language as described in Figure~\ref{syntax:in_grammar_pts}~\cite{Porthos17}.
+It supports recursive definitions of control-flow instructions, that were directly encoded into SMT-formula.
+In \mousquetaires, the set of supported instructions is extended in order to support expressions valid in C. %TODO: examples, how we extended
+Also, for the purpose of simplicity, all kinds of fence instructions and different types of variable assignments (shared variable assignment~`\texttt{:=}' or local variable assignment~`$\mathtt{\leftarrow}$') were defined directly in the grammar for \Porthos, whereas the semantics of function invocations need to be determined dynamically during the interpretation
+% according to the set of known functions
+(see Chapter~\ref{???}).
+
+
+\begin{figure}%[H]
 %\begin{multicols}{2}
 \begin{lstlisting}[mathescape=true,
         caption={Syntax of an input language of \Porthos},
@@ -11,6 +19,7 @@ The \Porthos tool used a small subset of C as an input language as described in 
         literate={<--}{{$\leftarrow$}}1,
         morekeywords={if,then,else,return,while,program,thread,mfence,sync,lwsync,isync}
         breaklines=true,
+        basicstyle=\ttfamily\scriptsize,
         ]
 <prog> : program <thrd>*
        ;
@@ -33,10 +42,5 @@ The \Porthos tool used a small subset of C as an input language as described in 
 %\end{multicols}
 \end{figure}
 
-
-The input language of \Porthos supported recursive definitions of control-flow instructions, that were directly encoded into SMT-formula. In \mousquetaires, the set of supported instructions is extended in order to support expressions valid in C.%TODO: examples, which  we extended
- Also, for the purpose of simplicity, all kinds of fence instructions and different types of variable assignments (shared variable assignment~`\texttt{:=}' or local variable assignment~`$\mathtt{\leftarrow}$') were defined directly in the grammar for \Porthos, whereas the semantics of function invocations need to be determined dynamically during the interpretation
-% according to the set of known functions
-(see Chapter~\ref{???}).
 
 Both \Porthos and \mousquetaires \ use the parser generator ANTLR~\cite{parr2013definitive}, the powerfull language processing tool. The (hand-written) ANTLR grammar used in \Porthos is available at Appendix~\ref{apx:in_grammar_pts}, whereas the \mousquetaires uses the grammar of C language proposed in the C11 standard~\cite{jtc2011sc22} (the ANTLR grammar can be found in the official ANTLR repository on GitHub~\footnote{\url{https://github.com/antlr/grammars-v4}}).
