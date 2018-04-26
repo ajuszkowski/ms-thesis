@@ -21,6 +21,11 @@
 \usepackage{mathtools}
 \usepackage{appendix}
 
+\usepackage{fancyhdr}
+
+%\usepackage[final]{pdfpages}
+\usepackage[export]{adjustbox} % loads also graphicx
+
 %\newcommand{\pvec}[1]{\vec{#1}\mkern2mu\vphantom{#1}} %for primed vectors, see https://tex.stackexchange.com/a/120034
 \newcommand{\pvec}[1]{\vec{#1}\,}
 
@@ -57,7 +62,7 @@
 \newcommand*{\fx}{\ensuremath{\mathbf{x}}}%x}}}
 \newcommand*{\fv}{\ensuremath{\mathbf{v}}} %v}}}
 
-\newcommand{\porthos}[1][]{\texttt{porthos\ifthenelse{\equal{#1}{}}{}{#1}}}
+\newcommand{\porthos}[1][]{\texttt{porthos\ifthenelse{\equal{#1}{}}{}{#1}}\,}
 \newcommand{\rf}{\ensuremath{\,\mathtt{rf}\,}}
 \newcommand{\fr}{\ensuremath{\,\mathtt{fr}\,}}
 \newcommand{\po}{\ensuremath{\,\mathtt{po}\,}}
@@ -491,7 +496,12 @@ ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;
 \startfirstchapter
 
 % Add headings to pages (the chapter title is shown)
-\pagestyle{headings}
+%\pagestyle{headings}
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0.5pt}
+\fancyhf{}
+%\rhead{\footnotesize\lfseries\uppercase{\leftmark}}
+\rhead{\footnotesize\itshape{\leftmark}}
 
 \definecolor{dkblue}{rgb}{0,0.1,0.4}
 
@@ -501,9 +511,8 @@ ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;
 \input{1_intro.tex}
 \input{2_wmm.tex}
 \input{3_encod.tex}
-\input{4_input.tex}
-\input{5_impl.tex}
-\input{6_eval.tex}
+\input{4_impl.tex}
+\input{5_eval.tex}
 \input{99_summary.tex}
 
 % Fix numbering of bibliography section
