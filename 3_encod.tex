@@ -68,9 +68,9 @@ In control-flow graph, there are two types of transitions (edges): \textit{prima
 While working on the \porthos[2], we applied some modifications of the encoding scheme for the control-flow. The changes are conditioned by the need to be able to process an arbitrary control-flow produced by conditional and unconditional jumps of C language.
 For that, we compile the recursive abstract syntax tree~(AST) of the parsed C-code to the plain (non-recursive) event-flow graph.
 We show %TODO! to show, actually
-that the new encoding is smaller than the old one used in \porthos since it does not produces new variables for each high-level statement of the input language.
+that the new encoding is smaller than the old one used in \porthos{} since it does not produces new variables for each high-level statement of the input language.
 %The \tool{PORTHOS} tool encodes the \textit{instructions}, which have recursive nature, in a recursive manner. This means, it adds synthetic composite instructions for both linear (sequential) and non-linear (branching) instructions. 
-For instance, \porthos uses the encoding scheme where the control-flow of the sequential instruction $i_1 = i_2; i_3$ was encoded as
+For instance, \porthos{} uses the encoding scheme where the control-flow of the sequential instruction $i_1 = i_2; i_3$ was encoded as
 $\phi_{CF}(i_2;i_3) = (cf_{i_1} \Leftrightarrow (cf_{i_2} \land cf_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)$,
 and control-flow of the branching instruction $i_1 = (c \, ? \, i_2 \, : \, i_3)$ was encoded as
 $\phi_{CF}( \, c \, ? \, i_2 \, : \, i_3) = (cf_{i_1} \Leftrightarrow (cf_{i_2} \lor cf_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)$
@@ -190,7 +190,7 @@ Thus, for branching statements that do not have any events in one of the branche
 
 To encode the data-flow constraints, we use the \textit{static single-assignment (SSA) form} in order to be able to capture an arbitrary data-flow into a single SMT-formula.
 The SSA form requires each variable to be assigned only once within entire program.
-In contrast, \porthos used the dynamic single-assignment (DSA) form, that requires indices to be unique within a branch.
+In contrast, \porthos{} used the dynamic single-assignment (DSA) form, that requires indices to be unique within a branch.
 Although the number of variable references (each of which is encoded as unique SMT-variable) on average is logarithmically less in case of the DSA form than the SSA form, the result SMT-formula still needs to be complemented by same number of equality assertions when encoding the data-flow in merge points~\cite{Porthos17}.
 
 Following~\cite{Porthos17}, the indexed references of variables are computed in accordance with the following rules:

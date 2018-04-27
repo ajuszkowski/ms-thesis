@@ -10,22 +10,23 @@
 
 Current Chapter describes the architecture of the \porthos[2] framework.
 
-The programming language choice for \porthos[2] was made in favour of java in order to be able to reuse some parts of its predecessor \porthos written in java.
+The programming language choice for \porthos[2] was made in favour of java in order to be able to reuse some parts of its predecessor \porthos{} written in java.
 However this language does not show best results in performance benchmarks (comparing to C++, for example)~\cite{TODO}, the performance cornerstone of \porthos[2] (as well as any other SMT-based code analyser) is the phase of solving the SMT-formula, which is left to the third-party SMT-solver called from \porthos[2] via java API.
 However, considering the perspective of using \porthos[2] as a static analyser for real-world programs, the memory optimisation problem must also be taken into account during both encoding and solving stages.
+
 
 
 \section{Requirements}
 \label{ch:impl:req}
 
-The main reason for starting the work on re-implementing the \porthos tool was the need for extension the input language and optimisation of the tool so that it is able to process real C programs in perspective.
-In the existing \porthos architecture, the high-level recursive instructions (statements of C) are processed together with low-level non-recursive events abstractions (see classes of package `\texttt{dartagnan.program}' of \porthos) as single AST structure.
+The main reason for starting the work on re-implementing the \porthos{} tool was the need for extension the input language and optimisation of the tool so that it is able to process real C programs in perspective.
+In the existing \porthos{} architecture, the high-level recursive instructions (statements of C) are processed together with low-level non-recursive events abstractions (see classes of package `\texttt{dartagnan.program}' of \porthos) as single AST structure.
 This AST was implemented as a mutable data structure, which is being modified during the stage of SMT-encoding.
 We consider this architecture as hardly manageable (since it is hard to guarantee preserving of the invariants during the program execution) and poorly extensible (since adding support for a new high-level control-flow instruction requires changing multiple components of the program, from parser to encoder).
 %Moreover, we encounter serious problems when we need to add support for control-flow jumps (as \texttt{continue}, \texttt{break}, \texttt{goto} in C).
 
 Therefore, while designing the architecture of \porthos[2], we decided to clearly separate the high-level intermediate code representation (implemented as a recursive AST structure) from low-level event-based representation (implemented as an event-flow graph).
-Such a modular architecture allows to use multiple input language parsers and convert parsed syntax trees to our AST, thus having support for multiple languages (for instance, the original input language of \porthos tool, two variants of syntax of a litmus test used by \tool{herd}, an assembly language for any supported architecture).
+Such a modular architecture allows to use multiple input language parsers and convert parsed syntax trees to our AST, thus having support for multiple languages (for instance, the original input language of \porthos{} tool, two variants of syntax of a litmus test used by \tool{herd}, an assembly language for any supported architecture).
 
 The following list enumerates the target \textit{requirements} for the new tool:
 
@@ -48,15 +49,16 @@ The following list enumerates the target \textit{requirements} for the new tool:
 \end{enumerate}
 
 
+
 \section{Program Components}
 \label{ch:impl:comp}
 
 The general architecture of \porthos[2] is presented in Figure~\ref{fig:program-components}.
-The program receives as input the program to be analysed (see Section~\ref{ch:impl:input}) and one (the reachability analysis mode) or two (the portability analysis mode) memory models (see Section~\ref{ch:impl:input-parser}).
+The program receives as input the program to be analysed and one (the reachability analysis mode) or two (the portability analysis mode) memory models (see Section~\ref{ch:impl:input-parser}).
 Then, the parsed program input (called Y-tree%
 \footnote{In order to avoid confusing different internal representations, we prefix the names of elements of each internal representation with a letter. For instance, we picked the letter `Y' to denote the AST code representation as drawing of this letter resembles the tree branching; with letter `X' we prefix elements of the event-flow graph as the events are to be e\textbf{x}ecuted; and with letter `W' we prefix elements of the \textbf{w}eak memory model AST.}%
-) is being preprocessed in order to collect information necessary for performing compilation (see Section~\ref{ch:impl:y2x:preproc}), and compiled into the X-graph representation (see Section~\ref{ch:impl:y2x:compil}).
-
+) is being preprocessed in order to collect information necessary for the compilation (see Section~\ref{ch:impl:y2x:precomp}), and compiled into the X-graph representation (see Section~\ref{ch:impl:y2x:compil}).
+If the original program has a loop, the X-graph will have cycles, which need to be unrolled before being encoded into an SMT-formula. The unrolling and some other transformations are made by the X-graph transformer (see Section~\ref{}).
 
 \begin{figure}%[!b]%[H]
   \centering
@@ -66,92 +68,191 @@ Then, the parsed program input (called Y-tree%
 \end{figure}
 
 
-\section{The input language}
-\label{ch:impl:input}
+
+%\section{The input language}
+%\label{ch:impl:input}
+\subsection{Parsing the input}
+\label{ch:impl:input-parser}
+
+
+Both \porthos{} and \porthos[2] \ use the parser generator ANTLR~\cite{parr2013definitive}, a powerful language processing tool.
+The full ANTLR grammar of input language used by previous version of \porthos{} is available at Appendix~\ref{apx:in_grammar_pts}.
+
+% TODO: why we've chosen ANTLR (cite Kvanttt); what kind of parser is ANTLR, why it's good for C and not only for C (unified way to define multiple grammars, large collection, ...) + add references
+
+- Figure~\ref{syntax:in_grammar_pts} represents the informal grammar of the input language processed by \porthos[1] ... %todo: cite \cite{Porthos17}.
+- short characteristics of the old grammar, enumerate its features (wrt the Figure)
+
+- DRAWBACKS: %what parts need to be improved:
+
+    -- the semantics of memory operations and method invocations is encoded directly into the grammar.
+    Taking into account the complexity of developing the accurate grammar for a Turing-complete language,
+
+    -- in old implementation, the logics of parser was written directly in the grammar.
+    Although being fast-to-impelement (1 internal representation less), this is approach has numerous drawbacks s.a.:
+    * hard to read grammar (mixing 2 languages in a single file)
+    * hard to maintain grammar (no debugging with standard utils, no code analysis in the grammar file)
+    * non-extensible (there is no option to just plug-in existing grammar for any language and write a converter from this language's syntax tree to our AST)
+
+    - syntactically only the integers were supported. we:arrays???pointers??enums?structs?
+
+    - no declarations (all shared variables are declared in the init section, local variables are not decalred ever)
+
+    - no arbitrary function calls (need support for the knowledge base after implementing the typisation. cannot be supproted only syntactically)
+
+
+- Minor drawbacks:
+
+    - restricted sytnax for expressions:
+
+    -- no operator associativity allowed (`1 + 2 * 3` was invalid syntax)
+
+    -- no unary increment/decrement (technically it's hard to implement post-incerment/decrement without interpretation: we don't know when does this expression ends.)
+    Example:
+    `int* x;
+    if (x++ > 0 ) { }`
+    % todo: test pre-/post-fix operations //+think how current tool will behave if there's more than one post-operation //and pre-operation
+
+    -- incorrectly implemented statement in old code: sequence of stmts is separated by ';', but the syntax of C requires ';' as the operator that ends each operation (how to say this? see C standard)
+
+    -- litmus-initialisation  stmt did not allow the non-default values. The new syntax allow any type of declaration statement with initialisation
+
+- this means the full compiler engine that resolves the semantics
+
+%The grammar supported by \porthos[2] was extended in order to support expressions valid in C. %TODO: examples, how imenno extended
+%Also, the input language of the first version of \porthos{} syntactically distinguished the type of a memory instruction (shared variable assignments were defined with symbol~`\texttt{:=}', and local variable assignments --- with symbol~`$\mathtt{\leftarrow}$'), whereas \porthos[2] determines the semantics of a function invocation during the preprocessing stage of compilation~(see Chapter~\ref{TODO!!!}).
+
+% todo: this is the simplified grammar
+
+%TODO: although the grammar is context-free and fail whith <angle brackets>.... it still works fine. Even gcc uses CF grammar? reference to INRIA's parser and paper on discussing grammars for C
 
 %TODO: say sth about 100500 litmus-tests for kernel
-
-The previous version of \porthos processed the small subset of C as an input language (see grammar in Figure~\ref{syntax:in_grammar_pts})~\cite{Porthos17}.
-It supported recursive definitions of control-flow instructions, that were directly encoded into SMT-formula.
-The grammar supported by \porthos[2] was extended in order to support expressions valid in C. %TODO: examples, how imenno extended
-Also, the input language of the first version of \porthos syntactically distinguished the type of a memory instruction (shared variable assignments were defined with symbol~`\texttt{:=}', and local variable assignments --- with symbol~`$\mathtt{\leftarrow}$'), whereas \porthos[2] determines the semantics of a function invocation during the preprocessing stage of compilation~(see Chapter~\ref{TODO!!!}).
 
 \begin{figure}%[H]
 %\begin{multicols}{2}
 \begin{lstlisting}[mathescape=true,%
-caption={Syntax of an input language of \porthos version 1},%
-label={syntax:in_grammar_pts},%
-literate={<--}{{$\leftarrow$}}1,%
-morekeywords={if,then,else,return,while,program,thread,mfence,sync,lwsync,isync}%
-breaklines=true,%
-basicstyle=\ttfamily\scriptsize]
-<prog> : program <thrd>*
+                  caption={Syntax of an input language of \porthos{} version 1},%
+                  label={syntax:in_grammar_pts},%
+                  %literate={<--}{{$\leftarrow$}}1,%
+                  morekeywords={if,then,else,return,while,program,thread}%
+                  breaklines=true,%
+                  basicstyle=\ttfamily\scriptsize]
+<prog> : <init> <thrd>* <assert>
        ;
 <thrd> : thread <tid> <inst>
        ;
 <inst> : <atom>
        | <inst> ; <inst>
        | while <pred> <inst>
-       | if <pred > then <inst> else <inst>
+       | if <pred> { <inst> } <inst>
        ;
-<atom> : <reg> <-- <exp>
+<atom> : <reg> <-- <expr>
        | <reg> <-- <loc>
        | <loc> := <reg>
-       | mfence
-       | sync
-       | lwsync
-       | isync
+       | 'mfence'
+       | 'sync'
+       | 'lwsync'
+       | 'isync'
+       ;
+<pred> :
+       | true
+       | false
+       | <expr> (and | or) <expr>
+       | <expr> ('==' | '!=' | '>' | '>=' | '<' | '>=') <expr>
+       ;
+<expr> : [0-9]
+       | <reg>
+       | <expr> ('*' | '+' | '-' | '/' | '%') <expr>
        ;
 \end{lstlisting}
 %\end{multicols}
 \end{figure}
 
-Both \porthos and \porthos[2] \ use the parser generator ANTLR~\cite{parr2013definitive}, a powerful language processing tool.
-The full ANTLR grammar of input language used by previous version of \porthos is available at Appendix~\ref{apx:in_grammar_pts}.
+
+- NOW: we're using the C grammar from the standard
+
+- for now, we just ignore C macro directives, in future it's planned to support partially the preprocessing before parsing
+
 The \porthos[2] uses the C language grammar of proposed in the C11 standard~\cite{jtc2011sc22}, that was extended by litmus test-specific syntax such as initialisation and final-state assertion statements (the original ANTLR grammar can be found in the official ANTLR repository on GitHub~\footnote{The repository containing the collection of ANTLR v4 grammars:\\ \url{https://github.com/antlr/grammars-v4}}).
 Current version of \porthos[2] can operate only in the inter-procedural mode, assuming that each function defined in the input file is being executed in a separate thread.
 However, the redesigned architecture of \porthos[2] allow to easily support intra-procedural analysis by inlining function calls.
 
+%TODO: say sth about syntax errors handling: still now, what if parser does not accept syntax?
 
-\subsection{Parsing the input}
-\label{ch:impl:input-parser}
+- if we don't support , our parser still parses it, and the error is thrown at the moment of converting syntax tree to the AST (Y-tree).
 
-below: mostly mock text.
+- So, The language-dependent syntax tree is converted to the AST by the stateless Visitor (e.g., for C11->Ytree conversion is made by 'C2YtreeConverterVisitor') + short structure of this visitor (how?.. need ly?)
 
-- The language-dependent syntax tree:
-        - for now it's the C subset language which I called 'Cmin'; as a base, I used the C11 grammar from ANTLR github repository, then I simplified it a lot, cutting off many unnecessary C syntax features and making it more convenient for parsing. When developing the Cmin language, I kept in mind C elements that are necessary for processing the linux kernel code, though for now not the whole grammar element described in file 'Cmin.g4' are being implemented;
-        - later I am going to add the litmus grammar as well;
-        - in future, it will be not a problem to add any new C-like language;
 
-- The language-independent abstract syntax tree (aliased 'Ytree', where 'Y' resembles branching of the tree):
-        - all tree nodes in my code are prefixed with 'Y', see tentative (yet almost complete) class hierarchy in picture 'YEntity.png';
-        - this AST contains very basic language elements according to the C execution model (statements and expressions);
-        - converting the language-dependent syntax tree to the language-independent syntax tree is performed by Visitor pattern (e.g., for Cmin->Ytree conversion is made by 'CminToYtreeConverterVisitor')
-        - minor changes are performed by converting to ytree representation: desugaring the target code, etc.
+\section{The Y-tree: an AST}
+\label{ch:impl:ytree}
+
+- picture of the Y-hierarchy. everything inherits interface YEntity
+
+- immutable
+
+- AST is untyped (YVariableRef).
+
+- short characteristics with citations from the code (this AST contains very basic language elements according to the C execution model (statements and expressions) )
+
+- minor changes are performed by converting to ytree representation: desugaring the target code, etc. (what else?)
+
+
+\section{Model parser}
+\label{ch:impl:model}
+
+TODO
 
 
 \section{Compiling the Y-tree to the X-graph}
 \label{ch:impl:y2x}
 
-\subsection{Preprocessing}
-\label{ch:impl:y2x:preproc}
-- Then, the AST is being interpreted and converted to event-based representation (aliased 'Xrepr' for eXecution representation):
-        - more low-level code representation (or high-level assembly);
-        - I try to keep this representation close to the one you described in your papers: basic load \& store events, branching events, fence events;
-        - this representation is being implementing these days, I've just started doing it (see current class hierarchy in the picture 'XEntity.png');
-        
-- After we acquired the event-based representation, we can perform some modifications/simplifications/optimisations on it (separately, allowing user to manage them):
-        - converting to SSA form as one of necessary steps before encoding;
-        - (more? -- I'm not thinking about it yet);
+%todo: some words on necessity of contexts and lack of them. How would we implement them
 
+%todo: rename Interpreter -> Compiler.
+
+%note https://en.wikipedia.org/wiki/Semantics_(computer_science)
+%Operational semantics loosely corresponds to interpretation,
+
+- hierarchy of Compilers (XCompiler is an stateful abstract machine)
+
+- interface that it provides
+
+- dependencies on other modules (memory-manager, etc.)
+
+
+\subsection{Pre-compilation}
+\label{ch:impl:y2x:precomp}
+
+- collect goto labels (not done yet.)
+
+- determine kind of variables (cannot be done during parsing? don't say this)
+
+- basic typisation
+
+%todo: after all, list which modules (classes, managers) are being initialised during the pre-compilation. I'ts good to have the dependencies graph on moduls (operational semantics:) )
 
 \subsection{Compilation}
 \label{ch:impl:y2x:compil}
 
-\subsection{Loop unrolling}
-\label{ch:impl:x2y:unrolling}
-% If the analysing program contains a loop, then its control-flow graph represents the cyclic directed graph. Although, in order to be able to encode such a cyclic structure as a boolean formula, this graph needs to be  
-% In order to be
+- more low-level code representation (or high-level assembly); abstract assembly language. refer to the %2_wmm.tex
+
+- X-hierarchie
+
+
+\subsection{Post-compilation transformations}
+\label{ch:impl:x2y:postcomp}
+
+- After we acquired the event-based representation, we can perform some modifications/simplifications/optimisations on it (separately, allowing user to manage them)
+
+- converting to SSA form (now: during the encoding. should be: during the post-compilation) (as one of necessary steps before encoding)
+
+- setting up backward edges
+
+- more?
+
+- unrolling: why we cannot encode cyclic structures. reference to the paper (see arXiv version)
+% If the analysing program contains a loop, then its control-flow graph represents the cyclic directed graph. Although, in order to be able to encode such a cyclic structure as a boolean formula, this graph needs to be
 
 The original program encoded into the \texttt{XGraph} represents a \textit{flow graph}, a connected cyclic directed graph with single source node \texttt{(ENTRY)} (usually for convenience all leaves are connected to the sink node \texttt{(EXIT)}). The cycles are caused by low-level jump instructions, obtained from non-linear high-level control-flow statements (such as \texttt{while}, \texttt{do-while}, \texttt{for}, etc.). However, the cyclic flow graph cannot be encoded into SMT formula since ...
 //TODO:REFERENCE.%TODO
@@ -224,9 +325,6 @@ The original program encoded into the \texttt{XGraph} represents a \textit{flow 
 \end{figure}
 
 
-
-\subsection{Input language parser}
-\label{ch:impl:model-parser}
 
 
 \section{XGraph to ZFormula (SMT) encoder}

@@ -1,12 +1,17 @@
-\chapter{The ANTLR grammar for the \porthos input language}
-\label{apx:in_grammar_pts}
 
 %\vspace{-3em}
-\begin{figure}[h!]%[H]
-\begin{multicols}{2}
-\begin{lstlisting}[mathescape=true,
+%TODO: grammar highlight with bold font!
+%\begin{figure}[h!]%[H]
+\begin{multicols*}{2}
+[
+\chapter{The ANTLR grammar of the input language of \texttt{porthos\! v1}}
+\label{apx:in_grammar_pts}
+]
+\begin{lstlisting}[
+        mathescape=true,
         basicstyle=\ttfamily\scriptsize,
-        breaklines=true]
+        breaklines=true,
+        linewidth=.56\textwidth]
 grammar Porthos;
 
 main
@@ -19,8 +24,8 @@ bool_expression
   ;
 
 bool_atom
-  :   'true'
-  |   'false'
+  :   TRUE
+  |   FALSE
   |   '(' arith_expr COMP_OP arith_expr ')'
   |   '(' bool_expression ')'
   ;
@@ -57,21 +62,23 @@ store
   ;
 
 read
-  :   register '=' location '.' 'load' '(' ATOMIC ')'
+  :   register '=' location '.' 'load' '(' 
+     ATOMIC ')'
   ;
 
 write
-  :   location '.' 'store' '(' ATOMIC ',' register ')'
+  :   location '.' 'store' '(' ATOMIC ',' 
+     register ')'
   ;
 
-statement
-  :   expression
-  |   sequential_stmt
-  |   while_stmt
-  |   if_stmt
+instruction
+  :   atom
+  |   sequence
+  |   while_
+  |   if
   ;
 
-expression
+atom
   :   local
   |   load
   |   store
@@ -80,28 +87,31 @@ expression
   |   write
   ;
 
-sequential_stmt
-  :   expression  ';' statement
-  |   while_stmt  ';' statement
-  |   if_stmt     ';' statement
+sequence
+  :   atom    ';' instruction
+  |   while_  ';' instruction
+  |   if      ';' instruction
   ;
 
-if_stmt
-  :   'if' bool_expression 'then' '{' statement '}' ('else' '{' statement '}')?
+if
+  :   'if' bool_expression 'then' '{' instruction '}' 
+     ('else' '{' instruction '}')?
   ;
 
-while_stmt
-  :   'while' bool_expression '{' statement '}'
+while_
+  :   'while' bool_expression '{' instruction '}'
   ;
 
 program
   :   '{' location (',' location)* '}'
-       ('thread t' DIGIT '{' statement '}'
+       ('thread t' DIGIT '{' instruction '}'
          ('exists' (location '=' DIGIT ','
          | DIGIT ':' register '=' DIGIT ',')   
          )*
        )*
   ;
+
+// Lexer rules:
 
 ATOMIC
   :   '_na' | '_sc' | '_rx' | '_acq' | '_rel' | '_con'
@@ -111,13 +121,15 @@ FENCE
   :   'mfence' | 'sync' | 'lwsync' | 'isync'
   ;
     
-COMP_OP : '==' | '!=' | '<=' | '<' | '>=' | '>';
-ARITH_OP : '+' | '-' | '*' | '/' | '%';
-BOOL_OP : 'and' | 'or'; 
+COMP_OP  : '=='  | '!='  | '<=' | '<' | '>=' | '>';
+ARITH_OP : '+'   | '-'   | '*'  | '/' | '%';
+BOOL_OP  : 'and' | 'or';
 
-DIGIT : [0-9];
-WORD : (LETTER | DIGIT)+;
+DIGIT  : [0-9];
 LETTER : 'a'..'z' | 'A'..'Z';
+TRUE   : 'true'   | 'True';
+FALSE  : 'false'  | 'False';
+WORD   : (LETTER | DIGIT)+;
 \end{lstlisting}
-\end{multicols}
-\end{figure}
+\end{multicols*}
+%\end{figure}

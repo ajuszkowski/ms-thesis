@@ -62,7 +62,14 @@
 \newcommand*{\fx}{\ensuremath{\mathbf{x}}}%x}}}
 \newcommand*{\fv}{\ensuremath{\mathbf{v}}} %v}}}
 
-\newcommand{\porthos}[1][]{\texttt{porthos\ifthenelse{\equal{#1}{}}{}{#1}}\,}
+\newcommand{\porthos}[1][]{%
+\texttt{porthos\ifthenelse%
+{\equal{#1}{}}%if
+{}%then
+{\ifthenelse{\equal{#1}{1}}%else-if
+{\,v1}%then
+{#1}%else
+}}}
 \newcommand{\rf}{\ensuremath{\,\mathtt{rf}\,}}
 \newcommand{\fr}{\ensuremath{\,\mathtt{fr}\,}}
 \newcommand{\po}{\ensuremath{\,\mathtt{po}\,}}
@@ -526,6 +533,8 @@ ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;
 % ------------------------------------------------------------------
 % Fix numbering of bibliography section
 %\cleardoublepage
+
+\titlespacing*{\chapter}{0pt}{-40pt}{20pt}
 \titleformat{\chapter}[display]
   {\normalfont\large\bfseries}% <- font for label "Appendix A", default \huge
   {\chaptertitlename\ \thechapter}
