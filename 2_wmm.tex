@@ -1,11 +1,11 @@
-\chapter{Memory model-aware analysis}
+\chapter{Memory model-aware analysis}%Description of the analysis of concurrent systems wrt weak memory models
 %\chapter{A generic framework}
 \label{ch:wmm}
 
 In general, analysis of concurrent programs with respect to axiomatic memory models is performed in several stages. %TODO: site the 'Weak Memory Models with Matching Axiomatic and Operational Definitions' https://arxiv.org/pdf/1710.04259.pdf
 %TODO: cite also: "DENNIS SHASHA - Efficient and Correct Programs that Share" http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.142.2238&rep=rep1&type=pdf
 Firstly, the control-flow and data-flow of a program is encoded as the set of possible \textit{candidate executions}. %possible communications between threads of the program.
-Obtained model of the program is called an anarchic semantics, which is a truly parallel semantics with no global time that describes all possible computations with all possible communications~\cite{alglave2016syntax}. Thereafter, the anarchic semantics is constrained by the \textit{weak memory model} specification which is a set of axiomatic constraints for filtering out executions inconsistent in particular architecture.
+Obtained model of the program describes the anarchic semantics, which is a truly parallel semantics with no global time that describes all possible computations with all possible communications~\cite{alglave2016syntax}. Thereafter, the anarchic semantics is constrained by the \textit{weak memory model} specification which is a set of axiomatic constraints for filtering out executions inconsistent in particular architecture.
 
 
 \section{The event-based program representation}
@@ -16,6 +16,7 @@ The classical approach for modeling concurrent programs is to use the \textit{gl
 Although these models are easy to understand, it may be impossible to process \textit{all} possible states, number of which is exponentially large.
 However, there exist equivalence classes such that the result of execution different interleavings from single equivalence class is the same (for instance, computations performed by a processor locally do not affect the global state).
 %One way to do this is to use a non-deterministic computation-centric model~\cite{fri97}, such as ...%The idea in this class of models is based on the fact that the behaviour of a concurrent system is defined only by the interleavings of shared-memory operations, while being independent from the order of local computation events.
+%TODO: nondeterministic
 One such model is the \textit{event-based} representation of a program, which models a program as a directed graph of events (the \textit{event-flow graph}).
 The vertices of such a graph represent \textit{events} (independent low-level instructions; see Section~\ref{ch:wmm:model:events}), and edges represent \textit{relations} over the events (see Section~\ref{ch:wmm:model:relations}).
 
@@ -27,6 +28,8 @@ The vertices of such a graph represent \textit{events} (independent low-level in
 
 \subsection{Events}
 \label{ch:wmm:model:events}
+
+%TODO: event is atomic?
 
 % TODO: check this subseciton
 
@@ -172,6 +175,9 @@ Weak memory models are defined via the \cat language~\cite{alglave2016syntax}.
 This is a domain specific language for describing consistency properties of concurrent programs.
 The \cat language combines expressive power of a functional language (it is inspired by OCaml and adopts its types, first-class functions, pattern matching and other features) with types, expressions and assertions that are specific for operating with relations and executions.
 %represents the functional language extended by the theory of  allows to axiomatically define derived relations, architecture-specific fences, and constraints over relations.
+
+
+%TODO: this is binary relations. ADD UNARY RELS!
 
 The derived relations can be defined via the keyword \texttt{let} and the following operations over relations~\cite{alglave2016syntax}: % 3.1.6 Relations between events
 

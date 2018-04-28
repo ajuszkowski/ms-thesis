@@ -23,6 +23,8 @@
 
 \usepackage{fancyhdr}
 
+\usepackage{mfirstuc}%title case
+
 %\usepackage[final]{pdfpages}
 \usepackage[export]{adjustbox} % loads also graphicx
 
@@ -198,7 +200,7 @@ sorting=ydnt%Sort by year (descending), name, title
 \addbibresource{bib/ms-thesis.bib}
 
 % The aalto-thesis package provides typesetting instructions for the
-% standard master's thesis parts (abstracts, front page, and so on)
+% standard -thesis parts (abstracts, front page, and so on)
 % Load this package second-to-last, just before the hyperref package.
 % Options that you can use:
 %   mydraft - renders the thesis in draft mode.
@@ -210,7 +212,7 @@ sorting=ydnt%Sort by year (descending), name, title
 %   twoinstructors  - changes the title of instructors to plural form
 %   twosupervisors  - changes the title of supervisors to plural form
 %\usepackage[mydraft,doublenumbering]{aalto-thesis}
-\usepackage[doublenumbering]{lib/aalto-thesis}
+\usepackage[doublenumbering,twosupervisors]{lib/aalto-thesis}
 
 
 % Hyperref
@@ -265,9 +267,9 @@ sorting=ydnt%Sort by year (descending), name, title
 % ``twoinstructors'' to the aalto-thesis package so that the titles are in
 % plural.
 % Example of one supervisor:
-\newcommand{\SUPERVISOR}{Assoc. Prof. Keijo Heljanko} % TODO
-\newcommand{\FSUPERVISOR}{Assoc. Prof. Keijo Heljanko} % TODO
-\newcommand{\SSUPERVISOR}{Assoc. Prof. Keijo Heljanko} % TODO
+\newcommand{\SUPERVISOR}{Assoc. Prof. Keijo Heljanko \\ Docent Igor I. Komarov} % TODO
+\newcommand{\FSUPERVISOR}{} % TODO
+\newcommand{\SSUPERVISOR}{} % TODO
 
 % If you have only one instructor, just write one name here
 \newcommand{\INSTRUCTOR}{} % TODO
@@ -364,6 +366,24 @@ sorting=ydnt%Sort by year (descending), name, title
 %\setlength{\topmargin}{-11mm}
 
 
+\definecolor{pblue}{rgb}{0.13,0.13,1}
+\definecolor{pgreen}{rgb}{0,0.5,0}
+\definecolor{pred}{rgb}{0.9,0,0}
+\definecolor{pgrey}{rgb}{0.46,0.45,0.48}
+\lstset{language=java,
+  showspaces=false,
+  showtabs=false,
+  breaklines=true,
+  showstringspaces=false,
+  breakatwhitespace=true,
+  commentstyle=\color{pgreen},
+  keywordstyle=\color{pblue},
+  stringstyle=\color{pred},
+  basicstyle=\ttfamily\scriptsize,
+  moredelim=[il][\textcolor{pgrey}]{$$},
+  moredelim=[is][\textcolor{pgrey}]{\%\%}{\%\%}
+}
+
 % The preamble ends here, and the document begins.
 % Place all formatting commands and such before this line.
 % ------------------------------------------------------------------
@@ -455,9 +475,11 @@ ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;
 
 \vskip 10mm
 
-\noindent Espoo, \DATE
+\noindent Saint Petersburg \& Espoo 
+\newline
+\DATE
 \vskip 5mm
-\noindent\AUTHOR
+\noindent Artem Yushkovskiy
 
 % Acronyms
 % ------------------------------------------------------------------

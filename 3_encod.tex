@@ -1,7 +1,11 @@
 %\chapter{SMT-based program analysis}
 %\chapter{Portability of concurrent software}
-\chapter{Portability analysis as an SMT~problem}
+\chapter{Portability analysis as an SMT~problem}%Description of the method used by Porthos
 \label{ch:port}
+
+%TODO: the method used by Porthos is complete and efficient, but the implementation sucks. Why? 1), 2), 3). How can it be fixed? 1), 2), 3).
+
+%TODO: more about SMT (= SAT + constraints expressed in background theories. Exapmles of theories that we use and that are implem-ted in Z3).
 
 As it has been discussed in Chapter~\ref{ch:intro}, the program may behave differently when compiled for different parallel hardware architectures. This may cause the portability bugs, the behaviour that is allowed under one architecture and forbidden under another. 
 %already said:
@@ -38,6 +42,8 @@ Due to the SAT-solver. This technique is called \textit{bounded model checking (
 
 \section{Portability analysis as a bounded reachability problem}
 \label{ch:port:enc}
+
+%TODO: overapproximation. loops, Rice's thm. Within the bound, the method is complete.
 
 In general, a BMC problem aims to examine the reachability of the "undesirable" states of a finite-state system. Let $\vec{x} = (x_1, x_2, ..., x_n)$ be a vector of $n$ variables that uniquely distinguishes states of the system; let $Init(\vec{x})$ be an \textit{initial-state predicate} that defines the set of initial states of the system; let $Trans(\vec{x}, \pvec{x}')$ be a \textit{transition predicate} that signifies whether there the transition from state $\vec{x}$ to state $\pvec{x}'$ is valid; let $Bad(\vec{x})$ be a \textit{bad-state predicate} that defines the set of undesirable states. Then, the BMC problem, stated as the reachability of the undesirable state withing $k$ steps is formulated as following:
 %\begin{equation}
