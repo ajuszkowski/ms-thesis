@@ -1,12 +1,10 @@
 \chapter{The~\texttt{porthos2}:~implementation}
 \label{ch:impl}
 
-The main reason for commencing the work on \porthos[2] was the need for processing real-world C programs, which, at first, requires extension the input language.
-%process more intricate entities of the C language. 
-%Extension of the input language imply not only ability to process syntactic sugar
-This implies support not only for new syntactic structures of C language (such as the \texttt{switch} statement or the postfix increment operator \texttt{i++}), but also for its fundamental concepts and features (such as pointer arithmetic or first-order functions), which requires revision of the whole architecture of the tool.
-Although far not the entire C language is supported (that, considering its complexity and numerous pitfalls, goes far beyond current thesis%
-\footnote{To ensure that, we have merely to look at existing C compilers, for instance, gcc, that uses the hand-written C parser in more than 18.5 thousand lines (see \url{https://github.com/gcc-mirror/gcc/blob/master/gcc/c/c-parser.c})}%
+The main reason for commencing the work on \porthos[2] was the need for processing real-world C programs, which, at first, requires the input language to be extended.
+This implies the support not only for new syntactic structures of C language (such as the \texttt{switch} statement or the postfix increment operator \texttt{i++}), but also for its fundamental concepts and features (such as pointer arithmetic or first-order functions), which requires revision of the whole architecture of the tool.
+Although far not the entire C language has been supported (that, considering its complexity and numerous pitfalls, goes far beyond current thesis%
+\footnote{To ensure that, we have merely to look at existing C compilers, for instance, the open-source \texttt{gcc} compiler, that uses a C parser written in more than 18.5 thousand lines (see \url{https://github.com/gcc-mirror/gcc/blob/master/gcc/c/c-parser.c})}%
 ), we consider the accomplished work as a step towards this.
 %This applies not only to instances that simply constitute the syntactic sugar of C language (such as the \texttt{switch} statement or the prefix increment operator \texttt{++i}), but also to its fundamental concepts and features (such as pointer arithmetic or structures).
 %However, the architecture of current version of \porthos{} does not allow to ... as it is ....
@@ -26,7 +24,7 @@ Although far not the entire C language is supported (that, considering its compl
 \section{General principles}
 \label{ch:impl:principles}
 
-The existing implementation of \porthos{} does not distinguish the event-based program model from the high-level AST, they both are encoded into single SMT-formula (see classes of package `\texttt{dartagnan.program}' of \porthos tool).
+The existing implementation of \porthos[1] does not distinguish the event-based program model from the high-level AST, they both are encoded into single SMT-formula (see classes of package `\texttt{dartagnan.program}' of \porthos tool).
 Moreover, the syntax tree was implemented as a mutable data structure, which is being modified at all stages of the program (for instance, see the methods `\texttt{dartagnan.program.Program.compile(...)}' of \porthos{} that recursively compute some properties of the AST and change its state).
 We are inclined to consider this architecture as one that is fast to develop, but hard to maintain (since it is difficult to guarantee the correctness of the program) and extend (since adding the support for a new high-level instruction requires changing multiple components of the program, from parser to encoder).
 %Moreover, we encounter serious problems when we need to add support for control-flow jumps (as \texttt{continue}, \texttt{break}, \texttt{goto} in C).
@@ -39,91 +37,107 @@ The immutability in \porthos[2] is implemented via \texttt{final} fields that ar
 \footnote{Project repository: \url{https://github.com/google/guava/}}%
 ).
 
-During the development of \porthos[2] we mainly followed the \textit{KISS principle}, which can be exhaustively described in 17 Unix Rules of Eric Raymond~\cite{raymond2003art}.% which include the rule of modularity, the rule of clarity, transparency, extensibility, etc.
+During the development of \porthos[2] we mainly followed the \textit{KISS~principle}, which can be exhaustively described in 17 Unix Rules of Eric Raymond~\cite{raymond2003art}.% which include the rule of modularity, the rule of clarity, transparency, extensibility, etc.
 The following list summarises the main rules we followed during the development of \porthos[2]:
 
-%\vspace{1em}
+\vspace{0.5em}
 \begin{enumerate}[nolistsep]
-  \item \textit{robustness:}
+  \item \textit{Robustness:}
     \begin{enumerate}[label*=\arabic*.]
       \item usage of immutable data structures for all DTOs;
       \item interrupting the work on errors;
       \item modular architecture: each module can be tested independently;
       \item usage of software design patterns if necessary;
     \end{enumerate}
-  \item \textit{transparency:}
+  \item \textit{Transparency:}
     \begin{enumerate}[label*=\arabic*.]
       \item following the principles of simplicity and readability;
       \item clear and informative program output;
     \end{enumerate}
-  \item \textit{efficiency:}
+  \item \textit{Efficiency:}
     \begin{enumerate}[label*=\arabic*.]%[leftmargin=1.5em]
       \item keeping the trade-off between execution time and memory usage;
     \end{enumerate}
-  \item \textit{extensibility:}
+  \item \textit{Extensibility:}
     \begin{enumerate}[label*=\arabic*.]%[leftmargin=1em]
-      \item clear modular architecture
+      \item clear modular architecture.
     \end{enumerate}
 \end{enumerate}
 
+The programming language choice for \porthos[2] was also made in favour of \textit{java}, firstly, in order to be able to reuse some parts and concepts of \porthos[1] that is written in java, and secondly, because the authors find the object-oriented (OOP) concepts of java suitable for modelling languages.
+Although java does not show best results in performance benchmarks (for example, comparing to C++~\cite{hundt2011loop, oaks2014java}), the performance cornerstone of \porthos[2] (as well as any other SMT-based code analyser) is the phase of solving the SMT-formula, which is left to the third-party SMT-solver called from \porthos[2] via java API.
+However, considering the perspective of using \porthos[2] as a static analyser for real-world programs, the memory optimisation problem must also be taken into account during both encoding and solving stages.
+It is worth noting that, for the reasons of simplicity, the \porthos[2] is not a concurrent program, however, we believe that, due to its modular architecture, it can be easily parallelised on the level of program modules.
 
-\section{Architecture} %Program Components
+
+\section{Architecture}
 \label{ch:impl:arch}
 
-The programming language choice for \porthos[2] was made in favour of java in order to be able to reuse some parts of its predecessor \porthos{} written in java.
-However this language does not show best results in performance benchmarks (comparing to C++, for example)~\cite{TODO}, the performance cornerstone of \porthos[2] (as well as any other SMT-based code analyser) is the phase of solving the SMT-formula, which is left to the third-party SMT-solver called from \porthos[2] via java API.
-However, considering the perspective of using \porthos[2] as a static analyser for real-world programs, the memory optimisation problem must also be taken into account during both encoding and solving stages.
+The general architecture scheme of \porthos[2] is presented in Figure~\ref{fig:arch}.
+The program takes as input the program to be analysed and one (the reachability analysis mode) or two (the portability analysis mode) memory models.
+The program input is being parsed (Section~\ref{ch:impl:proc:y-parser}) to a program AST called \texttt{Y-tree}%
+\footnote{In order to avoid confusion between different internal representations, we prefix the names of elements of each internal representation with a letter. For instance, we picked the letter `Y' to denote the AST code representation as drawing of this letter resembles the tree branching; with letter `X' we prefix elements of the event-flow graph as the events are to be e\textbf{x}ecuted; and with letter `W' we prefix elements of the \textbf{w}eak memory model AST.}%
+(Section~\ref{ch:impl:model:ytree}), and the memory model is being parsed (Section~\ref{ch:impl:proc:w-parser}) to another AST called \texttt{W-model} (Section~\ref{ch:impl:model:wmodel}).
 
-The general architecture of \porthos[2] is presented in Figure~\ref{fig:program-components}.
-The program receives as input the program to be analysed and one (the reachability analysis mode) or two (the portability analysis mode) memory models (see Section~\ref{ch:impl:input-parser}).
-Then, the parsed program input (called Y-tree%
-\footnote{In order to avoid confusing different internal representations, we prefix the names of elements of each internal representation with a letter. For instance, we picked the letter `Y' to denote the AST code representation as drawing of this letter resembles the tree branching; with letter `X' we prefix elements of the event-flow graph as the events are to be e\textbf{x}ecuted; and with letter `W' we prefix elements of the \textbf{w}eak memory model AST.}%
-) is being preprocessed in order to collect information necessary for the compilation (see Section~\ref{ch:impl:y2x:precomp}), and compiled into the X-graph representation (see Section~\ref{ch:impl:y2x:compil}).
-If the original program has a loop, the X-graph will have cycles, which need to be unrolled before being encoded into an SMT-formula. The unrolling and some other transformations are made by the X-graph transformer (see Section~\ref{}).
+Thereafter, the \texttt{Y-tree} is being pre-processed at the pre-compilation stage (Section~\ref{ch:impl:proc:x-compiler:pre}) in order to collect information necessary for the compilation. Then, the \texttt{Y-tree} is being compiled (Section~\ref{ch:impl:proc:x-compiler:comp}) to an \texttt{X-graph} representation (Section~\ref{ch:impl:model:xgraph}), which then undergoes a number of transformations necessary for the encoding to an SMT formula at the post-compilation stage (Section~\ref{ch:impl:proc:x-compiler:post}).
+The post-processed \texttt{X-graph} then "fills in" the memory-model \texttt{W-model}, and both are encoded (Section~\ref{ch:impl:proc:z-encoder}) to a \texttt{Z-formula}, which then proceeds to the Z3 solver as an input.
 
 \begin{figure}%[!b]%[H]
   \centering
   % TODO: uncomment after a while
-  %\includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{img/my/lucidchart.com/data-flow-vert-300dpi.png}
+  \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{img/my/lucidchart.com/data-flow-vert-300dpi.png}
   \caption{Main components of \porthos[2]}
-  \label{fig:program-components}
+  \label{fig:arch}
 \end{figure}
 
 
 \subsection{The program input}
-
+\label{ch:impl:input}
 %(for instance, the original input language of \porthos{} tool, two variants of syntax of a litmus test used by \tool{herd}, an assembly language for any supported architecture).
 
 
 \subsection{The Model}
-
+\label{ch:impl:model}
 blabla
 
 \subsubsection{Y-tree}
+\label{ch:impl:model:ytree}
 
 \subsubsection{X-graph}
+\label{ch:impl:model:xgraph}
 
 \subsubsection{W-model}
+\label{ch:impl:model:wmodel}
 
 \subsubsection{Z-formula}
-
+\label{ch:impl:model:zformula}
 
 \subsection{The processing units} %Transformation}
+\label{ch:impl:proc}
 
 \subsubsection{Y-tree parser}
+\label{ch:impl:proc:y-parser}
 
 \subsubsection{W-model parser}
+\label{ch:impl:proc:w-parser}
 
 \subsubsection{X-graph compiler}
+\label{ch:impl:proc:x-compiler}
 
 \paragraph{Pre-compiler}
+\label{ch:impl:proc:x-compiler:pre}
+
 \paragraph{Compiler}
+\label{ch:impl:proc:x-compiler:comp}
+
 \paragraph{Post-compiler}
+\label{ch:impl:proc:x-compiler:post}
 
 \subsubsection{The Z-formula encoder}
-
+\label{ch:impl:proc:z-encoder}
 
 \subsection{The program output}
+\label{ch:impl:out}
 
 %\subsection{Parsing the input}
 %\label{ch:impl:input-parser}
