@@ -576,20 +576,22 @@ ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;
 % Fix numbering of bibliography section
 %\cleardoublepage
 
-\titlespacing*{\chapter}{0pt}{-40pt}{20pt}
-\titleformat{\chapter}[display]
-  {\normalfont\large\bfseries}% <- font for label "Appendix A", default \huge
-  {\chaptertitlename\ \thechapter}
+\renewcommand{\thesection}{A.\arabic{section}}
+\titlespacing*{\section}{0pt}{-40pt}{20pt}
+\titleformat{\section}[display]
+  {\normalfont\large\bfseries}% <- font for label "A.1", default \huge
+  {}
   {0ex}
-  {\large}% <- font for title, default \Huge
-%\renewcommand{\thesection}{A.\arabic{section}}
-
+  {\thesection\quad\large}% <- font for title, default \Huge
 
 \cleardoublepage\makeatletter\@openrightfalse\makeatother
 \phantomsection
 \appendix
 \addcontentsline{toc}{chapter}{Appendices}
+\fancyhead[R]{\footnotesize\itshape{APPENDICES}}
+%\chapter*{Appendices}
 \appendixpage
+
 \input{98_appendix.tex}
 
 % End of document!
