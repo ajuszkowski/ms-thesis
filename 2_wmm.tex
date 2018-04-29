@@ -57,7 +57,8 @@ Functionally, a fence may be a synchronisation barrier or a instruction of flush
 
 %In this section, we describe basic relations used in memory model-aware program analysis.
 
-The relation~$\xrightarrow{r}\,:~\mathbb{E}~\times~\mathbb{E}$ is a binary function over events (set of pairs of events). There are two kinds of relations between events: \textit{basic relations} %retrieved from the 
+The relation~%\xrightarrow{r}
+$r\,\subseteq~\mathbb{E}~\times~\mathbb{E}$ is a set of pairs of events (a subset of Cartesian product of two sets of events). There are two kinds of relations between events: \textit{basic relations} %retrieved from the 
 that capture semantics of the program, and \textit{derived relations} that are defined from the basic relations and events in the weak memory model specification. Constraints over relations that are specified by weak memory models are defined as requirements of acyclicity, irreflexivity or emptiness of specific relations~\cite{alglave2016syntax}.
 
 \vspace{1em}
@@ -72,7 +73,7 @@ The basic relations are the following~\cite{alglave2010shared}:
     \item The \textit{data-flow} of a program is defined by \textit{communication relations}:
         \begin{itemize}[noitemsep]
             \item the \textit{read-from} relation \rf~$\subset~\mathbb{W}~\times~\mathbb{R}$ that maps each write event to the read event that reads its value;
-            \item the \textit{coherence order} relation \co~$\subset~\mathbb{W}~\times~\mathbb{W}$ that defines the total order on writes to the same location across all processes         (also called the \textit{write serialisation} \texttt{ws}-relation);
+            \item the \textit{coherence order} relation \co~$\subset~\mathbb{W}~\times~\mathbb{W}$ that defines the total order on writes to the same location across all processes (also called the \textit{write serialisation} \texttt{ws}-relation);
         \end{itemize}
 
 	\item Events from the same process are related by the \textit{scope relation} \sr~$\subset~\mathbb{E}~\times~\mathbb{E}$.
@@ -85,31 +86,31 @@ Below we enumerate some derived relations~\cite{alglave2010shared}:
 
 \begin{itemize}
 
-    \item the \textit{from-read} relation $\fr \subset~\mathbb{R}~\times~\mathbb{W}$ that maps a read to writes preceding the write event from which the read reads the value: \\
-    $r \relation{fr} w = (\exists w' . w' \relation{rf} r \land w' \relation{co} w)$.
+    \item the \textit{from-read} relation $\fr \subset~\mathbb{R}~\times~\mathbb{W}$ that maps a read event to write events preceding the write event from which the read event gets the value: \\
+    $r \relation{fr} w ~\triangleq~ (\exists w' . w' \relation{rf} r \land w' \relation{co} w)$
 
-    \item the \textit{data dependency} relation \texttt{dp}, which is a subset of \po-relation that always has a read at its source (it connects the read to the write which it depends on).
+    %\item the \textit{data dependency} relation \texttt{dp}, which is a subset of \po-relation that always has a read at its source (it connects the read to the write which it depends on)
+    %TO-DO: formula for dp or exclude
+
+    \item the \textit{communication} relation \com over memory events, that fully describes the data-flow of a program: \\
+    %$\mathtt{com} \triangleq (\mathtt{rf} \cup \mathtt{co} \cup \mathtt{fr})$
+    $m_1 \relation{com} m_2~\triangleq~((m_1\relation{rf}m_2) \lor (m_1\relation{co}m_2) \lor (m_1\relation{fr}m_2))$
+
+    \item the \textit{external} (and \textit{internal}) \textit{read-from} relations that restrict the \rf-relation to the different (respectively, same) processes: \\
+    $w \relation{fre} r ~\triangleq~ (w \relation{fr} r \land \mathtt{proc}(w) = \mathtt{proc}(w))$ \\
+    $w \relation{fri} r ~\triangleq~ (w \relation{fr} r \land \mathtt{proc}(w) \neq \mathtt{proc}(w))$
+    
     %TODO: say that po-relation is *static*
-    %$\mathtt{com} = (\mathtt{rf} \cup \mathtt{co} \cup \mathtt{fr})$
+    \item the \texttt{po-loc} relation that is the \po-relation over events that access to the same shared variable: \\
+    $m_1 \relation{po-loc} m_2 ~\triangleq~ (m_1 \relation{po} m_2 \land \mathtt{loc}(m_1) = \mathtt{loc}(m_2))$
 
-    \item the \textit{external} (and \textit{internal}) \textit{read-from} relations that restrict the \rf-relation to the different (respectively, same) processes.
-
-    \item the \texttt{po-loc} relation that is the \po-relation over events that access to the same shared variable:
-    $m_1 \relation{po-loc} m_2 = (m_1 \relation{po} m_2 \land \mathtt{loc}(m_1) = \mathtt{loc}(m_2))$.
-
-    \item the semantics of fences and barriers specific for different architectures may be defined as derived relations.
+    \item the semantics of \textit{fences} (memory barriers) specific for different architectures may be defined as derived relations.
 
     %"Preserved program order defines the set of reorderings guaranteed by the architecture not to occur, based on the types of the accesses." http://delivery.acm.org/10.1145/2750000/2742219/p635-lustig.pdf
 
 \end{itemize}
 
-The work~\cite[Chapter~2]{alglave2010shared} provides definition of basic properties of relations, such as \textit{reflexivity} and \textit{irreflexivity}, \textit{transitivity} and \textit{transitive closure}, \textit{acyclicity}.
-Thereafter, weak memory models make asserts over these properties, thus restricting the set of allowed behaviours of the system.
-
-
-% TODO: some derived relations
-%The \textit{from-read order} \fr $\subset~\mathbb{R}~\times~\mathbb{W}$ that maps a read to possible writes preceding the current write event (this relation is the inversion of the \rf-relation: $\mathtt{rf} = \mathtt{fr}^{-1}$).
-%TODO: perephrase last sentence! alglave thesis, p. 36
+The work~\cite[Chapter~2]{alglave2010shared} provides formal definition of basic properties of relations, such as \textit{reflexivity} and \textit{irreflexivity}, \textit{transitivity} and \textit{transitive closure}, \textit{acyclicity}, that can be asserted by a weak memory model in order to restrict the set of allowed behaviours of the system.
 
 
 \subsection{Executions}
@@ -179,7 +180,7 @@ The \cat language combines expressive power of a functional language (it is insp
 
 %TODO: this is binary relations. ADD UNARY RELS!
 
-The derived relations can be defined via the keyword \texttt{let} and the following operations over relations~\cite{alglave2016syntax}: % 3.1.6 Relations between events
+New relations can be defined via the keyword \texttt{let} and the following operations over relations~\cite{alglave2016syntax}: % 3.1.6 Relations between events
 
 \begin{itemize}
 	\item \textit{the union} of two relations \rel{r1} and \rel{r2} is \rel{r1\,|\,r2}
