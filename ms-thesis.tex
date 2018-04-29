@@ -16,6 +16,24 @@
 \usepackage[finnish,swedish,english]{babel}
 %\usepackage[english]{babel}
 
+
+\usepackage{fancyvrb}%fancy verbatim
+%\makeatletter
+%\newcommand{\verbatimfont}[1]{\renewcommand{\verbatim@font}{\ttfamily\scriptsize#1}}
+%\makeatother
+% redefine \VerbatimInput
+\RecustomVerbatimCommand{\VerbatimInput}{VerbatimInput}{fontsize=\footnotesize}
+
+\usepackage{pmboxdraw}
+\usepackage{newunicodechar}
+\newunicodechar{└}{\textSFii}
+\newunicodechar{├}{\textSFviii}
+\newunicodechar{─}{\textSFx}
+
+
+\usepackage{wrapfig} %for text wrap around figures
+\usepackage{paracol}%2 columns
+
 \usepackage[section]{placeins}
 
 \usepackage{mathtools}
@@ -46,6 +64,7 @@
 \usepackage{verbatim}
 \usepackage{enumitem} % for nolistsep in enumeration
 \usepackage{multicol} % for using multiple columns in listings
+
 \usepackage{listings}
 \renewcommand{\lstlistingname}{Figure}  %perhaps, it's not a gute Idee to change all the listings to Figures
 
@@ -85,6 +104,10 @@
 \newcommand{\mathr}[1]{\ensuremath{\mathtt{#1}}}
 \newcommand{\invrel}[1]{\ensuremath{\mathr{#1}\!\!\mathbin{\char`\^}\!\!\text{-1}}} %inversion or a relation in math mode: r^-1
 
+\newcommand{\ytree}{\texttt{Y-tree}}
+\newcommand{\xgraph}{\texttt{X-graph}}
+\newcommand{\wmodel}{\texttt{W-model}}
+\newcommand{\zformula}{\texttt{Z-formula}}
 
 \usepackage{outlines} %for nested itemize lists
 
