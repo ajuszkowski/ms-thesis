@@ -157,21 +157,39 @@ c/.style={
 
 % Publication quality tables. See table in 2lorem.tex for example
 \usepackage{booktabs}
-
 % Use biber instead of bibtex as it supports UTF-8 among other things
 \usepackage[backend=biber,
-maxnames=5,
+%maxnames=5,
 %style=numeric-verb,
-style=alphabetic-verb, %numeric-comp %[1-3]
+style=alphabetic,%-verb,%style=alphabetic
 minalphanames=3,
 maxalphanames=3,
-sortcites=true,
+%sortcites=true,
 %sorting=none
-sorting=ydnt%Sort by year (descending), name, title 
-%sorting=ynt %Sort by year, name, title. 
-%sorting=nyt Sort by name, year, title. %see https://tex.stackexchange.com/a/51439
+%see options: http://texdoc.net/texmf-dist/doc/latex/biblatex/biblatex.pdf
+%sorting=anyvt,%Sort by alphabetic label, name, year, volume, title,
+sorting=anyt,%Sort by alphabetic label, name, year, title,
+%sorting=ydnt,%Sort by year (descending), name, title 
+%sorting=ynt, %Sort by year, name, title. 
+%sorting=nyt, %Sort by name, year, title. %see https://tex.stackexchange.com/a/51439
 ]{biblatex}
-\renewcommand*{\labelalphaothers}{\textsuperscript{+}} %make the plus sign in bibliography references superscript
+% A catch-all filter for all items which are not assigned to a dedicated sub-bibliography:
+\defbibfilter{other}{
+  not type=article
+  and
+  not type=book
+  and
+  not type=collection
+}
+%make the plus sign in bibliography references as superscript:
+\renewcommand*{\labelalphaothers}{\textsuperscript{+}}
+
+
+% Separate multiple citations with space instead of comma
+% E.g. "[1] [2] [3]" instead of "[1], [2], [3]"
+%\renewcommand\multicitedelim{\space}
+%separate them by semicolon
+\renewcommand*{\multicitedelim}{\setunit{; }}
 
 
 % Nicer looking caption for figures, tables, etc.
@@ -187,10 +205,6 @@ sorting=ydnt%Sort by year (descending), name, title
 \usepackage{rotating}
 
 \usepackage{hyphenat} % for using \nohyphens
-
-% Separate multiple citations with space instead of comma
-% E.g. "[1] [2] [3]" instead of "[1], [2], [3]"
-\renewcommand\multicitedelim{\space}
 
 % Prevent orphan and widow rows
 \widowpenalty=10000
