@@ -45,7 +45,7 @@ Also, it is important to separate the set of initial write events $\mathbb{IW}~\
 
 A \textit{computation event} $e_c \in \mathbb{C} \subseteq \mathbb{E}$, represents a low-level assembly computation operation performed solely on local-memory arguments.
 An example of computation event may be the event $e_c = r_1 \leftarrow add(r_2, 1)$ that writes the sum of values stored in register $r_2$ and constant $1$ (which is modelled as a register as well) to the register $r_1$.
-For modelling branching statements, we distinguish the set $\mathbb{C_{p}} \subseteq \mathbb{C}$ of \textit{predicative} computation events (also called as \textit{branching events}), that are evaluated as a boolean value.
+For modelling branching statements, we distinguish the set $\mathbb{C_{p}}~\subseteq~\mathbb{C}$ of \textit{predicative} computation events (also called as \textit{branching events}), that are evaluated as a boolean value.
 
 The synchronisation instructions (fences) cause the \textit{barrier events}, that do not perform any computation or memory value transfer, instead, they add new relations to the program model that restrict the set of allowed behaviours.
 Functionally, a fence may be a synchronisation barrier or a instruction of flushing the local memory caches, etc.
@@ -67,8 +67,8 @@ The basic relations are the following~\cite{alglave2010shared}:
 %TODO: say that 
 \begin{itemize}
     \item The \textit{control-flow} of a program is defined by the \textit{program-order} relation \po~$\subset~\mathbb{E}~\times~\mathbb{E}$, which represents the total order of events of same process.
-	For instance, if the instruction $i_1$ generates the event $e_1$ and the instruction $i_2$ follows $i_1$ and generates the event $e_2$, then $e_1 \relation{po} e_2$.
-	%Some new relations may be acquired : dp, po-loc
+    For instance, if the instruction $i_1$ generates the event $e_1$ and the instruction $i_2$ follows $i_1$ and generates the event $e_2$, then $e_1 \relation{po} e_2$.
+    %Some new relations may be acquired : dp, po-loc
 
     \item The \textit{data-flow} of a program is defined by \textit{communication relations}:
         \begin{itemize}[noitemsep]
@@ -76,7 +76,7 @@ The basic relations are the following~\cite{alglave2010shared}:
             \item the \textit{coherence order} relation \co~$\subset~\mathbb{W}~\times~\mathbb{W}$ that defines the total order on writes to the same location across all processes (also called the \textit{write serialisation} \texttt{ws}-relation);
         \end{itemize}
 
-	\item Events from the same process are related by the \textit{scope relation} \sr~$\subset~\mathbb{E}~\times~\mathbb{E}$.
+    \item Events from the same process are related by the \textit{scope relation} \sr~$\subset~\mathbb{E}~\times~\mathbb{E}$.
     In contrast to the \tool{herd} tool, the \porthos[2] does not use hierarchy of scopes (depicted as the scope tree); instead, it uses simple lables that indicate which process has produced certain event.
 \end{itemize}
 
@@ -110,21 +110,24 @@ Below we enumerate some derived relations~\cite{alglave2010shared}:
 
 \end{itemize}
 
-The work~\cite[Chapter~2]{alglave2010shared} provides formal definition of basic properties of relations, such as \textit{reflexivity} and \textit{irreflexivity}, \textit{transitivity} and \textit{transitive closure}, \textit{acyclicity}, that can be asserted by a weak memory model in order to restrict the set of allowed behaviours of the system.
+%todo: some words here?
 
 
 \subsection{Executions}
 \label{ch:wmm:model:executions}
 
-The \textit{candidate execution} is a path in the event-flow graph defined by \po- and \rf-relations and set of final writes to a given memory location that is valid under certain memory model~\cite{alglave2014herding}. %the sequence of choices from guesses which event is to be executed next.
-%The semantics of a concurrent program is represented as the set of allowed executions.
-%An \textit{execution} (trace, run) of a program is an ordered set of events defined by \po- and \rf-relations and set of final writes to a given memory location that is valid under certain memory model~\cite{alglave2014herding}.
-%A \textit{candidate execution} is an execution that is not constrained by the memory model (i.e., the execution for that the validity is not checked).
+The semantics of a concurrent program is represented as the set of allowed executions. The 
+The \textit{execution} is a path in the event-flow graph defined by \po- and \rf-relations and set of final writes to a given memory location that is valid under certain memory model~\cite{alglave2014herding}.
+It can be interpreted as a sequence of guesses which event is to be executed next.
+The \textit{candidate execution} is an execution that is not yet constrained by a memory model.
+
+%TODO: cite this paper elsewhere
 %As it was shown in~\cite{wickerson2017automatically}, it is enough for memory models to constrain the executions independently instead of constraining the program at a whole.
+
+%An \textit{execution} (trace, run) of a program is an ordered set of events defined by \po- and \rf-relations and set of final writes to a given memory location that is valid under certain memory model~\cite{alglave2014herding}.
 %The order of events in particular execution is denoted as `$\rightarrow$', an empty execution is denoted as $\emptyset$.
 %associated with the instructions of the program
-%the path in the event-flow graph.
-%An execution is considered to be \textit{valid} if the memory events follow a single global timeline, textit.e., can be embedded in a single partial order allowed by the memory model restrictions~\cite{alglave2010shared}.
+%An execution is considered to be \textit{valid} if the memory events follow a single global timeline, i.e., can be embedded in a single partial order allowed by the memory model restrictions~\cite{alglave2010shared}.
 %An execution is uniquely defined by the set $\mathbb{X}$ of events have been executed in each thread (the \textit{control-flow} of a program), and the relations $\mathtt{rf}$ and $\mathtt{co}$~\cite{alglave2010shared}.
 Figure~\ref{simple_wmm_x86_pic} illustrates four possible candidate executions for the litmus test Example~\ref{simple_wmm_x86} (the pictures are generated by the \tool{herd7} tool, version~7.47).
 Since there are no conditional jumps, the \po-relation is defined and we do not need to guess it.
@@ -134,7 +137,7 @@ The candidate executions pictured in Figures~\ref{simple_wmm_x86_pic:sub1}--\ref
 However, the execution shown in Figure~\ref{simple_wmm_x86_pic:sub3} is still consistent under relaxed-memory architectures, but it becomes inconsistent under SC architecture as it forbids cycles over~$\fr\cup\po$.
 %However, the Power memory model allows such cycles, therefore %TODO: include load buffering example, see presentation pdf
 
-\begin{figure}[H]
+\begin{figure}[h]
 \centering
 \begin{subfigure}[t]{.28\textwidth}
   \centering
@@ -169,41 +172,87 @@ However, the execution shown in Figure~\ref{simple_wmm_x86_pic:sub3} is still co
 \end{figure}
 
 
-\section{The \cat language}
+\section{The \cat{} language}
 \label{ch:wmm:cat}
 
-Weak memory models are defined via the \cat language~\cite{alglave2016syntax}.
+Weak memory models are defined via the \cat{} language~\cite{alglave2016syntax}.
 This is a domain specific language for describing consistency properties of concurrent programs.
-The \cat language combines expressive power of a functional language (it is inspired by OCaml and adopts its types, first-class functions, pattern matching and other features) with types, expressions and assertions that are specific for operating with relations and executions.
+The \cat{} language combines expressive power of a functional language (it is inspired by OCaml and adopts its types, first-class functions, pattern matching and other features) with types, operations and assertions that are specific for operating with relations and executions.
 %represents the functional language extended by the theory of  allows to axiomatically define derived relations, architecture-specific fences, and constraints over relations.
-
+In \cat{}, new relations can be defined via the keyword \texttt{let} and the following operators over relations~\cite{alglave2016syntax}. % 3.1.6 Relations between events
 
 %TODO: this is binary relations. ADD UNARY RELS!
 
-New relations can be defined via the keyword \texttt{let} and the following operations over relations~\cite{alglave2016syntax}: % 3.1.6 Relations between events
+Below we enumerate pre-defined operators over relations and sets of events:
 
-\begin{itemize}
-	\item \textit{the union} of two relations \rel{r1} and \rel{r2} is \rel{r1\,|\,r2}
-	\item \textit{the intersection} of two relations \rel{r1} and \rel{r2} is \rel{r1\,\&\,r2}
-	\item \textit{the difference} of two relations \rel{r1} and \rel{r2} is $\mathtt{r1\,\backslash\,r2}$
-	\item \textit{the sequence}\footnote{The sequence of two relations \rel{r1} and \rel{r2} is defined as the set of pairs \rel{(x,y)} such that there exists an intervening \rel{z}, such that $\rel{(x,z)} \in \rel{r1}$ and $\rel{(z,y)} \in \rel{r2}$}
-	of two relations \rel{r1} and \rel{r2} is \rel{r1;r2}
-\end{itemize}
+\begin{enumerate}
+  \item \textit{Unary relations}:
+    \begin{itemize}
+      \item \textit{the complement} of a relation \rel{r} is $\rel{\textasciitilde r}$
+      \item \textit{the transitive closure} of a relation \rel{r} is $\rel{r+}$
+      \item \textit{the reflexive closure} of a relation \rel{r} is $\rel{r?}$
+      \item \textit{the reflexive-transitive closure} of a relation \rel{r} is $\rel{r*}$
+      \item \textit{the inverse} of a relation \rel{r} is $\invrel{r}$
+    \end{itemize}
+  \item \textit{Binary relations:}
+  \begin{itemize}
+    \item \textit{the union} of two relations \rel{r1} and \rel{r2} is \rel{r1\,|\,r2}
+    \item \textit{the intersection} of two relations \rel{r1} and \rel{r2} is \rel{r1\,\&\,r2}
+    \item \textit{the difference} of two relations \rel{r1} and \rel{r2} is $\mathtt{r1\,\backslash\,r2}$
+    \item \textit{the sequence}\footnote{The sequence of two relations \rel{r1} and \rel{r2} is defined as the set of pairs \rel{(x,y)} such that there exists an intervening \rel{z}, such that $\rel{(x,z)} \in \rel{r1}$ and $\rel{(z,y)} \in \rel{r2}$}
+    of two relations \rel{r1} and \rel{r2} is \rel{r1;r2}
+  \end{itemize}
+\end{enumerate}
 
-For instance, the \fr-relation is defined as follows: $\mathr{fr} = (\mathr{rf}^{-1};\mathr{co})$.
+For instance, the \fr-relation is defined as a sequence of inverted \rf-relation and \co-relation: $\mathr{fr} = (\mathr{rf}^{-1};\mathr{co})$. Figure~\ref{example:x86-cat} contains an example of x86-TSO weak memory model definition in \cat{} language that asserts acyclicity of communication relation, \rel{po-loc} relation, \rel{mfence} relation and some other derived relations~\cite{owens2009better}:
 
-Figure~\ref{example:x86-cat} contains part of x86-TSO model~\cite{owens2009better} that asserts acyclicity of communication relation and \rel{po-loc} relation:
-
-\begin{figure}[!h]
+\begin{figure}[h]
 \begin{lstlisting}
-...
+"X86 TSO"
+include "x86fences.cat"
+include "filters.cat"
+include "cos.cat"
+
+(* Uniproc check *)
 let com = rf | fr | co
-let po-loc = po & loc
 acyclic po-loc | com
+
+(* Atomic *)
+empty rmw & (fre;coe)
+
+(* Global happens-before *)
+#ppo
+let po_ghb = WW(po) | RM(po)
+
+#mfence
+include "x86fences.cat"
+
+#implied barriers
+let poWR = WR(po)
+let i1 = MA(poWR)
+let i2 = AM(poWR)
+let implied = i1 | i2
+
+let com = rfe | fr | co
+let ghb = mfence | implied | po_ghb | com
+show implied
+acyclic ghb as tso
 \end{lstlisting}
-\caption{Excerpt from the x86-TSO memory model in \cat language}
+\caption{The x86-TSO memory model defined in \cat{} language\protect\footnotemark}
 \label{example:x86-cat}
 \end{figure}
+\footnotetext{The \cat{}-memory model for x86-TSO can be found in official repository of \tool{herd} tool: \url{https://github.com/herd/herdtools7}}
+%\begin{figure}[h]
+%\begin{lstlisting}
+%...
+%let com = rf | fr | co
+%let po-loc = po & loc
+%acyclic po-loc | com
+%\end{lstlisting}
+%\caption{Excerpt from the x86-TSO memory model in \cat{} language}
+%\label{example:x86-cat}
+%\end{figure}
 
 %Relationship between different models \url{http://wiki.expertiza.ncsu.edu/index.php/CSC/ECE_506_Spring_2013/10c_ks}
 
+%The work~\cite[Chapter~2]{alglave2010shared} provides formal definition of basic properties of relations, such as \textit{reflexivity} and \textit{irreflexivity}, \textit{transitivity} and \textit{transitive closure}, \textit{acyclicity}, that can be asserted by a weak memory model in order to restrict the set of allowed behaviours of the system.

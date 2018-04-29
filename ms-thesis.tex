@@ -72,6 +72,7 @@
 {\,v1}%then
 {#1}%else
 }}}
+\newcommand{\oldporthos}{\porthos[1]}
 \newcommand{\rf}{\ensuremath{\,\mathtt{rf}\,}}
 \newcommand{\fr}{\ensuremath{\,\mathtt{fr}\,}}
 \newcommand{\po}{\ensuremath{\,\mathtt{po}\,}}
@@ -82,6 +83,7 @@
 \newcommand{\relation}[1]{\ensuremath{\overset{\mathtt{#1}}{\rightarrow}}}
 \newcommand{\rel}[1]{\texttt{#1}}
 \newcommand{\mathr}[1]{\ensuremath{\mathtt{#1}}}
+\newcommand{\invrel}[1]{\ensuremath{\mathr{#1}\!\!\mathbin{\char`\^}\!\!\text{-1}}} %inversion or a relation in math mode: r^-1
 
 
 \usepackage{outlines} %for nested itemize lists
@@ -544,8 +546,8 @@ ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;
 \pagestyle{fancy}
 \renewcommand{\headrulewidth}{0.5pt}
 \fancyhf{}
-%\rhead{\footnotesize\lfseries\uppercase{\leftmark}}
 \rhead{\footnotesize\itshape{\leftmark}}
+\cfoot{\thepage}
 
 \definecolor{dkblue}{rgb}{0,0.1,0.4}
 
