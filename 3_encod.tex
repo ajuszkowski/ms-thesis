@@ -90,8 +90,7 @@ We distinguish the function ${\fv_p\,:\,\mathbb{C_p}\,\rightarrow\,\{0,1\}}$ tha
 
 Consider the following possible mutual arrangement of nodes in a control-flow graph:
 
-
-\begin{figure}[H]
+\begin{figure}[!hb]
     \centering
     \begin{subfigure}[b]{0.3\textwidth}
         \makebox[\textwidth]{
@@ -166,7 +165,7 @@ Equation~\ref{enc:cf:br} encodes the branching control-flow depicted in Figure~\
 For sake of encoding correctness, we require all branches to have at least one event.
 Thus, for branching statements that do not have any events in one of the branches (such a branch represents a conditional jump forward), we add the synthetic \texttt{nop}-event as it is shown in Figure~\ref{encode:branching:nop}:
 
-\begin{figure}[H]
+\begin{figure}
     \centering
     \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
         \node[c] at (0,0) (1a) {$e_1$};
