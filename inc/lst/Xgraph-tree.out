@@ -1,0 +1,55 @@
+xgraph/
+├── events
+│   ├── barrier
+│   │   └── XBarrierEvent.java
+│   ├── computation
+│   │   ├── XAssertionEvent.java
+│   │   ├── XBinaryComputationEvent.java
+│   │   ├── XBinaryOperator.java
+│   │   ├── XComputationEvent.java
+│   │   ├── XOperator.java
+│   │   ├── XTypeDeterminer.java
+│   │   ├── XUnaryComputationEvent.java
+│   │   └── XUnaryOperator.java
+│   ├── controlflow
+│   │   ├── XEntryEvent.java
+│   │   ├── XExitEvent.java
+│   │   ├── XJumpEvent.java
+│   │   └── XNopEvent.java
+│   ├── memory
+│   │   ├── XInitialWriteEvent.java
+│   │   ├── XLoadMemoryEvent.java
+│   │   ├── XLocalMemoryEvent.java
+│   │   ├── XMemoryEvent.java
+│   │   ├── XRegisterMemoryEvent.java
+│   │   ├── XSharedMemoryEvent.java
+│   │   └── XStoreMemoryEvent.java
+│   ├── XEventInfo.java
+│   └── XEvent.java
+├── memories
+│   ├── XConstant.java
+│   ├── XLocalLvalueMemoryUnit.java
+│   ├── XLocalMemoryUnit.java
+│   ├── XLocation.java
+│   ├── XLvalueMemoryUnit.java
+│   ├── XMemoryUnit.java
+│   ├── XRegister.java
+│   ├── XRvalueMemoryUnit.java
+│   ├── XSharedLvalueMemoryUnit.java
+│   └── XSharedMemoryUnit.java
+├── process
+│   ├── XCyclicProcessBuilder.java
+│   ├── XCyclicProcess.java
+│   ├── XProcessBuilder.java
+│   ├── XProcessId.java
+│   ├── XProcess.java
+│   └── XProcessKind.java
+├── program
+│   ├── XCyclicProgramBuilder.java
+│   ├── XCyclicProgram.java
+│   ├── XProgramBuilder.java
+│   └── XProgram.java
+├── types
+│   ├── XMockType.java
+│   └── XType.java
+└── XEntity.java

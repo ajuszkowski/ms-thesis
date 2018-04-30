@@ -1,51 +1,49 @@
-ytree
+ytree/
 ├── definitions
-│   ├── YDefinition
-│   └── YFunctionDefinition
+│   ├── YDefinition.java
+│   └── YFunctionDefinition.java
 ├── expressions
 │   ├── accesses
-│   │   ├── YIndexerExpression
-│   │   ├── YInvocationExpression
-│   │   └── YMemberAccessExpression
+│   │   ├── YIndexerExpression.java
+│   │   ├── YInvocationExpression.java
+│   │   └── YMemberAccessExpression.java
 │   ├── assignments
-│   │   └── YAssignmentExpression
+│   │   └── YAssignmentExpression.java
 │   ├── atomics
-│   │   ├── YAtomBase
-│   │   ├── YAtom
-│   │   ├── YConstant
-│   │   ├── YLabeledVariableRef
-│   │   ├── YParameter
-│   │   ├── YParameterListBuilder
-│   │   └── YVariableRef
+│   │   ├── YAtom.java
+│   │   ├── YConstant.java
+│   │   ├── YLabeledVariableRef.java
+│   │   ├── YParameter.java
+│   │   ├── YParameterListBuilder.java
+│   │   └── YVariableRef.java
 │   ├── operations
-│   │   ├── YBinaryExpression
-│   │   ├── YBinaryOperator
-│   │   ├── YPointerUnaryExpression
-│   │   ├── YUnaryExpression
-│   │   └── YUnaryOperator
+│   │   ├── YBinaryExpression.java
+│   │   ├── YBinaryOperator.java
+│   │   ├── YPointerUnaryExpression.java
+│   │   ├── YUnaryExpression.java
+│   │   └── YUnaryOperator.java
 │   ├── ternary
-│   │   └── YTernaryExpression
-│   ├── YEmptyExpression
-│   ├── YExpression
-│   ├── YMultiExpression
-│   └── YOperator
+│   │   └── YTernaryExpression.java
+│   ├── YEmptyExpression.java
+│   ├── YExpression.java
+│   └── YOperator.java
 ├── litmus
-│   ├── YPostludeStatement
-│   ├── YPreludeStatement
-│   └── YProcessStatement
+│   ├── YPostludeStatement.java
+│   ├── YPreludeStatement.java
+│   └── YProcessStatement.java
 ├── statements
 │   ├── jumps
-│   │   ├── YJumpLabel
-│   │   └── YJumpStatement
-│   ├── YBranchingStatement
-│   ├── YCompoundStatement
-│   ├── YLinearStatement
-│   ├── YStatement
-│   ├── YUnlabeledStatement
-│   ├── YVariableDeclarationStatement
-│   └── YWhileLoopStatement
+│   │   ├── YJumpLabel.java
+│   │   └── YJumpStatement.java
+│   ├── YBranchingStatement.java
+│   ├── YCompoundStatement.java
+│   ├── YLinearStatement.java
+│   ├── YStatement.java
+│   ├── YUnlabeledStatement.java
+│   ├── YVariableDeclarationStatement.java
+│   └── YWhileLoopStatement.java
 ├── types
-│   ├── YMethodSignature
-│   └── YType
-├── YEntity
-└── YSyntaxTree
+│   ├── YMethodSignature.java
+│   └── YType.java
+├── YEntity.java
+└── YSyntaxTree.java
