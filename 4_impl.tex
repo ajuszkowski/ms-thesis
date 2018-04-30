@@ -75,7 +75,7 @@ However, considering the perspective of using \porthos[2] as a static analyser f
 It is worth noting that, for the reasons of simplicity, the \porthos[2] is not a concurrent program, however, we believe that, due to its modular architecture, it can be easily parallelised on the level of program modules.
 
 
-\section{General architecture}
+\section{Architecture}
 \label{ch:impl:arch}
 
 The general architecture scheme of \porthos[2] is presented in Figure~\ref{fig:arch}.
@@ -98,7 +98,7 @@ Thereafter, \wmodel{} and transformed \xgraph{} are encoded (Section~\ref{ch:imp
 \end{figure}
 
 
-\subsection{The program input}
+\subsection{Program input}
 \label{ch:impl:input}
 %(for instance, the original input language of \porthos{} tool, two variants of syntax of a litmus test used by \tool{herd}, an assembly language for any supported architecture).
 
@@ -165,11 +165,12 @@ Thirdly, the grammar used by \porthos{} had restricted set of allowed operations
 %TODO : constant arrays? https://rise4fun.com/Z3/tutorial/guide
 Thus, adding support for more advanced syntactic structures as pointers, arrays, function definitions and calls was one of the purposes of revising the tool architecture.
 
-The minor drawbacks of grammar used by \porthos[1] include lack of operator associativity (expressions of type \lstinline{1 + 2 * 3} could not be parsed), incorrectly (in terms of C) implemented grammar rule for statements (the semicolon punctuator `\lstinline{;}' was implemented as the separator between two statements, whereas in C it serves as a statement terminator). Also, \porthos[1] supports only the litmus-specific syntax for the variables initialisation, however, it allows only ini
+The minor drawbacks of grammar used by \porthos[1] include lack of operator associativity (expressions of the form \lstinline{1 + 2 * 3} could not be parsed), incorrectly (in terms of C) implemented grammar rule for the statement (the semicolon punctuator `\lstinline{;}' was implemented as the separator between two statements, whereas in C it serves as a statement terminator). Also, \porthos[1] supports only the litmus-specific syntax for the variables initialisation, however, it allows only ini
 tialisation of the shared variable and only by default value \lstinline{0}. The \porthos[2] supports arbitrary declaration to be performed in initialisation statement.
 
 
-The \porthos[2] uses the C language grammar of proposed in the C11 standard~\cite{jtc2011sc22}, that was extended by litmus test-specific syntax such as initialisation and final-state assertion statements (the original ANTLR grammar can be found in the official repository containing the collection of ANTLR v4 grammars~\footnote{Repository path: \url{https://github.com/antlr/grammars-v4}}).
+The \porthos[2] uses the C language grammar of proposed in the C11 standard~\cite{jtc2011sc22}, that was extended by litmus test-specific syntax such as initialisation and final-state assertion statements (the original ANTLR grammar can be found in the official repository containing the collection of ANTLR v4 grammars%
+\footnote{Repository path: \url{https://github.com/antlr/grammars-v4}}).%
 Currently, \porthos[2] can operate only in the intra-procedural analysis mode (analysing single procedure), assuming that each function defined in the input file is being executed in a separate thread.
 However, the redesigned architecture of \porthos[2] allow to easily support inter-procedural (cross-procedure) analysis by inlining function calls and binding variable contexts. Also, Current version of \porthos[2] simply ignores C processor directives, however, in future it is possible to support it.
 
@@ -183,49 +184,96 @@ However, the redesigned architecture of \porthos[2] allow to easily support inte
 \subsubsection{Y-tree}
 \label{ch:impl:model:ytree}
 
-- TODO: everything inherited YEntity + citation
-
 The first internal representation that \porthos[2] uses is the \ytree{}, which represents a rather high-level AST.
-The Apendix~\ref{apx:trees} represents the file tree of main classes that constitute the \ytree{} hierarchy (as the inheritance tree might be obvious for the C-like AST, we confine ourselves to representing the classes file tree only).
+The Apendix~\ref{apx:trees} represents the file tree of main classes that constitute the \ytree{} hierarchy (as the inheritance tree might be obvious for the C-like AST, we confine ourselves to presenting the classes file tree only).
 
 %\columnratio{0.7}%\begin{paracol}{2}
 %\switchcolumn%\VerbatimInput{inc/lst/Ytree-tree.out}%\end{paracol}
-The abstract syntax tree \ytree{} is an abstraction level suitable for compiling to a low-level representation (in case of processing low-level assembly code, it may be directly converted to the \xgraph{} representation).
+The abstract syntax tree \ytree{} is an abstraction level suitable for compiling the program to a low-level representation (in case of processing low-level assembly code, it may be directly converted to the \xgraph{} representation).
 As the ANTLR syntax tree follows the same structure as the grammar, which is a superset of the real (meaningful) grammar of C language, it lacks multiple concepts of the language (for example, the syntax of indexer access corresponds the grammar rule \lstinline{postfixExpression '[' expression ']'}, that is converted to the \texttt{YIndexerExpression}).
-However some details of the syntax might have been abstracted away (for instance, array operations may be emulated by functions invocations, see~\cite{gries2012science}\textbf{TODO:CHAPTER,PAGE}), we found this level of abstraction as suitable enough for our tasks.
+However some details of the syntax might have been abstracted away (for instance, array operations may be emulated by functions invocations, see~\cite[Chapter 5]{gries2012science}), we found this level of abstraction suitable enough for our tasks.
 
-Following the terms of C standard, we distinguish \textit{statements} (actions to be performed) and \textit{expressions} (TODO).
+Each \ytree{} element implements the interface \texttt{YEntity} and carries the \texttt{OriginLocation} %
+%\textbf{(TODO: Rename CodeLocation->OriginLocation in the code!)} %TODO <--
+instance that contains information about the coordinates of the input text that generated the \ytree{} element.
 
-- TODO: all statements inherit \texttt{YStatement} + interface lstlisting
+Following the C11 standard~\cite{iso2012iec}, we distinguish a \textit{statement} (\textit{"an action to be performed"}) from an \textit{expression} (\textit{"a sequence of operators and operands that specifies computation of a value, or that designates an object or a function, or that generates side effects, or that performs a combination thereof"}).
 
-The \porthos[2] processes the following statements: 
-\begin{itemize}[nolistsep]
-  \item \texttt{YBranchingStatement} representing the \texttt{if-then-else} statement,
-  \item \texttt{YLoopStatement} representing both \texttt{while}- and \texttt{for}-loops, %TODO:RENAME YWhileLoopStatement->YLoopStatement in code!!!)}
-  \item \texttt{YJumpStatement} representing unconditional jump (\texttt{goto}-jump to a label and loop-jumps \texttt{break} and \texttt{continue}),
-  \item \texttt{YCompoundStatement} (block statement) representing sequence of \texttt{N} statements grouped into one syntactic unit,
-  \item \texttt{YLinearStatement} representing single expression.
+All \ytree{} expressions implement the \texttt{YExpression} interface.
+On the \ytree{} level, the pointer arithmetic is modelled by the integer number \textit{pointer level} of an expression (although in fact this is the property of a type not of an expression, the y-tree is an untyped syntax tree, therefore the elements \ytree{} should carry this property).
+We distinguish the subset of expressions that imply no side-effects, they implement the interface \texttt{YAtom} and can be global or local (which is defined also syntactically).
+%\textbf{(TODO:THIS SHOULD BE IN PRE-PROCESSING)} %TODO <--
+
+\vspace{0.5em}
+The \ytree{} expressions are the following:
+
+\begin{itemize}%[nolistsep]
+  \item \texttt{YBinaryExpression} that model the C binary operator (\textit{relative} operator that compares two expressions of any type, \textit{logical} that processes two boolean expressions, and \textit{numerical} that processes two numerical expressions);
+  %\textbf{TODO: rename 'integer'->'numerical' in code} %TODO <--
+
+  \item \texttt{YUnaryExpression} that model the C unary expression (logical negation, numeric prefix and postfix increment and decrement, bitwise complement);
+
+  \item \texttt{YMemberAccessExpression} that has an arbitrary expression of type \texttt{YExpression} as its base expression (it will be resolved during the compilation stage);%TODO: pre-compilation??
+
+  \item \texttt{YIndexerExpression} and \texttt{YInvocationExpression} that as arbitrary expression as its base or arguments (strictly speaking, the indexer expression is an unary-function invocation, but as the SMT solver we use supports the constant-array theory, we can maintain the array type);
+
+  \item \texttt{YAssignmentExpression} that assigns an \texttt{YExpression} to an \texttt{YAtom};
+
+  \item \texttt{YVariableRef} that stores the "reference" to a variable (viz., the name of an object);
+
+  \item \texttt{YLabeledVariableRef} that represents the litmus-specific local variable reference for a certain the process (e.g., `\lstinline{P0:x}' which means the local variable \lstinline{x} of the process \lstinline{P0});
+
+  \item \texttt{YParameter} that represents a typed variable (the type was declared, similarly to the variable definition);
+
+  \item \texttt{YConstant} that represents an untyped non-named constant.
 \end{itemize}
 
+%\vspace{0.5em}
+Similarly to expressions, all \ytree{} statements implement the \texttt{YStatement} interface. The statements are the following: 
+%\textbf{(TODO: extract interface YStatement, create abstract class YStatementBase)} %TODO <--
+
+\begin{itemize}%[nolistsep]
+  \item \texttt{YBranchingStatement} representing the \texttt{if-then-else} statement;
+  
+  \item \texttt{YLoopStatement} representing both \texttt{while}- and \texttt{for}-loops;%TODO:RENAME YWhileLoopStatement->YLoopStatement in code!!!)}
+  
+  \item \texttt{YJumpStatement} representing unconditional jump (\texttt{goto}-jump to a label and loop-jumps \texttt{break} and \texttt{continue});
+  
+  \item \texttt{YCompoundStatement} (block statement) representing sequence of \texttt{N} statements grouped into one syntactic unit;
+  
+  \item \texttt{YLinearStatement} representing single expression;
+  
+  \item \texttt{YVariableDeclarationStatement} containing the information about the variable type during the variable declaration.
+\end{itemize}
+
+On the \texttt{Y}-level of abstraction, we define the \texttt{YType} as an alias for a type (since the \ytree{} is not typed, all expressions do not have type, however, the \texttt{YType} is used for storing the information of the type for declarations
+
 According to the C standard, \textit{"any statement may be preceded by a prefix that declares an identifier as a label name"}.
-However, the \ytree{} statements may have only simple symbolic labels, which have to be resolved at the pre-compilation stage.
-Apart from the listed set of statements, \ytree{} has also the \texttt{YFunctionDefinition} and its litmus-specific inheritor \texttt{YProcessStatement} used in intra-procedural analysis mode.
+The \ytree{} statements of follow this rule, however they these labels are symbolic, and they need to be resolved at the pre-compilation stage.
+Apart from the set of statements listed before, we define the \texttt{YFunctionDefinition} and its inheritor a litmus-specific declaration \texttt{YProcessDefinition}
+%\textbf{(TODO: rename YProcessStatement->YProcessDefinition)} %TODO <--
+used in intra-procedural analysis mode.
 The function definition contains the \texttt{YCompoundStatement}-typed body and the signature of type \texttt{YMethodSignature}, which is used in the function resolution during the compilation stage. %TODO: pre-compilation?
-The other litmus-specific statements are \texttt{YPreludeStatement} that carries the list of \texttt{YStatement}-typed initial writes, and \texttt{YPostludeStatement} that carries the \texttt{YExpression}-typed binary expression to be asserted by the litmus test.
+The other litmus-specific statements are \texttt{YPreludeDefinition}
+%\textbf{(TODO: rename YPreludeStatement -> YPreludeDefinition)} %TODO <--
+that carries the list of \texttt{YStatement}-typed initial writes, and \texttt{YPostludeDefinition} 
+%\textbf{(TODO: rename YPostludeStatement -> YPostludeDefinition)} %TODO <--
+that carries the \texttt{YExpression}-typed binary expression to be asserted by the litmus test.
 
-Similar to statements of \ytree{}, its expressions 
-
-pointer operations are modeled as the pointer level of and expression (although it is the property of type, the y-tree is untyped, so elements that represent syntactic expressions shoudl carry tnis information)
-
-
-
-Each element of \ytree{} carries the \texttt{OriginLocation} %
-\textbf{(TODO: Rename CodeLocation->OriginLocation in the code!)} %
-instance that contains information about the coordinates of the input text that generated the \ytree{} element.
+The syntax tree that contains set of definitions (e.g., litmus-initialisations, function definitions, litmus-asserts) is modelled by the class \texttt{YSyntaxTree}.
 
 
 \subsubsection{X-graph}
 \label{ch:impl:model:xgraph}
+
+The second internal representation used by \porthos[2] is the event-based flow graph \xgraph{}. This is the 
+
+two basic elements of diff nature: XEvent and YMemoryUnit
+
+comp event emulated by both -- optimisation?
+
+
+
 
 \subsubsection{W-model}
 \label{ch:impl:model:wmodel}
@@ -276,7 +324,7 @@ The ANTLR syntax tree of C
 %todo: mention The SMT-LIB standard http://smtlib.cs.uiowa.edu/papers/smt-lib-reference-v2.6-r2017-07-18.pdf
 
 
-\subsection{The program output}
+\subsection{Program output}
 \label{ch:impl:out}
 
 
