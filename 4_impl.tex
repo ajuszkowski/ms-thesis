@@ -78,25 +78,24 @@ It is worth noting that, for the reasons of simplicity, the \porthos[2] is not a
 \section{Architecture}
 \label{ch:impl:arch}
 
-The general architecture scheme of \porthos[2] is presented in Figure~\ref{fig:arch}.
+The general architecture scheme of \porthos[2] is presented in Figure~\ref{fig:arch}. On the picture, rectangles denote processing units (marked with gear sign with a number of the component for referencing it).
+
+\begin{figure}%[H]
+    \centering
+  \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{img/my/draw.io/general_arch.png}
+  \caption{The general architecture of \porthos[2]}
+  \label{fig:arch}
+\end{figure}
+
 The program takes as input the program to be analysed and one (the reachability analysis mode) or two (the portability analysis mode) memory models. The parsed program syntax tree is then converted (Section~\ref{ch:impl:proc:y-constr}) to a program AST called \ytree{}%
 \footnote{In order to avoid confusion between different internal representations, we prefix the names of elements of each internal representation with a letter. For instance, we picked the letter `Y' to denote the AST code representation as drawing of this letter resembles the tree branching; with letter `X' we prefix elements of the event-flow graph as the events are to be e\textbf{x}ecuted; and with letter `W' we prefix elements of the \textbf{w}eak memory model AST.} %
 (Section~\ref{ch:impl:model:ytree})
 %, and the memory model is being parsed (Section~\ref{ch:impl:proc:w-parser}) to another AST called \wmodel{} (Section~\ref{ch:impl:model:wmodel}).
 , which then is being pre-processed at the pre-compilation stage (Section~\ref{ch:impl:proc:x-pre-compiler}) in order to collect information necessary for the compilation.
 The \ytree{} then is being compiled (Section~\ref{ch:impl:proc:x-compiler}) to an \xgraph{} representation (Section~\ref{ch:impl:model:xgraph}).
-The compiled \xgraph{} then undergoes a number of transformations (Section~\ref{ch:impl:proc:x-transf}) necessary for the encoding into a \zformula{} (Section~\ref{ch:impl:model:zformula}) at the pre-encoding stage (Section~\ref{ch:impl:proc:x-transf}).
+The compiled \xgraph{} then undergoes a number of transformations (Section~\ref{ch:impl:proc:x-unroll}) necessary for the encoding into a \zformula{} (Section~\ref{ch:impl:model:zformula}) at the pre-encoding stage (Section~\ref{ch:impl:proc:x-unroll}).
 Then, the memory-model constructor (Section~\ref{ch:impl:proc:w-constr}) constructs the derived relations on the basis of the \xgraph{} in order to build the weak memory model \wmodel{} (Section~\ref{ch:impl:model:wmodel}).
 Thereafter, \wmodel{} and transformed \xgraph{} are encoded (Section~\ref{ch:impl:proc:z-encoder}) to a \zformula{} representation (a wrapper over an SMT logical formula), which then is passed as an input to the SMT-solver.
-
-\begin{figure}[H]
-  \centering
-  % TODO: remove scale 0.8 if it can fit the whole page
-  \includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{img/my/lucidchart.com/data-flow-vert-300dpi.png}
-  \caption{General architecture of \porthos[2]}
-  \label{fig:arch}
-\end{figure}
-
 
 \subsection{Program input}
 \label{ch:impl:input}
@@ -172,7 +171,10 @@ tialisation of the shared variable and only by default value \lstinline{0}. The 
 The \porthos[2] uses the C language grammar of proposed in the C11 standard~\cite{jtc2011sc22}, that was extended by litmus test-specific syntax such as initialisation and final-state assertion statements (the original ANTLR grammar can be found in the official repository containing the collection of ANTLR v4 grammars%
 \footnote{Repository path: \url{https://github.com/antlr/grammars-v4}}).%
 Currently, \porthos[2] can operate only in the intra-procedural analysis mode (analysing single procedure), assuming that each function defined in the input file is being executed in a separate thread.
-However, the redesigned architecture of \porthos[2] allow to easily support inter-procedural (cross-procedure) analysis by inlining function calls and binding variable contexts. Also, Current version of \porthos[2] simply ignores C processor directives, however, in future it is possible to support it.
+%TODO: describe more intra- and inter-procedural!
+However, the redesigned architecture of \porthos[2] allow to easily support inter-procedural (cross-procedure) analysis by inlining function calls and binding variable contexts.
+%TODO: inter: user specifies the repository with code, functions that intended to work in parallel and runs. 
+Also, Current version of \porthos[2] simply ignores C processor directives, however, in future it is possible to support it.
 
 %TODO: say sth about 100500 litmus-tests for kernel
 
@@ -241,7 +243,7 @@ Similarly to expressions, all \ytree{} statements implement the \texttt{YStateme
   
   \item \texttt{YCompoundStatement} (block statement) representing sequence of \texttt{N} statements grouped into one syntactic unit;
   
-  \item \texttt{YLinearStatement} representing single expression;
+  \item \texttt{YLinearStatement} representing a single expression;
   
   \item \texttt{YVariableDeclarationStatement} containing the information about the variable type during the variable declaration.
 \end{itemize}
@@ -266,34 +268,119 @@ The syntax tree that contains set of definitions (e.g., litmus-initialisations, 
 \subsubsection{X-graph}
 \label{ch:impl:model:xgraph}
 
-The second internal representation used by \porthos[2] is the event-based flow graph \xgraph{}. This is the 
+The \ytree{} is compiled into the low-level event-based program representation \xgraph{}.
+The mathematical structure of event-flow graph was discussed in Section~\ref{ch:wmm:event}.
+In general, \xgraph{} follows the structure described there, however it is constructed in several stages.
+%.. goto: compilation
 
-two basic elements of diff nature: XEvent and YMemoryUnit
+
+atomic action?
+
+%However, the \xgraph{}
+%The basic element of \xgraph{} is an event. Each event \texttt{XEvent}
+Firstly, two elements
+%two basic elements of diff nature: XEvent and YMemoryUnit
 
 comp event emulated by both -- optimisation?
 
+secondly, relations edges (special class? no, just map with enum as kind of edge)
 
+
+CF edge: then-edge (primary), else-edge (alternative)
+
+
+XEventInfo
+
+
+hierarchy of memory units
+
+
+memory events
+
+computation: reduce to method call event
+MethCallE (descr in transformer section)
+
+XBarrierEvent - kinds
+
+controlflow/ %TODO: rename package controlflow->empty (NOT FORGET TO UPDATE FILE TREE LISTING)
+XNopEvent
+XJumpEvent - no kinds, same as nop
+entry
+two kinds of exit
+
+
+Valid graph:
+- single source, two sinks
+- connected
+- each node has 1 or 2 children
+- branching node (2 children) instanceof XComputationEvent (evaluation of the value, no shared-memory operations)
+- 
+
+
+//Picture of the CF-graph
+Consider the following code in C:
 
 
 \subsubsection{W-model}
 \label{ch:impl:model:wmodel}
 
+a simple set of recursively defined relations
+
+atoms: sets/basic relations
+
+
 \subsubsection{Z-formula}
 \label{ch:impl:model:zformula}
+
+%TODO: not implemented at all !
+
+in \porthos[1] : ctx as an argument, calling ctx to create new clause. 
+drawbacks:
+- hard to debug
+- only one solver
+- non-safe way to construct formula (if ctx has changed, runtime excpetion)
+
+in \porthos[2] we created the new abstraction layer \zformula that is translated to 
+
+also recursive representation of smt formula
+
+used as an abstrac
+
+implemented as a simple wrapper over the z3 formula
+
+typed: Expr, BoolExpr, ArithExpr, ...
+
 
 
 \subsection{The processing units} %Transformation}
 \label{ch:impl:proc}
 
-\subsubsection{Input program parser}
+
+\subsubsection{Input memory model parser (1)}
+\label{ch:impl:proc:inp-mod-parser}
+
+ANTLR grammar is extracted from parser used by herd written in OCaml
+
+\subsubsection{Input program parser (2)}
 \label{ch:impl:proc:inp-prog-parser}
 % todo: test pre-/post-fix operations //+think how current tool will behave if there's more than one post-operation //and pre-operation
 
+%TODO: maybe merge this and previous subsubsections
 
-\subsubsection{Input memory model parser}
-\label{ch:impl:proc:inp-mod-parser}
+todo: move something from the input language chapter here
 
-\subsubsection{Y-tree constructor}
+
+\subsubsection{W-model constructor (3)}
+\label{ch:impl:proc:w-constr}
+
+same as y-tree constructor
+
+in perspective: work with functional-style definitions
+
+<not implemented yet>
+
+
+\subsubsection{Y-tree constructor (4)}
 \label{ch:impl:proc:y-constr}
 
 The ANTLR syntax tree of C
@@ -303,40 +390,135 @@ The ANTLR syntax tree of C
 - variables distinguished from 
 
 
-\subsubsection{X-graph pre-compiler}
-\label{ch:impl:proc:x-pre-compiler}
-
-\paragraph{Invocation hooks}
-\label{ch:impl:proc:x-pre-compiler:hooks}
-
-\subsubsection{X-graph compiler}
-\label{ch:impl:proc:x-compiler}
-
-\subsubsection{X-graph transformer}
-\label{ch:impl:proc:x-transf}
-
-\subsubsection{W-model constructor}
-\label{ch:impl:proc:w-constr}
-
-\subsubsection{Z-formula encoder}
-\label{ch:impl:proc:z-encoder}
-
-%todo: mention The SMT-LIB standard http://smtlib.cs.uiowa.edu/papers/smt-lib-reference-v2.6-r2017-07-18.pdf
-
-
-\subsection{Program output}
-\label{ch:impl:out}
-
-
-%TODO: say sth about syntax errors handling: still now, what if parser does not accept syntax?
-
 - if we don't support , our parser still parses it, and the error is thrown at the moment of converting syntax tree to the AST (Y-tree).
 
 - So, The language-dependent syntax tree is converted to the AST by the stateless Visitor (e.g., for C11->Ytree conversion is made by 'C2YtreeConverterVisitor') + short structure of this visitor (how?.. need ly?)
 
 
-%\section{The Y-tree: an AST}
-%\label{ch:impl:ytree}
+
+
+\subsubsection{X-graph precompiler (5)}
+\label{ch:impl:proc:x-pre-compiler}
+
+
+\paragraph{The macro preprocessor}
+
+typedefs, aliases
+
+not supported yet
+
+\paragraph{Variables kinds determination}
+\label{ch:impl:proc:x-pre-compiler:var}
+
+todo
+
+
+\paragraph{The label resolution}
+\label{ch:impl:proc:x-pre-compiler:label}
+
+The label resolution is a process of linkage the referenced labels to declared labels.
+
+In C, the labeled statements are declared via the colon-syntax `\texttt{<label> : <statement>}',
+and the labels are referenced by the jump-statement `\texttt{goto <label>}'.
+The label resolution algorithm traverses the \ytree{} and collects all declared labels into a map that points a label to the labeled statement. %TODO: code: remove temp label generation, it's stupid. put null.
+This information is used during compilation (see Section~\ref{ch:impl:proc:x-compiler}).
+
+%TODO: <not implemented yet>
+
+
+\paragraph{Type analysis}% and function resolution.}
+\label{ch:impl:proc:x-pre-compiler:type}
+
+%\textit{Type analysis} is the process of \textit{converting} the text-based type labels (obtained at variable declarations) to the type instances (modelled by the class \texttt{mousquetaires.languages.common.Type}) and \textit{propagating} them to all expressions.
+The C language has a static (resolved at compile-time) manifest (all types are declared explicitly) type system.
+Comparing to languages that use type inference, the type analysis of a C program constitutes a simple propagating the type information (obtained from variables declarations) to all expressions.
+In \porthos[2], the type is modelled by the class \texttt{mousquetaires.languages.common.Type}.%TODO: + fix class and package name!
+Being carried at Y and X representation levels, the type is converted to a Z-type at the Z-formula encoding stage (see Section~\ref{ch:impl:proc:z-encoder}).
+
+%TODO: describe the Type
+%TODO: maybe rename back to XYType
+%TODO: but definitely get rid of bit32
+
+- X-Y-type construction: code of class YType2TypeConverter (todo: rename: it's not conversion, it's a type construction, from the y-level name+qualifiers+
+
+- The typification algorithm: propagation rules for each of Y and X
+
+- more about type abstraction: common for all levels. Simple label?
+
+- data-model?
+
+\paragraph{Invocation hooking.}
+\label{ch:impl:proc:x-pre-compiler:hooks}
+
+resolve the semantics of a function given its signature (arguments are already typed)
+
+knowledge base
+
+\subsubsection{X-graph compiler (6)}
+\label{ch:impl:proc:x-compiler}
+
+Firstly, the \ytree{} is compiled to the \textit{cyclic control-flow event-based graph} \xgraph[CF].
+
+Then: unrolled up to bound $k$ to the \textit{acyclic control-flow event-based graph} \xgraphU[CF].
+
+Then: data-flow analysis to the \textit{acyclic full event-based graph} \xgraphU[CF+DF].
+
+no contexts yet
+
+MethCallE : bind parameters with values (load them to temp registers) + remember the return-register
+reutrn event= assign the return-register + simple jump
+
+
+\subsubsection{X-graph unroller (7)}
+\label{ch:impl:proc:x-unroll}
+
+simple algorithm
+
+how we attempted, why it didn't work in general case:
+- 
+
+why we changed the notion of unrolling bound
+
+
+\subsubsection{X-graph data-flow constructor (8)}
+\label{ch:impl:proc:x-df}%TODO: ref it in pre-word in this chapter
+
+
+\subsubsection{Z-formula encoder (9)}
+\label{ch:impl:proc:z-encoder}
+
+Z-type : SMT-specific
+
+\subsubsection{SMT-formula translator (10)}
+\label{ch:impl:proc:smt-transator}%TODO: ref in pre-word
+
+\subsubsection{SMT-formula translator (11)}
+\label{ch:impl:proc:smt-solver}%TODO: ref it in pre-word in this chapter
+%TODO: check that we have ALL references in pre-word in this chapter
+
+%todo: mention The SMT-LIB standard http://smtlib.cs.uiowa.edu/papers/smt-lib-reference-v2.6-r2017-07-18.pdf
+
+\subsection{Program output}
+\label{ch:impl:out}
+
+structure: verdict
+
+%TODO: say sth about syntax errors handling: still now, what if parser does not accept syntax?
+
+
+
+\subsection{Auxiliary components}
+\label{ch:impl:aux}
+
+\subsubsection{Watchdog timer}
+\label{ch:impl:aux:watchdog}
+
+\subsubsection{}
+\label{ch:impl:aux:watchdog}
+
+
+
+
 
 - picture of the Y-hierarchy. everything inherits interface YEntity
 
@@ -355,8 +537,6 @@ The ANTLR syntax tree of C
 TODO
 
 
-\section{Compiling the Y-tree to the X-graph}
-\label{ch:impl:y2x}
 
 
 \begin{figure}%[!b]%[H]
@@ -390,7 +570,6 @@ TODO
 
 - determine kind of variables (cannot be done during parsing? don't say this)
 
-- basic typisation
 
 %todo: after all, list which modules (classes, managers) are being initialised during the pre-compilation. I'ts good to have the dependencies graph on moduls (operational semantics:) )
 

@@ -104,10 +104,21 @@
 \newcommand{\mathr}[1]{\ensuremath{\mathtt{#1}}}
 \newcommand{\invrel}[1]{\ensuremath{\mathr{#1}\!\!\mathbin{\char`\^}\!\!\text{-1}}} %inversion or a relation in math mode: r^-1
 
-\newcommand{\ytree}{\texttt{Y-tree}}
-\newcommand{\xgraph}{\texttt{X-graph}}
-\newcommand{\wmodel}{\texttt{W-model}}
-\newcommand{\zformula}{\texttt{Z-formula}}
+\newcommand{\ytree}{\ensuremath{\mathtt{Y\text{-}tree}}}
+\newcommand{\xgraph}[1][]{\ensuremath{\mathtt{X\text{-}graph
+\ifthenelse%
+{\equal{#1}{}}%if
+{}%then
+{_{#1}}%else
+}}}
+\newcommand{\xgraphU}[1][]{\ensuremath{\mathtt{X\text{-}graph%unrolled x-graph
+\ifthenelse%
+{\equal{#1}{}}%if
+{}%then
+{_{#1}^u}%else
+}}}
+\newcommand{\wmodel}{\ensuremath{\mathtt{W\text{-}model}}}
+\newcommand{\zformula}{\ensuremath{\mathtt{Z\text{-}formula}}}
 
 \usepackage{outlines} %for nested itemize lists
 
@@ -502,6 +513,9 @@ vel in turpis. Nulla facilisi. Nulla id tellus sapien, vitae blandit lorem.
 % The star means that the chapter isn't numbered and does not
 % show up in the TOC
 \chapter*{Acknowledgements} % TODO
+%Prof. Keijo Heljanko
+%Prof. Stavros Tripakis
+%Vladimir Kochetkov and Stanislav Matveyev
 In id fringilla velit. Maecenas sed ante sit amet nisi iaculis bibendum sed vel
 elit. Quisque eleifend lacus nec ipsum lobortis ornare. Nam lectus diam,
 facilisis eget porttitor ac, fringilla quis massa. Phasellus ac dolor sem, eget
@@ -573,6 +587,11 @@ ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;
 \cfoot{\thepage}
 
 \definecolor{dkblue}{rgb}{0,0.1,0.4}
+
+\titleformat{\paragraph}[display]%[runin]
+  {\normalsize\bfseries}{}{0pt}{}
+%\titleformat{\paragraph}[runin]
+%{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
 
 % The contents of the thesis are separated to their own files.
 % Edit the content in these files, rename them as necessary.
