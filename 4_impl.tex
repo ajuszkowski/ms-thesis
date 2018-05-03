@@ -83,16 +83,14 @@ The general architecture scheme of \porthos[2] is presented in Figure~\ref{fig:a
 \begin{figure}%[H]
     \centering
   %draft=true
-  \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{img/my/draw.io/general_arch.png}
+  \includegraphics[height=.99\textheight,keepaspectratio]{img/my/draw.io/general_arch.png}
   \caption{The general architecture of \porthos[2]}
   \label{fig:arch}
 \end{figure}
 
 The program takes as input the program to be analysed and one (the reachability analysis mode) or two (the portability analysis mode) memory models. The parsed program syntax tree is then converted (Section~\ref{ch:impl:proc:y-constr}) to a program AST called \ytree{}%
-\footnote{In order to avoid confusion between different internal representations, we prefix the names of elements of each internal representation with a letter. For instance, we picked the letter `Y' to denote the AST code representation as drawing of this letter resembles the tree branching; with letter `X' we prefix elements of the event-flow graph as the events are to be e\textbf{x}ecuted; and with letter `W' we prefix elements of the \textbf{w}eak memory model AST.} %
-(Section~\ref{ch:impl:model:ytree})
-%, and the memory model is being parsed (Section~\ref{ch:impl:proc:w-parser}) to another AST called \wmodel{} (Section~\ref{ch:impl:model:wmodel}).
-, which then is being pre-processed at the pre-compilation stage (Section~\ref{ch:impl:proc:x-pre-compiler}) in order to collect information necessary for the compilation.
+\footnote{In order to avoid confusion between different internal representations, we prefix the names of elements of each internal representation with a letter. For instance, we picked the letter `Y' to denote the AST code representation as drawing of this letter resembles the tree branching; with letter `X' we prefix elements of the event-flow graph as the events are to be e\textbf{x}ecuted; and with letter `W' we prefix elements of the \textbf{w}eak memory model AST.}%
+(Section~\ref{ch:impl:model:ytree}), which then is being pre-processed at the pre-compilation stage (Section~\ref{ch:impl:proc:x-pre-compiler}) in order to collect information necessary for the compilation.
 The \ytree{} then is being compiled (Section~\ref{ch:impl:proc:x-compiler}) to an \xgraph{} representation (Section~\ref{ch:impl:model:xgraph}).
 The compiled \xgraph{} then undergoes a number of transformations (Section~\ref{ch:impl:proc:x-unroll}) necessary for the encoding into a \zformula{} (Section~\ref{ch:impl:model:zformula}) at the pre-encoding stage (Section~\ref{ch:impl:proc:x-unroll}).
 Then, the memory-model constructor (Section~\ref{ch:impl:proc:w-constr}) constructs the derived relations on the basis of the \xgraph{} in order to build the weak memory model \wmodel{} (Section~\ref{ch:impl:model:wmodel}).
@@ -224,7 +222,7 @@ The \ytree{} expressions are the following:
 
   \item \texttt{YAssignmentExpression} that assigns an \texttt{YExpression} to an \texttt{YAtom};
 
-  \item \texttt{YVariableRef} that stores the "reference" to a variable (viz., the name of an object);
+  \item \texttt{YVariableRef} that stores the untyped "reference" to a variable (viz., the name only);
 
   \item \texttt{YLabeledVariableRef} that represents the litmus-specific local variable reference for a certain the process (e.g., `\lstinline{P0:x}' which means the local variable \lstinline{x} of the process \lstinline{P0});
 
@@ -282,7 +280,7 @@ Figure~\ref{fig:class-diagrams:XEntity-interfaces} represents the main hierarchy
 \begin{figure}[t]%[!b]%[H]
   \centering
   \includegraphics[width=\textwidth,keepaspectratio]{img/my/class-diagrams/XEntity-interfaces.png}
-  \caption{The inheritance tree of main interfaces of \xgraph{} elements}
+  \caption{The inheritance tree of interfaces of \xgraph{}}
   \label{fig:class-diagrams:XEntity-interfaces}
 \end{figure}
 
@@ -305,68 +303,98 @@ Figure~\ref{fig:class-diagrams:XMemoryUnit} represents inheritance hierarchy of 
   \label{fig:class-diagrams:XMemoryUnit}
 \end{figure}
 
-Following the terminology of the C standard, we distinguish the \textit{r-value} and \textit{l-value} memory units (l-values may be assigned the new value).
-As r-values cannot change their value, they can be seen as the value itself (therefore the \texttt{XComputationEvent} is modelled as an local r-value memory unit, more detailed discussion goes further in current Section).
+Following the terminology of the C standard, we distinguish the \textit{r-value} and \textit{l-value} memory units (unlike r-values, the l-values may be assigned a new value).
+As r-values cannot change their value, they can be seen as the value itself (therefore the \texttt{XComputationEvent} is modelled as an local r-value memory unit, see more detailed discussion further in current Section).
 
 Each memory unit has an \texttt{XType} associated with it.
 The X-type is a symbolic representation of the C primitive type%
 \footnote{Here we should note the \porthos[2] can eventually evolve to be able to analyse programs written in an OOP language (for instance, in C++). In this case, the \texttt{XType} will have more complex structure than a simple enumeration, which it has when we need to emulate only primitive types of C language. See more detailed discussion on input language type system in Section~\ref{ch:impl:proc:x-pre-compiler:type}.} %
 that is easily convertable to a SMT type (modelled as \texttt{ZType}).%TODO: add the class ZType
 
+- memory manager: no contexts so far; locals per process + shareds; register/deregister;
+
 
 \paragraph{Events}
 \label{ch:impl:model:xgraph:evt}
 
-atomic action
-XEventInfo
+The following interfaces capture main types of events (see also Figure~\ref{fig:class-diagrams:XEntity-interfaces}):
 
-%comp event emulated by both -- optimisation?
-Note, the computation-event \texttt{XComputationEvent} implements both \texttt{XEvent} and \texttt{XMemoryUnit}.
-This is a model-level optimisation possible because a computation-event
-%\textit{is} an event (thus it can form a node in \xgraph{}) and it also 
-performs a computation over local-only memory and does not change the value of any memory unit, therefore the \textit{computation} abstraction (the CPU time) can be safely removed from the model, and the computation event can be seen as an atomic operation.
+\begin{itemize}
+  \item \texttt{XMemoryEvent} \\
+  The memory event defines the transfer of the value from one memory unit to another.
+  There are four types of memory events (the arrow denotes the direction of the data-flow):
+  \begin{enumerate}
+  \item \texttt{XRegisterMemoryEvent}: \\
+    $\texttt{XLocalLvalueMemoryUnit} \leftarrow \texttt{XLocalMemoryUnit}$
+  \item \texttt{XLoadMemoryEvent}: \\
+    $\texttt{XLocalLvalueMemoryUnit} \leftarrow \texttt{XSharedMemoryUnit}$
+  \item \texttt{XStoreMemoryEvent}: \\
+    $\texttt{XSharedLvalueMemoryUnit} \leftarrow \texttt{XLocalMemoryUnit}$
+  \item \texttt{XInitialWriteEvent}: \\
+    $\texttt{XLvalueMemoryUnit} \leftarrow \texttt{XRvalueMemoryUnit}$
 
-secondly, relations edges (special class? no, just map with enum as kind of edge)
+  \end{enumerate}%TODO incompleted enumeration
+  %TODO: either say st about getLoc(), getReg(), or remove them from code
+  
+  \item \texttt{XComputationEvent} \\
+  - binary and unary \\
+  - implements both \texttt{XEvent} and \texttt{XMemoryUnit}.
+  This is a model-level optimisation possible \textbf{due to} because a computation-event
+  %\textit{is} an event (thus it can form a node in \xgraph{}) and it also 
+  performs a computation over local-only memory and does not change the value of any memory unit, therefore the \textit{computation} abstraction (the CPU time) can be safely removed from the model, and the computation event can be seen as an atomic operation.
+  
+  \item \texttt{XControlFlowEvent} \\
+    \texttt{XJumpEvent} no computation, no data operation. may be safely removed for optimisation
+    \texttt{XMethodCallEvent} : TODO: meth call should inherit both control-flow and computation.
+    itself - computation result (temp register) + if (method resolved) => context binding + jump to the method body 
+    
+  \item \texttt{XFenceEvent}
+    \texttt{XBarrierEvent} : mfence, sync, optsync, lwsync, optlwsync, ish, isb, isync
+    
+  \item \texttt{XFakeEvent}
+    \begin{enumerate}
+    \item \texttt{XEntryEvent}, the source event in the event-flow graph %only event that cannot have incoming edges
+    \item \texttt{XExitEvent} : two kinds (depending on the unrolling boundary)
+    \item \texttt{XNopEvent} : no-operation event, used for correct encoding (picture); same as simple jump to the next event
+    \end{enumerate}
+    
+\end{itemize}
 
-CF edge: then-edge (primary), else-edge (alternative)
+Edges (relations edges (just map with enum as kind of edge)):
+\begin{enumerate}
+\item CF edge: then-edge (primary), else-edge (alternative)
+\item DF edge: co, rf
+\end{enumerate}
 
-DF edge: co, rf
+Valid graph:
+\begin{enumerate}
+\item single source, two sinks
+\item connected
+\item each node has 1 or 2 children
+\item branching node (2 children) instanceof XComputationEvent (evaluation of the value, no shared-memory operations)
+\end{enumerate}
 
-Kinds of events: (paragraph) <pciture>
+consider the following code in C:
 
-memory events
+picture of the CF-graph:
 
-computation: reduce to method call event
-MethCallE (descr in transformer section)
+XEventInfo:
+Events are specified by the process generated them and a unique label.
+This information is stored by events as the immutable structure \texttt{XEventInfo}.
+%hashcode, uniqueness
 
-XBarrierEvent - kinds
-
-controlflow/ %TODO: rename package controlflow->empty (NOT FORGET TO UPDATE FILE TREE LISTING)
-XNopEvent
-XJumpEvent - no kinds, same as nop
-entry
-two kinds of exit
-
-
-
-Valid graph: (paragraph)
-- single source, two sinks
-- connected
-- each node has 1 or 2 children
-- branching node (2 children) instanceof XComputationEvent (evaluation of the value, no shared-memory operations)
-- 
-
-
-//Picture of the CF-graph
-Consider the following code in C:
-
+%\lstinputlisting{inc/XEventVisitor-cleaned.java}
 
 \subsubsection{W-model}
 \label{ch:impl:model:wmodel}
+%TODO: almost not implemented !
+<to be done>
 
-a simple set of recursively defined relations
+a simple set of recursively defined relations over ..
 
 atoms: sets/basic relations
+
+itemize elements
 
 
 \subsubsection{Z-formula}
@@ -391,9 +419,10 @@ implemented as a simple wrapper over the z3 formula
 typed: Expr, BoolExpr, ArithExpr, ...
 
 
-
 \subsection{The processing units} %Transformation}
 \label{ch:impl:proc}
+
+%todo: after all, list HERE which modules (classes, managers) are being initialised during the pre-compilation. I'ts good to have the dependencies graph on moduls (operational semantics:) )
 
 - numbers -- same as in gears in Figure~\ref{fig:arch}.
 
@@ -414,7 +443,9 @@ todo: move something from the input language chapter here
 \subsubsection{W-model constructor (3)}
 \label{ch:impl:proc:w-constr}
 
-same as y-tree constructor
+visitor of antlr tree: almost direct
+
+todo: grammar of w-model to appendix
 
 in perspective: work with functional-style definitions
 
@@ -424,22 +455,25 @@ in perspective: work with functional-style definitions
 \subsubsection{Y-tree constructor (4)}
 \label{ch:impl:proc:y-constr}
 
-The ANTLR syntax tree of C
+from ANTLR syntax tree of C
 
-%, comparing to ANTLR syntax tree, does not have 
 - desugar, equiv transform
-- variables distinguished from 
 
+- variables distinguished from 
 
 - if we don't support , our parser still parses it, and the error is thrown at the moment of converting syntax tree to the AST (Y-tree).
 
-- So, The language-dependent syntax tree is converted to the AST by the stateless Visitor (e.g., for C11->Ytree conversion is made by 'C2YtreeConverterVisitor') + short structure of this visitor (how?.. need ly?)
-
-
+- So, The language-dependent syntax tree is converted to the AST by the stateless Visitor (e.g., for C11 -> Ytree conversion is made by 'C2YtreeConverterVisitor') + short structure of this visitor (how?.. need ly?)
 
 
 \subsubsection{X-graph precompiler (5)}
 \label{ch:impl:proc:x-pre-compiler}
+
+%The original program encoded into the \texttt{XGraph} represents a \textit{flow graph}, a connected cyclic directed graph with single source node \texttt{(ENTRY)} (usually for convenience all leaves are connected to the sink node \texttt{(EXIT)}). The cycles are caused by low-level jump instructions, obtained from non-linear high-level control-flow statements (such as \texttt{while}, \texttt{do-while}, \texttt{for}, etc.). However, the cyclic flow graph cannot be encoded into SMT formula since ...
+%//TODO:REFERENCE.%TODO
+
+%note https://en.wikipedia.org/wiki/Semantics_(computer_science)
+%Operational semantics loosely corresponds to interpretation,
 
 
 \paragraph{The macro preprocessor}
@@ -451,11 +485,15 @@ not supported yet
 \paragraph{Variables kinds determination}
 \label{ch:impl:proc:x-pre-compiler:var}
 
-todo
+- pointers
+- externs
+- parameters of process-functions
 
 
 \paragraph{The label resolution}
 \label{ch:impl:proc:x-pre-compiler:label}
+
+%TODO: <not implemented yet>
 
 The label resolution is a process of linkage the referenced labels to declared labels.
 
@@ -464,13 +502,10 @@ and the labels are referenced by the jump-statement `\texttt{goto <label>}'.
 The label resolution algorithm traverses the \ytree{} and collects all declared labels into a map that points a label to the labeled statement. %TODO: code: remove temp label generation, it's stupid. put null.
 This information is used during compilation (see Section~\ref{ch:impl:proc:x-compiler}).
 
-%TODO: <not implemented yet>
-
 
 \paragraph{Type analysis}% and function resolution.}
 \label{ch:impl:proc:x-pre-compiler:type}
 
-%\textit{Type analysis} is the process of \textit{converting} the text-based type labels (obtained at variable declarations) to the type instances (modelled by the class \texttt{mousquetaires.languages.common.Type}) and \textit{propagating} them to all expressions.
 %TODO: remake this paragraph considering that we have already said sth about XType
 The C language has a static (resolved at compile-time) manifest (all types are declared explicitly) type system.
 Comparing to languages that use type inference, the type analysis of a C program constitutes a simple propagating the type information (obtained from variables declarations) to all expressions.
@@ -481,23 +516,23 @@ Being carried at Y and X representation levels, the type is converted to a Z-typ
 %TODO: maybe rename back to XType
 %TODO: but definitely get rid of bit32
 
-- X-Y-type construction: code of class YType2TypeConverter (todo: rename: it's not conversion, it's a type construction, from the y-level name+qualifiers+
+- X-type construction: code of class YType2TypeConverter (todo: rename: it's not conversion, it's a type construction, from the y-level name+qualifiers+
 
-- The typification algorithm: propagation rules for each of Y and X
+- The typification algorithm: propagation rules for each of Y
 
-- more about type abstraction: common for all levels. Simple label?
 
-- data-model?
-
-\paragraph{Invocation hooking.}
+\paragraph{Invocation hooking}
 \label{ch:impl:proc:x-pre-compiler:hooks}
 
-resolve the semantics of a function given its signature (arguments are already typed)
+resolve the semantics of a function given its signature (meth name + params types)
 
-knowledge base
+knowledge base: InterceptionAction(BiFunction<XMemoryUnit, XMemoryUnit[], ? extends XEntity> action)
+
 
 \subsubsection{X-graph compiler (6)}
 \label{ch:impl:proc:x-compiler}
+
+- hierarchy of Compilers (XCompiler is an stateful abstract machine)
 
 Firstly, the \ytree{} is compiled to the \textit{cyclic control-flow event-based graph} \xgraph[CF].
 
@@ -505,146 +540,34 @@ Then: unrolled up to bound $k$ to the \textit{acyclic control-flow event-based g
 
 Then: data-flow analysis to the \textit{acyclic full event-based graph} \xgraphU[CF+DF].
 
-no contexts yet
-
-MethCallE : bind parameters with values (load them to temp registers) + remember the return-register
-reutrn event= assign the return-register + simple jump
+%MethCallE : bind parameters with values (load them to temp registers) + remember the return-register
+%reutrn event= assign the return-register + simple jump
 
 
 \subsubsection{X-graph unroller (7)}
 \label{ch:impl:proc:x-unroll}
 
-simple algorithm
-
-how we attempted, why it didn't work in general case:
-- 
-
-why we changed the notion of unrolling bound
-
-
-\subsubsection{X-graph data-flow constructor (8)}
-\label{ch:impl:proc:x-df}%TODO: ref it in pre-word in this chapter
-
-
-\subsubsection{Z-formula encoder (9)}
-\label{ch:impl:proc:z-encoder}
-
-Z-type : SMT-specific
-
-\subsubsection{SMT-formula translator (10)}
-\label{ch:impl:proc:smt-transator}%TODO: ref in pre-word
-
-\subsubsection{SMT-formula translator (11)}
-\label{ch:impl:proc:smt-solver}%TODO: ref it in pre-word in this chapter
-%TODO: check that we have ALL references in pre-word in this chapter
-
-%todo: mention The SMT-LIB standard http://smtlib.cs.uiowa.edu/papers/smt-lib-reference-v2.6-r2017-07-18.pdf
-
-\subsection{Program output}
-\label{ch:impl:out}
-
-structure: verdict
-
-%TODO: say sth about syntax errors handling: still now, what if parser does not accept syntax?
-
-
-
-\subsection{Auxiliary components}
-\label{ch:impl:aux}
-
-\subsubsection{Watchdog timer}
-\label{ch:impl:aux:watchdog}
-
-\subsubsection{}
-\label{ch:impl:aux:watchdog}
-
-
-
-
-
-- picture of the Y-hierarchy. everything inherits interface YEntity
-
-- immutable
-
-- AST is untyped (YVariableRef).
-
-- short characteristics with citations from the code (this AST contains very basic language elements according to the C execution model (statements and expressions) )
-
-- minor changes are performed by converting to ytree representation: desugaring the target code, etc. (what else?)
-
-
-%\section{Model parser}
-%\label{ch:impl:model}
-
-TODO
-
-
-
-
-\begin{figure}%[!b]%[H]
-  \centering
-  \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{img/my/class-diagrams/XEntity.png}
-  \caption{TODO}
-  \label{fig:class-diagrams:XEntity}
-\end{figure}
-
-\lstinputlisting{inc/XEventVisitor-cleaned.java}
-
-
-%todo: some words on necessity of contexts and lack of them. How would we implement them
-
-%todo: rename Interpreter -> Compiler.
-
-%note https://en.wikipedia.org/wiki/Semantics_(computer_science)
-%Operational semantics loosely corresponds to interpretation,
-
-- hierarchy of Compilers (XCompiler is an stateful abstract machine)
-
-- interface that it provides
-
-- dependencies on other modules (memory-manager, etc.)
-
-
-\subsection{Pre-compilation}
-\label{ch:impl:y2x:precomp}
-
-- collect goto labels (not done yet.)
-
-- determine kind of variables (cannot be done during parsing? don't say this)
-
-
-%todo: after all, list which modules (classes, managers) are being initialised during the pre-compilation. I'ts good to have the dependencies graph on moduls (operational semantics:) )
-
-%\subsection{Compilation}
-%\label{ch:impl:y2x:compil}
-
-- more low-level code representation (or high-level assembly); abstract assembly language. refer to the %2_wmm.tex
-
-- X-hierarchie
-
-
-%\subsection{Post-compilation}
-%\label{ch:impl:x2y:postcomp}
-
-transformations
-
-- After we acquired the event-based representation, we can perform some modifications/simplifications/optimisations on it (separately, allowing user to manage them)
-
-- converting to SSA form (now: during the encoding. should be: during the post-compilation) (as one of necessary steps before encoding)
-
-- setting up backward edges
-
-- more?
-
 - unrolling: why we cannot encode cyclic structures. reference to the paper (see arXiv version)
 % If the analysing program contains a loop, then its control-flow graph represents the cyclic directed graph. Although, in order to be able to encode such a cyclic structure as a boolean formula, this graph needs to be
 
-The original program encoded into the \texttt{XGraph} represents a \textit{flow graph}, a connected cyclic directed graph with single source node \texttt{(ENTRY)} (usually for convenience all leaves are connected to the sink node \texttt{(EXIT)}). The cycles are caused by low-level jump instructions, obtained from non-linear high-level control-flow statements (such as \texttt{while}, \texttt{do-while}, \texttt{for}, etc.). However, the cyclic flow graph cannot be encoded into SMT formula since ...
-//TODO:REFERENCE.%TODO
+simple algorithm
+
+setting up backward edges
+
+how we attempted, why it didn't work in general case:
+
+why we changed the notion of unrolling bound
+
+sth about hashcodes and collections
+
+- After we acquired the event-based representation, we can perform some modifications/simplifications/optimisations on it (separately, allowing user to manage them)
 
 
 
-\begin{figure}
+%TODO: draw (and implement) diff types of exit nodes
+\begin{figure}[h]
+\centering
+\resizebox{\linewidth}{!}{
 \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
 \node[c] (1) [] {$1$};
 \node[c] (2) [below left of=1] {$2$};
@@ -705,22 +628,67 @@ The original program encoded into the \texttt{XGraph} represents a \textit{flow 
 (44) edge [bend left=20] node {} (6)
 ;
 \end{tikzpicture}
+}
 \label{fig:loop-unwind}
 \caption{Example of the flow graph from Figure~\ref{fig:merged-loop.....}, unwinded up to the bound $k = 6$}
 \end{figure}
 
 
+\subsubsection{X-graph data-flow constructor (8)}
+\label{ch:impl:proc:x-df}%TODO: ref it in pre-word in this chapter
+
+- set up co, rf edges => new graph
+
+- computing SSA maps (now: during the encoding. should be: during the post-compilation) (as one of necessary steps before encoding)
 
 
-%\section{XGraph to ZFormula (SMT) encoder}
-%\label{ch:impl:comp:zformula}
+\subsubsection{Z-formula encoder (9)}
+\label{ch:impl:proc:z-encoder}
 
-- Then, this modified event-representation is being encoded to SMT formula and sent to the solver.
+Z-type : SMT-specific (say about smt-lib)
+
+
+\subsubsection{SMT-formula translator (10)}
+\label{ch:impl:proc:smt-transator}%TODO: ref in pre-word
+
+
+\subsubsection{SMT-formula translator (11)}
+\label{ch:impl:proc:smt-solver}%TODO: ref it in pre-word in this chapter
+%TODO: check that we have ALL references in pre-word in this chapter
+
+%todo: mention The SMT-LIB standard http://smtlib.cs.uiowa.edu/papers/smt-lib-reference-v2.6-r2017-07-18.pdf
+
+
+\subsection{Program output}
+\label{ch:impl:out}
+
+structure: verdict
+
+%TODO: say sth about syntax errors handling: still now, what if parser does not accept syntax?
 
 
 
-% say something about equals() and hashCode()
+\subsection{Auxiliary components}
+\label{ch:impl:aux}
 
+\subsubsection{Watchdog timer}
+\label{ch:impl:aux:watchdog}
+
+<not implemented>
+
+todo
+
+\subsubsection{Logger}
+\label{ch:impl:aux:logger}
+
+<not implemented>
+
+todo
+
+
+%todo: some words on necessity of contexts and lack of them. How would we implement them
+
+%todo: rename Interpreter -> Compiler.
 
 
 %TODO: \section{Optimisations}

@@ -1,3 +1,5 @@
+%TODO: move this chapter as a section to introduction and add here the new "Problem statement" chapter!!!
+
 \chapter{Memory model-aware analysis}%Description of the analysis of concurrent systems wrt weak memory models
 %\chapter{A generic framework}
 \label{ch:wmm}
@@ -13,12 +15,12 @@ Obtained model of the program describes the anarchic semantics, which is a truly
 
 %"The semantics of a program is a set of executions" https://johnwickerson.github.io/papers/memalloy.pdf
 The classical approach for modeling concurrent programs is to use the \textit{global time}, a single order of interleavings among all events happened in different threads.
-Although these models are easy to understand, it may be impossible to process \textit{all} possible states, number of which is exponentially large.
+Although these models are easy to understand, it may be impossible to treat \textit{all} possible states, number of which is exponentially large.
 However, there exist equivalence classes such that the result of execution different interleavings from single equivalence class is the same (for instance, computations performed by a processor locally do not affect the global state).
 %One way to do this is to use a non-deterministic computation-centric model~\cite{fri97}, such as ...%The idea in this class of models is based on the fact that the behaviour of a concurrent system is defined only by the interleavings of shared-memory operations, while being independent from the order of local computation events.
 %TODO: nondeterministic
 One such model is the \textit{event-based} representation of a program, which models a program as a directed graph of events (the \textit{event-flow graph}).
-The vertices of such a graph represent \textit{events} (independent low-level instructions; see Section~\ref{ch:wmm:model:events}), and edges represent \textit{relations} over the events (see Section~\ref{ch:wmm:model:relations}).
+The vertices of such a graph represent \textit{events} (see Section~\ref{ch:wmm:model:events}), and edges represent \textit{basic relations} (see Section~\ref{ch:wmm:model:relations}).
 
 % TODO: the event-based representation is a non-deterministic model
 
@@ -33,7 +35,11 @@ The vertices of such a graph represent \textit{events} (independent low-level in
 
 % TODO: check this subseciton
 
-A \textit{memory event} $e_m \in \mathbb{E}$ represents the fact of access to the memory. Since memory is the crucial low-level resource shared by multiple processes, most relations are defined over memory events. 
+The event is an independent low-level atomic operation.
+
+A \textit{memory event} $e_m \in \mathbb{E}$ represents the fact of access to the memory.
+Only memory events change the state of an abstract machine executing the code, since it is completely determined by values stored in its memory.
+Since memory is the crucial low-level resource shared by multiple processes, most relations are defined over memory events. 
 The processes can access a shared memory location (denoted by~$l_i$, for \textit{location}), or a local one (denoted by~$r_i$, for \textit{register}).
 A memory event can access at most one shared memory location, high-level instructions that address more than one shared variable must be transformed into a sequence of events.
 A memory event is specified by its direction with respect to the shared variable, its location~$\mathtt{loc}(e_m)$, its processor label~$\mathtt{proc}(e_m)$, and a unique event label~$\mathtt{id}(e_m)$~\cite{alglave2010shared}.
