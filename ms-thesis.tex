@@ -104,21 +104,21 @@
 \newcommand{\mathr}[1]{\ensuremath{\mathtt{#1}}}
 \newcommand{\invrel}[1]{\ensuremath{\mathr{#1}\!\!\mathbin{\char`\^}\!\!\text{-1}}} %inversion or a relation in math mode: r^-1
 
-\newcommand{\ytree}{\ensuremath{\mathtt{Y\text{-}tree}}}
-\newcommand{\xgraph}[1][]{\ensuremath{\mathtt{X\text{-}graph
+\newcommand{\ytree}{\ensuremath{\text{Y-tree}}}
+\newcommand{\wmodel}{\ensuremath{\text{W-model}}}%\mathtt{W\text{-}model}}}
+\newcommand{\zformula}{\ensuremath{\text{Z-formula}}}
+\newcommand{\xgraph}[1][]{\ensuremath{\text{X-graph}
 \ifthenelse%
 {\equal{#1}{}}%if
 {}%then
 {_{#1}}%else
-}}}
-\newcommand{\xgraphU}[1][]{\ensuremath{\mathtt{X\text{-}graph%unrolled x-graph
+}}
+\newcommand{\xgraphU}[1][]{\ensuremath{\text{X-graph}%\mathtt{X\text{-}graph%unrolled x-graph
 \ifthenelse%
 {\equal{#1}{}}%if
 {}%then
 {_{#1}^u}%else
-}}}
-\newcommand{\wmodel}{\ensuremath{\mathtt{W\text{-}model}}}
-\newcommand{\zformula}{\ensuremath{\mathtt{Z\text{-}formula}}}
+}}
 
 \usepackage{outlines} %for nested itemize lists
 
@@ -590,6 +590,7 @@ ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;
 
 \titleformat{\paragraph}[display]%[runin]
   {\normalsize\bfseries}{}{0pt}{}
+\titlespacing*{\paragraph}{0pt}{0pt}{0pt}
 %\titleformat{\paragraph}[runin]
 %{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
 

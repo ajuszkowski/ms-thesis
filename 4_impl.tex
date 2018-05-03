@@ -78,10 +78,11 @@ It is worth noting that, for the reasons of simplicity, the \porthos[2] is not a
 \section{Architecture}
 \label{ch:impl:arch}
 
-The general architecture scheme of \porthos[2] is presented in Figure~\ref{fig:arch}. On the picture, rectangles denote processing units (marked with gear sign with a number of the component for referencing it).
+The general architecture scheme of \porthos[2] is presented in Figure~\ref{fig:arch}. On the picture, rectangles denote processing units (marked with gear sign with a unique number of the component).
 
 \begin{figure}%[H]
     \centering
+  %draft=true
   \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{img/my/draw.io/general_arch.png}
   \caption{The general architecture of \porthos[2]}
   \label{fig:arch}
@@ -181,12 +182,14 @@ Also, Current version of \porthos[2] simply ignores C processor directives, howe
 
 \subsection{The internal representations}
 \label{ch:impl:model}
-%As it has already been mentioned, all internal representations constructed by \porthos[2] are \textit{immutable}.
+
+As it has already been mentioned, all internal representations used by \porthos[2] are immutable.
+For keeping the architecture transparent, we build all abstraction levels with interfaces, even if some of them does not add any new functionality.% (as java does not support multiple inheritance for classes (only for interfaces), we 
 
 \subsubsection{Y-tree}
 \label{ch:impl:model:ytree}
 
-The first internal representation that \porthos[2] uses is the \ytree{}, which represents a rather high-level AST.
+The first internal representation used by \porthos[2] is the \textit{\ytree{}}, which represents a rather high-level AST.
 The Apendix~\ref{apx:trees} represents the file tree of main classes that constitute the \ytree{} hierarchy (as the inheritance tree might be obvious for the C-like AST, we confine ourselves to presenting the classes file tree only).
 
 %\columnratio{0.7}%\begin{paracol}{2}
@@ -255,12 +258,13 @@ The \ytree{} statements of follow this rule, however they these labels are symbo
 Apart from the set of statements listed before, we define the \texttt{YFunctionDefinition} and its inheritor a litmus-specific declaration \texttt{YProcessDefinition}
 %\textbf{(TODO: rename YProcessStatement->YProcessDefinition)} %TODO <--
 used in intra-procedural analysis mode.
-The function definition contains the \texttt{YCompoundStatement}-typed body and the signature of type \texttt{YMethodSignature}, which is used in the function resolution during the compilation stage. %TODO: pre-compilation?
+%TODO: rename YMethodSignature -> YFunctionSignature
+The function definition contains the \texttt{YCompoundStatement} body and the \texttt{YMethodSignature} signature, which is used in the function resolution during the compilation stage. %TODO: pre-compilation?
 The other litmus-specific statements are \texttt{YPreludeDefinition}
 %\textbf{(TODO: rename YPreludeStatement -> YPreludeDefinition)} %TODO <--
-that carries the list of \texttt{YStatement}-typed initial writes, and \texttt{YPostludeDefinition} 
+that carries the list of \texttt{YStatement} initial writes, and \texttt{YPostludeDefinition} 
 %\textbf{(TODO: rename YPostludeStatement -> YPostludeDefinition)} %TODO <--
-that carries the \texttt{YExpression}-typed binary expression to be asserted by the litmus test.
+that carries the \texttt{YExpression} binary expression to be asserted by the litmus test.
 
 The syntax tree that contains set of definitions (e.g., litmus-initialisations, function definitions, litmus-asserts) is modelled by the class \texttt{YSyntaxTree}.
 
@@ -268,32 +272,67 @@ The syntax tree that contains set of definitions (e.g., litmus-initialisations, 
 \subsubsection{X-graph}
 \label{ch:impl:model:xgraph}
 
-The \ytree{} is compiled into the low-level event-based program representation \xgraph{}.
+The \ytree{} is compiled into the low-level event-based program representation \textit{\xgraph{}}.
 The mathematical structure of event-flow graph was discussed in Section~\ref{ch:wmm:event}.
-In general, \xgraph{} follows the structure described there, however it is constructed in several stages.
-%.. goto: compilation
+%In general, \xgraph{} follows the structure described there, however it is constructed in several stages.
+The nodes of the graph are events, and the edges are basic relations: the control-flow relation \po and the data-flow relations \co and \rf.
+Hereinafter, we denote the \xgraph{} with only control-flow edges as \xgraph[CF], the \xgraph{} with only data-flow edges as \xgraph[CF]. The complete \xgraph{} is $\xgraph[CF+DF] = \xgraph[CF] \cup \xgraph[DF]$.
+Figure~\ref{fig:class-diagrams:XEntity-interfaces} represents the main hierarchy of the X-abstraction level.
+
+\begin{figure}[t]%[!b]%[H]
+  \centering
+  \includegraphics[width=\textwidth,keepaspectratio]{img/my/class-diagrams/XEntity-interfaces.png}
+  \caption{The inheritance tree of main interfaces of \xgraph{} elements}
+  \label{fig:class-diagrams:XEntity-interfaces}
+\end{figure}
+
+All elements of \xgraph{} implement the interface \texttt{XEntity}.
+There are two main kinds of X-entity: \textit{events} that implement the \texttt{XEvent} interface, and \textit{memory-units} that implement the \texttt{XMemoryUnit} interface.
 
 
-atomic action?
+\paragraph{Memory units}
+\label{ch:impl:model:xgraph:mem}
 
-%However, the \xgraph{}
-%The basic element of \xgraph{} is an event. Each event \texttt{XEvent}
-Firstly, two elements
-%two basic elements of diff nature: XEvent and YMemoryUnit
+The \textit{memory unit} is a memory cell of an abstract machine executing the code.
+This machine has an infinite number of arbitrary-sized \textit{registers} (local memory units) and \textit{locations} (shared memory units).
+Local memory units inherit the \texttt{XProcessLocalElement} interface, that stores the ID of the owning process.
+Figure~\ref{fig:class-diagrams:XMemoryUnit} represents inheritance hierarchy of memory units.
 
-comp event emulated by both -- optimisation?
+\begin{figure}[t]%[!b]%[H]
+  \centering
+  \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{img/my/class-diagrams/XMemoryUnit-m.png}
+  \caption{The inheritance tree of \xgraph{} memory units}
+  \label{fig:class-diagrams:XMemoryUnit}
+\end{figure}
+
+Following the terminology of the C standard, we distinguish the \textit{r-value} and \textit{l-value} memory units (l-values may be assigned the new value).
+As r-values cannot change their value, they can be seen as the value itself (therefore the \texttt{XComputationEvent} is modelled as an local r-value memory unit, more detailed discussion goes further in current Section).
+
+Each memory unit has an \texttt{XType} associated with it.
+The X-type is a symbolic representation of the C primitive type%
+\footnote{Here we should note the \porthos[2] can eventually evolve to be able to analyse programs written in an OOP language (for instance, in C++). In this case, the \texttt{XType} will have more complex structure than a simple enumeration, which it has when we need to emulate only primitive types of C language. See more detailed discussion on input language type system in Section~\ref{ch:impl:proc:x-pre-compiler:type}.} %
+that is easily convertable to a SMT type (modelled as \texttt{ZType}).%TODO: add the class ZType
+
+
+\paragraph{Events}
+\label{ch:impl:model:xgraph:evt}
+
+atomic action
+XEventInfo
+
+%comp event emulated by both -- optimisation?
+Note, the computation-event \texttt{XComputationEvent} implements both \texttt{XEvent} and \texttt{XMemoryUnit}.
+This is a model-level optimisation possible because a computation-event
+%\textit{is} an event (thus it can form a node in \xgraph{}) and it also 
+performs a computation over local-only memory and does not change the value of any memory unit, therefore the \textit{computation} abstraction (the CPU time) can be safely removed from the model, and the computation event can be seen as an atomic operation.
 
 secondly, relations edges (special class? no, just map with enum as kind of edge)
 
-
 CF edge: then-edge (primary), else-edge (alternative)
 
+DF edge: co, rf
 
-XEventInfo
-
-
-hierarchy of memory units
-
+Kinds of events: (paragraph) <pciture>
 
 memory events
 
@@ -309,7 +348,8 @@ entry
 two kinds of exit
 
 
-Valid graph:
+
+Valid graph: (paragraph)
 - single source, two sinks
 - connected
 - each node has 1 or 2 children
@@ -355,6 +395,7 @@ typed: Expr, BoolExpr, ArithExpr, ...
 \subsection{The processing units} %Transformation}
 \label{ch:impl:proc}
 
+- numbers -- same as in gears in Figure~\ref{fig:arch}.
 
 \subsubsection{Input memory model parser (1)}
 \label{ch:impl:proc:inp-mod-parser}
@@ -430,13 +471,14 @@ This information is used during compilation (see Section~\ref{ch:impl:proc:x-com
 \label{ch:impl:proc:x-pre-compiler:type}
 
 %\textit{Type analysis} is the process of \textit{converting} the text-based type labels (obtained at variable declarations) to the type instances (modelled by the class \texttt{mousquetaires.languages.common.Type}) and \textit{propagating} them to all expressions.
+%TODO: remake this paragraph considering that we have already said sth about XType
 The C language has a static (resolved at compile-time) manifest (all types are declared explicitly) type system.
 Comparing to languages that use type inference, the type analysis of a C program constitutes a simple propagating the type information (obtained from variables declarations) to all expressions.
-In \porthos[2], the type is modelled by the class \texttt{mousquetaires.languages.common.Type}.%TODO: + fix class and package name!
+%In \porthos[2], the type is modelled by the class \texttt{XType}.%TODO: + fix class and package name!
 Being carried at Y and X representation levels, the type is converted to a Z-type at the Z-formula encoding stage (see Section~\ref{ch:impl:proc:z-encoder}).
 
 %TODO: describe the Type
-%TODO: maybe rename back to XYType
+%TODO: maybe rename back to XType
 %TODO: but definitely get rid of bit32
 
 - X-Y-type construction: code of class YType2TypeConverter (todo: rename: it's not conversion, it's a type construction, from the y-level name+qualifiers+
