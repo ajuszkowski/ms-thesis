@@ -66,7 +66,10 @@
 \usepackage{multicol} % for using multiple columns in listings
 
 \usepackage{listings}
-\renewcommand{\lstlistingname}{Figure}  %perhaps, it's not a gute Idee to change all the listings to Figures
+\usepackage{inc/listingset}
+
+
+\renewcommand{\labelitemii}{$\circ$}
 
 \lstset{ 
     columns=[l]fullflexible,
@@ -88,7 +91,7 @@
 {\equal{#1}{}}%if
 {}%then
 {\ifthenelse{\equal{#1}{1}}%else-if
-{\,v1}%then
+{}%then%{\,v1}%then
 {#1}%else
 }}}
 \newcommand{\oldporthos}{\porthos[1]}
@@ -119,6 +122,8 @@
 {}%then
 {_{#1}^u}%else
 }}
+
+\sloppy %forbid page overfull with texttt words
 
 \usepackage{outlines} %for nested itemize lists
 
@@ -417,23 +422,23 @@ sorting=anyt,%Sort by alphabetic label, name, year, title,
 %\setlength{\topmargin}{-11mm}
 
 
-\definecolor{pblue}{rgb}{0.13,0.13,1}
-\definecolor{pgreen}{rgb}{0,0.5,0}
-\definecolor{pred}{rgb}{0.9,0,0}
-\definecolor{pgrey}{rgb}{0.46,0.45,0.48}
-\lstset{language=java,
-  showspaces=false,
-  showtabs=false,
-  breaklines=true,
-  showstringspaces=false,
-  breakatwhitespace=true,
-  commentstyle=\color{pgreen},
-  keywordstyle=\color{pblue},
-  stringstyle=\color{pred},
-  basicstyle=\ttfamily\scriptsize,
-  moredelim=[il][\textcolor{pgrey}]{$$},
-  moredelim=[is][\textcolor{pgrey}]{\%\%}{\%\%}
-}
+%\definecolor{pblue}{rgb}{0.13,0.13,1}
+%\definecolor{pgreen}{rgb}{0,0.5,0}
+%\definecolor{pred}{rgb}{0.9,0,0}
+%\definecolor{pgrey}{rgb}{0.46,0.45,0.48}
+%\lstset{
+%  showspaces=false,
+%  showtabs=false,
+%  breaklines=true,
+%  showstringspaces=false,
+%  breakatwhitespace=true,
+%  commentstyle=\color{pgreen},
+%  keywordstyle=\color{pblue},
+%  stringstyle=\color{pred},
+%  basicstyle=\ttfamily\scriptsize,
+%  moredelim=[il][\textcolor{pgrey}]{$$},
+%  moredelim=[is][\textcolor{pgrey}]{\%\%}{\%\%}
+%}
 
 % The preamble ends here, and the document begins.
 % Place all formatting commands and such before this line.

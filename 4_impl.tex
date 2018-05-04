@@ -88,13 +88,15 @@ The general architecture scheme of \porthos[2] is presented in Figure~\ref{fig:a
   \label{fig:arch}
 \end{figure}
 
-The program takes as input the program to be analysed and one (the reachability analysis mode) or two (the portability analysis mode) memory models. The parsed program syntax tree is then converted (Section~\ref{ch:impl:proc:y-constr}) to a program AST called \ytree{}%
+The program takes as input the program to be analysed and one (the reachability analysis mode) or two (the portability analysis mode) memory models.
+The parsed program syntax tree is then converted (Section~\ref{ch:impl:proc:y-constr}) to a program AST called \ytree{}%
 \footnote{In order to avoid confusion between different internal representations, we prefix the names of elements of each internal representation with a letter. For instance, we picked the letter `Y' to denote the AST code representation as drawing of this letter resembles the tree branching; with letter `X' we prefix elements of the event-flow graph as the events are to be e\textbf{x}ecuted; and with letter `W' we prefix elements of the \textbf{w}eak memory model AST.}%
 (Section~\ref{ch:impl:model:ytree}), which then is being pre-processed at the pre-compilation stage (Section~\ref{ch:impl:proc:x-pre-compiler}) in order to collect information necessary for the compilation.
 The \ytree{} then is being compiled (Section~\ref{ch:impl:proc:x-compiler}) to an \xgraph{} representation (Section~\ref{ch:impl:model:xgraph}).
-The compiled \xgraph{} then undergoes a number of transformations (Section~\ref{ch:impl:proc:x-unroll}) necessary for the encoding into a \zformula{} (Section~\ref{ch:impl:model:zformula}) at the pre-encoding stage (Section~\ref{ch:impl:proc:x-unroll}).
-Then, the memory-model constructor (Section~\ref{ch:impl:proc:w-constr}) constructs the derived relations on the basis of the \xgraph{} in order to build the weak memory model \wmodel{} (Section~\ref{ch:impl:model:wmodel}).
-Thereafter, \wmodel{} and transformed \xgraph{} are encoded (Section~\ref{ch:impl:proc:z-encoder}) to a \zformula{} representation (a wrapper over an SMT logical formula), which then is passed as an input to the SMT-solver.
+The compiled \xgraph{} then is being converted to an acyclic form (Section~\ref{ch:impl:proc:x-unroll}) in order to be encoded into a \zformula{} (Section~\ref{ch:impl:model:zformula}).
+Apart from that, the memory-model constructor (Section~\ref{ch:impl:proc:w-constr}) constructs the abstract syntax tree of derived relations of the weak memory model \wmodel{} (Section~\ref{ch:impl:model:wmodel}).
+%on the basis of the \xgraph{} in order to build the weak memory model \wmodel{} (Section~\ref{ch:impl:model:wmodel}).
+Thereafter, \wmodel{} and acyclic \xgraph{} are encoded (Section~\ref{ch:impl:proc:z-encoder}) to a \zformula{} representation (a wrapper over an SMT logical formula), which then is translated to an SMT-formula (Section~\ref{ch:impl:proc:smt-transator}), which then is solved by the SMT-solver (Section~\ref{ch:impl:proc:smt-solver}).
 
 \subsection{Program input}
 \label{ch:impl:input}
@@ -109,14 +111,12 @@ Among other advantages ANTLR, it is worth of noting that it has rather large col
 
 Figure~\ref{fig:in_grammar_pts} represents the simplified grammar of of input language used by previous version of \porthos{} (the full ANTLR grammar is available at Appendix~\ref{apx:grammar}.
 
-\begin{figure}[h]%[!hb]
+\begin{figure}[!h]%[!hb]
 \centering
-\begin{lstlisting}[mathescape=true,%
+\begin{lstlisting}[language=antlr,
+                  basicstyle=\ttfamily\tiny,
                   caption={The sketch of the input language grammar used by \oldporthos},%
-                  label={fig:in_grammar_pts},%
-                  morekeywords={if,then,else,return,while,program,thread},%
-                  breaklines=true,%
-                  basicstyle=\ttfamily\scriptsize]
+                  label={fig:in_grammar_pts}]
 <prog> : <init> <thrd>* <assert>
        ;
 <thrd> : thread <tid> <inst>
@@ -168,12 +168,12 @@ tialisation of the shared variable and only by default value \lstinline{0}. The 
 
 
 The \porthos[2] uses the C language grammar of proposed in the C11 standard~\cite{jtc2011sc22}, that was extended by litmus test-specific syntax such as initialisation and final-state assertion statements (the original ANTLR grammar can be found in the official repository containing the collection of ANTLR v4 grammars%
-\footnote{Repository path: \url{https://github.com/antlr/grammars-v4}}).%
+\footnote{Repository path: \url{https://github.com/antlr/grammars-v4}}). %
 Currently, \porthos[2] can operate only in the intra-procedural analysis mode (analysing single procedure), assuming that each function defined in the input file is being executed in a separate thread.
 %TODO: describe more intra- and inter-procedural!
 However, the redesigned architecture of \porthos[2] allow to easily support inter-procedural (cross-procedure) analysis by inlining function calls and binding variable contexts.
 %TODO: inter: user specifies the repository with code, functions that intended to work in parallel and runs. 
-Also, Current version of \porthos[2] simply ignores C processor directives, however, in future it is possible to support it.
+Also, current version of \porthos[2] simply ignores C processor directives, however, in future it can be extended to support them.
 
 %TODO: say sth about 100500 litmus-tests for kernel
 
@@ -193,21 +193,21 @@ The Apendix~\ref{apx:trees} represents the file tree of main classes that consti
 %\columnratio{0.7}%\begin{paracol}{2}
 %\switchcolumn%\VerbatimInput{inc/lst/Ytree-tree.out}%\end{paracol}
 The abstract syntax tree \ytree{} is an abstraction level suitable for compiling the program to a low-level representation (in case of processing low-level assembly code, it may be directly converted to the \xgraph{} representation).
-As the ANTLR syntax tree follows the same structure as the grammar, which is a superset of the real (meaningful) grammar of C language, it lacks multiple concepts of the language (for example, the syntax of indexer access corresponds the grammar rule \lstinline{postfixExpression '[' expression ']'}, that is converted to the \texttt{YIndexerExpression}).
+As the ANTLR syntax tree follows the same structure as the grammar, which is a superset of the real (meaningful) grammar of C language, it lacks multiple concepts of the language (for example, the syntax of indexer access corresponds the grammar rule "\lstinline{postfixExpression '[' expression ']'}", that is converted to the \texttt{YIndexerExpression}).
 However some details of the syntax might have been abstracted away (for instance, array operations may be emulated by functions invocations, see~\cite[Chapter 5]{gries2012science}), we found this level of abstraction suitable enough for our tasks.
 
 Each \ytree{} element implements the interface \texttt{YEntity} and carries the \texttt{OriginLocation} %
 %\textbf{(TODO: Rename CodeLocation->OriginLocation in the code!)} %TODO <--
 instance that contains information about the coordinates of the input text that generated the \ytree{} element.
 
-Following the C11 standard~\cite{iso2012iec}, we distinguish a \textit{statement} (\textit{"an action to be performed"}) from an \textit{expression} (\textit{"a sequence of operators and operands that specifies computation of a value, or that designates an object or a function, or that generates side effects, or that performs a combination thereof"}).
+Following the C11 standard~\cite{iso2012iec}, we distinguish a \textit{statement} (\textit{"an~action to be performed"}) from an \textit{expression} (\textit{"a sequence of operators and operands that specifies computation of a value, or that designates an object or a function, or that generates side effects, or that performs a combination thereof"}).
 
 All \ytree{} expressions implement the \texttt{YExpression} interface.
 On the \ytree{} level, the pointer arithmetic is modelled by the integer number \textit{pointer level} of an expression (although in fact this is the property of a type not of an expression, the y-tree is an untyped syntax tree, therefore the elements \ytree{} should carry this property).
 We distinguish the subset of expressions that imply no side-effects, they implement the interface \texttt{YAtom} and can be global or local (which is defined also syntactically).
 %\textbf{(TODO:THIS SHOULD BE IN PRE-PROCESSING)} %TODO <--
 
-\vspace{0.5em}
+\vspace{1em}
 The \ytree{} expressions are the following:
 
 \begin{itemize}%[nolistsep]
@@ -311,76 +311,101 @@ The X-type is a symbolic representation of the C primitive type%
 \footnote{Here we should note the \porthos[2] can eventually evolve to be able to analyse programs written in an OOP language (for instance, in C++). In this case, the \texttt{XType} will have more complex structure than a simple enumeration, which it has when we need to emulate only primitive types of C language. See more detailed discussion on input language type system in Section~\ref{ch:impl:proc:x-pre-compiler:type}.} %
 that is easily convertable to a SMT type (modelled as \texttt{ZType}).%TODO: add the class ZType
 
-- memory manager: no contexts so far; locals per process + shareds; register/deregister;
+The memory units are crated and stored by the stateful \texttt{XMemoryManager}, which provides interface for accessing memory units during compilation stage.
+The memory manager takes into account the higher priority of local variables over global variables specific for C language.
+The \texttt{XMemoryManager} provides interface for registering shared variables at the precompilation stage, registering local variables dynamically at the compilation stage, and returning memory unit instances for the requests by name.
+\textit{TODO: context stack}%TODO: refactor XMemoryManager!
 
 
 \paragraph{Events}
 \label{ch:impl:model:xgraph:evt}
 
-The following interfaces capture main types of events (see also Figure~\ref{fig:class-diagrams:XEntity-interfaces}):
+X-events are the independent atomic operations.
+Each event is specified by the process generated them and a unique event label.
+This information is stored by events in the immutable structure \texttt{XEventInfo}.
 
-\begin{itemize}
-  \item \texttt{XMemoryEvent} \\
+The following interfaces model basic kinds of events (see Figure~\ref{fig:class-diagrams:XEntity-interfaces}):
+%\begin{itemize}[noitemsep]
+\begin{outline}
+  \1 \texttt{XMemoryEvent} \\
   The memory event defines the transfer of the value from one memory unit to another.
   There are four types of memory events (the arrow denotes the direction of the data-flow):
-  \begin{enumerate}
-  \item \texttt{XRegisterMemoryEvent}: \\
-    $\texttt{XLocalLvalueMemoryUnit} \leftarrow \texttt{XLocalMemoryUnit}$
-  \item \texttt{XLoadMemoryEvent}: \\
-    $\texttt{XLocalLvalueMemoryUnit} \leftarrow \texttt{XSharedMemoryUnit}$
-  \item \texttt{XStoreMemoryEvent}: \\
-    $\texttt{XSharedLvalueMemoryUnit} \leftarrow \texttt{XLocalMemoryUnit}$
-  \item \texttt{XInitialWriteEvent}: \\
-    $\texttt{XLvalueMemoryUnit} \leftarrow \texttt{XRvalueMemoryUnit}$
+  %\begin{itemize}[noitemsep]
+  \2 \texttt{XRegisterMemoryEvent}: \\
+    $(\texttt{XLocalLvalueMemoryUnit}) \leftarrow (\texttt{XLocalMemoryUnit})$,
+  \2 \texttt{XLoadMemoryEvent}: \\
+    $(\texttt{XLocalLvalueMemoryUnit}) \leftarrow (\texttt{XSharedMemoryUnit})$,
+  \2 \texttt{XStoreMemoryEvent}: \\
+    $(\texttt{XSharedLvalueMemoryUnit}) \leftarrow (\texttt{XLocalMemoryUnit})$,
+  \2 \texttt{XInitialWriteEvent}: \\
+    $(\texttt{XLvalueMemoryUnit}) \leftarrow (\texttt{XRvalueMemoryUnit})$.
 
-  \end{enumerate}%TODO incompleted enumeration
+  %\end{itemize}%TODO incompleted enumeration
   %TODO: either say st about getLoc(), getReg(), or remove them from code
   
-  \item \texttt{XComputationEvent} \\
-  - binary and unary \\
-  - implements both \texttt{XEvent} and \texttt{XMemoryUnit}.
-  This is a model-level optimisation possible \textbf{due to} because a computation-event
-  %\textit{is} an event (thus it can form a node in \xgraph{}) and it also 
-  performs a computation over local-only memory and does not change the value of any memory unit, therefore the \textit{computation} abstraction (the CPU time) can be safely removed from the model, and the computation event can be seen as an atomic operation.
-  
-  \item \texttt{XControlFlowEvent} \\
-    \texttt{XJumpEvent} no computation, no data operation. may be safely removed for optimisation
-    \texttt{XMethodCallEvent} : TODO: meth call should inherit both control-flow and computation.
-    itself - computation result (temp register) + if (method resolved) => context binding + jump to the method body 
+  \1 \texttt{XComputationEvent} \\
+    We distinguish two types of computation events:
+      %\begin{itemize}[noitemsep]
+      \2 \texttt{XUnaryComputationEvent} that encodes bit negation and no-operation,
+      \2 \texttt{XBinaryComputationEvent} that encodes numeric operations (such as addition, multiplication, etc.), bit vector operations (such as bit-and, bit-xor, etc.), relative operations (such as greater-then comparison, equality comparison, etc.), and logical operations (such as conjunction and disjunction).
+      %\end{itemize}
+    Since a computation event performs computation over local-only memory and does not change value of any memory unit, the \textit{computation} abstraction (as the CPU time spent for the computation itself) can be safely removed from the model, and the computation event can be seen as a simultaneous operation.
+    Therefore the computation event class implements both \texttt{XEvent} and \texttt{XMemoryUnit}.
     
-  \item \texttt{XFenceEvent}
-    \texttt{XBarrierEvent} : mfence, sync, optsync, lwsync, optlwsync, ish, isb, isync
+  \1 \texttt{XControlFlowEvent} \\
+    The control-flow event indicates a non-linear jump in the code. We distinguish two kinds of control-flow events: 
+    %\begin{itemize}[noitemsep]
+      \2 \texttt{XJumpEvent} that performs no computation and no data operation, it can be safely removed from the model as an optimisation,
+      \2 \texttt{XMethodCallEvent} that models the method call with the \texttt{FASTCALL} calling convention (passing arguments in registers).
+      %TODO: check the diagrams if the XMCE really inherits XLMU
+      The method call also implements the \texttt{XLocalMemoryUnit} since it represents the computed value returned by the method call.
+      If the method has been resolved, the actual arguments are bind to the formal parameters (treated as temporary local memory units), the called \texttt{XMethodCallEvent} is pushed onto the call stack, and the execution jumps to the method body.
+      Each \texttt{return} statement creates the assignment of the method call event on the top of call stack.
+      \\
+      If the method has not been resolved, \textit{TODO: think about it. Will the formula be SAT? Or do we need to abort the analysis?}
+    %\end{itemize}
+
+  \1 \texttt{XFenceEvent} \\
+    The fences are implemented as an enumeration \texttt{XBarrierEvent}.
+    Current implementation of \porthos[2] supports all fences supported by \porthos[1]: 
+    \texttt{mfence}, %TODO: what about lfence and sfence from the x86fences.cat ?
+    \texttt{sync}, \texttt{optsync}, \texttt{lwsync}, \texttt{optlwsync}, \texttt{ish}, \texttt{isb}, and \texttt{isync}.%TODO: description of each
     
-  \item \texttt{XFakeEvent}
-    \begin{enumerate}
-    \item \texttt{XEntryEvent}, the source event in the event-flow graph %only event that cannot have incoming edges
-    \item \texttt{XExitEvent} : two kinds (depending on the unrolling boundary)
-    \item \texttt{XNopEvent} : no-operation event, used for correct encoding (picture); same as simple jump to the next event
-    \end{enumerate}
-    
+  \1 \texttt{XFakeEvent} \\
+    The fake events are auxiliary elements of \xgraph{}.
+    %\begin{itemize}[noitemsep]
+    \2 \texttt{XEntryEvent}, the per-process unique source event in the event-flow graph,
+    \2 \texttt{XExitEvent}, the process sink event. There are two kinds of sink events: \textit{complete} and \textit{incomplete} (see description in Section~\ref{ch:impl:proc:x-unroll}),
+    \2 \texttt{XNopEvent}, the no-operation event (a jump to the next event), used for correct encoding in case when the control-flow branch does not have any event (see Figure~\ref{encode:branching:nop}).
+   % \end{itemize}
+%\end{itemize}
+\end{outline}
+
+\paragraph{Edges}
+Edges are stored as an immutable hash-map from source to target event.
+The type of edge is stored in the enumeration \texttt{XEdgeKind}:%TODO: IMPLEMENT THIS
+\begin{itemize}[noitemsep]
+  \item control-flow edges: a \textit{primary} edge (epsilon or if-then transition) and an \textit{alternative} edge (if-else transition), see more in Section~\ref{ch:port:enc:cf};
+  \item data-flow edges: the \co-relation edge and the \rf-relation edge. %TODO! implement and then describe more!
 \end{itemize}
 
-Edges (relations edges (just map with enum as kind of edge)):
+\paragraph{Graph invariants}
+Once being constructed, graph must conform the following requirements:
 \begin{enumerate}
-\item CF edge: then-edge (primary), else-edge (alternative)
-\item DF edge: co, rf
+\item graph must have a single source with no ingoing edges, and two sinks of different kinds without outgoing edges,
+\item graph must be connected,
+\item each node can have either one or two direct control-flow successors,
+\item only nodes of type \texttt{XComputationEvent} can have two direct control-flow successors,
+%\item each node except the source node must have at least one parent
+\item \textbf{todo: sth about data-flow edges}
 \end{enumerate}
 
-Valid graph:
-\begin{enumerate}
-\item single source, two sinks
-\item connected
-\item each node has 1 or 2 children
-\item branching node (2 children) instanceof XComputationEvent (evaluation of the value, no shared-memory operations)
-\end{enumerate}
+\paragraph{Example}
 
 consider the following code in C:
 
 picture of the CF-graph:
 
-XEventInfo:
-Events are specified by the process generated them and a unique label.
-This information is stored by events as the immutable structure \texttt{XEventInfo}.
 %hashcode, uniqueness
 
 %\lstinputlisting{inc/XEventVisitor-cleaned.java}
@@ -388,7 +413,6 @@ This information is stored by events as the immutable structure \texttt{XEventIn
 \subsubsection{W-model}
 \label{ch:impl:model:wmodel}
 %TODO: almost not implemented !
-<to be done>
 
 a simple set of recursively defined relations over ..
 
@@ -410,9 +434,9 @@ drawbacks:
 
 in \porthos[2] we created the new abstraction layer \zformula that is translated to 
 
-also recursive representation of smt formula
+recursive representation of smt formula
 
-used as an abstrac
+used as an abstraction btween
 
 implemented as a simple wrapper over the z3 formula
 
@@ -449,7 +473,7 @@ todo: grammar of w-model to appendix
 
 in perspective: work with functional-style definitions
 
-<not implemented yet>
+%<not implemented yet>
 
 
 \subsubsection{Y-tree constructor (4)}
@@ -546,6 +570,8 @@ Then: data-flow analysis to the \textit{acyclic full event-based graph} \xgraphU
 
 \subsubsection{X-graph unroller (7)}
 \label{ch:impl:proc:x-unroll}
+
+two kinds of exits
 
 - unrolling: why we cannot encode cyclic structures. reference to the paper (see arXiv version)
 % If the analysing program contains a loop, then its control-flow graph represents the cyclic directed graph. Although, in order to be able to encode such a cyclic structure as a boolean formula, this graph needs to be
@@ -674,14 +700,14 @@ structure: verdict
 \subsubsection{Watchdog timer}
 \label{ch:impl:aux:watchdog}
 
-<not implemented>
+%<not implemented>
 
 todo
 
 \subsubsection{Logger}
 \label{ch:impl:aux:logger}
 
-<not implemented>
+%<not implemented>
 
 todo
 
