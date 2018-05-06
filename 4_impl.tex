@@ -96,7 +96,7 @@ The \ytree{} then is being compiled (Section~\ref{ch:impl:proc:x-compiler}) to a
 The compiled \xgraph{} then is being converted to an acyclic form (Section~\ref{ch:impl:proc:x-unroll}) in order to be encoded into a \zformula{} (Section~\ref{ch:impl:model:zformula}).
 Apart from that, the memory-model constructor (Section~\ref{ch:impl:proc:w-constr}) constructs the abstract syntax tree of derived relations of the weak memory model \wmodel{} (Section~\ref{ch:impl:model:wmodel}).
 %on the basis of the \xgraph{} in order to build the weak memory model \wmodel{} (Section~\ref{ch:impl:model:wmodel}).
-Thereafter, \wmodel{} and acyclic \xgraph{} are encoded (Section~\ref{ch:impl:proc:z-encoder}) to a \zformula{} representation (a wrapper over an SMT logical formula), which then is translated to an SMT-formula (Section~\ref{ch:impl:proc:smt-transator}), which then is solved by the SMT-solver (Section~\ref{ch:impl:proc:smt-solver}).
+Thereafter, \wmodel{} and acyclic \xgraph{} are encoded (Section~\ref{ch:impl:proc:z-encoder}) to a \zformula{} representation (a wrapper over an SMT logical formula), which then is translated to an SMT-formula (Section~\ref{ch:impl:proc:smt-converter}), which then is solved by the SMT-solver (Section~\ref{ch:impl:proc:smt-solver}).
 
 \subsection{Program input}
 \label{ch:impl:input}
@@ -157,9 +157,12 @@ makes the code hardly understandable, and, therefore, poorly maintainable. In \p
 Secondly, the semantics of operations was defined syntactically, whereas processing programs written in most modern languages (including C) requires the semantics resolution based on typification%
 \footnote{for instance, given two functions
 `\lstinline{int foo(int a)}' and `\lstinline{int foo(char a)}', the code `\lstinline{int a = '1'; foo(a);}' will invoke the first method rather than the second one.}.%
-As the reader can notice from the grammar sketch in Figure~\ref{fig:in_grammar_pts}, the memory operations of different kinds vary syntactically. For example, the assignment of local computation to a register uses the symbol `\lstinline{<-}', the atomic non-relaxed load operation denoted as `\lstinline{<:-}', non-relaxed store operation denoted as `\lstinline{:=}', and the semantics of relaxed \lstinline{load} and \lstinline{store} are resolved syntactically by matching the method name. In \porthos[2], the semantics of the data-flow operation is determined according to the types of operands, that are determined during the pre-compilation stage (see Section~\ref{ch:impl:proc:x-pre-compiler}). The semantics of the methods also is being resolved during the pre-compilation stage via the \textit{invocation hooks} mechanism (see Section~\ref{ch:impl:proc:x-pre-compiler:hooks}).
+As the reader can notice from the grammar sketch in Figure~\ref{fig:in_grammar_pts}, the memory operations of different kinds vary syntactically.
+For example, the assignment of local computation to a register uses the symbol `\lstinline{<-}', the atomic non-relaxed load operation denoted as `\lstinline{<:-}', non-relaxed store operation denoted as `\lstinline{:=}', and the semantics of relaxed \lstinline{load} and \lstinline{store} are resolved syntactically by matching the method name.
+In \porthos[2], the semantics of the data-flow operation is determined according to the types of operands, that are determined during the pre-compilation stage (see Section~\ref{ch:impl:proc:x-pre-compiler}).
+The semantics of the methods also is being resolved during the pre-compilation stage via the \textit{invocation hooking} mechanism (see Section~\ref{ch:impl:proc:x-pre-compiler:hooks}).
 
-Thirdly, the grammar used by \porthos{} had restricted set of allowed operations. For example, it allowed only computations over the local variables, which might lead to inconsistency of the result SMT-formula if the same variable name was used both as a register and as a location, for instance, the in code snippet `\lstinline{x := reg1; reg2 <- (x + 1);}', the first statement interprets the variable \lstinline{x} as a location, while the grammar of second statement requires it to be a register. Also, only integers were processed by the input language parser of \porthos[1]. In \porthos[2], we extended support for primitive types supported by the \texttt{Z3} solver (this apply to 32-bit integers encoded as \texttt{Int}s, floats encoded as \texttt{Real}s, enums encoded as Z3 \texttt{Scalars}).
+Thirdly, the grammar used by \porthos{} had restricted set of allowed operations. For example, it allowed only computations over the local variables, which might lead to inconsistency of the result SMT-formula if the same variable name was used both as a register and as a location, for instance, the in code snippet `\lstinline{x := reg1; reg2 <- (x + 1);}', the first statement interprets the variable \lstinline{x} as a location, while the grammar of second statement requires it to be a register. Also, only integers were processed by the input language parser of \porthos[1]. In \porthos[2], we extended support for primitive types supported by the Z3 solver (this apply to 32-bit integers encoded as \texttt{Int}s, floats encoded as \texttt{Real}s, enums encoded as Z3 \texttt{Scalars}).
 %TODO : constant arrays? https://rise4fun.com/Z3/tutorial/guide
 Thus, adding support for more advanced syntactic structures as pointers, arrays, function definitions and calls was one of the purposes of revising the tool architecture.
 
@@ -181,7 +184,7 @@ Also, current version of \porthos[2] simply ignores C processor directives, howe
 \subsection{The internal representations}
 \label{ch:impl:model}
 
-As it has already been mentioned, all internal representations used by \porthos[2] are immutable.
+%As it has already been mentioned, all internal representations used by \porthos[2] are immutable.
 For keeping the architecture transparent, we build all abstraction levels with interfaces, even if some of them does not add any new functionality.% (as java does not support multiple inheritance for classes (only for interfaces), we 
 
 \subsubsection{Y-tree}
@@ -432,7 +435,7 @@ drawbacks:
 - only one solver
 - non-safe way to construct formula (if ctx has changed, runtime excpetion)
 
-in \porthos[2] we created the new abstraction layer \zformula that is translated to 
+in \porthos[2] we created the new abstraction layer \zformula[] that is translated to 
 
 recursive representation of smt formula
 
@@ -448,20 +451,83 @@ typed: Expr, BoolExpr, ArithExpr, ...
 
 %todo: after all, list HERE which modules (classes, managers) are being initialised during the pre-compilation. I'ts good to have the dependencies graph on moduls (operational semantics:) )
 
-- numbers -- same as in gears in Figure~\ref{fig:arch}.
+This section describes program units that construct, transform and analyse internal representations described before. % steps of construction of the program representations and transformations applied to them.
+Further in this Section, the subsection titles have a number in parentheses, which correspond to a unique number of the  processing unit being discussed.
+This numbers are pictured within gears on the top-left corner of each processing unit in Figure~\ref{fig:arch}.
+%he numbers in parentheses correspond the numbers of processing units pictured within gears in Figure~\ref{fig:arch}.
 
-\subsubsection{Input memory model parser (1)}
-\label{ch:impl:proc:inp-mod-parser}
+All recursive data structures are processed by units that implement the \textit{visitor} pattern~\cite{palsberg1998essence}.
+This is a behavioural pattern that separates the program logic from the object implementation by specifying handling methods for each element of the object.
+The visitor pattern performs the double-dispatching mechanism: the visiting class defines the method for accepting a visitor, and the visitor itself defines the 
+To visit an instance \lstinline{x} by a visitor \lstinline{v}, the program should call the accept-method of \lstinline{x} and pass \lstinline{v} as an argument.
+In our implementation, the visitor must carry out the continuation of traversing the recursive data structure itself.
+The general structure of the visitor pattern is illustrated by t9he pseudo-java code in Figure~\ref{fig:visitor}.
 
-ANTLR grammar is extracted from parser used by herd written in OCaml
+\begin{figure}[h]
+\centering
+\begin{multicols}{2}
+\begin{lstlisting}[language=java]
+interface Element {
+  ...
+  <T> T accept(Visitor<T> visitor);
+}
 
-\subsubsection{Input program parser (2)}
-\label{ch:impl:proc:inp-prog-parser}
+class AnElement implements Element {
+  ...
+  @Override
+  <T> T accept(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
+}
+[* \vfill\null \columnbreak *]
+class Visitor<T> {
+  ...
+
+  T visit(AnElement e) {
+    // some visiting logic
+    ...
+    // continue recursively
+    e.getChild().accept(this);
+  }
+
+  T visit(AnOtherElement e) {
+    ...
+  }
+}
+\end{lstlisting}
+\end{multicols}
+\caption{Sketch of the visitor pattern}
+\label{fig:visitor}
+\end{figure}
+
+We consider the visitor pattern as the most natural way for operating the hierarchical data structures such as AST.
+However, we use its double-dispatching capabilities to reduce cost of multiple type casting performed while traversing the elements of a non-recursive data structure.
+The operator instance, instead of having a single method that handles and element of the instance, it extends the visitor interface and splits the handler method into multiple methods, one for each type of element.
+
+For traversing plain (non-recursive) complex data structures, we mostly follow the \texttt{iterator} pattern: the object that 
+the special object Iterator, that has access to elements of the instance, iterates over them and . Since in \porthos[] we usually do not need to browse an object elements in different order, the iterator creation is performed by the data structure itself.
+However, in contrast to the visitor of a recursive data structure, the visitor of a plain data structure should be used with an \textit{iterator} that has access to the elements of the object and passes them to the visitor.
+
+
+
 % todo: test pre-/post-fix operations //+think how current tool will behave if there's more than one post-operation //and pre-operation
 
-%TODO: maybe merge this and previous subsubsections
 
-todo: move something from the input language chapter here
+\subsubsection{Input parsers (1,2)}
+\label{ch:impl:proc:input-parser}
+
+Both input-language and input-model parsers are implemented via ANTLR parser generator.
+Details on the input program language grammar are discussed in Section~\ref{ch:impl:input}.
+The input memory model language \cat is discussed in Section~\ref{ch:wmm:cat}.
+The ANTLR grammar for the \cat language was extracted from the parser used by \tool{herd} tool%
+\footnote{\tool{herd} project repository: \url{https://github.com/herd/herdtools7}} %
+written in OCaml.
+%TODO: upload the grammar to github
+%The input memory model 
+
+\textbf{TODO: add reference to the grammar file in github repository OR include a short version as an appendix}
+
+%todo: maybe: move something from the input language chapter here
 
 
 \subsubsection{W-model constructor (3)}
@@ -493,25 +559,28 @@ from ANTLR syntax tree of C
 \subsubsection{X-graph precompiler (5)}
 \label{ch:impl:proc:x-pre-compiler}
 
-%The original program encoded into the \texttt{XGraph} represents a \textit{flow graph}, a connected cyclic directed graph with single source node \texttt{(ENTRY)} (usually for convenience all leaves are connected to the sink node \texttt{(EXIT)}). The cycles are caused by low-level jump instructions, obtained from non-linear high-level control-flow statements (such as \texttt{while}, \texttt{do-while}, \texttt{for}, etc.). However, the cyclic flow graph cannot be encoded into SMT formula since ...
-%//TODO:REFERENCE.%TODO
-
-%note https://en.wikipedia.org/wiki/Semantics_(computer_science)
-%Operational semantics loosely corresponds to interpretation,
-
 
 \paragraph{The macro preprocessor}
 
-typedefs, aliases
+The preprocessor traverses the \ytree{} and collects information necessary for compiling it into an \xgraph{}. 
+
+typedefs
+
+aliases
+
+more macros?
 
 not supported yet
+
 
 \paragraph{Variables kinds determination}
 \label{ch:impl:proc:x-pre-compiler:var}
 
 - pointers
+
 - externs
-- parameters of process-functions
+
+- parameters of process-functions (parameters of other funcs are local)
 
 
 \paragraph{The label resolution}
@@ -544,6 +613,7 @@ Being carried at Y and X representation levels, the type is converted to a Z-typ
 
 - The typification algorithm: propagation rules for each of Y
 
+- size\_t. ...%https://en.wikipedia.org/wiki/C_data_types#stddef.h
 
 \paragraph{Invocation hooking}
 \label{ch:impl:proc:x-pre-compiler:hooks}
@@ -674,8 +744,8 @@ sth about hashcodes and collections
 Z-type : SMT-specific (say about smt-lib)
 
 
-\subsubsection{SMT-formula translator (10)}
-\label{ch:impl:proc:smt-transator}%TODO: ref in pre-word
+\subsubsection{SMT-formula converter (10)}
+\label{ch:impl:proc:smt-converter}%TODO: ref in pre-word
 
 
 \subsubsection{SMT-formula translator (11)}
@@ -717,4 +787,4 @@ todo
 %todo: rename Interpreter -> Compiler.
 
 
-%TODO: \section{Optimisations}
+%TODO: \section{Optimisations} 
