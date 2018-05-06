@@ -44,10 +44,11 @@ The following list summarises the main rules we followed during the development 
 \begin{enumerate}[nolistsep]
   \item \textit{Robustness:}
     \begin{enumerate}[label*=\arabic*.]
-      \item usage of immutable data structures for all DTOs;
-      \item interrupting the work on errors;
+      \item prohibit under-approximating abstractions;
+      \item preservation the completeness of analysis;
       \item modular architecture: each module can be tested independently;
-      \item usage of software design patterns if necessary;
+      \item usage of software design patterns where necessary;
+      \item usage of immutable data structures for all DTOs;
     \end{enumerate}
   \item \textit{Transparency:}
     \begin{enumerate}[label*=\arabic*.]
@@ -64,8 +65,15 @@ The following list summarises the main rules we followed during the development 
     \end{enumerate}
 \end{enumerate}
 
+The robustness of analysis is the main criterion of \porthos[2] as a verification of a bug-hunting tool.
+This implies modelling the system with only over-approximating abstractions, which, however makes it more vulnerable to the combinatorial growth of the state space size, preserve the completeness of analysis.
+As a robust and transparent tool, the \porthos[2] must adhere to the strategy of aborting its work on any unexpected state (for instance, if a parser failed to parse the string and recovery algorithm is not described).
+%The modular architecture of \porthos[2] allow each its module to be tested independently.
+%Usage of immutable data structures for all DTOs helps 
+%immut: preservation of invariants
+%The transparency, efficiency and extensibility are the necessary criteria of any good tool.
 
-As \porthos[1], the \porthos[2] uses the open-source SMT solver \texttt{Z3} from Microsoft Research~\cite{de2008z3}. However, unlikely its predecessor, the \porthos[2] has an additional abstraction level \zformula{} (see Section~\ref{ch:impl:model:zformula}) that allow to use any other SMT solver. %TODO: *should* allow?
+As its predecessor, \porthos[2] uses the open-source SMT solver \tool{Z3} by Microsoft Research~\cite{de2008z3}. However, unlikely its predecessor, the \porthos[2] has an additional abstraction level \zformula{} (see Section~\ref{ch:impl:model:zformula}) that allow to use any other SMT solver. %TODO: *should* allow?
 
 The programming language choice for \porthos[2] was also made in favour of \textit{java}, firstly, in order to be able to reuse some parts and concepts of \porthos[1] that is written in java, and secondly, because the authors find the object-oriented (OOP) concepts of java suitable for modelling languages.
 Although java does not show best results in performance benchmarks (for example, comparing to C++~\cite{hundt2011loop, oaks2014java}), the performance cornerstone of \porthos[2] (as well as any other SMT-based code analyser) is the phase of solving the SMT-formula, which is left to the third-party SMT-solver \textit{Z3}%
@@ -312,7 +320,7 @@ As r-values cannot change their value, they can be seen as the value itself (the
 Each memory unit has an \texttt{XType} associated with it.
 The X-type is a symbolic representation of the C primitive type%
 \footnote{Here we should note the \porthos[2] can eventually evolve to be able to analyse programs written in an OOP language (for instance, in C++). In this case, the \texttt{XType} will have more complex structure than a simple enumeration, which it has when we need to emulate only primitive types of C language. See more detailed discussion on input language type system in Section~\ref{ch:impl:proc:x-pre-compiler:type}.} %
-that is easily convertable to a SMT type (modelled as \texttt{ZType}).%TODO: add the class ZType
+that is easily convertable to an SMT type (modelled as \texttt{ZType}).%TODO: add the class ZType
 
 The memory units are crated and stored by the stateful \texttt{XMemoryManager}, which provides interface for accessing memory units during compilation stage.
 The memory manager takes into account the higher priority of local variables over global variables specific for C language.
@@ -349,11 +357,16 @@ The following interfaces model basic kinds of events (see Figure~\ref{fig:class-
   \1 \texttt{XComputationEvent} \\
     We distinguish two types of computation events:
       %\begin{itemize}[noitemsep]
-      \2 \texttt{XUnaryComputationEvent} that encodes bit negation and no-operation,
-      \2 \texttt{XBinaryComputationEvent} that encodes numeric operations (such as addition, multiplication, etc.), bit vector operations (such as bit-and, bit-xor, etc.), relative operations (such as greater-then comparison, equality comparison, etc.), and logical operations (such as conjunction and disjunction).
+      \2 \texttt{XUnaryComputationEvent} that encodes bit negation and no-operation, 
+      \2 \texttt{XBinaryComputationEvent} that encodes numeric operations (such as addition, multiplication, etc.), bit vector operations (such as bit-and, bit-xor, etc.), relative operations (such as greater-then comparison, equality comparison, etc.), and logical operations (such as conjunction and disjunction). 
       %\end{itemize}
-    Since a computation event performs computation over local-only memory and does not change value of any memory unit, the \textit{computation} abstraction (as the CPU time spent for the computation itself) can be safely removed from the model, and the computation event can be seen as a simultaneous operation.
-    Therefore the computation event class implements both \texttt{XEvent} and \texttt{XMemoryUnit}.
+    \newline
+    The computation event class implements both \texttt{XEvent} and \texttt{XMemoryUnit}.
+    This is a model-level optimisation, which is possible because a computation event performs computation over local-only memory and does not change value of any memory unit.
+    Thus, the \textit{computation} abstraction (as the CPU time spent for the computation itself) can be safely removed from the model, and the computation event can be seen as a zero-time operation that produces the \textit{value}.
+    For analysing large expressions this optimisation is sensible because it considers the whole expression as a single computation event, encoded therefore as a single SMT-variable.
+    \newline
+    Note, for the purpose of simplifying the X abstraction level, computation events may be modelled as a bodiless function invocation (for instance, `\lstinline{x + y}' is the invocation of the function `\lstinline{+}' to argument `\lstinline{x}' and `\lstinline{y}').
     
   \1 \texttt{XControlFlowEvent} \\
     The control-flow event indicates a non-linear jump in the code. We distinguish two kinds of control-flow events: 
@@ -365,7 +378,7 @@ The following interfaces model basic kinds of events (see Figure~\ref{fig:class-
       If the method has been resolved, the actual arguments are bind to the formal parameters (treated as temporary local memory units), the called \texttt{XMethodCallEvent} is pushed onto the call stack, and the execution jumps to the method body.
       Each \texttt{return} statement creates the assignment of the method call event on the top of call stack.
       \\
-      If the method has not been resolved, \textit{TODO: think about it. Will the formula be SAT? Or do we need to abort the analysis?}
+      If the method has not been resolved, \textbf{TODO: think about it. Will the formula be SAT? Or do we need to abort the analysis?}
     %\end{itemize}
 
   \1 \texttt{XFenceEvent} \\
@@ -465,38 +478,42 @@ The general structure of the visitor pattern is illustrated by t9he pseudo-java 
 
 \begin{figure}[h]
 \centering
-\begin{multicols}{2}
+%\begin{multicols*}{2}
+\begin{minipage}[t]{.55\textwidth}
 \begin{lstlisting}[language=java]
 interface Element {
-  ...
   <T> T accept(Visitor<T> visitor);
+  ...
 }
 
 class AnElement implements Element {
-  ...
   @Override
   <T> T accept(Visitor<T> visitor) {
     return visitor.visit(this);
   }
-}
-[* \vfill\null \columnbreak *]
-class Visitor<T> {
   ...
-
+}
+\end{lstlisting}
+%[* \vfill\null \columnbreak *]
+\end{minipage}% <---------------- Note the use of "%"
+\begin{minipage}[t]{.45\textwidth}
+\begin{lstlisting}[language=java]
+class Visitor<T> {
   T visit(AnElement e) {
-    // some visiting logic
+    // visiting logic
     ...
     // continue recursively
     e.getChild().accept(this);
   }
-
   T visit(AnOtherElement e) {
     ...
   }
+  ...
 }
 \end{lstlisting}
-\end{multicols}
-\caption{Sketch of the visitor pattern}
+%\end{multicols*}
+\end{minipage}
+\caption{Illustration of the visitor pattern}
 \label{fig:visitor}
 \end{figure}
 
@@ -512,19 +529,25 @@ However, in contrast to the visitor of a recursive data structure, the visitor o
 
 % todo: test pre-/post-fix operations //+think how current tool will behave if there's more than one post-operation //and pre-operation
 
-
 \subsubsection{Input parsers (1,2)}
 \label{ch:impl:proc:input-parser}
 
 Both input-language and input-model parsers are implemented via ANTLR parser generator.
+
 Details on the input program language grammar are discussed in Section~\ref{ch:impl:input}.
+Currently, \porthos[2] does not consider preprocessor instructions (it ignores them).
+For implementing the inter-procedural mode of \porthos{}, it is crucial to support inclusion of header files (the \texttt{\#include} preprocessor directive).
+Next step would be implementing the support of macros and conditional compilation directives, that are used often in C code.
+As preprocessor statements may appear in arbitrary place of a program, the preprocessor must be a stateful processing unit that reads the token stream and dynamically instrument the program by interpreting directives and expanding macros.
+%The ANTLR grammar for the C preprocessor may be found 
+%more macros (stateful) : https://gcc.gnu.org/onlinedocs/cpp/Macros.html
+
 The input memory model language \cat is discussed in Section~\ref{ch:wmm:cat}.
 The ANTLR grammar for the \cat language was extracted from the parser used by \tool{herd} tool%
 \footnote{\tool{herd} project repository: \url{https://github.com/herd/herdtools7}} %
 written in OCaml.
 %TODO: upload the grammar to github
 %The input memory model 
-
 \textbf{TODO: add reference to the grammar file in github repository OR include a short version as an appendix}
 
 %todo: maybe: move something from the input language chapter here
@@ -533,13 +556,13 @@ written in OCaml.
 \subsubsection{W-model constructor (3)}
 \label{ch:impl:proc:w-constr}
 
+%<not implemented yet>
+
 visitor of antlr tree: almost direct
 
-todo: grammar of w-model to appendix
+todo: file tree of w-model to appendix
 
 in perspective: work with functional-style definitions
-
-%<not implemented yet>
 
 
 \subsubsection{Y-tree constructor (4)}
@@ -559,28 +582,9 @@ from ANTLR syntax tree of C
 \subsubsection{X-graph precompiler (5)}
 \label{ch:impl:proc:x-pre-compiler}
 
+The precompiler traverses the \ytree{} and collects information necessary for compiling it into an \xgraph{}.
 
-\paragraph{The macro preprocessor}
-
-The preprocessor traverses the \ytree{} and collects information necessary for compiling it into an \xgraph{}. 
-
-typedefs
-
-aliases
-
-more macros?
-
-not supported yet
-
-
-\paragraph{Variables kinds determination}
-\label{ch:impl:proc:x-pre-compiler:var}
-
-- pointers
-
-- externs
-
-- parameters of process-functions (parameters of other funcs are local)
+%TODO: not supported yet
 
 
 \paragraph{The label resolution}
@@ -588,26 +592,35 @@ not supported yet
 
 %TODO: <not implemented yet>
 
-The label resolution is a process of linkage the referenced labels to declared labels.
-
-In C, the labeled statements are declared via the colon-syntax `\texttt{<label> : <statement>}',
-and the labels are referenced by the jump-statement `\texttt{goto <label>}'.
+The label resolution is necessary for establishing links to labelled statements. %a process of linkage the text labels referenced in code to the places of their declaration.
+In C, labelled statements are declared via the colon-syntax `\texttt{<label> : <statement>}', and the labels are referenced by the jump-statement `\texttt{goto <label>}'.
 The label resolution algorithm traverses the \ytree{} and collects all declared labels into a map that points a label to the labeled statement. %TODO: code: remove temp label generation, it's stupid. put null.
-This information is used during compilation (see Section~\ref{ch:impl:proc:x-compiler}).
+This information is used during compilation to set up unconditional jumps.
 
 
-\paragraph{Type analysis}% and function resolution.}
+\paragraph{Type analysis}
 \label{ch:impl:proc:x-pre-compiler:type}
 
-%TODO: remake this paragraph considering that we have already said sth about XType
 The C language has a static (resolved at compile-time) manifest (all types are declared explicitly) type system.
-Comparing to languages that use type inference, the type analysis of a C program constitutes a simple propagating the type information (obtained from variables declarations) to all expressions.
-%In \porthos[2], the type is modelled by the class \texttt{XType}.%TODO: + fix class and package name!
-Being carried at Y and X representation levels, the type is converted to a Z-type at the Z-formula encoding stage (see Section~\ref{ch:impl:proc:z-encoder}).
+Comparing to languages that use type inference, the type analysis of a C program constitutes a simple propagating the type information (obtained from variables declarations) to all expressions. % according the rules of propagation. For example, 
+Being carried at Y and X representation levels, the type is converted to a Z-type at the stage of the Z-formula encoding (see Section~\ref{ch:impl:proc:z-encoder}).
+Currently, \porthos[2] operates only the primitive C types (such as \texttt{int}, \texttt{char}, \texttt{float}, etc.), which is modelled as an enumeration \texttt{XType}. %TODO: model it.
+Array dimension is stored as an integer number at the Y-level (at the X- and Z- levels, \textbf{TODO: think about it}). %the array operations are converted to ).
+In addition, \porthos[2] supports ... int\_t .... 
 
-%TODO: describe the Type
-%TODO: maybe rename back to XType
-%TODO: but definitely get rid of bit32
+   %TODO: support this.
+
+%TODO: describe the XType
+%TODO: definitely get rid of bit32
+
+
+%TODO: <not implemented>
+The type analysis algorithm should consider the type aliases supported by C language (defined by the \texttt{typedef} instruction).
+For resolving the type aliases, the precompiler should make an extra traverse of the \ytree{} before the precompilation stage  and build up a symbol map.
+
+%TODO: <not implemented>
+The type analysis includes the function resolution: for correct resolving the semantics of functions, the compiler needs a mapping of each function invocation to its signature.
+However due to lack of polymorphism and function overloading mechanism inherent to OOP languages the function resolution algorithm may set up the mapping only for the function name and thus may neglect analysis of types of the arguments, we build the mapping for the full function signature so that the type analysis preprocessing unit may be used for analysing the C++ code if needed.
 
 - X-type construction: code of class YType2TypeConverter (todo: rename: it's not conversion, it's a type construction, from the y-level name+qualifiers+
 
@@ -615,10 +628,25 @@ Being carried at Y and X representation levels, the type is converted to a Z-typ
 
 - size\_t. ...%https://en.wikipedia.org/wiki/C_data_types#stddef.h
 
+
+\paragraph{Variables kinds determination}
+\label{ch:impl:proc:x-pre-compiler:var}
+
+As it was discussed in Section~\ref{ch:impl:model:ytree}, the \ytree{} encodes all named objects as \texttt{YVariableRef}.
+
+
+- pointers
+
+- externs
+
+- parameters of process-functions (parameters of other funcs are local)
+
 \paragraph{Invocation hooking}
 \label{ch:impl:proc:x-pre-compiler:hooks}
 
 resolve the semantics of a function given its signature (meth name + params types)
+
+mapping 
 
 knowledge base: InterceptionAction(BiFunction<XMemoryUnit, XMemoryUnit[], ? extends XEntity> action)
 
