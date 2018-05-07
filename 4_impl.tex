@@ -260,7 +260,7 @@ Similarly to expressions, all \ytree{} statements implement the \texttt{YStateme
   \item \texttt{YVariableDeclarationStatement} containing the information about the variable type during the variable declaration.
 \end{itemize}
 
-On the \texttt{Y}-level of abstraction, we define the \texttt{YType} as an alias for a type (since the \ytree{} is not typed, all expressions do not have type, however, the \texttt{YType} is used for storing the information of the type for declarations
+On the \texttt{Y}-level of abstraction, we define the \texttt{YType} as a \textit{reference} for the type (since the \ytree{} is not typed, all expressions do not have type, however, the \texttt{YType} is used for storing the information on declaration, including the type itself, type modifiers and qualifiers).
 
 According to the C standard, \textit{"any statement may be preceded by a prefix that declares an identifier as a label name"}.
 The \ytree{} statements of follow this rule, however they these labels are symbolic, and they need to be resolved at the pre-compilation stage.
@@ -286,7 +286,7 @@ The mathematical structure of event-flow graph was discussed in Section~\ref{ch:
 %In general, \xgraph{} follows the structure described there, however it is constructed in several stages.
 The nodes of the graph are events, and the edges are basic relations: the control-flow relation \po and the data-flow relations \co and \rf.
 Hereinafter, we denote the \xgraph{} with only control-flow edges as \xgraph[CF], the \xgraph{} with only data-flow edges as \xgraph[CF]. The complete \xgraph{} is $\xgraph[CF+DF] = \xgraph[CF] \cup \xgraph[DF]$.
-Figure~\ref{fig:class-diagrams:XEntity-interfaces} represents the main hierarchy of the X-abstraction level.
+\ Figure~\ref{fig:class-diagrams:XEntity-interfaces} represents the main hierarchy of the X-abstraction level.
 
 \begin{figure}[t]%[!b]%[H]
   \centering
@@ -366,7 +366,7 @@ The following interfaces model basic kinds of events (see Figure~\ref{fig:class-
     Thus, the \textit{computation} abstraction (as the CPU time spent for the computation itself) can be safely removed from the model, and the computation event can be seen as a zero-time operation that produces the \textit{value}.
     For analysing large expressions this optimisation is sensible because it considers the whole expression as a single computation event, encoded therefore as a single SMT-variable.
     \newline
-    Note, for the purpose of simplifying the X abstraction level, computation events may be modelled as a bodiless function invocation (for instance, `\lstinline{x + y}' is the invocation of the function `\lstinline{+}' to argument `\lstinline{x}' and `\lstinline{y}').
+    Note, for the purpose of simplifying the X abstraction level, computation events may be modelled as a bodiless function invocation (for instance, `\lstinline{x + y}' is the invocation of the function `\lstinline{+}' to the arguments `\lstinline{x}' and `\lstinline{y}').
     
   \1 \texttt{XControlFlowEvent} \\
     The control-flow event indicates a non-linear jump in the code. We distinguish two kinds of control-flow events: 
@@ -401,8 +401,8 @@ The following interfaces model basic kinds of events (see Figure~\ref{fig:class-
 Edges are stored as an immutable hash-map from source to target event.
 The type of edge is stored in the enumeration \texttt{XEdgeKind}:%TODO: IMPLEMENT THIS
 \begin{itemize}[noitemsep]
-  \item control-flow edges: a \textit{primary} edge (epsilon or if-then transition) and an \textit{alternative} edge (if-else transition), see more in Section~\ref{ch:port:enc:cf};
-  \item data-flow edges: the \co-relation edge and the \rf-relation edge. %TODO! implement and then describe more!
+  \item the \textit{control-flow edges}: a primary edge (epsilon or if-then transition) and an alternative edge (if-else transition), see more in Section~\ref{ch:port:enc:cf};
+  \item the \textit{data-flow edges}: the \co-relation edge and the \rf-relation edge. %TODO! implement and then describe more!
 \end{itemize}
 
 \paragraph{Graph invariants}
@@ -415,6 +415,12 @@ Once being constructed, graph must conform the following requirements:
 %\item each node except the source node must have at least one parent
 \item \textbf{todo: sth about data-flow edges}
 \end{enumerate}
+
+
+\paragraph{Graph builder} % TODO: in code: remove graph hierarchy by combining unrolled and normal. Add a bool 'UnrolledStatus' -- thus we can keep genericity
+%TODO: code : NOTE: 'FlowGraph<N extends FlowGraphNode>' may be just 'FlowGraph<N>'
+todo
+
 
 \paragraph{Example}
 
@@ -582,7 +588,7 @@ from ANTLR syntax tree of C
 \subsubsection{X-graph precompiler (5)}
 \label{ch:impl:proc:x-pre-compiler}
 
-The precompiler traverses the \ytree{} and collects information necessary for compiling it into an \xgraph{}.
+The precompiler traverses the \ytree{} and collects information necessary for its compilation into an \xgraph{}.
 
 %TODO: not supported yet
 
@@ -604,36 +610,41 @@ This information is used during compilation to set up unconditional jumps.
 The C language has a static (resolved at compile-time) manifest (all types are declared explicitly) type system.
 Comparing to languages that use type inference, the type analysis of a C program constitutes a simple propagating the type information (obtained from variables declarations) to all expressions. % according the rules of propagation. For example, 
 Being carried at Y and X representation levels, the type is converted to a Z-type at the stage of the Z-formula encoding (see Section~\ref{ch:impl:proc:z-encoder}).
+
+%TODO: YOU REALLY NEED TO THINK MORE ABOUT TYPES ON Y, X, Z LEVELS + reconsider this paragraph (and others about types)
 Currently, \porthos[2] operates only the primitive C types (such as \texttt{int}, \texttt{char}, \texttt{float}, etc.), which is modelled as an enumeration \texttt{XType}. %TODO: model it.
 Array dimension is stored as an integer number at the Y-level (at the X- and Z- levels, \textbf{TODO: think about it}). %the array operations are converted to ).
-In addition, \porthos[2] supports ... int\_t .... 
-
-   %TODO: support this.
-
-%TODO: describe the XType
-%TODO: definitely get rid of bit32
+In addition, \porthos[2] has a built-in extensible database storing the semantics of non-primitive C types stored by the \texttt{X2ZTypeConverter}, %TODO: Or XTypeHookManager?
+which can be requested for converting an X-type to a Z-type. %TODO: implement this.
+%TODO: describe the XType (before) + implement this clearly! + definitely get rid of bit32
 
 
 %TODO: <not implemented>
 The type analysis algorithm should consider the type aliases supported by C language (defined by the \texttt{typedef} instruction).
-For resolving the type aliases, the precompiler should make an extra traverse of the \ytree{} before the precompilation stage  and build up a symbol map.
+For resolving the type aliases, the precompiler should make an extra traverse of the \ytree{} before the precompilation stage and build up a symbol map.
 
 %TODO: <not implemented>
-The type analysis includes the function resolution: for correct resolving the semantics of functions, the compiler needs a mapping of each function invocation to its signature.
-However due to lack of polymorphism and function overloading mechanism inherent to OOP languages the function resolution algorithm may set up the mapping only for the function name and thus may neglect analysis of types of the arguments, we build the mapping for the full function signature so that the type analysis preprocessing unit may be used for analysing the C++ code if needed.
+The type analysis includes the process of resolving semantics of function invocations.
+The result is stored in a map of function invocation expression to its resolved signature, so that the compiler can decide either to jump to the function body and interpret it, or to hook the invocation if the semantics of the function is resolved.
+However, due to lack of polymorphism and function overloading mechanism inherent to OOP languages, the function resolution algorithm may set up the mapping only for the function name and thus may neglect analysis of types of the arguments, we build the mapping for the full function signature so that the type analysis preprocessing unit may be used for analysing the C++ code if needed.
 
-- X-type construction: code of class YType2TypeConverter (todo: rename: it's not conversion, it's a type construction, from the y-level name+qualifiers+
+== 
 
+The X-type construction: //code of class YType2TypeConverter (todo: rename: it's not conversion, it's a type construction, from the y-level name+qualifiers+
+- on Z level, type is one-pointer-level
 - The typification algorithm: propagation rules for each of Y
+- as vector array as needed.
 
-- size\_t. ...%https://en.wikipedia.org/wiki/C_data_types#stddef.h
+Y: quantifiers+specifiers+typeName
+X: ?.. Z? TODO: rename+rework XType->XZType
+Z: Int, Real, Boolean, BitVector[N]
 
 
 \paragraph{Variables kinds determination}
 \label{ch:impl:proc:x-pre-compiler:var}
 
-As it was discussed in Section~\ref{ch:impl:model:ytree}, the \ytree{} encodes all named objects as \texttt{YVariableRef}.
-
+On the compilation stage, once the compiler meets the reference to a variable, it should know whether it is local or global variable.
+In general case, 
 
 - pointers
 
@@ -641,20 +652,15 @@ As it was discussed in Section~\ref{ch:impl:model:ytree}, the \ytree{} encodes a
 
 - parameters of process-functions (parameters of other funcs are local)
 
-\paragraph{Invocation hooking}
-\label{ch:impl:proc:x-pre-compiler:hooks}
+- EXPORT\_SYMBOL "exports the symbol for dynamic linking"
 
-resolve the semantics of a function given its signature (meth name + params types)
+-EXPORT\_SYMBOL\_GPL %https://lwn.net/Articles/154602/
 
-mapping 
-
-knowledge base: InterceptionAction(BiFunction<XMemoryUnit, XMemoryUnit[], ? extends XEntity> action)
+ %https://stackoverflow.com/questions/6670589/how-to-prevent-error-symbol-undeclared-here-despite-export-symbol-in-a-linu
 
 
 \subsubsection{X-graph compiler (6)}
 \label{ch:impl:proc:x-compiler}
-
-- hierarchy of Compilers (XCompiler is an stateful abstract machine)
 
 Firstly, the \ytree{} is compiled to the \textit{cyclic control-flow event-based graph} \xgraph[CF].
 
@@ -662,8 +668,46 @@ Then: unrolled up to bound $k$ to the \textit{acyclic control-flow event-based g
 
 Then: data-flow analysis to the \textit{acyclic full event-based graph} \xgraphU[CF+DF].
 
+
+converting recursive structure to plain
+
+stacks: context, readyContext, call, 
+  BlockContext (rename): what stores, enum of states
+  
+almostReadyContexts: for computation events. Flushed by invocation . When are filled.
+
+setting up edges depending of type of ready-context
+
+stateful. Managers, [graph] builders
+  interfaces of XMemoryManager: listing, paragraph
+ 
+- hierarchy of Compilers: pic on inheritance (XCompiler is an stateful abstract machine). Restrictions of lude-compilers
+  postlude: assertion: a new event XAssertionEvent
+  
+interfaces that offer compilers: listing of interface
+
+algorithm for interpreting
+
 %MethCallE : bind parameters with values (load them to temp registers) + remember the return-register
 %reutrn event= assign the return-register + simple jump
+
+
+\paragraph{Invocation hooking}
+\label{ch:impl:proc:x-pre-compiler:hooks}
+
+resolve the semantics of a function given its signature (meth name + params types)
+
+mapping - as a result
+
+knowledge base: InterceptionAction(BiFunction<XMemoryUnit, XMemoryUnit[], ? extends XEntity> action)
+
+%TODO: kernel's : ACCESS_ONCE() access may be modeled as a volatile memory_order_relaxed access.  %http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4374.html
+
+% + RCU %https://www.kernel.org/doc/Documentation/RCU/whatisRCU.txt
+
+
+
+
 
 
 \subsubsection{X-graph unroller (7)}
@@ -685,7 +729,6 @@ why we changed the notion of unrolling bound
 sth about hashcodes and collections
 
 - After we acquired the event-based representation, we can perform some modifications/simplifications/optimisations on it (separately, allowing user to manage them)
-
 
 
 %TODO: draw (and implement) diff types of exit nodes

@@ -46,3 +46,7 @@ florian publications https://tcs.cs.tu-bs.de/group/furbach/publications.html
 paper: SAT-Based Image Computation with Application in Reachability Analysis https://cs.wmich.edu/~zijiang/pub/fmcad00.pdf
 slides: sat-based model checking http://www.sti.uniurb.it/events/sfm06hv/slides/Gupta.pdf
 
+
+--
+find all global variables (visible for linker) in C file:
+ctags -R -x --c-kinds=v --file-scope=no /run/media/ael/Virtuals/linux/drivers/dio/dio-driver.c
