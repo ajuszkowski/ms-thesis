@@ -73,7 +73,7 @@ As a robust and transparent tool, the \porthos[2] must adhere to the strategy of
 %immut: preservation of invariants
 %The transparency, efficiency and extensibility are the necessary criteria of any good tool.
 
-As its predecessor, \porthos[2] uses the open-source SMT solver \tool{Z3} by Microsoft Research~\cite{de2008z3}. However, unlikely its predecessor, the \porthos[2] has an additional abstraction level \zformula{} (see Section~\ref{ch:impl:model:zformula}) that allow to use any other SMT solver. %TODO: *should* allow?
+As its predecessor, \porthos[2] uses the open-source SMT-solver \tool{Z3} by Microsoft Research~\cite{de2008z3}. However, unlikely its predecessor, the \porthos[2] has an additional abstraction level \zformula{} (see Section~\ref{ch:impl:model:zformula}) that allow to use any other SMT-solver. %TODO: *should* allow?
 
 The programming language choice for \porthos[2] was also made in favour of \textit{java}, firstly, in order to be able to reuse some parts and concepts of \porthos[1] that is written in java, and secondly, because the authors find the object-oriented (OOP) concepts of java suitable for modelling languages.
 Although java does not show best results in performance benchmarks (for example, comparing to C++~\cite{hundt2011loop, oaks2014java}), the performance cornerstone of \porthos[2] (as well as any other SMT-based code analyser) is the phase of solving the SMT-formula, which is left to the third-party SMT-solver \textit{Z3}%
@@ -104,7 +104,7 @@ The \ytree{} then is being compiled (Section~\ref{ch:impl:proc:x-compiler}) to a
 The compiled \xgraph{} then is being converted to an acyclic form (Section~\ref{ch:impl:proc:x-unroll}) in order to be encoded into a \zformula{} (Section~\ref{ch:impl:model:zformula}).
 Apart from that, the memory-model constructor (Section~\ref{ch:impl:proc:w-constr}) constructs the abstract syntax tree of derived relations of the weak memory model \wmodel{} (Section~\ref{ch:impl:model:wmodel}).
 %on the basis of the \xgraph{} in order to build the weak memory model \wmodel{} (Section~\ref{ch:impl:model:wmodel}).
-Thereafter, \wmodel{} and acyclic \xgraph{} are encoded (Section~\ref{ch:impl:proc:z-encoder}) to a \zformula{} representation (a wrapper over an SMT logical formula), which then is translated to an SMT-formula (Section~\ref{ch:impl:proc:smt-converter}), which then is solved by the SMT-solver (Section~\ref{ch:impl:proc:smt-solver}).
+Thereafter, \wmodel{} and acyclic \xgraph{} are encoded (Section~\ref{ch:impl:proc:z-encoder}) to a \zformula{} representation (a wrapper over an SMT-formula), which then is translated to an SMT-formula (Section~\ref{ch:impl:proc:smt-converter}), which then is solved by the SMT-solver (Section~\ref{ch:impl:proc:smt-solver}).
 
 \subsection{Program input}
 \label{ch:impl:input}
@@ -162,29 +162,35 @@ Firstly, it contained the parser code inlined into directly the grammar, so that
 \footnote{by the term "reach" we mean "expressiveness": at least, the grammar of the language of semantic actions (i.e., java in our case) is Turing-complete.} %
 makes the code hardly understandable, and, therefore, poorly maintainable. In \porthos[2], we clearly separated the parser (generated from the grammar file `\textit{<grammar>.g4}') from the converting the ANTLR syntax tree to the AST, that is one for all  languages of an input program.
 
-Secondly, the semantics of operations was defined syntactically, whereas processing programs written in most modern languages (including C) requires the semantics resolution based on typification%
-\footnote{for instance, given two functions
-`\lstinline{int foo(int a)}' and `\lstinline{int foo(char a)}', the code `\lstinline{int a = '1'; foo(a);}' will invoke the first method rather than the second one.}.%
+Secondly, in \porthos[1], the semantics of operations was defined syntactically (in ANTLR grammar), whereas this should be performed by a separate module operating on the AST level%
+\footnote{Most modern languages (including C++) allow the function overloading, thus requiring the type information to be available for the function resolution algorithm (see Section~\ref{ch:impl:proc:x-pre-compiler:type}).}%
+, so that it does not require to change grammar for encoding the semantics of a new function. %adding support for a new function.
+
+%\footnote{for instance, given two functions `\lstinline{foo(int a)}' and `\lstinline{foo(char a)}' compiled by a C++ compiler, the code `\lstinline{int a = '1'; foo(a);}' will invoke the first method rather than the second one.}.%
 As the reader can notice from the grammar sketch in Figure~\ref{fig:in_grammar_pts}, the memory operations of different kinds vary syntactically.
-For example, the assignment of local computation to a register uses the symbol `\lstinline{<-}', the atomic non-relaxed load operation denoted as `\lstinline{<:-}', non-relaxed store operation denoted as `\lstinline{:=}', and the semantics of relaxed \lstinline{load} and \lstinline{store} are resolved syntactically by matching the method name.
+For example, the assignment of local computation to a register uses the symbol `\lstinline{<-}', the atomic non-relaxed load operation denoted as `\lstinline{<:-}', non-relaxed store operation denoted as `\lstinline{:=}', and the semantics of relaxed \lstinline{load} and \lstinline{store} are resolved syntactically by matching the function name.
 In \porthos[2], the semantics of the data-flow operation is determined according to the types of operands, that are determined during the pre-compilation stage (see Section~\ref{ch:impl:proc:x-pre-compiler}).
-The semantics of the methods also is being resolved during the pre-compilation stage via the \textit{invocation hooking} mechanism (see Section~\ref{ch:impl:proc:x-pre-compiler:hooks}).
+The semantics of the functions also is being resolved during the pre-compilation stage via the \textit{invocation hooking} mechanism (see Section~\ref{ch:impl:proc:x-compiler:hooking}).
 
 Thirdly, the grammar used by \porthos{} had restricted set of allowed operations. For example, it allowed only computations over the local variables, which might lead to inconsistency of the result SMT-formula if the same variable name was used both as a register and as a location, for instance, the in code snippet `\lstinline{x := reg1; reg2 <- (x + 1);}', the first statement interprets the variable \lstinline{x} as a location, while the grammar of second statement requires it to be a register. Also, only integers were processed by the input language parser of \porthos[1]. In \porthos[2], we extended support for primitive types supported by the Z3 solver (this apply to 32-bit integers encoded as \texttt{Int}s, floats encoded as \texttt{Real}s, enums encoded as Z3 \texttt{Scalars}).
 %TODO : constant arrays? https://rise4fun.com/Z3/tutorial/guide
-Thus, adding support for more advanced syntactic structures as pointers, arrays, function definitions and calls was one of the purposes of revising the tool architecture.
+Although Z3 supports the array theory (characterised by the select-store axioms~\cite{de2011z3}), the complexity of static analysis of pointers and non-constant sized arrays moves the full support of arrays and pointers out of the scope of current thesis.
+%Thus, adding support for more advanced structures as pointers, arrays, function definitions and calls was one of the purposes of revising the tool architecture.
 
-The minor drawbacks of grammar used by \porthos[1] include lack of operator associativity (expressions of the form \lstinline{1 + 2 * 3} could not be parsed), incorrectly (in terms of C) implemented grammar rule for the statement (the semicolon punctuator `\lstinline{;}' was implemented as the separator between two statements, whereas in C it serves as a statement terminator). Also, \porthos[1] supports only the litmus-specific syntax for the variables initialisation, however, it allows only ini
+The minor drawbacks of grammar used by \porthos[1] include lack of operator associativity (expressions of the form \lstinline{1\,+\,2\,*\,3} could not be parsed), incorrectly (in terms of C) implemented grammar rule for the statement (the semicolon punctuator `\lstinline{;}' was implemented as the separator between two statements, whereas in C it serves as a statement terminator). Also, \porthos[1] supports only the litmus-specific syntax for the variables initialisation, however, it allows only ini
 tialisation of the shared variable and only by default value \lstinline{0}. The \porthos[2] supports arbitrary declaration to be performed in initialisation statement.
 
 
 The \porthos[2] uses the C language grammar of proposed in the C11 standard~\cite{jtc2011sc22}, that was extended by litmus test-specific syntax such as initialisation and final-state assertion statements (the original ANTLR grammar can be found in the official repository containing the collection of ANTLR v4 grammars%
-\footnote{Repository path: \url{https://github.com/antlr/grammars-v4}}). %
-Currently, \porthos[2] can operate only in the intra-procedural analysis mode (analysing single procedure), assuming that each function defined in the input file is being executed in a separate thread.
+\footnote{Repository path:~\url{https://github.com/antlr/grammars-v4}}).%
+Current version of \porthos[2] does not recognise C processor directives (it ignores them), however, in future it can be extended to support them.
+
+Currently, \porthos[2] can operate only in the intra-procedural analysis mode, assuming that each function defined in the input file is being executed in a separate thread.
 %TODO: describe more intra- and inter-procedural!
-However, the redesigned architecture of \porthos[2] allow to easily support inter-procedural (cross-procedure) analysis by inlining function calls and binding variable contexts.
+However, the redesigned architecture of \porthos[2] allow to easily support the inter-procedural (cross-procedure) analysis by inlining function calls and binding variable contexts.
+Thus, instead of analysing a single code file, the user can specify the whole code project.
+The functions to be executed in parallel can be specified by the user, however, the some concurrent parts of code can be detected automatically at the compilation stage while the semantics of function invocations is being resolved (for instance, the C threads operations from \texttt{thread.h} or \texttt{pthread.h} may be supported).
 %TODO: inter: user specifies the repository with code, functions that intended to work in parallel and runs. 
-Also, current version of \porthos[2] simply ignores C processor directives, however, in future it can be extended to support them.
 
 %TODO: say sth about 100500 litmus-tests for kernel
 
@@ -229,7 +235,7 @@ The \ytree{} expressions are the following:
 
   \item \texttt{YMemberAccessExpression} that has an arbitrary expression of type \texttt{YExpression} as its base expression (it will be resolved during the compilation stage);%TODO: pre-compilation??
 
-  \item \texttt{YIndexerExpression} and \texttt{YInvocationExpression} that as arbitrary expression as its base or arguments (strictly speaking, the indexer expression is an unary-function invocation, but as the SMT solver we use supports the constant-array theory, we can maintain the array type);
+  \item \texttt{YIndexerExpression} and \texttt{YInvocationExpression} that as arbitrary expression as its base or arguments (strictly speaking, the indexer expression is an unary-function invocation, but as the SMT-solver we use supports the constant-array theory, we can maintain the array type);
 
   \item \texttt{YAssignmentExpression} that assigns an \texttt{YExpression} to an \texttt{YAtom};
 
@@ -320,12 +326,10 @@ As r-values cannot change their value, they can be seen as the value itself (the
 Each memory unit has an \texttt{XType} associated with it.
 The X-type is a symbolic representation of the C primitive type%
 \footnote{Here we should note the \porthos[2] can eventually evolve to be able to analyse programs written in an OOP language (for instance, in C++). In this case, the \texttt{XType} will have more complex structure than a simple enumeration, which it has when we need to emulate only primitive types of C language. See more detailed discussion on input language type system in Section~\ref{ch:impl:proc:x-pre-compiler:type}.} %
-that is easily convertable to an SMT type (modelled as \texttt{ZType}).%TODO: add the class ZType
+that is easily convertible to an SMT-type (modelled as \texttt{ZType}).%TODO: add the class ZType
 
-The memory units are crated and stored by the stateful \texttt{XMemoryManager}, which provides interface for accessing memory units during compilation stage.
-The memory manager takes into account the higher priority of local variables over global variables specific for C language.
-The \texttt{XMemoryManager} provides interface for registering shared variables at the precompilation stage, registering local variables dynamically at the compilation stage, and returning memory unit instances for the requests by name.
-\textit{TODO: context stack}%TODO: refactor XMemoryManager!
+The memory units are created and stored by the \texttt{XMemoryManager}, which provides interface for accessing memory units during compilation stage.
+For more detailed description of memory management see Section~\ref{ch:impl:proc:x-compiler:mem}.
 
 
 \paragraph{Events}
@@ -366,19 +370,20 @@ The following interfaces model basic kinds of events (see Figure~\ref{fig:class-
     Thus, the \textit{computation} abstraction (as the CPU time spent for the computation itself) can be safely removed from the model, and the computation event can be seen as a zero-time operation that produces the \textit{value}.
     For analysing large expressions this optimisation is sensible because it considers the whole expression as a single computation event, encoded therefore as a single SMT-variable.
     \newline
-    Note, for the purpose of simplifying the X abstraction level, computation events may be modelled as a bodiless function invocation (for instance, `\lstinline{x + y}' is the invocation of the function `\lstinline{+}' to the arguments `\lstinline{x}' and `\lstinline{y}').
+    Note, for the purpose of simplifying the X abstraction level, computation events may have been modelled as invocations of bodiless functions (for instance, the operation `\lstinline{x + y}' may be modelled as the invocation of the function `\lstinline{+}' with the arguments `\lstinline{x}' and `\lstinline{y}').
+    However, current version of \porthos[2] maintains the \texttt{XComputationEvent} as the operators are supported by the SMT-solver.
     
   \1 \texttt{XControlFlowEvent} \\
     The control-flow event indicates a non-linear jump in the code. We distinguish two kinds of control-flow events: 
     %\begin{itemize}[noitemsep]
       \2 \texttt{XJumpEvent} that performs no computation and no data operation, it can be safely removed from the model as an optimisation,
-      \2 \texttt{XMethodCallEvent} that models the method call with the \texttt{FASTCALL} calling convention (passing arguments in registers).
+      \2 \texttt{XMethodCallEvent} that models the function call with the \texttt{fastcall} calling convention (passing arguments in registers).
       %TODO: check the diagrams if the XMCE really inherits XLMU
-      The method call also implements the \texttt{XLocalMemoryUnit} since it represents the computed value returned by the method call.
-      If the method has been resolved, the actual arguments are bind to the formal parameters (treated as temporary local memory units), the called \texttt{XMethodCallEvent} is pushed onto the call stack, and the execution jumps to the method body.
-      Each \texttt{return} statement creates the assignment of the method call event on the top of call stack.
+      The function call also implements the \texttt{XLocalMemoryUnit} since it represents the computed value returned by the function call.
+      If the function has been resolved, the actual arguments are bind to the formal parameters (treated as temporary local memory units), the called \texttt{XMethodCallEvent} is pushed onto the call stack, and the execution jumps to the function body.
+      Each \texttt{return} statement creates the assignment of the function call event on the top of call stack.
       \\
-      If the method has not been resolved, \textbf{TODO: think about it. Will the formula be SAT? Or do we need to abort the analysis?}
+      If the function has not been resolved, \textbf{TODO: think about it. Will the formula be SAT? Or do we need to abort the analysis?}
     %\end{itemize}
 
   \1 \texttt{XFenceEvent} \\
@@ -398,6 +403,7 @@ The following interfaces model basic kinds of events (see Figure~\ref{fig:class-
 \end{outline}
 
 \paragraph{Edges}
+\label{ch:impl:model:xgraph:edges}
 Edges are stored as an immutable hash-map from source to target event.
 The type of edge is stored in the enumeration \texttt{XEdgeKind}:%TODO: IMPLEMENT THIS
 \begin{itemize}[noitemsep]
@@ -405,8 +411,11 @@ The type of edge is stored in the enumeration \texttt{XEdgeKind}:%TODO: IMPLEMEN
   \item the \textit{data-flow edges}: the \co-relation edge and the \rf-relation edge. %TODO! implement and then describe more!
 \end{itemize}
 
+
 \paragraph{Graph invariants}
-Once being constructed, graph must conform the following requirements:
+\label{ch:impl:model:xgraph:invariants}
+Once being constructed, the graph must conform the following requirements:
+
 \begin{enumerate}
 \item graph must have a single source with no ingoing edges, and two sinks of different kinds without outgoing edges,
 \item graph must be connected,
@@ -418,15 +427,17 @@ Once being constructed, graph must conform the following requirements:
 
 
 \paragraph{Graph builder} % TODO: in code: remove graph hierarchy by combining unrolled and normal. Add a bool 'UnrolledStatus' -- thus we can keep genericity
+\label{ch:impl:model:xgraph:builder}
 %TODO: code : NOTE: 'FlowGraph<N extends FlowGraphNode>' may be just 'FlowGraph<N>'
-todo
+
+\textbf{todo}
 
 
-\paragraph{Example}
+\paragraph{Graph example}
+\label{ch:impl:model:xgraph:example}
+\textbf{consider the following code in C:}
 
-consider the following code in C:
-
-picture of the CF-graph:
+\textbf{picture of the CF-graph:}
 
 %hashcode, uniqueness
 
@@ -456,7 +467,7 @@ drawbacks:
 
 in \porthos[2] we created the new abstraction layer \zformula[] that is translated to 
 
-recursive representation of smt formula
+recursive representation of SMT-formula
 
 used as an abstraction btween
 
@@ -525,7 +536,7 @@ class Visitor<T> {
 
 We consider the visitor pattern as the most natural way for operating the hierarchical data structures such as AST.
 However, we use its double-dispatching capabilities to reduce cost of multiple type casting performed while traversing the elements of a non-recursive data structure.
-The operator instance, instead of having a single method that handles and element of the instance, it extends the visitor interface and splits the handler method into multiple methods, one for each type of element.
+The operator instance, inch:impl:model:xgraph:memstead of having a single method that handles and element of the instance, it extends the visitor interface and splits the handler method into multiple methods, one for each type of element.
 
 For traversing plain (non-recursive) complex data structures, we mostly follow the \texttt{iterator} pattern: the object that 
 the special object Iterator, that has access to elements of the instance, iterates over them and . Since in \porthos[] we usually do not need to browse an object elements in different order, the iterator creation is performed by the data structure itself.
@@ -585,7 +596,7 @@ from ANTLR syntax tree of C
 - So, The language-dependent syntax tree is converted to the AST by the stateless Visitor (e.g., for C11 -> Ytree conversion is made by 'C2YtreeConverterVisitor') + short structure of this visitor (how?.. need ly?)
 
 
-\subsubsection{X-graph precompiler (5)}
+\subsubsection{X-graph pre-compiler (5)}
 \label{ch:impl:proc:x-pre-compiler}
 
 The precompiler traverses the \ytree{} and collects information necessary for its compilation into an \xgraph{}.
@@ -599,7 +610,7 @@ The precompiler traverses the \ytree{} and collects information necessary for it
 %TODO: <not implemented yet>
 
 The label resolution is necessary for establishing links to labelled statements. %a process of linkage the text labels referenced in code to the places of their declaration.
-In C, labelled statements are declared via the colon-syntax `\texttt{<label> : <statement>}', and the labels are referenced by the jump-statement `\texttt{goto <label>}'.
+In C, labelled statements are declared via the colon-syntax `\texttt{<label>\;:\;<statement>}', and the labels are referenced by the jump-statement `\texttt{goto\;<label>}'.
 The label resolution algorithm traverses the \ytree{} and collects all declared labels into a map that points a label to the labeled statement. %TODO: code: remove temp label generation, it's stupid. put null.
 This information is used during compilation to set up unconditional jumps.
 
@@ -609,10 +620,10 @@ This information is used during compilation to set up unconditional jumps.
 
 The C language has a static (resolved at compile-time) manifest (all types are declared explicitly) type system.
 Comparing to languages that use type inference, the type analysis of a C program constitutes a simple propagating the type information (obtained from variables declarations) to all expressions. % according the rules of propagation. For example, 
-Being carried at Y and X representation levels, the type is converted to a Z-type at the stage of the Z-formula encoding (see Section~\ref{ch:impl:proc:z-encoder}).
+Being carried at Y- and X- representation levels, the type is converted to a Z-type at the stage of the Z-formula encoding (see Section~\ref{ch:impl:proc:z-encoder}).
 
 %TODO: YOU REALLY NEED TO THINK MORE ABOUT TYPES ON Y, X, Z LEVELS + reconsider this paragraph (and others about types)
-Currently, \porthos[2] operates only the primitive C types (such as \texttt{int}, \texttt{char}, \texttt{float}, etc.), which is modelled as an enumeration \texttt{XType}. %TODO: model it.
+Currently, \porthos[2] handles only the primitive C types (such as \texttt{int}, \texttt{char}, \texttt{float}, etc.), which is modelled as an enumeration \texttt{XType}. %TODO: model it.
 Array dimension is stored as an integer number at the Y-level (at the X- and Z- levels, \textbf{TODO: think about it}). %the array operations are converted to ).
 In addition, \porthos[2] has a built-in extensible database storing the semantics of non-primitive C types stored by the \texttt{X2ZTypeConverter}, %TODO: Or XTypeHookManager?
 which can be requested for converting an X-type to a Z-type. %TODO: implement this.
@@ -621,55 +632,99 @@ which can be requested for converting an X-type to a Z-type. %TODO: implement th
 
 %TODO: <not implemented>
 The type analysis algorithm should consider the type aliases supported by C language (defined by the \texttt{typedef} instruction).
-For resolving the type aliases, the precompiler should make an extra traverse of the \ytree{} before the precompilation stage and build up a symbol map.
+For resolving the type aliases, the precompiler should make an extra traverse of the \ytree{} before the pre-compilation stage and build up a symbol map.
 
 %TODO: <not implemented>
-The type analysis includes the process of resolving semantics of function invocations.
-The result is stored in a map of function invocation expression to its resolved signature, so that the compiler can decide either to jump to the function body and interpret it, or to hook the invocation if the semantics of the function is resolved.
+The type analysis also includes the process of resolving semantics of function invocations.
+The result is stored in a map of invocation expression to the resolved function signature, so that the compiler can decide either to jump to the function body and interpret it, or to hook the invocation if the semantics of the function is resolved.
 However, due to lack of polymorphism and function overloading mechanism inherent to OOP languages, the function resolution algorithm may set up the mapping only for the function name and thus may neglect analysis of types of the arguments, we build the mapping for the full function signature so that the type analysis preprocessing unit may be used for analysing the C++ code if needed.
 
-== 
+%TODOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+%The X-type construction: \textbf{TODO} //code of class YType2TypeConverter (todo: rename: it's not conversion, it's a type construction, from the y-level name+qualifiers+
+%- on Z level, type is one-pointer-level
+%- The typification algorithm: propagation rules for each of Y
+%- as vector array as needed.
+%%
+%Y: quantifiers+specifiers+typeName
+%X: ?.. Z? TODO: rename+rework XType->XZType
+%Z: Int, Real, Boolean, BitVector[N]
 
-The X-type construction: //code of class YType2TypeConverter (todo: rename: it's not conversion, it's a type construction, from the y-level name+qualifiers+
-- on Z level, type is one-pointer-level
-- The typification algorithm: propagation rules for each of Y
-- as vector array as needed.
 
-Y: quantifiers+specifiers+typeName
-X: ?.. Z? TODO: rename+rework XType->XZType
-Z: Int, Real, Boolean, BitVector[N]
-
-
-\paragraph{Variables kinds determination}
+\paragraph{Variable kind analysis}
 \label{ch:impl:proc:x-pre-compiler:var}
 
-On the compilation stage, once the compiler meets the reference to a variable, it should know whether it is local or global variable.
-In general case, 
+On the compilation stage, once the compiler meets the reference to a variable, it should know whether it refers to a local or global variable.
+The kinds of variables have to be determined on the pre-compilation stage.
 
-- pointers
-
-- externs
-
-- parameters of process-functions (parameters of other funcs are local)
-
-- EXPORT\_SYMBOL "exports the symbol for dynamic linking"
-
--EXPORT\_SYMBOL\_GPL %https://lwn.net/Articles/154602/
-
- %https://stackoverflow.com/questions/6670589/how-to-prevent-error-symbol-undeclared-here-despite-export-symbol-in-a-linu
+\vspace{1em}
+The following types of variables are detected as \textit{global}:
+%TODO: not implemented
+\begin{itemize}
+\item a variable was declared as a pointer;
+\item a variable whose address was accessed by any process;
+\item a variable that was declared as a parameter of the process function;
+%TODO: say sth about KERNEL ANALYSIS MODE BEFORE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+\item a variable that was exported by the \texttt{extern} keyword (in the kernel-analysis mode, the functions \texttt{EXPORT\_SYMBOL} and \texttt{EXPORT\_SYMBOL\_GPL} also export symbols for dynamic linking); %https://lwn.net/Articles/154602/
+\end{itemize}
 
 
 \subsubsection{X-graph compiler (6)}
 \label{ch:impl:proc:x-compiler}
 
-Firstly, the \ytree{} is compiled to the \textit{cyclic control-flow event-based graph} \xgraph[CF].
+The X-graph compiler is the main component that transforms the recursive \ytree{} data structure to the plain \xgraph{} representation.
 
-Then: unrolled up to bound $k$ to the \textit{acyclic control-flow event-based graph} \xgraphU[CF].
+The compilation is performed in three stages.
+Firstly, the \ytree{} is compiled to a \textit{cyclic} control-flow event-based graph \xgraph[CF].
+Then, this graph is unrolled to an \textit{acyclic} control-flow event-based graph \xgraphU[CF].
+After that, the compiler is able to perform the data-flow analysis and produce the full event-based graph \xgraphU[CF+DF], which remains to be CF-acyclic (no cycles among control-flow edges).
 
-Then: data-flow analysis to the \textit{acyclic full event-based graph} \xgraphU[CF+DF].
+<COmpiler contains several modules: (todo: remove todo about renaming interpreter to compiler: it's indeed interpreter>
+
+<scheme of who calls whom>
+
+%MethCallE : bind parameters with values (load them to temp registers) + remember the return-register
+%reutrn event= assign the return-register + simple jump
 
 
-converting recursive structure to plain
+\paragraph{Memory manager}
+\label{ch:impl:proc:x-compiler:mem}
+
+The \xgraph{} abstract machine model disposes infinite number of memory units, both local and shared (see Section~\ref{ch:impl:model:xgraph:mem}).
+The X-compiler accesses all memory units via the \texttt{XMemoryManager}, which by the end of pre-compilation stage is already initialised (has registered all shared memory units).
+However, the memory manager is a stateful component of the compiler as it offers the methods for declaring and removing local memory units dynamically at the compilation time.
+At each time of the compilation process, the \texttt{XMemoryManager} can resolve the memory unit by its name.
+Following the C standard, local memory units have higher priority over global ones.
+Since the C language allows the variables that have the same name to be declared in nested contexts, the \texttt{XMemoryManager} carries the block-context stack. %TODO: refactor XMemoryManager!
+
+<some picture ? >
+
+\paragraph{Invocation hook manager}
+\label{ch:impl:proc:x-compiler:hooking}
+
+The invocation hooking module serves as a knowledge base that stores the semantics of functions.
+%TODO: rename HookManager -> XHookManager
+Once the X-compiler meets the function invocation, it calls the \texttt{XHookManager}, which tries to match the function signature (in case of program in C language -- only the function name) across all signatures it stores.
+Once the signature matches, the hook manager intercepts the compilation process and interprets the method according to the algorithm it stores.
+%TODO: say sth about the mode
+The hook manager operates multiple invocation hooks depending on the user-defined mode (
+ \texttt{XInvocationHook} 
+
+%TODO: rename InvocationHook -> XInvocationHook
+multiple hooks for mult modes
+%, having access to the X-interpreter (see Section~\ref{ch:impl:proc:x-compiler:compilation}), 
+
+lambda-hook: knowledge base: InterceptionAction(BiFunction<XMemoryUnit, XMemoryUnit[], ? extends XEntity> action)
+
+todo: kernel hooks
+%TODO: kernel's : ACCESS_ONCE() access may be modeled as a volatile memory_order_relaxed access.  %http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4374.html
+
+% + RCU %https://www.kernel.org/doc/Documentation/RCU/whatisRCU.txt
+
+
+\paragraph{Interpreter}
+\label{ch:impl:proc:x-compiler:compilation}
+
+stateful
 
 stacks: context, readyContext, call, 
   BlockContext (rename): what stores, enum of states
@@ -678,40 +733,21 @@ almostReadyContexts: for computation events. Flushed by invocation . When are fi
 
 setting up edges depending of type of ready-context
 
-stateful. Managers, [graph] builders
-  interfaces of XMemoryManager: listing, paragraph
- 
 - hierarchy of Compilers: pic on inheritance (XCompiler is an stateful abstract machine). Restrictions of lude-compilers
   postlude: assertion: a new event XAssertionEvent
-  
+
 interfaces that offer compilers: listing of interface
 
 algorithm for interpreting
-
-%MethCallE : bind parameters with values (load them to temp registers) + remember the return-register
-%reutrn event= assign the return-register + simple jump
-
-
-\paragraph{Invocation hooking}
-\label{ch:impl:proc:x-pre-compiler:hooks}
-
-resolve the semantics of a function given its signature (meth name + params types)
-
-mapping - as a result
-
-knowledge base: InterceptionAction(BiFunction<XMemoryUnit, XMemoryUnit[], ? extends XEntity> action)
-
-%TODO: kernel's : ACCESS_ONCE() access may be modeled as a volatile memory_order_relaxed access.  %http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4374.html
-
-% + RCU %https://www.kernel.org/doc/Documentation/RCU/whatisRCU.txt
-
-
-
 
 
 
 \subsubsection{X-graph unroller (7)}
 \label{ch:impl:proc:x-unroll}
+
+up to bound $k$ 
+
+recursion -- may be, if calls are supported
 
 two kinds of exits
 

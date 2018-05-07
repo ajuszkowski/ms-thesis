@@ -9,7 +9,7 @@ Most modern computer systems contain large parts that operate concurrently. Thou
 
 Traditionally, studies related to concurrent programming concern on more fundamental theoretical questions of designing race-free and lock-free parallel algorithms, asynchronous data structures and synchronisation primitives of a programming language.
 Unfortunately, when it comes to the real-world concurrent programs, the algorithmic level of abstraction is not enough for guaranteeing their properties of correctness and reliability.
-The reasons of this fact lie in the code optimisations that both compiler and hardware perform in order to increase performance as much as possible.
+The reasons of this fact lie in the code optimisations that both compiler and hardware perform in order to increase performance as much as possible~\cite{adve1996shared}.
 For instance, Figure~\ref{simple_wmm_x86} provides simple example of reachability of the state `\texttt{(0:EAX=0~/\textbackslash~1:EAX=0)}' on the x86 architecture (such little examples that illustrate specific behaviour of a WMM are called \textit{litmus tests}).
 %reordering of memory access instructions within single process allowed by the x86-TSO weak memory model, which potentially breaks the program logic. 
 This state is allowed because in the x86 architecture each processor may cache the write to shared memory variable into its local write buffer, so that they do not immediately become visible by processes running on other cores.
@@ -38,7 +38,7 @@ MOV EAX,[y] & MOV EAX,[x] \\
 \label{simple_wmm_x86}
 \end{figure}
 
-Research of weak memory models firstly aims to \textit{formalise} develop the formal approach of understanding programs with respect to weak memory models which is systematic, sound and complete. The first (and so far the only) such a framework was presented in 2010~\cite{alglave2010shared}.
+Research of weak memory models firstly aims to \textit{formalise} develop the formal approach of understanding programs with respect to weak memory models which is systematic, sound and complete. The first (and so far the only) such a framework was formalised by Jade Alglave in 2010~\cite{alglave2010shared}.
 In addition to developing rather theoretical basis, researchers work on extracting the WMMs for hardware architectures from existing implementations of from their specifications, which are written in natural language and thus suffer from ambiguities and incompleteness.
 Over last decade the memory models have been defined for most mainstream multiprocessor architectures, such as x86-TSO and Sparc-TSO (for \textit{Total Store Order}) model for x86 and Sparc architecture formalised in 2009~\cite{owens2009better}, much more relaxed memory model for Power and ARM architectures~\cite{alglave2009semantics,sarkar2011understanding, alglave2014herding}, and others.
 There are projects for validating hardware architectures wrt. a memory model, e.g.~\cite{lustig2014pipecheck,lustig2016coatcheck}.

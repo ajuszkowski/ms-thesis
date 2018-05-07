@@ -120,7 +120,7 @@
 \ifthenelse%
 {\equal{#1}{}}%if
 {}%then
-{_{\text{\tiny{#1}}}^{\text{\tiny{u}}}}%else
+{_{\text{\tiny{#1}}}^{\text{\tiny{U}}}}%else
 }}
 
 \sloppy %forbid page overfull with texttt words
@@ -572,11 +572,9 @@ ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;
 
 \definecolor{dkblue}{rgb}{0,0.1,0.4}
 
-\titleformat{\paragraph}[display]%[runin]
-  {\normalsize\bfseries}{}{0pt}{}
-\titlespacing*{\paragraph}{0pt}{0pt}{0pt}
-%\titleformat{\paragraph}[runin]
-%{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+%\titleformat{\paragraph}[display]{\normalsize\bfseries}{}{0pt}{}
+\titleformat{\paragraph}[hang]{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}{0pt}{1em}{0pt}
 
 % The contents of the thesis are separated to their own files.
 % Edit the content in these files, rename them as necessary.
