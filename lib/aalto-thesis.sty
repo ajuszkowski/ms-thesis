@@ -163,13 +163,13 @@
     {\renewcommand{\ATINSTRUCTORNAME}{Instructor}}%
     {\renewcommand{\ATINSTRUCTORNAME}{Instructors}}
   \renewcommand{\ATSUPERVISOR}{\SUPERVISOR}
-  \renewcommand{\ATINSTRUCTOR}{\INSTRUCTOR}
+  %\renewcommand{\ATINSTRUCTOR}{\INSTRUCTOR}
   \renewcommand{\ATDATENAME}{Date}
   \renewcommand{\ATDATE}{\DATE}
   \renewcommand{\ATCITY}{Espoo, Finland \& Saint Petersburg, Russia}
   \renewcommand{\ATUNIV}{Aalto University, School of Science \\ ITMO University, Faculty of Information Security and Computer Technologies}
   \renewcommand{\ATSCHOOL}{}
-  \renewcommand{\ATDEGREEPROG}{Master's Programme in Computer, Communication and Information Sciences \\ International double degree programme}
+  \renewcommand{\ATDEGREEPROG}{Master's\;Programme\;in\;Computer,\;Communication\;and\;Information\;Sciences\\International double degree programme}
   \renewcommand{\ATABSTRACTNAME}{ABSTRACT}
   \renewcommand{\ATLOGO}{img/aalto-logo-en}
   \renewcommand{\ATAUTHORNAME}{Author}
@@ -178,77 +178,9 @@
   \renewcommand{\ATPAGESNAME}{Pages}
   \renewcommand{\ATLANGUAGENAME}{Language}
   \renewcommand{\ATLANGUAGE}{\LANGUAGE}
-  \renewcommand{\ATPROFSHIPNAME}{Professorship?}
-  \renewcommand{\ATPROFCODENAME}{Code?}
-  \renewcommand{\ATPROFSHIP}{\PROFESSORSHIP}
-}
-% Terms in Finnish
-% ------------------------------------------------------------------
-% You may change these if you wish
-\ifthen{\equal{#1}{finnish}}{
-  \renewcommand{\ATTITLENAME}{Työn nimi}
-  \renewcommand{\ATTITLE}{\FTITLE}
-  \renewcommand{\ATSUBTITLE}{\FSUBTITLE}
-  \ifthenelse{\NUMSUPERVISORS = 1}%
-    {\renewcommand{\ATSUPERVISORNAME}{Valvoja}}%
-    {\renewcommand{\ATSUPERVISORNAME}{Valvojat}}
-  \ifthenelse{\NUMINSTRUCTORS = 1}%
-    {\renewcommand{\ATINSTRUCTORNAME}{Ohjaaja}}%
-    {\renewcommand{\ATINSTRUCTORNAME}{Ohjaajat}}
-  \renewcommand{\ATSUPERVISOR}{\FSUPERVISOR}
-  \renewcommand{\ATINSTRUCTOR}{\FINSTRUCTOR}
-  \renewcommand{\ATDATENAME}{Päiväys}
-  \renewcommand{\ATDATE}{\FDATE}
-  \renewcommand{\ATTHESIS}{Diplomityö}
-  \renewcommand{\ATCITY}{Espoo}
-  \renewcommand{\ATUNIV}{Aalto-yliopisto}
-  \renewcommand{\ATSCHOOL}{Perustieteiden korkeakoulu}
-  \renewcommand{\ATDEGREEPROG}{???}
-  \renewcommand{\ATABSTRACTNAME}{???}
-  \renewcommand{\ATLOGO}{img/aalto-logo-fi}
-  \renewcommand{\ATAUTHORNAME}{Tekijä}
-  \renewcommand{\ATKEYWORDSNAME}{Asiasanat}
-  \renewcommand{\ATKEYWORDS}{\FKEYWORDS}
-  \renewcommand{\ATPAGESNAME}{Sivumäärä}  
-  \renewcommand{\ATLANGUAGE}{\FLANGUAGE}
-  \renewcommand{\ATLANGUAGENAME}{Kieli}
-  \renewcommand{\ATPROFSHIPNAME}{Professuuri}
-  \renewcommand{\ATPROFCODENAME}{Koodi}
-  \renewcommand{\ATPROFSHIP}{\FPROFESSORSHIP}
-}
-% Terms in Swedish
-% ------------------------------------------------------------------
-% You may change these if you wish
-\ifthen{\equal{#1}{swedish}}{
-  \renewcommand{\ATTITLENAME}{Arbetets namn}
-  \renewcommand{\ATTITLE}{\STITLE}
-  \renewcommand{\ATSUBTITLE}{\SSUBTITLE}
-  \ifthenelse{\NUMSUPERVISORS = 1}%
-    {\renewcommand{\ATSUPERVISORNAME}{Övervakare}}%
-    {\renewcommand{\ATSUPERVISORNAME}{Övervakare}}
-  \ifthenelse{\NUMINSTRUCTORS = 1}%
-    {\renewcommand{\ATINSTRUCTORNAME}{Handledare}}%
-    {\renewcommand{\ATINSTRUCTORNAME}{Handledare}}
-  \renewcommand{\ATSUPERVISOR}{\SSUPERVISOR}
-  \renewcommand{\ATINSTRUCTOR}{\SINSTRUCTOR}
-  \renewcommand{\ATDATENAME}{Datum}
-  \renewcommand{\ATDATE}{\SDATE}
-  \renewcommand{\ATTHESIS}{Diplomarbete}
-  \renewcommand{\ATCITY}{Esbo}
-  \renewcommand{\ATUNIV}{Aalto-universitetet}
-  \renewcommand{\ATSCHOOL}{Högskolan för teknikvetenskaper}
-  \renewcommand{\ATDEGREEPROG}{Examensprogram för datateknik} 
-  \renewcommand{\ATABSTRACTNAME}{SAMMANDRAG AV DIPLOMARBETET}
-  \renewcommand{\ATLOGO}{img/aalto-logo-se}
-  \renewcommand{\ATAUTHORNAME}{Utfört av}
-  \renewcommand{\ATKEYWORDSNAME}{Nyckelord}
-  \renewcommand{\ATKEYWORDS}{\SKEYWORDS}
-  \renewcommand{\ATPAGESNAME}{Sidantal}  
-  \renewcommand{\ATLANGUAGENAME}{Språk}
-  \renewcommand{\ATLANGUAGE}{\SLANGUAGE}
-  \renewcommand{\ATPROFSHIPNAME}{Professur}
-  \renewcommand{\ATPROFCODENAME}{Kod}
-  \renewcommand{\ATPROFSHIP}{\SPROFESSORSHIP}
+  %\renewcommand{\ATPROFSHIPNAME}{Professorship?}
+  %\renewcommand{\ATPROFCODENAME}{Code?}
+  %\renewcommand{\ATPROFSHIP}{\PROFESSORSHIP}
 }
 }
 
@@ -291,9 +223,9 @@
 \ATSUPERVISORNAME: & \allowlinebreaks{10cm}{%
 \ifthenelse{\isundefined{\COVERSUPERVISOR}}%
 {\ATSUPERVISOR}{\COVERSUPERVISOR}}\\
-\ATINSTRUCTORNAME: & \allowlinebreaks{10cm}{%
-\ifthenelse{\isundefined{\COVERINSTRUCTOR}}%
-{\ATINSTRUCTOR}{\COVERINSTRUCTOR}}\\
+%\ATINSTRUCTORNAME: & \allowlinebreaks{10cm}{%
+%\ifthenelse{\isundefined{\COVERINSTRUCTOR}}%
+%{\ATINSTRUCTOR}{\COVERINSTRUCTOR}}\\
 \end{tabular}
 }
 \newpage%
@@ -339,9 +271,9 @@
 \ATTITLE\ \ATSUBTITLE}}\\
 \hline
 \textbf{\ATDATENAME:} & \ATDATE & \textbf{\ATPAGESNAME:} & \PAGES\\
-\hline
-\textbf{\ATPROFSHIPNAME:} & \ATPROFSHIP & 
-\textbf{\ATPROFCODENAME:} & \PROFCODE\\
+%\hline
+%\textbf{\ATPROFSHIPNAME:} & \ATPROFSHIP & 
+%\textbf{\ATPROFCODENAME:} & \PROFCODE\\
 \hline
 \textbf{\ATSUPERVISORNAME:} &
 \multicolumn{3}{l|}{\allowlinebreaks{11cm}{\ATSUPERVISOR}}\\

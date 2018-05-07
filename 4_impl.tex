@@ -199,7 +199,7 @@ For keeping the architecture transparent, we build all abstraction levels with i
 \label{ch:impl:model:ytree}
 
 The first internal representation used by \porthos[2] is the \textit{\ytree{}}, which represents a rather high-level AST.
-The Apendix~\ref{apx:trees} represents the file tree of main classes that constitute the \ytree{} hierarchy (as the inheritance tree might be obvious for the C-like AST, we confine ourselves to presenting the classes file tree only).
+The Apendix~\ref{apx:trees} represents the file tree of main classes that constitute the \ytree{} hierarchy (as the inheritance tree might be obvious for the C-like AST, we confine ourselves to presenting the classes file tree only, which we tend to retain clearly structured).
 
 %\columnratio{0.7}%\begin{paracol}{2}
 %\switchcolumn%\VerbatimInput{inc/lst/Ytree-tree.out}%\end{paracol}
@@ -249,7 +249,7 @@ Similarly to expressions, all \ytree{} statements implement the \texttt{YStateme
 \begin{itemize}%[nolistsep]
   \item \texttt{YBranchingStatement} representing the \texttt{if-then-else} statement;
   
-  \item \texttt{YLoopStatement} representing both \texttt{while}- and \texttt{for}-loops;%TODO:RENAME YWhileLoopStatement->YLoopStatement in code!!!)}
+  \item \texttt{YLoopStatement} representing both \texttt{while}- and \texttt{for}- loops;%TODO:RENAME YWhileLoopStatement->YLoopStatement in code!!!)}
   
   \item \texttt{YJumpStatement} representing unconditional jump (\texttt{goto}-jump to a label and loop-jumps \texttt{break} and \texttt{continue});
   
@@ -281,7 +281,7 @@ The syntax tree that contains set of definitions (e.g., litmus-initialisations, 
 \subsubsection{X-graph}
 \label{ch:impl:model:xgraph}
 
-The \ytree{} is compiled into the low-level event-based program representation \textit{\xgraph{}}.
+The \ytree{} is compiled into the low-level event-based program representation called \textit{\xgraph{}}.
 The mathematical structure of event-flow graph was discussed in Section~\ref{ch:wmm:event}.
 %In general, \xgraph{} follows the structure described there, however it is constructed in several stages.
 The nodes of the graph are events, and the edges are basic relations: the control-flow relation \po and the data-flow relations \co and \rf.

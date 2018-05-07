@@ -120,7 +120,7 @@
 \ifthenelse%
 {\equal{#1}{}}%if
 {}%then
-{_{#1}^u}%else
+{_{\text{\tiny{#1}}}^{\text{\tiny{u}}}}%else
 }}
 
 \sloppy %forbid page overfull with texttt words
@@ -216,13 +216,13 @@ sorting=anyt,%Sort by alphabetic label, name, year, title,
 %sorting=nyt, %Sort by name, year, title. %see https://tex.stackexchange.com/a/51439
 ]{biblatex}
 % A catch-all filter for all items which are not assigned to a dedicated sub-bibliography:
-\defbibfilter{other}{
-  not type=article
-  and
-  not type=book
-  and
-  not type=collection
-}
+%\defbibfilter{other}{
+%  not type=article
+%  and
+%  not type=book
+%  and
+%  not type=collection
+%}
 %make the plus sign in bibliography references as superscript:
 \renewcommand*{\labelalphaothers}{\textsuperscript{+}}
 
@@ -308,12 +308,12 @@ sorting=anyt,%Sort by alphabetic label, name, year, title,
 % You can just fix the texts there. Just remember to check all the language
 % variants you use (they are all there in the same place).
 % ------------------------------------------------------------------
-\newcommand{\TITLE}{\nohyphens{Automated Analysis of Weak Memory Models}} % TODO
-\newcommand{\FTITLE}{?} % TODO
+\newcommand{\TITLE}{\nohyphens{Automated Analysis of Weak Memory Models}}
+%\newcommand{\FTITLE}{?}
+%\newcommand{\FSUBTITLE}{}
+%\newcommand{\FDATE}{?.?.2018} % TODO
 \newcommand{\SUBTITLE}{}
-\newcommand{\FSUBTITLE}{}
-\newcommand{\DATE}{?.?.2018} % TODO
-\newcommand{\FDATE}{?.?.2018} % TODO
+\newcommand{\DATE}{?.?.2018 \textbf{TODO}} % TODO
 
 % Supervisors and instructors
 % ------------------------------------------------------------------
@@ -323,14 +323,14 @@ sorting=anyt,%Sort by alphabetic label, name, year, title,
 % ``twoinstructors'' to the aalto-thesis package so that the titles are in
 % plural.
 % Example of one supervisor:
-\newcommand{\SUPERVISOR}{Assoc. Prof. Keijo Heljanko \\ Docent Igor I. Komarov} % TODO
-\newcommand{\FSUPERVISOR}{} % TODO
-\newcommand{\SSUPERVISOR}{} % TODO
+\newcommand{\SUPERVISOR}{Assoc. Prof. Keijo Heljanko\\Docent Igor I. Komarov} % TODO
+%\newcommand{\FSUPERVISOR}{} % TODO
+%\newcommand{\SSUPERVISOR}{} % TODO
 
 % If you have only one instructor, just write one name here
-\newcommand{\INSTRUCTOR}{} % TODO
-\newcommand{\FINSTRUCTOR}{} % TODO
-\newcommand{\SINSTRUCTOR}{} % TODO
+%\newcommand{\INSTRUCTOR}{} % TODO
+%\newcommand{\FINSTRUCTOR}{} % TODO
+%\newcommand{\SINSTRUCTOR}{} % TODO
 % If you have two instructors, separate them with \\ to create linefeeds
 % \newcommand{\INSTRUCTOR}{Olli Ohjaaja M.Sc. (Tech.)\\
 %  Elli Opas M.Sc. (Tech)}
@@ -353,14 +353,14 @@ sorting=anyt,%Sort by alphabetic label, name, year, title,
 
 % Other stuff
 % ------------------------------------------------------------------
-\newcommand{\PROFESSORSHIP}{} % TODO
-\newcommand{\FPROFESSORSHIP}{?} % TODO check
+%\newcommand{\PROFESSORSHIP}{} % TODO
+%\newcommand{\FPROFESSORSHIP}{?} % TODO check
 % Professorship code is the same in all languages
-\newcommand{\PROFCODE}{AS-116} % TODO check
-\newcommand{\KEYWORDS}{Thesis template, master's thesis} % TODO
-\newcommand{\FKEYWORDS}{Diplomityöpohja} % TODO
-\newcommand{\LANGUAGE}{English} % TODO
-\newcommand{\FLANGUAGE}{Englanti} % TODO
+%\newcommand{\PROFCODE}{AS-116} % TODO check
+\newcommand{\KEYWORDS}{\textbf{TODO: }Thesis template, master's thesis} % TODO
+%\newcommand{\FKEYWORDS}{Diplomityöpohja} % TODO
+\newcommand{\LANGUAGE}{English}
+%\newcommand{\FLANGUAGE}{Englanti} % TODO
 
 % Author is the same for all languages
 \newcommand{\AUTHOR}{Artem YUSHKOVSKIY}
@@ -485,27 +485,6 @@ porttitor vestibulum. Praesent diam lorem, ultrices nec vestibulum id, volutpat
 nec lacus.
 }
 
-% Abstract in Finnish
-% ------------------------------------------------------------------
-\thesisabstract{finnish}{
-Cras tincidunt bibendum erat, vel tincidunt diam porttitor aliquam. Donec sit
-amet urna non felis placerat pharetra. Aenean ultrices facilisis nulla vitae
-semper. Nullam non libero quis dui fermentum aliquam id vel eros. Praesent
-elementum tortor quis sem congue iaculis sit amet eget nisl. Quisque erat
-tortor, condimentum eu volutpat et, blandit et augue. Phasellus erat turpis,
-pretium non feugiat id, posuere id velit. Vestibulum ut sapien felis, quis
-convallis dui.
-
-In elementum est eu nulla hendrerit feugiat. In sodales diam vel lacus cursus
-tincidunt. Morbi nibh dui, imperdiet non vestibulum non, dignissim id risus. Sed
-sollicitudin neque lectus, porttitor sollicitudin elit. Nulla facilisi. Nullam
-in ante eu mi suscipit sollicitudin. Sed est velit, gravida facilisis varius
-eget, tempus sed urna. Aliquam erat volutpat. Nam semper condimentum nisi.
-Nullam scelerisque, metus nec sodales vulputate, purus augue venenatis urna, sit
-amet mattis turpis nisl ac metus. Mauris nec odio ut neque condimentum vulputate
-vel in turpis. Nulla facilisi. Nulla id tellus sapien, vitae blandit lorem.
-}
-
 % Acknowledgements
 % ------------------------------------------------------------------
 % Select the language you use in your acknowledgements
@@ -614,12 +593,12 @@ ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;
 \phantomsection
 
 \addcontentsline{toc}{chapter}{\bibname}
-%\printbibliography
 
-% And now the sub-bibliographies: we use three of them (based on the entry type). Each sub-bibliography assigns a different prefix. The option is called 'prefixnumbers' because it was originally intended for numeric citations only. It also works with alphabetic labels:
-\printbibliography[heading=subbibliography,title={Articles},type=article]%,prefixnumbers={A-}]
-\printbibliography[heading=subbibliography,title={Books},type=book]%,prefixnumbers={B-}]
-\printbibliography[heading=subbibliography,title={Collections},type=collection]%,prefixnumbers={C-}]
+\printbibliography
+%% And now the sub-bibliographies: we use three of them (based on the entry type). Each sub-bibliography assigns a different prefix. The option is called 'prefixnumbers' because it was originally intended for numeric citations only. It also works with alphabetic labels:
+%\printbibliography[heading=subbibliography,title={Articles},type=article]%,prefixnumbers={A-}]
+%\printbibliography[heading=subbibliography,title={Books},type=book]%,prefixnumbers={B-}]
+%\printbibliography[heading=subbibliography,title={Collections},type=collection]%,prefixnumbers={C-}]
 
 % Appendices go here
 % ------------------------------------------------------------------
