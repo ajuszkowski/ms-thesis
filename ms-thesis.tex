@@ -81,7 +81,7 @@
     escapeinside={[*}{*]},
     %keywordstyle={\ttfamily\color{red}},
 }
-\newcommand{\tool}[1]{\texttt{#1}\,}
+\newcommand{\tool}[1]{\texttt{#1}}
 
 \newcommand*{\fx}{\ensuremath{\mathbf{x}}}%x}}}
 \newcommand*{\fv}{\ensuremath{\mathbf{v}}} %v}}}
@@ -569,6 +569,9 @@ ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;
 \fancyhf{}
 \rhead{\footnotesize\itshape{\leftmark}}
 \cfoot{\thepage}
+
+\interfootnotelinepenalty=10000
+
 
 \definecolor{dkblue}{rgb}{0,0.1,0.4}
 

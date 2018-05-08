@@ -1,10 +1,10 @@
 \chapter{The~\texttt{porthos2}:~implementation}
 \label{ch:impl}
 
-The main reason for commencing the work on \porthos[2] was the need for processing real-world C programs, which, at first, requires the input language to be extended.
+The main call for commencing the work on \porthos[2] was the need for processing real-world C programs, which, at first, requires the input language to be extended.
 This implies the support not only for new syntactic structures of C language (such as the \texttt{switch} statement or the postfix increment operator \texttt{i++}), but also for its fundamental concepts and features (such as types, pointer arithmetic or first-order functions), which requires revision of the whole architecture of the tool.
-Although far not the entire C language has been supported (that, considering its complexity and numerous pitfalls, goes far beyond current thesis%
-\footnote{To ensure that, we have merely to look at existing C compilers, for instance, the open-source \texttt{gcc} compiler, that uses a C parser written in more than 18.5 thousand lines (see \url{https://github.com/gcc-mirror/gcc/blob/master/gcc/c/c-parser.c})}%
+Yet far from all of the C language has been supported (that, considering its complexity and numerous pitfalls, goes far beyond current thesis%
+\footnote{To ensure that, we have merely to look at existing C compilers, for instance, the open-source \texttt{gcc} compiler, which uses the C parser written in more than 18.5 thousand lines of code (see \url{https://github.com/gcc-mirror/gcc/blob/master/gcc/c/c-parser.c})}%
 ), we consider the accomplished work as a step towards this.
 %This applies not only to instances that simply constitute the syntactic sugar of C language (such as the \texttt{switch} statement or the prefix increment operator \texttt{++i}), but also to its fundamental concepts and features (such as pointer arithmetic or structures).
 %However, the architecture of current version of \porthos{} does not allow to ... as it is ....
@@ -73,11 +73,12 @@ As a robust and transparent tool, the \porthos[2] must adhere to the strategy of
 %immut: preservation of invariants
 %The transparency, efficiency and extensibility are the necessary criteria of any good tool.
 
-As its predecessor, \porthos[2] uses the open-source SMT-solver \tool{Z3} by Microsoft Research~\cite{de2008z3}. However, unlikely its predecessor, the \porthos[2] has an additional abstraction level \zformula{} (see Section~\ref{ch:impl:model:zformula}) that allow to use any other SMT-solver. %TODO: *should* allow?
+As its predecessor, \porthos[2] uses the open-source SMT-solver \tool{Z3}%
+\footnote{The \tool{Z3} project repository: \url{https://github.com/Z3Prover/z3}}%
+by Microsoft Research~\cite{de2008z3}. However, unlikely its predecessor, the \porthos[2] has an additional abstraction level \zformula{} (see Section~\ref{ch:impl:model:zformula}) that allow to use any other SMT-solver. %TODO: *should* allow?
 
 The programming language choice for \porthos[2] was also made in favour of \textit{java}, firstly, in order to be able to reuse some parts and concepts of \porthos[1] that is written in java, and secondly, because the authors find the object-oriented (OOP) concepts of java suitable for modelling languages.
-Although java does not show best results in performance benchmarks (for example, comparing to C++~\cite{hundt2011loop, oaks2014java}), the performance cornerstone of \porthos[2] (as well as any other SMT-based code analyser) is the phase of solving the SMT-formula, which is left to the third-party SMT-solver \textit{Z3}%
-\footnote{The Z3 project repository: \url{https://github.com/Z3Prover/z3}} %
+Although java does not show best results in performance benchmarks (for example, comparing to C++~\cite{hundt2011loop, oaks2014java}), the performance cornerstone of \porthos[2] (as well as any other SMT-based code analyser) is the phase of solving the SMT-formula, which is left to the third-party SMT-solver%
 invoked from \porthos[2] via java API.
 However, considering the perspective of using \porthos[2] as a static analyser for real-world programs, the memory optimisation problem must also be taken into account during both encoding and solving stages.
 It is worth noting that, for the reasons of simplicity, the \porthos[2] is not a concurrent program, however, we believe that, due to its modular architecture, it can be easily parallelised on the level of program modules.
@@ -86,7 +87,8 @@ It is worth noting that, for the reasons of simplicity, the \porthos[2] is not a
 \section{Architecture}
 \label{ch:impl:arch}
 
-The general architecture scheme of \porthos[2] is presented in Figure~\ref{fig:arch}. On the picture, rectangles denote processing units (marked with gear sign with a unique number of the component).
+The general architecture scheme of \porthos[2] is presented in Figure~\ref{fig:arch}.
+The rectangles in the picture denote processing units (marked with gear sign with a unique number of the component), and labels of the arrows describe the internal representation carried out during the transformation.
 
 \begin{figure}%[H]
     \centering
@@ -99,7 +101,7 @@ The general architecture scheme of \porthos[2] is presented in Figure~\ref{fig:a
 The program takes as input the program to be analysed and one (the reachability analysis mode) or two (the portability analysis mode) memory models.
 The parsed program syntax tree is then converted (Section~\ref{ch:impl:proc:y-constr}) to a program AST called \ytree{}%
 \footnote{In order to avoid confusion between different internal representations, we prefix the names of elements of each internal representation with a letter. For instance, we picked the letter `Y' to denote the AST code representation as drawing of this letter resembles the tree branching; with letter `X' we prefix elements of the event-flow graph as the events are to be e\textbf{x}ecuted; and with letter `W' we prefix elements of the \textbf{w}eak memory model AST.}%
-(Section~\ref{ch:impl:model:ytree}), which then is being pre-processed at the pre-compilation stage (Section~\ref{ch:impl:proc:x-pre-compiler}) in order to collect information necessary for the compilation.
+(Section~\ref{ch:impl:model:ytree}), which then is being preprocessed at the pre-compilation stage (Section~\ref{ch:impl:proc:x-pre-compiler}) in order to collect information necessary for the compilation.
 The \ytree{} then is being compiled (Section~\ref{ch:impl:proc:x-compiler}) to an \xgraph{} representation (Section~\ref{ch:impl:model:xgraph}).
 The compiled \xgraph{} then is being converted to an acyclic form (Section~\ref{ch:impl:proc:x-unroll}) in order to be encoded into a \zformula{} (Section~\ref{ch:impl:model:zformula}).
 Apart from that, the memory-model constructor (Section~\ref{ch:impl:proc:w-constr}) constructs the abstract syntax tree of derived relations of the weak memory model \wmodel{} (Section~\ref{ch:impl:model:wmodel}).
@@ -110,14 +112,14 @@ Thereafter, \wmodel{} and acyclic \xgraph{} are encoded (Section~\ref{ch:impl:pr
 \label{ch:impl:input}
 %(for instance, the original input language of \porthos{} tool, two variants of syntax of a litmus test used by \tool{herd}, an assembly language for any supported architecture).
 
-Both \porthos[1] and \porthos[2] use the ANTLR parser generator%
-\footnote{The ANTLR project repository: \url{https://github.com/antlr/antlr4}}%
+Both \porthos[1] and \porthos[2] use the \tool{ANTLR} parser generator%
+\footnote{The \tool{ANTLR} project repository: \url{https://github.com/antlr/antlr4}}%
 ~\cite{parr2013definitive}, a~powerful language processing tool.
-The ANTLR takes as input the user-defined grammar of the target language in a BNF-like form and produces the LL(*)-parser and optionally some auxiliary classes (such as listeners and visitors for the syntax tree).
+The \tool{ANTLR} takes as input the user-defined grammar of the target language in a BNF-like form and produces the LL(*)-parser and optionally some auxiliary classes (such as listeners and visitors for the syntax tree).
 Although this parser may be not as efficient as the hand-written language-optimised parser, it reduces the overhead of implementing the parser significantly.
-Among other advantages ANTLR, it is worth of noting that it has rather large collection of officially supported grammars. Nonetheless, the intuitive syntax for defining grammars and numerous of tools for debugging grammars make the ANTLR an attractive instrument for solving the parsing problem.
+Among other advantages \tool{ANTLR}, it is worth of noting that it has rather large collection of officially supported grammars. Nonetheless, the intuitive syntax for defining grammars and numerous of tools for debugging grammars make the \tool{ANTLR} an attractive instrument for solving the parsing problem.
 
-Figure~\ref{fig:in_grammar_pts} represents the simplified grammar of of input language used by previous version of \porthos{} (the full ANTLR grammar is available at Appendix~\ref{apx:grammar}.
+Figure~\ref{fig:in_grammar_pts} represents the simplified grammar of of input language used by previous version of \porthos{} (the full \tool{ANTLR} grammar is available at Appendix~\ref{apx:grammar}.
 
 \begin{figure}[!h]%[!hb]
 \centering
@@ -139,10 +141,7 @@ Figure~\ref{fig:in_grammar_pts} represents the simplified grammar of of input la
        | <loc> := <reg>
        | <reg> = <loc>.load(<atomic>)
        | <loc> = <reg>.store(<atomic>)
-       | 'mfence'
-       | 'sync'
-       | 'lwsync'
-       | 'isync'
+       | ('mfence' | sync' | 'lwsync' | 'isync')
        ;
 <pred> :
        | true
@@ -160,9 +159,9 @@ Figure~\ref{fig:in_grammar_pts} represents the simplified grammar of of input la
 The input language parser used by \porthos[1] suffered from several disadvantages.
 Firstly, it contained the parser code inlined into directly the grammar, so that the grammar would serve as a template for the parser code (which is called semantic actions). Such a combining of two rich languages%
 \footnote{by the term "reach" we mean "expressiveness": at least, the grammar of the language of semantic actions (i.e., java in our case) is Turing-complete.} %
-makes the code hardly understandable, and, therefore, poorly maintainable. In \porthos[2], we clearly separated the parser (generated from the grammar file `\textit{<grammar>.g4}') from the converting the ANTLR syntax tree to the AST, that is one for all  languages of an input program.
+makes the code hardly understandable, and, therefore, poorly maintainable. In \porthos[2], we clearly separated the parser (generated from the grammar file `\textit{<grammar>.g4}') from the converting the \tool{ANTLR} syntax tree to the AST, that is one for all  languages of an input program.
 
-Secondly, in \porthos[1], the semantics of operations was defined syntactically (in ANTLR grammar), whereas this should be performed by a separate module operating on the AST level%
+Secondly, in \porthos[1], the semantics of operations was defined syntactically (in \tool{ANTLR} grammar), whereas this should be performed by a separate module operating on the AST level%
 \footnote{Most modern languages (including C++) allow the function overloading, thus requiring the type information to be available for the function resolution algorithm (see Section~\ref{ch:impl:proc:x-pre-compiler:type}).}%
 , so that it does not require to change grammar for encoding the semantics of a new function. %adding support for a new function.
 
@@ -172,16 +171,16 @@ For example, the assignment of local computation to a register uses the symbol `
 In \porthos[2], the semantics of the data-flow operation is determined according to the types of operands, that are determined during the pre-compilation stage (see Section~\ref{ch:impl:proc:x-pre-compiler}).
 The semantics of the functions also is being resolved during the pre-compilation stage via the \textit{invocation hooking} mechanism (see Section~\ref{ch:impl:proc:x-compiler:hooking}).
 
-Thirdly, the grammar used by \porthos{} had restricted set of allowed operations. For example, it allowed only computations over the local variables, which might lead to inconsistency of the result SMT-formula if the same variable name was used both as a register and as a location, for instance, the in code snippet `\lstinline{x := reg1; reg2 <- (x + 1);}', the first statement interprets the variable \lstinline{x} as a location, while the grammar of second statement requires it to be a register. Also, only integers were processed by the input language parser of \porthos[1]. In \porthos[2], we extended support for primitive types supported by the Z3 solver (this apply to 32-bit integers encoded as \texttt{Int}s, floats encoded as \texttt{Real}s, enums encoded as Z3 \texttt{Scalars}).
-%TODO : constant arrays? https://rise4fun.com/Z3/tutorial/guide
-Although Z3 supports the array theory (characterised by the select-store axioms~\cite{de2011z3}), the complexity of static analysis of pointers and non-constant sized arrays moves the full support of arrays and pointers out of the scope of current thesis.
+Thirdly, the grammar used by \porthos{} had restricted set of allowed operations. For example, it allowed only computations over the local variables, which might lead to inconsistency of the result SMT-formula if the same variable name was used both as a register and as a location, for instance, the in code snippet `\lstinline{x := reg1; reg2 <- (x + 1);}', the first statement interprets the variable \lstinline{x} as a location, while the grammar of second statement requires it to be a register. Also, only integers were processed by the input language parser of \porthos[1]. In \porthos[2], we extended support for primitive types supported by the \tool{Z3} solver (this apply to 32-bit integers encoded as \texttt{Int}s of \tool{Z3}, floats encoded as \texttt{Real}s, enumerations encoded as \texttt{Scalar}s).
+%TODO : constant arrays? https://rise4fun.com/\tool{Z3}/tutorial/guide
+Although \tool{Z3} supports the array theory (characterised by the select-store axioms~\cite{de2011z3}), the complexity of static analysis of pointers and non-constant sized arrays moves the full support of arrays and pointers out of the scope of current thesis.
 %Thus, adding support for more advanced structures as pointers, arrays, function definitions and calls was one of the purposes of revising the tool architecture.
 
-The minor drawbacks of grammar used by \porthos[1] include lack of operator associativity (expressions of the form \lstinline{1\,+\,2\,*\,3} could not be parsed), incorrectly (in terms of C) implemented grammar rule for the statement (the semicolon punctuator `\lstinline{;}' was implemented as the separator between two statements, whereas in C it serves as a statement terminator). Also, \porthos[1] supports only the litmus-specific syntax for the variables initialisation, however, it allows only ini
+The minor drawbacks of grammar used by \porthos[1] include lack of operator associativity (expressions of the form \lstinline{1 + 2 * 3} could not be parsed), incorrectly (in terms of C) implemented grammar rule for the statement (the semicolon punctuator `\lstinline{;}' was implemented as the separator between two statements, whereas in C it serves as a statement terminator). Also, \porthos[1] supports only the litmus-specific syntax for the variables initialisation, however, it allows only ini
 tialisation of the shared variable and only by default value \lstinline{0}. The \porthos[2] supports arbitrary declaration to be performed in initialisation statement.
 
 
-The \porthos[2] uses the C language grammar of proposed in the C11 standard~\cite{jtc2011sc22}, that was extended by litmus test-specific syntax such as initialisation and final-state assertion statements (the original ANTLR grammar can be found in the official repository containing the collection of ANTLR v4 grammars%
+The \porthos[2] uses the C language grammar of proposed in the C11 standard~\cite{jtc2011sc22}, that was extended by litmus test-specific syntax such as initialisation and final-state assertion statements (the original \tool{ANTLR} grammar can be found in the official repository containing the collection of \tool{ANTLR v4} grammars%
 \footnote{Repository path:~\url{https://github.com/antlr/grammars-v4}}).%
 Current version of \porthos[2] does not recognise C processor directives (it ignores them), however, in future it can be extended to support them.
 
@@ -210,7 +209,7 @@ The Apendix~\ref{apx:trees} represents the file tree of main classes that consti
 %\columnratio{0.7}%\begin{paracol}{2}
 %\switchcolumn%\VerbatimInput{inc/lst/Ytree-tree.out}%\end{paracol}
 The abstract syntax tree \ytree{} is an abstraction level suitable for compiling the program to a low-level representation (in case of processing low-level assembly code, it may be directly converted to the \xgraph{} representation).
-As the ANTLR syntax tree follows the same structure as the grammar, which is a superset of the real (meaningful) grammar of C language, it lacks multiple concepts of the language (for example, the syntax of indexer access corresponds the grammar rule "\lstinline{postfixExpression '[' expression ']'}", that is converted to the \texttt{YIndexerExpression}).
+As the \tool{ANTLR} syntax tree follows the same structure as the grammar, which is a superset of the real (meaningful) grammar of C language, it lacks multiple concepts of the language (for example, the syntax of indexer access corresponds the grammar rule "\lstinline{postfixExpression '[' expression ']'}", that is converted to the \texttt{YIndexerExpression}).
 However some details of the syntax might have been abstracted away (for instance, array operations may be emulated by functions invocations, see~\cite[Chapter 5]{gries2012science}), we found this level of abstraction suitable enough for our tasks.
 
 Each \ytree{} element implements the interface \texttt{YEntity} and carries the \texttt{OriginLocation} %
@@ -291,7 +290,7 @@ The \ytree{} is compiled into the low-level event-based program representation c
 The mathematical structure of event-flow graph was discussed in Section~\ref{ch:wmm:event}.
 %In general, \xgraph{} follows the structure described there, however it is constructed in several stages.
 The nodes of the graph are events, and the edges are basic relations: the control-flow relation \po and the data-flow relations \co and \rf.
-Hereinafter, we denote the \xgraph{} with only control-flow edges as \xgraph[CF], the \xgraph{} with only data-flow edges as \xgraph[CF]. The complete \xgraph{} is $\xgraph[CF+DF] = \xgraph[CF] \cup \xgraph[DF]$.
+Hereinafter, we denote the \xgraph{} with only control-flow edges as \xgraph[CF], the \xgraph{} with only data-flow edges as \xgraph[CF]. The complete \xgraph{} is $\xgraph[CF+DF] = \xgraph[CF] \; \cup \; \xgraph[DF]$.
 \ Figure~\ref{fig:class-diagrams:XEntity-interfaces} represents the main hierarchy of the X-abstraction level.
 
 \begin{figure}[t]%[!b]%[H]
@@ -435,9 +434,10 @@ Once being constructed, the graph must conform the following requirements:
 
 \paragraph{Graph example}
 \label{ch:impl:model:xgraph:example}
-\textbf{consider the following code in C:}
 
-\textbf{picture of the CF-graph:}
+consider the following code in C:
+
+picture of the CF-graph:
 
 %hashcode, uniqueness
 
@@ -491,7 +491,7 @@ This is a behavioural pattern that separates the program logic from the object i
 The visitor pattern performs the double-dispatching mechanism: the visiting class defines the method for accepting a visitor, and the visitor itself defines the 
 To visit an instance \lstinline{x} by a visitor \lstinline{v}, the program should call the accept-method of \lstinline{x} and pass \lstinline{v} as an argument.
 In our implementation, the visitor must carry out the continuation of traversing the recursive data structure itself.
-The general structure of the visitor pattern is illustrated by t9he pseudo-java code in Figure~\ref{fig:visitor}.
+The general structure of the visitor pattern is illustrated by the pseudo-java code in Figure~\ref{fig:visitor}.
 
 \begin{figure}[h]
 \centering
@@ -536,10 +536,10 @@ class Visitor<T> {
 
 We consider the visitor pattern as the most natural way for operating the hierarchical data structures such as AST.
 However, we use its double-dispatching capabilities to reduce cost of multiple type casting performed while traversing the elements of a non-recursive data structure.
-The operator instance, inch:impl:model:xgraph:memstead of having a single method that handles and element of the instance, it extends the visitor interface and splits the handler method into multiple methods, one for each type of element.
+The operator instance, instead of having a single method that handles and element of the instance, extends the visitor interface and splits the handler method into multiple methods, one for each type of element.
 
-For traversing plain (non-recursive) complex data structures, we mostly follow the \texttt{iterator} pattern: the object that 
-the special object Iterator, that has access to elements of the instance, iterates over them and . Since in \porthos[] we usually do not need to browse an object elements in different order, the iterator creation is performed by the data structure itself.
+For traversing plain (non-recursive) complex data structures, we mostly follow the \texttt{iterator} pattern: the special object Iterator, that has access to elements of the data structure, iterates over them and ...
+. Since in \porthos[] we usually do not need to browse an object elements in different order, the iterator creation is performed by the data structure itself.
 However, in contrast to the visitor of a recursive data structure, the visitor of a plain data structure should be used with an \textit{iterator} that has access to the elements of the object and passes them to the visitor.
 
 
@@ -549,18 +549,18 @@ However, in contrast to the visitor of a recursive data structure, the visitor o
 \subsubsection{Input parsers (1,2)}
 \label{ch:impl:proc:input-parser}
 
-Both input-language and input-model parsers are implemented via ANTLR parser generator.
+Both input-language and input-model parsers are implemented via \tool{ANTLR} parser generator.
 
 Details on the input program language grammar are discussed in Section~\ref{ch:impl:input}.
 Currently, \porthos[2] does not consider preprocessor instructions (it ignores them).
 For implementing the inter-procedural mode of \porthos{}, it is crucial to support inclusion of header files (the \texttt{\#include} preprocessor directive).
 Next step would be implementing the support of macros and conditional compilation directives, that are used often in C code.
 As preprocessor statements may appear in arbitrary place of a program, the preprocessor must be a stateful processing unit that reads the token stream and dynamically instrument the program by interpreting directives and expanding macros.
-%The ANTLR grammar for the C preprocessor may be found 
+%The \tool{ANTLR} grammar for the C preprocessor may be found 
 %more macros (stateful) : https://gcc.gnu.org/onlinedocs/cpp/Macros.html
 
 The input memory model language \cat is discussed in Section~\ref{ch:wmm:cat}.
-The ANTLR grammar for the \cat language was extracted from the parser used by \tool{herd} tool%
+The \tool{ANTLR} grammar for the \cat language was extracted from the parser used by \tool{herd} tool%
 \footnote{\tool{herd} project repository: \url{https://github.com/herd/herdtools7}} %
 written in OCaml.
 %TODO: upload the grammar to github
@@ -585,7 +585,7 @@ in perspective: work with functional-style definitions
 \subsubsection{Y-tree constructor (4)}
 \label{ch:impl:proc:y-constr}
 
-from ANTLR syntax tree of C
+from \tool{ANTLR} syntax tree of C
 
 - desugar, equiv transform
 

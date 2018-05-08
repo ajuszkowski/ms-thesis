@@ -38,14 +38,19 @@ MOV EAX,[y] & MOV EAX,[x] \\
 \label{simple_wmm_x86}
 \end{figure}
 
-Research of weak memory models firstly aims to \textit{formalise} develop the formal approach of understanding programs with respect to weak memory models which is systematic, sound and complete. The first (and so far the only) such a framework was formalised by Jade Alglave in 2010~\cite{alglave2010shared}.
+Research of weak memory models firstly aims to \textit{formalise} develop the formal approach of understanding programs with respect to weak memory models which is systematic, sound and complete. The first (and so far the only) such a framework was formalised by J. Alglave in 2010~\cite{alglave2010shared}.
 In addition to developing rather theoretical basis, researchers work on extracting the WMMs for hardware architectures from existing implementations of from their specifications, which are written in natural language and thus suffer from ambiguities and incompleteness.
 Over last decade the memory models have been defined for most mainstream multiprocessor architectures, such as x86-TSO and Sparc-TSO (for \textit{Total Store Order}) model for x86 and Sparc architecture formalised in 2009~\cite{owens2009better}, much more relaxed memory model for Power and ARM architectures~\cite{alglave2009semantics,sarkar2011understanding, alglave2014herding}, and others.
 There are projects for validating hardware architectures wrt. a memory model, e.g.~\cite{lustig2014pipecheck,lustig2016coatcheck}.
 
 Most modern high-level programming languages rely on relaxed memory model as well.
 Thus, the memory model for Java is based on the \textit{happens-before} principle~\cite{lamport1978time}, it was introduced in J2SE 5.0 in 2004~\cite{manson2005java}; the C++11 standard~\cite{iso2012iec} has introduced the set of hardware-independent synchronisation fences and atomic operations, whenever the C++17 memory model~\cite{batty2011mathematizing} is based on the relation \textit{strongly happens-before}. Weak memory are being formalised for even more abstract software environments, the notable project in this area is the project on formalising the Linux kernel memory model, which is being actively developing these days~\cite{kernel1}.
-Furthermore, there is a wide range of tools that perform program verification wrt. memory models (see~\cite{alglave2013software}, \cite{Porthos17SAS}).
+
+Furthermore, there exists a wide range of tools that perform program verification wrt. memory models (e.g., \cite{alglave2013software}, the tool \tool{Trencher} for checking programs against the TSO memory model~\cite{bouajjani2013checking}, the tool \porthos{} for portability analysis~\cite{Porthos17SAS})
+, weak memory aware model checking (e.g., the model-checker \tool{blender}~\cite{kuperstein2011partial}, the tool \tool{mmchecker} for model-checking the C\# code~\cite{huynh2006memory})
+, synchronisation synthesis (e.g., the automatic fence insertion tool \tool{musketeer}~\cite{alglave2014don})
+, static instrumentation of concurrent C programs for further analysis wrt. weak memory model (e.g., the instrumenting compiler \tool{goto-cc} which is a part of \tool{CBMC} model checker~\cite{kroening2014cbmc}, the tool \tool{Weak2SC} for producing program descriptions which can be fed into standard model checking tools for performing memory model-aware analysis~\cite{travkin2016verification})
+, and other.
 
 %experiments with kernel?
 
