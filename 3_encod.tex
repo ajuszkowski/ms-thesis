@@ -1,5 +1,3 @@
-%\chapter{SMT-based program analysis}
-%\chapter{Portability of concurrent software}
 \chapter{Portability analysis as an SMT~problem}%Description of the method used by Porthos
 \label{ch:port}
 
@@ -17,7 +15,7 @@ As it has been discussed in Chapter~\ref{ch:intro}, the program may behave diffe
 %already said:
 %Although the research of weak memory models has achieved considerable success, most works remain to be rather theoretical that practical and serve mostly as tools for better understanding the concurrent nature of programs.
 % The first tool that tackles the problem 
-%The first work that has investigated the practical approach of modeling and verification the real-world programs with respect to weak memory models was ~\cite{Porthos17a}  
+%The first work that has investigated the practical approach of modelling and verification the real-world programs with respect to weak memory models was ~\cite{Porthos17a}  
 In this Chapter, we describe the general task of analysing the concurrent software portability
 %may be stated 
 as a \textit{bounded reachability} problem, which in turn can be reduced to a SAT problem~\cite{Porthos17a} (more precisely, to an SMT-problem).
@@ -26,16 +24,16 @@ as a \textit{bounded reachability} problem, which in turn can be reduced to a SA
 \section{Model checking and reachability analysis}
 \label{ch:port:mc}
 
-The model checking is the problem of verifying the system (the model) against the set of constraints (the specification)~\cite{dkw2008}.
+The model checking is the problem of verifying the system (the model) against a set of constraints (the specification)~\cite{dkw2008}.
 As the state machine model is the most widespread mathematical model of computation, most classical model checking algorithms explore the state space of a system in order to find states that violate the specification.
-The general schema of model checking is the following: firstly, the analysing system is being represented as a transition system, a finite directed graph with labeled nodes representing states of the system such that each state corresponds to the unique subset of atomic propositions, that characterise the behavioral properties of each state.
+The general schema of model checking is the following: firstly, the analysing system is being represented as a transition system, a finite directed graph with labelled nodes representing states of the system such that each state corresponds to the unique subset of atomic propositions that characterise the behavioural properties of each state.
 Then, the system constraints are being defined in terms of a modal temporal logic with respect to the atomic propositions. Commonly, the Linear Temporal Logic~(LTL) or Computational Tree Logic~(CTL), along with their extensions, are used as a specification language due to the expressiveness and verifiability of their statements. 
 In the described schema, the model checking problem is reducible to the reachability analysis, an iterative process of a systematic exhaustive search in the state space. This approach is called \textit{unbounded model checking (UMC)}.
 
-However, all model checking techniques are exposed to the \textit{state explosion problem} as the size of the state space grows exponentially with respect to the number of state variables used by the system (its size). In case of modeling concurrent systems, this problem becomes much more considerable due to exponential number of possible interleavings of states.
+However, all model checking techniques are exposed to the \textit{state explosion problem} as the size of the state space grows exponentially with respect to the number of state variables used by the system (its size). In case of modelling concurrent systems, this problem becomes much more considerable due to exponential number of possible interleavings of states.
 Therefore, the research in model checking over past 40 years was aimed at tackling the state explosion problem, mostly by optimising search space, search strategy or basic data structures of existing algorithms.
 
-One of the first technique that optimises the search space considerably major was the symbolic model checking with binary decision diagrams (BDDs). Instead of by processing each state individually, in this approach the set of states is represented by the BDD, efficient data structure for performing operations on large boolean formulas~\cite{clarke2012model}.
+One of the first techniques that optimises the search space considerably is the symbolic model checking with \textit{binary decision diagrams (BDDs)}. Instead of processing each state individually, in this approach the set of states is represented by the BDD, efficient data structure for performing operations on large boolean formulas~\cite{clarke2012model}.
 The BDD representation can be linear of size of variables it encodes if the ordering of variables is optimal, otherwise the size of BDD is exponential. The problem of finding such an optimal ordering is known as NP-complete problem, which makes this approach inapplicable in some cases.
 
 The other idea is to use satisfiability solvers for symbolic exploration of state space~\cite{clarke2001bounded}. In this approach, the state space exploration consists of sequence of queries to the SAT-solver, represented as boolean formulas that encode the constraints of the model and the finite path to a state in the corresponding transition system.  
@@ -92,7 +90,7 @@ In contrast, the new scheme implemented in \porthos[2] firstly compiles the recu
 Let $\fx:\,\mathbb{E}\,\rightarrow\,\{0,1\}$ be the predicate that signifies the fact that the event has been e\textbf{x}ecuted (and, consequently, has changed the state of the system).
 % TODO: attention to these non-breakable spaces
 Let $\fv:\,\mathbb{C}\,\rightarrow\,\mathbb{R}$ be the function that returns the value of the computation event (evaluates it) that will be computed once the event is executed (strictly speaking, it retuns the \textit{set} of values determined by the \rf-relation (see Section~\ref{ch:wmm:model:relations} for details on relations).
-We distinguish the function ${\fv_p\;:\;\mathbb{C_p}\;\rightarrow\;\{0,1\}}$ that evaluates the predicative computation event. In the result formula, all symbols $\fx(e_i)$ and $\fv(e_i)$ are encoded as boolean variables.
+We distinguish the function ${\fv_g\;:\;\mathbb{C_g}\;\rightarrow\;\{0,1\}}$ that evaluates the guard computation event. In the result formula, all symbols $\fx(e_i)$ and $\fv(e_i)$ are encoded as boolean variables.
 
 Consider the following possible mutual arrangement of nodes in a control-flow graph:
 

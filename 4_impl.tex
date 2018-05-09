@@ -4,7 +4,7 @@
 The main call for commencing the work on \porthos[2] was the need for processing real-world C programs, which, at first, requires the input language to be extended.
 This implies the support not only for new syntactic structures of C language (such as the \texttt{switch} statement or the postfix increment operator \texttt{i++}), but also for its fundamental concepts and features (such as types, pointer arithmetic or first-order functions), which requires revision of the whole architecture of the tool.
 Yet far from all of the C language has been supported (that, considering its complexity and numerous pitfalls, goes far beyond current thesis%
-\footnote{To ensure that, we have merely to look at existing C compilers, for instance, the open-source \texttt{gcc} compiler, which uses the C parser written in more than 18.5 thousand lines of code (see \url{https://github.com/gcc-mirror/gcc/blob/master/gcc/c/c-parser.c})}%
+\footnote{For ensuring this, one merely has to look at existing C compilers, for instance, the open-source \tool{gcc} compiler, which uses the C parser written in more than 18.5 thousand lines of code (see \url{https://github.com/gcc-mirror/gcc/blob/master/gcc/c/c-parser.c})}%
 ), we consider the accomplished work as a step towards this.
 %This applies not only to instances that simply constitute the syntactic sugar of C language (such as the \texttt{switch} statement or the prefix increment operator \texttt{++i}), but also to its fundamental concepts and features (such as pointer arithmetic or structures).
 %However, the architecture of current version of \porthos{} does not allow to ... as it is ....
@@ -223,6 +223,8 @@ On the \ytree{} level, the pointer arithmetic is modelled by the integer number 
 We distinguish the subset of expressions that imply no side-effects, they implement the interface \texttt{YAtom} and can be global or local (which is defined also syntactically).
 %\textbf{(TODO:THIS SHOULD BE IN PRE-PROCESSING)} %TODO <--
 
+- carries the origin (text) -> all the origins can be resolved by the \texttt{LocationService} %todo: rename from CodeCitationService + create 3 instances for each of level. Or keep it for Y->text, and store references to the original Y-object by X-objects
+
 \vspace{1em}
 The \ytree{} expressions are the following:
 
@@ -344,6 +346,8 @@ An event (\texttt{XEvent}) represents the fact of executing the primitive operat
 Each event is specified by the process generated them and a unique event label.
 This information is stored by events in the immutable structure \texttt{XEventInfo}.
 
+- carries the origin (Y)
+
 The following interfaces model basic kinds of events (see Figure~\ref{fig:class-diagrams:XEntity-interfaces}):
 %\begin{itemize}[noitemsep]
 \begin{outline}
@@ -459,6 +463,8 @@ atoms: sets/basic relations
 
 itemize elements
 
+todo: rename everywhere assertions <- axioms
+
 
 \subsubsection{Z-formula}
 \label{ch:impl:model:zformula}
@@ -480,6 +486,8 @@ used as an abstraction btween
 implemented as a simple wrapper over the z3 formula
 
 typed: Expr, BoolExpr, ArithExpr, ...
+
+carries the origin (X)
 
 
 \subsection{The processing units} %Transformation}
@@ -722,6 +730,8 @@ Since the C language allows the variables that have the same name to be declared
 
 \paragraph{Invocation hook manager}
 \label{ch:impl:proc:x-compiler:hooking}
+
+%TODO: cite again here : alglave2018frightening + other Kernel references
 
 The invocation hooking module serves as a knowledge base that stores the semantics of functions.
 %TODO: rename HookManager -> XHookManager

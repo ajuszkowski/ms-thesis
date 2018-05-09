@@ -86,7 +86,7 @@
 \newcommand*{\fx}{\ensuremath{\mathbf{x}}}%x}}}
 \newcommand*{\fv}{\ensuremath{\mathbf{v}}} %v}}}
 
-\newcommand{\porthos}[1][]{\texttt{%
+\newcommand{\porthos}[1][]{%\texttt{%
 Porthos\ifthenelse%
 {\equal{#1}{}}%if
 {}%then
@@ -96,7 +96,7 @@ Porthos\ifthenelse%
 \ifthenelse{\equal{#1}{2}}%else-if
 {C}%then
 {#1}%else
-}}}}
+}}}%}
 \newcommand{\oldporthos}{\porthos[1]}
 \newcommand{\rf}{\ensuremath{\,\mathtt{rf}\,}}
 \newcommand{\fr}{\ensuremath{\,\mathtt{fr}\,}}
@@ -206,7 +206,7 @@ c/.style={
 \usepackage[backend=biber,
 %maxnames=5,
 %style=numeric-verb,
-style=alphabetic,%-verb,%style=alphabetic
+style=alphabetic-verb,%style=alphabetic
 minalphanames=3,
 maxalphanames=3,
 maxbibnames=5, minbibnames=5, %for 'et al'
@@ -235,7 +235,7 @@ sorting=anyvt,%Sort by alphabetic label, name, year, title,
 % E.g. "[1] [2] [3]" instead of "[1], [2], [3]"
 %\renewcommand\multicitedelim{\space}
 %separate them by semicolon
-\renewcommand*{\multicitedelim}{\setunit{; }}
+%\renewcommand*{\multicitedelim}{\setunit{; }}
 
 
 % Nicer looking caption for figures, tables, etc.
@@ -587,6 +587,8 @@ ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;
 % The contents of the thesis are separated to their own files.
 % Edit the content in these files, rename them as necessary.
 % ------------------------------------------------------------------
+
+%TODO: List of figures!!! + tables
 \input{1_intro.tex}
 \input{2_wmm.tex}
 \input{3_encod.tex}

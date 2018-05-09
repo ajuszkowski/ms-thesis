@@ -1,40 +1,33 @@
-%TODO: move this chapter as a section to introduction and add here the new "Problem statement" chapter!!!
-
-\chapter{Memory model-aware analysis}%Description of the analysis of concurrent systems wrt weak memory models
-%\chapter{A generic framework}
+\chapter{Memory model-aware analysis}
 \label{ch:wmm}
 
-In general, analysis of concurrent programs with respect to axiomatic memory models is performed in several stages. %TODO: site the 'Weak Memory Models with Matching Axiomatic and Operational Definitions' https://arxiv.org/pdf/1710.04259.pdf
-%TODO: cite also: "DENNIS SHASHA - Efficient and Correct Programs that Share" http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.142.2238&rep=rep1&type=pdf
-Firstly, the control-flow and data-flow of a program is encoded as the set of possible \textit{candidate executions}. %possible communications between threads of the program.
-Obtained model of the program describes the anarchic semantics, which is a truly parallel semantics with no global time that describes all possible computations with all possible communications~\cite{alglave2016syntax}. Thereafter, the anarchic semantics is constrained by the \textit{weak memory model} specification which is a set of axiomatic constraints for filtering out executions inconsistent in particular architecture.
+The main idea behind the memory model-aware program analysis is that the set of all possible interleavings of the concurrent program (\textit{anarchic semantics}) can be specified by the axiomatic constraints of the memory model that filter out executions inconsistent in particular architecture (\textit{analytic semantics})~\cite{alglave2016syntax}.
+The anarchic semantics of the program is a truly parallel semantics with no global time that describes all possible computations with all possible communications.
+However, the analytic semantics captures the program behaviours on a certain execution environment more precisely.
+%"The semantics of a program is a set of executions" https://johnwickerson.github.io/papers/memalloy.pdf
 
 
 \section{The event-based program representation}
 \label{ch:wmm:event}
 
-%"The semantics of a program is a set of executions" https://johnwickerson.github.io/papers/memalloy.pdf
-The classical approach for modeling concurrent programs is to use the \textit{global time}, a single order of interleavings among all events happened in different threads.
-Although these models are easy to understand, it may be impossible to treat \textit{all} possible states, number of which is exponentially large.
-However, there exist equivalence classes such that the result of execution different interleavings from single equivalence class is the same (for instance, computations performed by a processor locally do not affect the global state).
-%One way to do this is to use a non-deterministic computation-centric model~\cite{fri97}, such as ...%The idea in this class of models is based on the fact that the behaviour of a concurrent system is defined only by the interleavings of shared-memory operations, while being independent from the order of local computation events.
-%TODO: nondeterministic
-One such model is the \textit{event-based} representation of a program, which models the program as a directed graph of events (the \textit{event-flow graph}).
-The event-based model is \textit{non-deterministic}, which
+The classical approach for analysing concurrent programs is to model it as the set of sequentially consistent programs, obtained by enumerating all possible interleavings.
+These models are deterministic as they include the notion of the \textit{global time}. %, a single order of interleavings among all events happened in different threads.
+Although these models are easy to build and analyse, the number of all possible interleavings grows exponentially (known as the \textit{combinatorial explosion}), which affects the completeness of an analysis method in general case.
+
+One way to fight the combinatorial explosion is to exclude the global time from the model and treat executions from one equivalence class together in a non-deterministic fashion.
+For instance, such an equivalence class can be the set of computations performed by a processor locally that do not affect the global state.
+This idea is used in the \textit{event-based} model, that represents the program as a directed graph of events (the \textit{event-flow graph})~\cite{alglave2010shared}.
 The vertices of such a graph represent \textit{events} (see Section~\ref{ch:wmm:model:events}), and edges represent \textit{basic relations} (see Section~\ref{ch:wmm:model:relations}).
+The graph represents the set of executions (sequences of events; see Section~\ref{ch:wmm:model:executions}) defined by the non-deterministic guesses of certain relations on some states.
 
 % TODO: the event-based representation is a non-deterministic model
-
-% TODO: the semantics of the event-flow graph is given:  "alglave: Don’t sit on the fence A static analysis approach to automatic fence insertion" page 8 or 9
+%- The semantics of the event-flow graph is given:  "alglave: Don’t sit on the fence A static analysis approach to automatic fence insertion" page 8 or 9
 %"To build the aeg , we define a semantics of goto-programs in terms of abstract events, ..."
 % TODO: OR from here: http://www.cprover.org/etaps/esop.pdf "Software Verification for Weak Memory via Program Transformation"
 
+
 \subsection{Events}
 \label{ch:wmm:model:events}
-
-%TODO: event is atomic?
-
-% TODO: check this subseciton
 
 %TODO: EVENT -- ATOMIC?
 An event is a fact of executing the low-level primitive operation such as memory access, threads synchronisation, computation, etc.
@@ -49,11 +42,11 @@ A memory event is specified by its direction with respect to the shared variable
 
 The set of memory events $\mathbb{M}$ is divided into write events $\mathbb{W}$ (that write values to shared-memory locations) and read events $\mathbb{R}$ (that read values stored in shared-memory locations).
 We add a restriction that each memory event uses at most one shared location, so that the write instruction $i = write(l_1, l_2)$, that encodes the write from the shared location $l_2$ to the shared location $l_1$, is represented as two consequent events $e_1~=~\mathtt{load}(r_1~\leftarrow~l_2); \ e_2~=~\mathtt{store}(l_1~\leftarrow~r_1)$.
-Also, it is important to separate the set of initial write events $\mathbb{IW}~\subset~\mathbb{W}$ that perform initialisation of program variables.
+Also, it is important to separate the set of initial write events $\mathbb{IW}~\subseteq~\mathbb{W}$ that perform initialisation of program variables.
 
 A \textit{computation event} $e_c \in \mathbb{C} \subseteq \mathbb{E}$, represents a low-level assembly computation operation performed solely on local-memory arguments.
 An example of computation event may be the event $e_c = r_1 \leftarrow add(r_2, 1)$ that writes the sum of values stored in register $r_2$ and constant $1$ (which is modelled as a register as well) to the register $r_1$.
-For modelling branching statements, we distinguish the set $\mathbb{C_{p}}~\subseteq~\mathbb{C}$ of \textit{predicative} computation events (also called as \textit{branching events}), that are evaluated as a boolean value.
+For modelling branching statements, we distinguish the set $\mathbb{C_{g}}~\subseteq~\mathbb{C}$ of \textit{guard} computation events (also called as \textit{branching events}), that are evaluated as a boolean value.
 
 The synchronisation instructions (fences) cause the \textit{barrier events}, that do not perform any computation or memory value transfer, instead, they add new relations to the program model that restrict the set of allowed behaviours.
 Functionally, a fence may be a synchronisation barrier or a instruction of flushing the local memory caches, etc.
@@ -74,18 +67,18 @@ The basic relations are the following~\cite{alglave2010shared}:
 %TODO: say that po and rf are  defined from the candidate execution:
 %TODO: say that 
 \begin{itemize}
-    \item The \textit{control-flow} of a program is defined by the \textit{program-order} relation \po~$\subset~\mathbb{E}~\times~\mathbb{E}$, which represents the total order of events of same process.
+    \item The \textit{control-flow} of a program is defined by the \textit{program-order} relation \po~$\subseteq~\mathbb{E}~\times~\mathbb{E}$, which represents the total order of events of same process.
     For instance, if the instruction $i_1$ generates the event $e_1$ and the instruction $i_2$ follows $i_1$ and generates the event $e_2$, then $e_1 \relation{po} e_2$.
     %Some new relations may be acquired : dp, po-loc
 
     \item The \textit{data-flow} of a program is defined by \textit{communication relations}:
         \begin{itemize}[noitemsep]
-            \item the \textit{read-from} relation \rf~$\subset~\mathbb{W}~\times~\mathbb{R}$ that maps each write event to the read event that reads the value written by write event;
-            \item the \textit{coherence order} relation \co~$\subset~\mathbb{W}~\times~\mathbb{W}$ that defines the total order on writes to the same location across all processes (also called the \textit{write serialisation}, \texttt{ws}-relation);
+            \item the \textit{read-from} relation \rf~$\subseteq~\mathbb{W}~\times~\mathbb{R}$ that maps each write event to the read event that reads the value written by write event;
+            \item the \textit{coherence order} relation \co~$\subseteq~\mathbb{W}~\times~\mathbb{W}$ that defines the total order on writes to the same location across all processes (also called the \textit{write serialisation}, \texttt{ws}-relation);
         \end{itemize}
 
-    \item Events from the same process are related by the \textit{scope relation} \sr~$\subset~\mathbb{E}~\times~\mathbb{E}$.
-    In contrast to the \tool{herd} tool, the \porthos[2] does not use hierarchy of scopes (depicted as the scope tree); instead, it uses simple lables that indicate which process has produced certain event.
+    \item Events from the same process are related by the \textit{scope relation} \sr~$\subseteq~\mathbb{E}~\times~\mathbb{E}$.
+    In contrast to the \tool{herd} tool, the \porthos[2] does not use hierarchy of scopes (depicted as the scope tree); instead, it uses simple labels that indicate which process has produced certain event.
 \end{itemize}
 
 %TODO: add ppo = characteristics of memory model. "Architectures are instances of our model. An architecture is a triple of functions (ppo, fences, prop), which specifies the preserved program order ppo, the fences fences and the propagation order prop." (herding cats, p.13)
@@ -94,7 +87,7 @@ Below we enumerate some derived relations~\cite{alglave2010shared}:
 
 \begin{itemize}
 
-    \item the \textit{from-read} relation $\fr \subset~\mathbb{R}~\times~\mathbb{W}$ that maps a read event to all write events preceding the write event from which the read event gets its value: \\
+    \item the \textit{from-read} relation $\fr \subseteq~\mathbb{R}~\times~\mathbb{W}$ that maps a read event to all write events succeeding the write event from which the read event gets its value: \\
     $r \relation{fr} w ~\triangleq~ (\exists w' . w' \relation{rf} r \land w' \relation{co} w)$
 
     %\item the \textit{data dependency} relation \texttt{dp}, which is a subset of \po-relation that always has a read at its source (it connects the read to the write which it depends on)
@@ -104,7 +97,7 @@ Below we enumerate some derived relations~\cite{alglave2010shared}:
     %$\mathtt{com} \triangleq (\mathtt{rf} \cup \mathtt{co} \cup \mathtt{fr})$
     $m_1 \relation{com} m_2~\triangleq~((m_1\relation{rf}m_2) \lor (m_1\relation{co}m_2) \lor (m_1\relation{fr}m_2))$
 
-    \item the \textit{external} (and \textit{internal}) \textit{read-from} relations that restrict the \rf-relation to the different (respectively, same) processes: \\
+    \item the \textit{external} (and \textit{internal}) \textit{from-read} relations that restrict the \fr-relation to the different (respectively, same) processes: \\
     $w \relation{fre} r ~\triangleq~ (w \relation{fr} r \land \mathtt{proc}(w) = \mathtt{proc}(w))$ \\
     $w \relation{fri} r ~\triangleq~ (w \relation{fr} r \land \mathtt{proc}(w) \neq \mathtt{proc}(w))$
     
@@ -124,7 +117,7 @@ Below we enumerate some derived relations~\cite{alglave2010shared}:
 \subsection{Executions}
 \label{ch:wmm:model:executions}
 
-The semantics of a concurrent program is represented as the set of allowed executions. The 
+The semantics of a concurrent program is represented as the set of allowed executions.
 The \textit{execution} is a path in the event-flow graph defined by \po- and \rf-relations and set of final writes to a given memory location that is valid under certain memory model~\cite{alglave2014herding}.
 It can be interpreted as a sequence of guesses which event is to be executed next.
 The \textit{candidate execution} is an execution that is not yet constrained by a memory model.
@@ -197,17 +190,17 @@ Below we enumerate pre-defined operators over relations and sets of events:
 \begin{enumerate}
   \item \textit{Unary relations}:
     \begin{itemize}
-      \item \textit{the complement} of a relation \rel{r} is $\rel{\textasciitilde r}$
-      \item \textit{the transitive closure} of a relation \rel{r} is $\rel{r+}$
-      \item \textit{the reflexive closure} of a relation \rel{r} is $\rel{r?}$
-      \item \textit{the reflexive-transitive closure} of a relation \rel{r} is $\rel{r*}$
-      \item \textit{the inverse} of a relation \rel{r} is $\invrel{r}$
+      \item \textit{the complement} of a relation \rel{r} is $\rel{\textasciitilde r}$,
+      \item \textit{the transitive closure} of a relation \rel{r} is $\rel{r+}$,
+      \item \textit{the reflexive closure} of a relation \rel{r} is $\rel{r?}$,
+      \item \textit{the reflexive-transitive closure} of a relation \rel{r} is $\rel{r*}$, and
+      \item \textit{the inverse} of a relation \rel{r} is $\invrel{r}$.
     \end{itemize}
   \item \textit{Binary relations:}
   \begin{itemize}
     \item \textit{the union} of two relations \rel{r1} and \rel{r2} is \rel{r1\,|\,r2},
     \item \textit{the intersection} of two relations \rel{r1} and \rel{r2} is \rel{r1\,\&\,r2},
-    \item \textit{the difference} of two relations \rel{r1} and \rel{r2} is $\mathtt{r1\,\backslash\,r2}$,
+    \item \textit{the difference} of two relations \rel{r1} and \rel{r2} is $\mathtt{r1\,\backslash\,r2}$, and
     \item \textit{the sequence} of two relations \rel{r1} and \rel{r2} is \rel{r1;r2}, which is defined as the set of pairs \rel{(x,y)} such that there exists an intervening \rel{z}, such that $\rel{(x,z)} \in \rel{r1}$ and $\rel{(z,y)} \in \rel{r2}$.
   \end{itemize}
 \end{enumerate}
