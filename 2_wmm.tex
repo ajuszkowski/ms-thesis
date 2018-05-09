@@ -20,7 +20,15 @@ This idea is used in the \textit{event-based} model, that represents the program
 The vertices of such a graph represent \textit{events} (see Section~\ref{ch:wmm:model:events}), and edges represent \textit{basic relations} (see Section~\ref{ch:wmm:model:relations}).
 The graph represents the set of executions (sequences of events; see Section~\ref{ch:wmm:model:executions}) defined by the non-deterministic guesses of certain relations on some states.
 
-% TODO: the event-based representation is a non-deterministic model
+There are three main types of sources of non-determinism in concurrent programs~\cite{musuvathi2008fair}:
+\begin{enumerate}[noitemsep,topsep=0pt]
+\item \textit{input non-determinism}, which is a standard undecidable problem for all static analysis methods: to resolve the user input, system call from the environment, unresolved function calls, etc.;
+\item \textit{scheduling non-determinism}, caused by the interleavings, which in turn are caused by the scheduler activity;
+\item \textit{memory-model non-determinism}, caused by hardware and compiler relaxations.
+\end{enumerate}
+
+The event-based program model is able to emulate effectively the second and the third types of sources of non-determinism, while the first one can be coped by standard static analysis methods~\cite{landi1992undecidability,SurveySymExec-CSUR18}.
+
 %- The semantics of the event-flow graph is given:  "alglave: Don’t sit on the fence A static analysis approach to automatic fence insertion" page 8 or 9
 %"To build the aeg , we define a semantics of goto-programs in terms of abstract events, ..."
 % TODO: OR from here: http://www.cprover.org/etaps/esop.pdf "Software Verification for Weak Memory via Program Transformation"

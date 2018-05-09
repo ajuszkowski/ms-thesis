@@ -73,7 +73,7 @@ As a robust and transparent tool, the \porthos[2] must adhere to the strategy of
 %immut: preservation of invariants
 %The transparency, efficiency and extensibility are the necessary criteria of any good tool.
 
-As its predecessor, \porthos[2] uses the open-source SMT-solver \tool{Z3}%
+As its predecessor, \porthos[2] uses the open-source SMT-solver \tool{Z3} %
 \footnote{The \tool{Z3} project repository: \url{https://github.com/Z3Prover/z3}}%
 by Microsoft Research~\cite{de2008z3}. However, unlikely its predecessor, the \porthos[2] has an additional abstraction level \zformula{} (see Section~\ref{ch:impl:model:zformula}) that allow to use any other SMT-solver. %TODO: *should* allow?
 
@@ -221,9 +221,9 @@ Following the C11 standard~\cite{iso2012iec}, we distinguish a \textit{statement
 All \ytree{} expressions implement the \texttt{YExpression} interface.
 On the \ytree{} level, the pointer arithmetic is modelled by the integer number \textit{pointer level} of an expression (although in fact this is the property of a type not of an expression, the y-tree is an untyped syntax tree, therefore the elements \ytree{} should carry this property).
 We distinguish the subset of expressions that imply no side-effects, they implement the interface \texttt{YAtom} and can be global or local (which is defined also syntactically).
-%\textbf{(TODO:THIS SHOULD BE IN PRE-PROCESSING)} %TODO <--
+Each \ytree{} expression carries the original code coordinates, that can be resolved to text by the service \texttt{LocationService}. %todo: rename from CodeCitationService + create 3 instances for each of level. Or keep it for Y->text, and store references to the original Y-object by X-objects
 
-- carries the origin (text) -> all the origins can be resolved by the \texttt{LocationService} %todo: rename from CodeCitationService + create 3 instances for each of level. Or keep it for Y->text, and store references to the original Y-object by X-objects
+%\textbf{(TODO:THIS SHOULD BE IN PRE-PROCESSING)} %TODO <--
 
 \vspace{1em}
 The \ytree{} expressions are the following:
@@ -292,8 +292,11 @@ The \ytree{} is compiled into the low-level event-based program representation c
 The mathematical structure of event-flow graph was discussed in Section~\ref{ch:wmm:event}.
 %In general, \xgraph{} follows the structure described there, however it is constructed in several stages.
 The nodes of the graph are events, and the edges are basic relations: the control-flow relation \po and the data-flow relations \co and \rf.
-Hereinafter, we denote the \xgraph{} with only control-flow edges as \xgraph[CF], the \xgraph{} with only data-flow edges as \xgraph[CF]. The complete \xgraph{} is $\xgraph[CF+DF] = \xgraph[CF] \; \cup \; \xgraph[DF]$.
-\ Figure~\ref{fig:class-diagrams:XEntity-interfaces} represents the main hierarchy of the X-abstraction level.
+Hereinafter, we denote the \xgraph{} with only control-flow edges as \xgraph[CF], the \xgraph{} with only data-flow edges as \xgraph[CF].
+The complete \xgraph{} is $\xgraph[CF+DF] = \xgraph[CF] \; \cup \; \xgraph[DF]$.
+The UML diagraph on Figure~\ref{fig:class-diagrams:XEntity-interfaces} represents the hierarchy of main interfaces of the X-abstraction level.
+%The \xgraph{} is constructed by the mutable graph builder. %TODO: name of builder -- after refactoring
+
 
 \begin{figure}[t]%[!b]%[H]
   \centering
@@ -339,14 +342,14 @@ The examples of restrictions on X-graphs are the following: the initialisation b
 We discuss the interpretation of different types of statements in more detail in Section~\ref{ch:impl:proc:x-compiler:compilation}.
 
 
+
 \paragraph{Events}
 \label{ch:impl:model:xgraph:evt}
 
 An event (\texttt{XEvent}) represents the fact of executing the primitive operation, which is independent from other events.
 Each event is specified by the process generated them and a unique event label.
 This information is stored by events in the immutable structure \texttt{XEventInfo}.
-
-- carries the origin (Y)
+Also, each event carries the reference to the Y-instruction that has generated it.
 
 The following interfaces model basic kinds of events (see Figure~\ref{fig:class-diagrams:XEntity-interfaces}):
 %\begin{itemize}[noitemsep]
@@ -399,7 +402,7 @@ The following interfaces model basic kinds of events (see Figure~\ref{fig:class-
     The fences are implemented as an enumeration \texttt{XBarrierEvent}.
     Current implementation of \porthos[2] supports all fences supported by \porthos{}: 
     \texttt{mfence}, %TODO: what about lfence and sfence from the x86fences.cat ?
-    \texttt{sync}, \texttt{optsync}, \texttt{lwsync}, \texttt{optlwsync}, \texttt{ish}, \texttt{isb}, and \texttt{isync}.%TODO: description of each
+    \texttt{sync}, \texttt{optsync}, \texttt{lwsync}, \texttt{optlwsync}, \texttt{ish}, \texttt{isb}, and \texttt{isync}.%TODO: description of each!
     
   \1 \texttt{XFakeEvent} \\
     The fake events are auxiliary elements of \xgraph{}.
@@ -435,11 +438,11 @@ Once being constructed, the graph must conform the following requirements:
 \end{enumerate}
 
 
-\paragraph{Graph builder} % TODO: in code: remove graph hierarchy by combining unrolled and normal. Add a bool 'UnrolledStatus' -- thus we can keep genericity
-\label{ch:impl:model:xgraph:builder}
+%\paragraph{Graph builder} % TODO: in code: remove graph hierarchy by combining unrolled and normal. Add a bool 'UnrolledStatus' -- thus we can keep genericity
+%\label{ch:impl:model:xgraph:builder}
 %TODO: code : NOTE: 'FlowGraph<N extends FlowGraphNode>' may be just 'FlowGraph<N>'
 
-\textbf{todo}
+
 
 
 \paragraph{Graph example}

@@ -81,7 +81,7 @@
     escapeinside={[*}{*]},
     %keywordstyle={\ttfamily\color{red}},
 }
-\newcommand{\tool}[1]{\texttt{#1}}
+\newcommand{\tool}[1]{#1}%{\texttt{#1}}
 
 \newcommand*{\fx}{\ensuremath{\mathbf{x}}}%x}}}
 \newcommand*{\fv}{\ensuremath{\mathbf{v}}} %v}}}
@@ -206,7 +206,7 @@ c/.style={
 \usepackage[backend=biber,
 %maxnames=5,
 %style=numeric-verb,
-style=alphabetic-verb,%style=alphabetic
+style=alphabetic,%-verb,%style=alphabetic
 minalphanames=3,
 maxalphanames=3,
 maxbibnames=5, minbibnames=5, %for 'et al'

@@ -11,7 +11,8 @@
 
 %TODO: more about SMT-(= SAT + constraints expressed in background theories. Exapmles of theories that we use and that are implem-ted in Z3).
 
-As it has been discussed in Chapter~\ref{ch:intro}, the program may behave differently when compiled for different parallel hardware architectures. This may cause the portability bugs, the behaviour that is allowed under one architecture and forbidden under another. 
+As it has been discussed in Chapter~\ref{ch:intro}, the program may behave differently when compiled for different parallel hardware architectures.
+This may cause the portability bugs, the behaviour that is allowed under one architecture and forbidden under another. 
 %already said:
 %Although the research of weak memory models has achieved considerable success, most works remain to be rather theoretical that practical and serve mostly as tools for better understanding the concurrent nature of programs.
 % The first tool that tackles the problem 
@@ -20,6 +21,7 @@ In this Chapter, we describe the general task of analysing the concurrent softwa
 %may be stated 
 as a \textit{bounded reachability} problem, which in turn can be reduced to a SAT problem~\cite{Porthos17a} (more precisely, to an SMT-problem).
 
+%TODO: sound, complete...
 
 \section{Model checking and reachability analysis}
 \label{ch:port:mc}
