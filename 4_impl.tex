@@ -141,7 +141,7 @@ Figure~\ref{fig:in_grammar_pts} represents the simplified grammar of of input la
        | <loc> := <reg>
        | <reg> = <loc>.load(<atomic>)
        | <loc> = <reg>.store(<atomic>)
-       | ('mfence' | sync' | 'lwsync' | 'isync')
+       | ('mfence' | 'sync' | 'lwsync' | 'isync')
        ;
 <pred> :
        | true
@@ -329,6 +329,12 @@ that is easily convertible to an SMT-type (modelled as \texttt{ZType}).%TODO: ad
 
 The memory units are created and stored by the \texttt{XMemoryManager}, which provides interface for accessing memory units during compilation stage.
 For more detailed description of memory management see Section~\ref{ch:impl:proc:x-compiler:mem}.
+
+Following the litmus tests format, we distinguish three types of \xgraph{}: one for a process, one for a litmus-initialisation block and one for the assertion statement.
+However, all three types of \xgraph{} are modelled by the same graph structure \texttt{XProcess} with certain restrictions complied by the corresponding type of X-interpreter that constructs the graph. %TODO: rename to XThread ?
+This simplifies drastically the processing of different types of code blocks as they all are modelled by the same data structure.
+The examples of restrictions on X-graphs are the following: the initialisation block can not have branchings, fence events; the process cannot have assertion events; the assertion block can not have shared-memory events or fence events.
+We discuss the interpretation of different types of statements in more detail in Section~\ref{ch:impl:proc:x-compiler:compilation}.
 
 
 \paragraph{Events}
@@ -559,8 +565,8 @@ As preprocessor statements may appear in arbitrary place of a program, the prepr
 %The \tool{ANTLR} grammar for the C preprocessor may be found 
 %more macros (stateful) : https://gcc.gnu.org/onlinedocs/cpp/Macros.html
 
-The input memory model language \cat is discussed in Section~\ref{ch:wmm:cat}.
-The \tool{ANTLR} grammar for the \cat language was extracted from the parser used by \tool{herd} tool%
+The input memory model language \cat{} is discussed in Section~\ref{ch:wmm:cat}.
+The \tool{ANTLR} grammar for the \cat{} language was extracted from the parser used by \tool{herd} tool%
 \footnote{\tool{herd} project repository: \url{https://github.com/herd/herdtools7}} %
 written in OCaml.
 %TODO: upload the grammar to github
@@ -595,6 +601,7 @@ from \tool{ANTLR} syntax tree of C
 
 - So, The language-dependent syntax tree is converted to the AST by the stateless Visitor (e.g., for C11 -> Ytree conversion is made by 'C2YtreeConverterVisitor') + short structure of this visitor (how?.. need ly?)
 
+- Y-Sytnax error
 
 \subsubsection{X-graph pre-compiler (5)}
 \label{ch:impl:proc:x-pre-compiler}
@@ -671,6 +678,15 @@ The following types of variables are detected as \textit{global}:
 \subsubsection{X-graph compiler (6)}
 \label{ch:impl:proc:x-compiler}
 
+\begin{figure}[th]
+    \centering
+  %draft=true
+  \includegraphics[max width=\textwidth,keepaspectratio]{img/my/draw.io/X-compiler.png}
+  \caption{Main components of the X-compilation processing unit}
+  \label{fig:compiler}
+\end{figure}
+
+
 The X-graph compiler is the main component that transforms the recursive \ytree{} data structure to the plain \xgraph{} representation.
 
 The compilation is performed in three stages.
@@ -678,7 +694,12 @@ Firstly, the \ytree{} is compiled to a \textit{cyclic} control-flow event-based 
 Then, this graph is unrolled to an \textit{acyclic} control-flow event-based graph \xgraphU[CF].
 After that, the compiler is able to perform the data-flow analysis and produce the full event-based graph \xgraphU[CF+DF], which remains to be CF-acyclic (no cycles among control-flow edges).
 
-<COmpiler contains several modules: (todo: remove todo about renaming interpreter to compiler: it's indeed interpreter>
+The X-compiler is a complex processing unit, Figure~\ref{fig:compiler} illustrates the relationship the principal components of the X-compiler in the UML language.
+
+The X-interpreter is a stateful processing unit that carries the \xgraph{}-builder and provides \textit{action} methods for changing its state and thus the state of the builder.
+
+
+X compilation error
 
 <scheme of who calls whom>
 
@@ -890,8 +911,6 @@ todo
 
 
 %todo: some words on necessity of contexts and lack of them. How would we implement them
-
-%todo: rename Interpreter -> Compiler.
 
 
 %TODO: \section{Optimisations} 

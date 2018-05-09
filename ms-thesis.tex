@@ -101,7 +101,7 @@
 \newcommand{\co}{\ensuremath{\,\mathtt{co}\,}}
 \newcommand{\com}{\ensuremath{\,\mathtt{po}\,}}
 \newcommand{\sr}{\ensuremath{\,\mathtt{sr}\,}}
-\newcommand{\cat}{\texttt{cat}\;}
+\newcommand{\cat}{\texttt{cat}}
 \newcommand{\relation}[1]{\ensuremath{\overset{\mathtt{#1}}{\rightarrow}}}
 \newcommand{\rel}[1]{\texttt{#1}}
 \newcommand{\mathr}[1]{\ensuremath{\mathtt{#1}}}
@@ -607,23 +607,26 @@ ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;
 %\cleardoublepage
 
 \renewcommand{\thesection}{A.\arabic{section}}
-\titlespacing*{\section}{0pt}{-40pt}{20pt}
+%\titlespacing*{\section}{0pt}{-40pt}{20pt}
+\titlespacing*{\section}{0pt}{0pt}{0pt}
 \titleformat{\section}[display]
   {\normalfont\large\bfseries}% <- font for label "A.1", default \huge
   {}
   {0ex}
-  {\thesection\quad\large}% <- font for title, default \Huge
+  {\thesection\quad\large}
+\newcommand{\sectionbreak}{\clearpage}
 
 \cleardoublepage\makeatletter\@openrightfalse\makeatother
 \phantomsection
 \appendix
 \addcontentsline{toc}{chapter}{Appendices}
 \fancyhead[R]{\footnotesize\itshape{APPENDICES}}
-%\chapter*{Appendices}
 \appendixpage
 
 \input{98_apx_grammar.tex}
 \input{97_apx_trees.tex}
+\input{96_apx_x86cat.tex}
+\input{95_apx_interpreter.tex}
 
 % End of document!
 % ------------------------------------------------------------------
