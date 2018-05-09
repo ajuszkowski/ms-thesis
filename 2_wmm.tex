@@ -19,7 +19,8 @@ Although these models are easy to understand, it may be impossible to treat \tex
 However, there exist equivalence classes such that the result of execution different interleavings from single equivalence class is the same (for instance, computations performed by a processor locally do not affect the global state).
 %One way to do this is to use a non-deterministic computation-centric model~\cite{fri97}, such as ...%The idea in this class of models is based on the fact that the behaviour of a concurrent system is defined only by the interleavings of shared-memory operations, while being independent from the order of local computation events.
 %TODO: nondeterministic
-One such model is the \textit{event-based} representation of a program, which models a program as a directed graph of events (the \textit{event-flow graph}).
+One such model is the \textit{event-based} representation of a program, which models the program as a directed graph of events (the \textit{event-flow graph}).
+The event-based model is \textit{non-deterministic}, which
 The vertices of such a graph represent \textit{events} (see Section~\ref{ch:wmm:model:events}), and edges represent \textit{basic relations} (see Section~\ref{ch:wmm:model:relations}).
 
 % TODO: the event-based representation is a non-deterministic model
@@ -35,7 +36,8 @@ The vertices of such a graph represent \textit{events} (see Section~\ref{ch:wmm:
 
 % TODO: check this subseciton
 
-The event is an independent low-level atomic operation.
+%TODO: EVENT -- ATOMIC?
+An event is a fact of executing the low-level primitive operation such as memory access, threads synchronisation, computation, etc.
 
 A \textit{memory event} $e_m \in \mathbb{E}$ represents the fact of access to the memory.
 Only memory events change the state of an abstract machine executing the code, since it is completely determined by values stored in its memory.
@@ -203,11 +205,10 @@ Below we enumerate pre-defined operators over relations and sets of events:
     \end{itemize}
   \item \textit{Binary relations:}
   \begin{itemize}
-    \item \textit{the union} of two relations \rel{r1} and \rel{r2} is \rel{r1\,|\,r2}
-    \item \textit{the intersection} of two relations \rel{r1} and \rel{r2} is \rel{r1\,\&\,r2}
-    \item \textit{the difference} of two relations \rel{r1} and \rel{r2} is $\mathtt{r1\,\backslash\,r2}$
-    \item \textit{the sequence}\footnote{The sequence of two relations \rel{r1} and \rel{r2} is defined as the set of pairs \rel{(x,y)} such that there exists an intervening \rel{z}, such that $\rel{(x,z)} \in \rel{r1}$ and $\rel{(z,y)} \in \rel{r2}$}
-    of two relations \rel{r1} and \rel{r2} is \rel{r1;r2}
+    \item \textit{the union} of two relations \rel{r1} and \rel{r2} is \rel{r1\,|\,r2},
+    \item \textit{the intersection} of two relations \rel{r1} and \rel{r2} is \rel{r1\,\&\,r2},
+    \item \textit{the difference} of two relations \rel{r1} and \rel{r2} is $\mathtt{r1\,\backslash\,r2}$,
+    \item \textit{the sequence} of two relations \rel{r1} and \rel{r2} is \rel{r1;r2}, which is defined as the set of pairs \rel{(x,y)} such that there exists an intervening \rel{z}, such that $\rel{(x,z)} \in \rel{r1}$ and $\rel{(z,y)} \in \rel{r2}$.
   \end{itemize}
 \end{enumerate}
 

@@ -86,14 +86,17 @@
 \newcommand*{\fx}{\ensuremath{\mathbf{x}}}%x}}}
 \newcommand*{\fv}{\ensuremath{\mathbf{v}}} %v}}}
 
-\newcommand{\porthos}[1][]{%
-\texttt{porthos\ifthenelse%
+\newcommand{\porthos}[1][]{\texttt{%
+Porthos\ifthenelse%
 {\equal{#1}{}}%if
 {}%then
 {\ifthenelse{\equal{#1}{1}}%else-if
-{}%then%{\,v1}%then
+{\,v1}%then
+{%else
+\ifthenelse{\equal{#1}{2}}%else-if
+{C}%then
 {#1}%else
-}}}
+}}}}
 \newcommand{\oldporthos}{\porthos[1]}
 \newcommand{\rf}{\ensuremath{\,\mathtt{rf}\,}}
 \newcommand{\fr}{\ensuremath{\,\mathtt{fr}\,}}
@@ -206,11 +209,12 @@ c/.style={
 style=alphabetic,%-verb,%style=alphabetic
 minalphanames=3,
 maxalphanames=3,
+maxbibnames=5, minbibnames=5, %for 'et al'
 %sortcites=true,
 %sorting=none
 %see options: http://texdoc.net/texmf-dist/doc/latex/biblatex/biblatex.pdf
 %sorting=anyvt,%Sort by alphabetic label, name, year, volume, title,
-sorting=anyt,%Sort by alphabetic label, name, year, title,
+sorting=anyvt,%Sort by alphabetic label, name, year, title,
 %sorting=ydnt,%Sort by year (descending), name, title 
 %sorting=ynt, %Sort by year, name, title. 
 %sorting=nyt, %Sort by name, year, title. %see https://tex.stackexchange.com/a/51439
@@ -498,6 +502,7 @@ nec lacus.
 % show up in the TOC
 \chapter*{Acknowledgements} % TODO
 %Prof. Keijo Heljanko
+  % that the work matters
 %Prof. Stavros Tripakis
 %Vladimir Kochetkov and Stanislav Matveyev
 In id fringilla velit. Maecenas sed ante sit amet nisi iaculis bibendum sed vel
