@@ -489,8 +489,15 @@ typed: Expr, BoolExpr, ArithExpr, ...
 
 This section describes program units that construct, transform and analyse internal representations described before. % steps of construction of the program representations and transformations applied to them.
 Further in this Section, the subsection titles have a number in parentheses, which correspond to a unique number of the  processing unit being discussed.
-This numbers are pictured within gears on the top-left corner of each processing unit in Figure~\ref{fig:arch}.
+These numbers are pictured within the gear in the top-left corner of each processing unit in Figure~\ref{fig:arch}.
 %he numbers in parentheses correspond the numbers of processing units pictured within gears in Figure~\ref{fig:arch}.
+
+the full \xgraph{} construction is performed in three stages.
+First, the \ytree{} is compiled to a \textit{cyclic} control-flow event-based graph \xgraph[CF].
+Then, this graph is unrolled to an \textit{acyclic} control-flow event-based graph \xgraphU[CF].
+After that, the compiler is able to perform the data-flow analysis and produce the full event-based graph \xgraphU[CF+DF], which remains to be \textit{CF-acyclic} (no cycles among control-flow edges).
+
+
 
 All recursive data structures are processed by units that implement the \textit{visitor} pattern~\cite{palsberg1998essence}.
 This is a behavioural pattern that separates the program logic from the object implementation by specifying handling methods for each element of the object.
@@ -547,7 +554,6 @@ The operator instance, instead of having a single method that handles and elemen
 For traversing plain (non-recursive) complex data structures, we mostly follow the \texttt{iterator} pattern: the special object Iterator, that has access to elements of the data structure, iterates over them and ...
 . Since in \porthos[] we usually do not need to browse an object elements in different order, the iterator creation is performed by the data structure itself.
 However, in contrast to the visitor of a recursive data structure, the visitor of a plain data structure should be used with an \textit{iterator} that has access to the elements of the object and passes them to the visitor.
-
 
 
 % todo: test pre-/post-fix operations //+think how current tool will behave if there's more than one post-operation //and pre-operation
@@ -678,7 +684,9 @@ The following types of variables are detected as \textit{global}:
 \subsubsection{X-graph compiler (6)}
 \label{ch:impl:proc:x-compiler}
 
-\begin{figure}[th]
+The X-compiler is the main component that transforms the recursive \ytree{} data structure to the plain \xgraph{} representation.
+
+\begin{figure}[!t]%[H]
     \centering
   %draft=true
   \includegraphics[max width=\textwidth,keepaspectratio]{img/my/draw.io/X-compiler.png}
@@ -687,14 +695,7 @@ The following types of variables are detected as \textit{global}:
 \end{figure}
 
 
-The X-graph compiler is the main component that transforms the recursive \ytree{} data structure to the plain \xgraph{} representation.
-
-The compilation is performed in three stages.
-Firstly, the \ytree{} is compiled to a \textit{cyclic} control-flow event-based graph \xgraph[CF].
-Then, this graph is unrolled to an \textit{acyclic} control-flow event-based graph \xgraphU[CF].
-After that, the compiler is able to perform the data-flow analysis and produce the full event-based graph \xgraphU[CF+DF], which remains to be CF-acyclic (no cycles among control-flow edges).
-
-The X-compiler is a complex processing unit, Figure~\ref{fig:compiler} illustrates the relationship the principal components of the X-compiler in the UML language.
+The It is a complex processing unit, Figure~\ref{fig:compiler} illustrates the relationship between the principal components of the X-compiler in the UML language.
 
 The X-interpreter is a stateful processing unit that carries the \xgraph{}-builder and provides \textit{action} methods for changing its state and thus the state of the builder.
 
