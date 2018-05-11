@@ -17,7 +17,7 @@ Although these models are easy to build and analyse, the number of all possible 
 One way to fight the combinatorial explosion is to exclude the global time from the model and treat executions from one equivalence class together in a non-deterministic fashion.
 For instance, such an equivalence class can be the set of computations performed by a processor locally that do not affect the global state.
 This idea is used in the \textit{event-based} model, that represents the program as a directed graph of events (the \textit{event-flow graph})~\cite{alglave2010shared}.
-The vertices of such a graph represent \textit{events} (see Section~\ref{ch:wmm:model:events}), and edges represent \textit{basic relations} (see Section~\ref{ch:wmm:model:relations}).
+The vertices of such a graph represent \textit{events} (see Section~\ref{ch:wmm:model:events}), and edges represent basic relations (see Section~\ref{ch:wmm:model:relations}).
 The graph represents the set of executions (sequences of events; see Section~\ref{ch:wmm:model:executions}) defined by the non-deterministic guesses of certain relations on some states.
 
 There are three main types of sources of non-determinism in concurrent programs~\cite{musuvathi2008fair}:
@@ -66,9 +66,7 @@ Functionally, a fence may be a synchronisation barrier or a instruction of flush
 
 %In this section, we describe basic relations used in memory model-aware program analysis.
 
-The relation~%\xrightarrow{r}
-$r\,\subseteq~\mathbb{E}~\times~\mathbb{E}$ is a set of pairs of events (a subset of Cartesian product of two sets of events). There are two kinds of relations between events: \textit{basic relations} %retrieved from the 
-that capture semantics of the program, and \textit{derived relations} that are defined from the basic relations and events in the weak memory model specification. Constraints over relations that are specified by weak memory models are defined as requirements of acyclicity, irreflexivity or emptiness of specific relations~\cite{alglave2016syntax}.
+The relation~$r\,\subseteq~\mathbb{E}~\times~\mathbb{E}$ is a set of pairs of events (a subset of Cartesian product of two sets of events). There are two kinds of relations between events: \textit{basic relations} that capture the semantics of the program, and \textit{derived relations} that are defined from the basic relations and events in the weak memory model specification. Constraints over relations that are specified by weak memory models are defined as requirements of acyclicity, irreflexivity or emptiness of specific relations~\cite{alglave2016syntax}.
 
 \vspace{1em}
 The basic relations are the following~\cite{alglave2010shared}:
@@ -80,10 +78,10 @@ The basic relations are the following~\cite{alglave2010shared}:
     %Some new relations may be acquired : dp, po-loc
 
     \item The \textit{data-flow} of a program is defined by \textit{communication relations}:
-        \begin{itemize}[noitemsep]
-            \item the \textit{read-from} relation \rf~$\subseteq~\mathbb{W}~\times~\mathbb{R}$ that maps each write event to the read event that reads the value written by write event;
-            \item the \textit{coherence order} relation \co~$\subseteq~\mathbb{W}~\times~\mathbb{W}$ that defines the total order on writes to the same location across all processes (also called the \textit{write serialisation}, \texttt{ws}-relation);
-        \end{itemize}
+    \begin{itemize}[noitemsep]
+        \item the \textit{read-from} relation \rf~$\subseteq~\mathbb{W}~\times~\mathbb{R}$ that maps each write event to the read event that reads the value written by write event;
+        \item the \textit{coherence order} relation \co~$\subseteq~\mathbb{W}~\times~\mathbb{W}$ that defines the total order on writes to the same location across all processes (also called the \textit{write serialisation}, \texttt{ws}-relation);
+    \end{itemize}
 
     \item Events from the same process are related by the \textit{scope relation} \sr~$\subseteq~\mathbb{E}~\times~\mathbb{E}$.
     In contrast to the \tool{herd} tool, the \porthos[2] does not use hierarchy of scopes (depicted as the scope tree); instead, it uses simple labels that indicate which process has produced certain event.
@@ -196,7 +194,7 @@ In \cat{}, new relations can be defined via the keyword \texttt{let} and the fol
 Below we enumerate pre-defined operators over relations and sets of events:
 
 \begin{enumerate}
-  \item \textit{Unary relations}:
+  \item \textit{Unary operations}:
     \begin{itemize}
       \item \textit{the complement} of a relation \rel{r} is $\rel{\textasciitilde r}$,
       \item \textit{the transitive closure} of a relation \rel{r} is $\rel{r+}$,
@@ -204,7 +202,7 @@ Below we enumerate pre-defined operators over relations and sets of events:
       \item \textit{the reflexive-transitive closure} of a relation \rel{r} is $\rel{r*}$, and
       \item \textit{the inverse} of a relation \rel{r} is $\invrel{r}$.
     \end{itemize}
-  \item \textit{Binary relations:}
+  \item \textit{Binary operations:}
   \begin{itemize}
     \item \textit{the union} of two relations \rel{r1} and \rel{r2} is \rel{r1\,|\,r2},
     \item \textit{the intersection} of two relations \rel{r1} and \rel{r2} is \rel{r1\,\&\,r2},

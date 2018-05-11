@@ -8,18 +8,23 @@
 \label{ch:intro:problem}
 
 Most modern computer systems contain large parts that operate concurrently.
-Although the parallelisation of the system can improve its performance drastically, it opens numerous of problems connected to correctness, robustness and reliability, which makes the concurrent program design one of the most difficult problems of programming~\cite{mckenney2017parallel}.
+Although the parallelisation of a system can drastically improve its performance, it opens numerous of problems connected to correctness, robustness and reliability, which makes the concurrent program design one of the most difficult problems of programming~\cite{mckenney2017parallel}.
 
 Traditionally, studies related to concurrent programming focus on more fundamental theoretical questions of designing race-free and lock-free parallel algorithms, asynchronous data structures and synchronisation primitives of a programming language~\cite{ben2006principles}.
 Unfortunately, when it comes to real-world concurrent programs, the algorithmic level of abstraction is not enough for guaranteeing their correctness.
-The reasons of this fact lie in the code optimisations that both compiler and hardware perform in order to increase performance as much as possible~\cite{adve1996shared}.
+The reasons of this fact lie in the code optimisations that both compiler and hardware perform in order to increase performance of the system~\cite{adve1996shared}.
 
-For example, consider a shared memory concurrent system that executes two parallel processes as it is described in Figure~\ref{simple_wmm_x86}.
-The process~\texttt{P0} writes value~\texttt{1} to the shared variable~\texttt{x} and reads the value of shared variable~\texttt{y}, and the process~\texttt{P1} writes the~\texttt{y} and reads the~\texttt{x}.
-As the program specifies the write to~\texttt{x} to precede the read of~\texttt{y} in process~\texttt{P0}, one could expect the final state `\texttt{(0:EAX=0~/\textbackslash~1:EAX=0)}' to be unreachable.
-However, this state is reachable on the x86 architecture as each processor may cache the write to shared memory location into its local write buffer, so that they do not immediately become visible by processes running on other cores.
-This behaviour is known as \textit{store buffering (SB)}.
-The little code examples that illustrate specific behaviour of an execution environment are called \textit{litmus tests}.
+As an example, consider a shared memory concurrent system that executes two parallel processes as it is described in Figure~\ref{simple_wmm_x86}.
+The process~\texttt{P0} writes the value~\texttt{1} to the shared variable~\texttt{x} and reads a value of the shared variable~\texttt{y}, and the process~\texttt{P1} writes the~\texttt{y} and reads the~\texttt{x}.
+Considering all interleavings of the processes, one could expect the final state to be one of the following states:
+\begin{itemize}[noitemsep,topsep=0pt]
+\item \texttt{(0:EAX=0,\,1:EBX=1)}
+\item \texttt{(0:EAX=1,\,1:EBX=0)}
+\item \texttt{(0:EAX=1,\,1:EBX=1)}
+\end{itemize}
+%As the program specifies the write to~\texttt{x} to precede the read of~\texttt{y} in process~\texttt{P0}, one could expect the final state `\texttt{(0:EAX=0~/\textbackslash~1:EAX=0)}' to be unreachable.
+However, on the x86 architecture the state `\texttt{(0:EAX=0,\,1:EAX=0)}' is also reachable as the processors may cache the write to shared memory into their local write buffers, so that they do not immediately become visible by processes running on other cores.
+This behaviour is known as \textit{store buffering~(SB)}.
 
 \begin{figure}[t]
 \centering
@@ -29,10 +34,10 @@ The little code examples that illustrate specific behaviour of an execution envi
 \multicolumn{2}{|l|}{ \{ x=0; y=0; \}} \tabularnewline \hline
 P0 & P1 \\ \hline
 MOV [x],1 & MOV [y],1 \\
-MOV EAX,[y] & MOV EAX,[x] \\
+MOV EAX,[y] & MOV EBX,[x] \\
 \hline
 %\multicolumn{2}{|l|}{locations [x;y;]} \tabularnewline
-\multicolumn{2}{|l|}{exists (0:EAX=0~/\textbackslash~1:EAX=0)} \tabularnewline
+\multicolumn{2}{|l|}{exists (0:EAX=0,~1:EBX=0)} \tabularnewline
 \hline
 \multicolumn{2}{|l|}{x86: allow} \tabularnewline
 \hline
@@ -45,8 +50,16 @@ MOV EAX,[y] & MOV EAX,[x] \\
 %Meanwhile, the write cache of the process \texttt{P1} may not have an updated version of the variable~\texttt{[x]}, neither the main memory, so that the read `\texttt{MOV~EBX,[x]}' performed in the process~\texttt{P1} may read the initial value~\texttt{0} even if this variable has been already updated in the other process.
 %The automation of the memory model-aware program analysis constitutes the main research interest of the current thesis.
 
-The issues like one discussed above have led to the need for formalisation of semantics of memory operations within different concurrent architectures defined by \textit{memory models}.
-There are two ways to define a memory model: by specifying its \textit{operational semantics} (in terms of an abstract machine executing the code, as it was done for the SB example above) or by defining its \textit{axiomatic semantics} (in terms of assertions over states of the program formed by sequences of operations).
+Such little examples that illustrate specific behaviour of a concurrent execution environment are called \textit{litmus tests}.
+The formal way to define the semantics of memory operations and synchronisation primitives of a parallel execution environment is to define its \textit{memory model}.
+%The behaviour of a concurrent execution environment is described by a formal memory model
+%The study of concurrency of a specific platform concerns on defining
+%and are widely used to illustrate its behaviour.
+%Properties of an execution environment can be described by a formal \textit{memory model}
+%The issues like one discussed above have led to the need for formalisation of semantics of memory operations within different concurrent architectures defined by \textit{memory models}.
+There are two types of formal memory models. Models of the first type characterise the behaviour of the system (its \textit{operational semantics}) in terms of the abstract machine executing the code, as it was done for the SB example above.
+Models of the second type define the \textit{axiomatic semantics} of the system by specifying the set of assertions over states of the program.
+%There are two ways to define a memory model: by specifying its \textit{operational semantics} (in terms of an abstract machine executing the code, as it was done for the SB example above) or by defining its \textit{axiomatic semantics} (in terms of assertions over states of the program formed by sequences of operations).
 Although the former type of memory models may be easier to describe and interpret, existing numerous formal verification tools and methods direct the research towards axiomatic memory models.
 
 The first memory model for concurrent systems was formulated by Leslie Lamport back in 1979~\cite{lamport1979make}.
@@ -87,7 +100,9 @@ Furthermore, there exists a wide range of tools that perform memory model-aware 
 
 \item A state-of-the-art tool is \tool{diy} (\textit{do it yourself}), developed by researchers from INRIA institute, France and University of Cambridge, UK.
 The \tool{diy}%
+%
 \footnote{The \tool{diy} project web site: \url{http://diy.inria.fr/}} %
+%
 is a software suite for designing and testing weak memory models.
 It is firstly released back in 2010, and since that time it remained to be the only tool for testing weak memory models.
 The \tool{diy} consists of several modules:
@@ -119,17 +134,19 @@ All the tools listed above consider only a single memory model, however, in real
 One of these problems is the \textit{portability} of the program from one hardware architecture to another.
 A program written in a high-level language is then compiled for different hardware.
 Even if all the compiler optimisations were disabled (which is rare case nowadays), the behaviour of two compiled versions of the same program may differ due to differences between hardware memory models.
-As the result, a program compiled under the platforms $T$ can reach states that are unreachable on the platform $S$, which is a \textit{portability bug} from the source platform $S$ to the target platform $T$~\cite{Porthos17a}.
+As the result, a program compiled under the platforms $\mathcal{T}$ can reach states that are unreachable on the platform $\mathcal{S}$, which is a \textit{portability bug} from the source platform $\mathcal{S}$ to the target platform $\mathcal{T}$~\cite{Porthos17a}.
 
 The very first tool that performs the WMM-aware portability analysis is \porthos%
+%
 \footnote{The \porthos{} project web site: \url{http://github.com/hernanponcedeleon/PORTHOS}} %
+%
 introduced in April~2017~\cite{Porthos17b}.
-This tool reduces described problem to a bounded reachability problem, which can be solved with help of an SMT-solver.
+This tool reduces described problem to a bounded reachability problem, which can be solved via an SMT-solver.
 This approach allows to capture symbolically the semantics of analysing program and both weak memory models into a single SMT-formula, augmented by the reachability assertion.
 As most modern SMT-solvers are efficient enough to be able to operate the state space of size millions of variables bounded by millions of constraints~(\cite{malik2009boolean}), the used method can be applicable in solving the real-world problems.
 % TODO: search space size: https://courses.cs.washington.edu/courses/csep573/11wi/lectures/ashish-satsolvers.pdf slide 
 
-%In the work~\cite{Porthos17b}, the SMT-based approach was defined for analysing the portability of a program from one hardware architechture to another, which is defined as ``an execution that is consistent with the target but inconsistent with the source memory model". Although encoding the control-flow and the data-flow of a program into an SMT-formula seems to be a trivial problem of symbolic execution, encoding of the weak memory model is more tedious. The reason is that some relations of WMMs are defined as mutually-recursive and need to be linearised in order to be encoded into an equivalent logical formula.
+%In the work~\cite{Porthos17b}, the SMT-based approach was defined for analysing the portability of a program from one hardware architechture to another, which is defined as ``an execution that is consistent with the target but inconsistent with the source memory model". Although encoding the control-flow and the data-flow of a program into an SMT-formula seems to be a tril problem of symbolic execution, encoding of the weak memory model is more tedious. The reason is that some relations of WMMs are defined as mutually-recursive and need to be linearised in order to be encoded into an equivalent logical formula.
 
 %"A portability bug is an execution that is consistent with the target but inconsistent with the source memory model. We capture this alternation with a single existential query. Consistency is specified in terms of acyclicity (and irreflexivity) of relations. Hence, an execution is inconsistent if a derived relation of the (source) memory model contains a cycle (or is not irreflexive)."
 
