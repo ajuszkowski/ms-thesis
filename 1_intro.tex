@@ -123,8 +123,9 @@ the automatic verification and fence inference tool \tool{blender}~\cite{kuperst
 
 \item Some other tools perform static instrumentation of concurrent C programs and encode the WMM into the program representation so that it can be model-checked by standard tools.
 The examples are
+%TODO: cite the 'wmm-general/Thread-Modular Static Analysis for Relaxed Memory Models.pdf'
 the instrumenting compiler \tool{goto-cc} which is a part of \tool{CBMC} model checker~\cite{kroening2014cbmc},
-the program transformation tool~\cite{alglave2013software},
+the tool that performs the sequentialisation of concurrent programs~\cite{alglave2013software},
 the tool \tool{Weak2SC} for producing program descriptions which can be fed into standard model checking tools (such as \tool{SPIN}~\cite{holzmann1997model} or \tool{NuSMV}~\cite{cimatti2000nusmv}) for performing memory model-aware analysis~\cite{travkin2016verification}.
 \end{itemize}
 

@@ -401,16 +401,19 @@ The following interfaces model basic kinds of events (see Figure~\ref{fig:class-
     
   \1 \texttt{XControlFlowEvent} \\
     The control-flow event indicates a non-linear jump in the code. We distinguish two kinds of control-flow events: 
-    %\begin{itemize}[noitemsep]
-      \2 \texttt{XJumpEvent} that performs no computation and no data operation, it can be safely removed from the model as an optimisation,
-      \2 \texttt{XMethodCallEvent} that models the function call with the \texttt{fastcall} calling convention (passing arguments in registers).
-      %TODO: check the diagrams if the XMCE really inherits XLMU
-      The function call also implements the \texttt{XLocalMemoryUnit} since it represents the computed value returned by the function call.
-      If the function has been resolved, the actual arguments are bind to the formal parameters (treated as temporary local memory units), the called \texttt{XMethodCallEvent} is pushed onto the call stack, and the execution jumps to the function body.
-      Each \texttt{return} statement creates the assignment of the function call event on the top of call stack.
-      \\
-      If the function has not been resolved, \textbf{TODO: think about it. Will the formula be SAT? Or do we need to abort the analysis?}
-    %\end{itemize}
+    \2 \texttt{XJumpEvent} that performs no computation and no data operation, it can be safely removed from the model as an optimisation,
+    \2 \texttt{XMethodCallEvent} that models the function call with the \texttt{fastcall} calling convention (passing arguments in registers).
+    %TODO: check the diagrams if the XMCE really inherits XLMU
+    The function call also implements the \texttt{XLocalMemoryUnit} since it represents the computed value returned by the function call.
+    If the function has been resolved, the actual arguments are bind to the formal parameters (treated as temporary local memory units), the called \texttt{XMethodCallEvent} is pushed onto the call stack, and the execution jumps to the function body.
+    The call stack is bounded by the user-defined parameter; once the stack is full, the interpretation continues without jumping to the body of the invoked function (such cases are properly logged). %TODO: call-stack: user-defined parameter
+    Each \texttt{return} statement creates the assignment of the function call event on the top of call stack.
+    Note, this approach works for any kind of recursion, which is unrolled up the user-defined boundary as well as explicit loops.
+    \\
+    According to the Rice's theorem~\cite{rice1953classes}, in general case there always will be functions unresolved within an analysis launch.
+    If the function has not been resolved, it can be safely assumed to be a no-operation function.
+    In other words, we suppose that the knowledge base of \porthos{} is complete and the tool can resolve all memory-operation functions and fence instructions.
+    Although this can affect the completeness of the analysis, it is safe to make such an assumption as the user can check the log file and manually analyse the semantics of an unresolved call and it to the knowledge base if necessary.
 
   \1 \texttt{XFenceEvent} \\
     The fences are implemented as an enumeration \texttt{XBarrierEvent}.
@@ -419,7 +422,7 @@ The following interfaces model basic kinds of events (see Figure~\ref{fig:class-
     \texttt{sync}, \texttt{optsync}, \texttt{lwsync}, \texttt{optlwsync}, \texttt{ish}, \texttt{isb}, and \texttt{isync}.%TODO: description of each!
     
   \1 \texttt{XFakeEvent} \\
-    The fake events are auxiliary elements of \xgraph{}.
+    The fake events are the auxiliary elements of \xgraph{}.
     %\begin{itemize}[noitemsep]
     \2 \texttt{XEntryEvent}, the per-process unique source event in the event-flow graph,
     \2 \texttt{XExitEvent}, the process sink event. There are two kinds of sink events: \textit{complete} and \textit{incomplete} (see description in Section~\ref{ch:impl:proc:x-unroll}),
@@ -448,7 +451,7 @@ Once being constructed, the graph must conform the following requirements (see a
 \item each node of the graph can have either one or two direct control-flow successors,
 \item only nodes of type \texttt{XComputationEvent} can have two direct control-flow successors,
 %\item each node except the source node must have at least one parent
-\item a \co-edge connects two writes, an \rf-relation edge connects a write and a read,
+\item a \co{}-edge connects two writes, an \rf{}-relation edge connects a write and a read,
 \item all write-event nodes except initial write-nodes must have exactly one \co-predecessor
 \item all write-event nodes except final write-nodes must have exactly one \co-successor.
 %TODO: \item \textbf{TODO: more?}
@@ -480,10 +483,10 @@ picture of the CF-graph:
 A \wmodel{} represents a recursively defined AST of relations defined by the memory model and an assertion expression.
 The atomic elements of \wmodel{} are the basic relations (\po, \rf and \co; see Section~\ref{ch:wmm:model:relations}) and sets of events ($\mathbb{R}$, $\mathbb{W}$, $\mathbb{IW}$, etc.; see Section~\ref{ch:wmm:model:events}).
 The expressions of \wmodel{} are unary (such as complement, transitive closure, etc.) and binary operations (such as union, intersection, etc.) over relations or sets of events; see Section~\ref{ch:wmm:cat}.
+For the sake of transparency, each element of a \wmodel{} contains the origin location as the coordinates of the string in the model file. %TODO: implement origin for w-model
 
-<todo: enumerate elements>
+<todo: enumerate elements -- after refactoring>
 
-<carries the origin -- from cat file>
 
 %todo: rename everywhere assertions <- axioms
 
@@ -496,18 +499,17 @@ The expressions of \wmodel{} are unary (such as complement, transitive closure, 
 The \zformula{} representation is a wrapper for an SMT-formula used as an additional abstraction level used to increase the transparency of the architecture, simplify the debugging process and ease the support of different SMT-solvers.
 As all other internal representations, the \zformula{} is implemented as an immutable data structure.
 
-Following the structure of a Z3-formula, the atomic elements of a \zformula{} are variables, and the expressions are 
+The Z-abstraction level models the the logical formulas (definitions and assertions) that are put on the assertion stack of the SMT-solver.
+Generally, a \zformula{} represents the S-expression-based syntax of the SMT-LIB language~\cite{smt-lib}. % the semantics of SMT-LIB formulas defined in~\cite[Chapter 5]{smt-lib}.
+Currently, the \zformula{} supports definitions and assertions over \textit{variables} and binary and unary \textit{expressions}.
+However, in future it may be extended to support \textit{function symbols} and \textit{binders} (existential and universal quantification, pattern matching and functional type construction).
 
-reference to Z3-tutorial AND 
+All expressions of a \zformula{} are \textit{typed} (or \textit{sorted}, in terms of SMT-LIB standard).
+Basically, we distinguish \textit{boolean} and \textit{numeric} (integer, bitvector, real) expressions.
+The typisation of a \zformula{} is necessary for checking the basic validity of its expressions and converting it to a typed SMT-LIB formula.
+For the sake of transparency, each element of a \zformula{} contains the origin location as the reference to the X-element that produced current Z-element. %TODO: implement origin for z-formula
 
-All expressions and variables of a \zformula{} are typed.
-Basically, we distinguish \textit{boolean} and \textit{numeric} (integer, floating point, <else?>) data type
-
-%typed: Expr, BoolExpr, ArithExpr, ...
-
-carries the origin (X)
-
-<todo: enumerate elements>
+<todo: enumerate elements -- after completing>
 
 
 \subsection{The processing units} %Transformation}
@@ -583,7 +585,9 @@ For traversing plain (non-recursive) complex data structures, we mostly follow t
 However, in contrast to the visitor of a recursive data structure, the visitor of a plain data structure should be used with an \textit{iterator} that has access to the elements of the object and passes them to the visitor.
 
 Construction of immutable data structures is performed by units that follow the \textit{builder} pattern.
-<TODO: SAY MORE: validation of ht einput elements during construction, maybe verif after building>
+A builder is a mutable object that contains methods "filling" it by the elements that will constitute the result complex object.
+The methods contain basic validity checks of the elements.
+Once a builder has been built, it cannot be modified.
 
 
 % todo: test pre-/post-fix operations //+think how current tool will behave if there's more than one post-operation //and pre-operation
@@ -609,7 +613,7 @@ The \tool{ANTLR} grammar for the \cat{} language was extracted from the parser u
 written in OCaml.
 %TODO: upload the grammar to github
 %The input memory model 
-\textbf{TODO: add reference to the grammar file in github repository OR include a short version as an appendix}
+%TODO: add reference to the grammar file in github repository OR include a short version as an appendix}
 
 %todo: maybe: move something from the input language chapter here
 
@@ -617,7 +621,10 @@ written in OCaml.
 \subsubsection{W-model constructor (3)}
 \label{ch:impl:proc:w-constr}
 
-%<not implemented yet>
+%TODO: <not implemented yet>
+The \wmodel{} is constructed by the converter \texttt{Cat2WmodelConverter}, which calls \texttt{Cat2WmodelConverterVisitor}, the stateless visitor of memory-model ANTLR syntax tree. %TODO: Implement this!!!
+Currently, the visitor supports only the declarative subset of the \cat{} language, and does not process the functional-style definitions (it can to be supported by implementing the 
+
 
 visitor of antlr tree: almost direct
 
@@ -753,9 +760,10 @@ The X-compiler accesses all memory units via the \texttt{XMemoryManager}, which 
 However, the memory manager is a stateful component of the compiler as it offers the methods for declaring and removing local memory units dynamically at the compilation time.
 At each time of the compilation process, the \texttt{XMemoryManager} can resolve the memory unit by its name.
 Following the C standard, local memory units have higher priority over global ones.
-Since the C language allows the variables that have the same name to be declared in nested contexts, the \texttt{XMemoryManager} carries the block-context stack. %TODO: refactor XMemoryManager!
+Since the C language allows usage of variables that have the same name to be declared in nested contexts, the \texttt{XMemoryManager} carries the stack of block block-contexts for local variables. %TODO: refactor XMemoryManager!
 
 <some picture ? >
+
 
 \paragraph{Invocation hook manager}
 \label{ch:impl:proc:x-compiler:hooking}
@@ -767,11 +775,11 @@ The invocation hooking module serves as a knowledge base that stores the semanti
 Once the X-compiler meets the function invocation, it calls the \texttt{XHookManager}, which tries to match the function signature (in case of program in C language -- only the function name) across all signatures it stores.
 Once the signature matches, the hook manager intercepts the compilation process and interprets the method according to the algorithm it stores.
 %TODO: say sth about the mode
-The hook manager operates multiple invocation hooks depending on the user-defined mode (
- \texttt{XInvocationHook} 
+The hook manager operates multiple invocation hooks depending on the user-defined mode.
+All invocation hooks implement the interface \texttt{XInvocationHook}.
+Current version of \porthos[2] contains two invocation hooks, the \texttt{} and \texttt{XKernelInvocationHook} that contains ...............................
 
 %TODO: rename InvocationHook -> XInvocationHook
-multiple hooks for mult modes
 %, having access to the X-interpreter (see Section~\ref{ch:impl:proc:x-compiler:compilation}), 
 
 lambda-hook: knowledge base: InterceptionAction(BiFunction<XMemoryUnit, XMemoryUnit[], ? extends XEntity> action)
