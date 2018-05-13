@@ -531,6 +531,8 @@ After that, the compiler is able to perform the data-flow analysis and produce t
 All recursive data structures are processed by units that implement the \textit{visitor} pattern~\cite{palsberg1998essence}.
 This is a behavioural pattern that separates the program logic from the object implementation by specifying handling methods for each element of the object.
 The visitor pattern performs the double-dispatching mechanism: the visiting class defines the method for accepting a visitor, and the visitor itself defines the 
+<TODO!!!!>
+
 To visit an instance \lstinline{x} by a visitor \lstinline{v}, the program should call the accept-method of \lstinline{x} and pass \lstinline{v} as an argument.
 In our implementation, the visitor must carry out the continuation of traversing the recursive data structure itself.
 The general structure of the visitor pattern is illustrated by the pseudo-java code in Figure~\ref{fig:visitor}.
@@ -606,7 +608,7 @@ As preprocessor statements may appear in arbitrary place of a program, the prepr
 %more macros (stateful) : https://gcc.gnu.org/onlinedocs/cpp/Macros.html
 
 The input memory model language \cat{} is discussed in Section~\ref{ch:wmm:cat}.
-The \tool{ANTLR} grammar for the \cat{} language was extracted from the parser used by \tool{herd} tool%
+The \tool{ANTLR} grammar for \cat{} language was extracted from the parser used by \tool{herd} tool%
 %
 \footnote{\tool{herd} project repository: \url{https://github.com/herd/herdtools7}} %
 %
@@ -622,11 +624,11 @@ written in OCaml.
 \label{ch:impl:proc:w-constr}
 
 %TODO: <not implemented yet>
-The \wmodel{} is constructed by the stateless visitor \texttt{Cat2WmodelConverterVisitor} from the ANTLR syntax tree \texttt{CatParser.MainContext} of the memory-model defined in \cat{} language.
-Currently, the visitor supports the small subset of the \cat{} language, which constitutes only non-functional declarative expressions of the language as the support for functional-style expressions requires implementing the full OCaml interpreter.
+The \wmodel{} representation is constructed by the stateless visitor \texttt{Cat2WmodelConverterVisitor} from the ANTLR syntax tree \texttt{CatParser.MainContext} of the memory-model defined in \cat{} language.
+Currently, the visitor supports the small subset of \cat{} language, which constitutes only non-functional declarative expressions of the language as the support for functional-style expressions requires implementing the full OCaml interpreter.
 However, some most commonly used functional-style expressions may be supported by mapping them syntactically to corresponding W-elements by the \wmodel{} constructor.
 
-Following the principle of transparency, the \wmodel{} constructor aborts its work with the \texttt{NotSupportedException} if received the unrecognised syntax construction (in contrast to the \porthos[1] approach in which the \texttt{null} value was produced in all exceptional states).
+Following the principle of transparency, the \wmodel{} constructor aborts its work with the \texttt{NotSupportedException} if met the unrecognised syntax construction (in contrast to the \porthos[1] approach in which the \texttt{null} value was produced in all exceptional states).
 
 <todo: file tree of w-model to appendix -- after code fixing>
 
@@ -670,7 +672,7 @@ Being carried at Y- and X- representation levels, the type is converted to a~Z-t
 
 %TODO: YOU REALLY NEED TO THINK MORE ABOUT TYPES ON Y, X, Z LEVELS + reconsider this paragraph (and others about types)
 Currently, \porthos[2] handles only the primitive C types (such as \texttt{int}, \texttt{char}, \texttt{float}, etc.), which is modelled as an enumeration \texttt{XType}. %TODO: model it.
-Array dimension is stored as an integer number at the Y-level (at the X- and Z- levels, \textbf{TODO: think about it}). %the array operations are converted to ).
+The array dimension is stored at the Y-level as an integer number (currently this information is not used as \porthos[2] does not support arrays, although this information can be used at the stage of pre-compilation for converting array elements to separate variables). %the array operations are converted to ).
 In addition, \porthos[2] has a built-in extensible database storing the semantics of non-primitive C types stored by the \texttt{X2ZTypeConverter}, %TODO: Or XTypeHookManager?
 which can be requested for converting an X-type to a~Z-type. %TODO: implement this.
 %TODO: describe the XType (before) + implement this clearly! + definitely get rid of bit32
@@ -702,8 +704,8 @@ However, due to lack of polymorphism and function overloading mechanism inherent
 On the compilation stage, once the compiler meets the reference to a variable, it should know whether it refers to a local or global variable.
 The kinds of variables have to be determined on the pre-compilation stage.
 
-\vspace{1em}
-The following types of variables are detected as \textit{global}:
+%\vspace{1em}
+The following types of variables are detected as \textit{global variables}:
 %TODO: not implemented
 \begin{itemize}
 \item a variable was declared as a pointer;
@@ -718,6 +720,9 @@ The following types of variables are detected as \textit{global}:
 \label{ch:impl:proc:x-compiler}
 
 The X-compiler is the main component that transforms the recursive \ytree{} data structure to the plain \xgraph{} representation.
+It is a complex processing unit; Figure~\ref{fig:compiler} illustrates the relationship between the principal components of the X-compiler in the UML language.
+
+<TODO: in picture change: xmemorymaager belongs to the program interpreter!>
 
 \begin{figure}[!t]%[H]
     \centering
@@ -727,18 +732,25 @@ The X-compiler is the main component that transforms the recursive \ytree{} data
   \label{fig:compiler}
 \end{figure}
 
+The main class representing the X-compiler is \texttt{Y2XConverter}. %TODO: draw it on Figure.
+It receives as input the \ytree{}, the memory model kind and user settings (for instance, the interpreter mode defining the set of invocation hooks enabled during the analysis run).
+The \texttt{Y2XConverter} creates an instance of the stateless visitor \texttt{Y2XConverterVisitor} that traverses the \ytree{} while invoking the stateful interpreter \texttt{XInterpreter}.
+The \texttt{XInterpreter} carries the \xgraph{}-builder and provides \textit{action} methods for changing its state and thus the filling in the builder.
+The interpreter requests the managers such as \texttt{XMemoryManager}, \texttt{XHookManager}, \texttt{XTypeManager} for additional information. 
 
-The X-compiler is a complex processing unit, Figure~\ref{fig:compiler} illustrates the relationship between the principal components of the X-compiler in the UML language.
+<TODO: ADD XTypeManager to the picture!>
 
-The X-interpreter is a stateful processing unit that carries the \xgraph{}-builder and provides \textit{action} methods for changing its state and thus the state of the builder.
+We distinguish three types of processes (each implement the \texttt{XInterpreter} interface):
+\begin{itemize}[noitemsep,topsep=0pt]
+\item the prelude process \texttt{XPreludeInterpreter} (to be executed before all other processes) that allows only declaration of local or shared variables, computations and memory operations;
+\item the postlude process \texttt{XPostludeInterpreter} (to be executed after all other processes) that allows only declaration of local variables, memory operations, computations and assertions;
+\item the process \texttt{XProcessInterpreter} (to be executed in parallel) that allows all X-compiler interface operations except declaration of shared variables %(that should be declared during pre-compilation stage or during compilation of the prelude process)
+and program assertions (declarations of local variables, computations, barriers, unconditional jumps, non-linear branching statements, method calls).
+\end{itemize}
 
-
-X compilation error
-
-<scheme of who calls whom>
-
-%MethCallE : bind parameters with values (load them to temp registers) + remember the return-register
-%reutrn event= assign the return-register + simple jump
+As the prelude process can declare shared variables, its compilation must go first.
+%TODO: think about sorting processes at the pre-compilation stage
+For transparency reasons, the first event of a process must be the \texttt{XEntryEvent} and the last events must be events of type \texttt{XExitEvent}.
 
 
 \paragraph{Memory manager}
@@ -759,21 +771,25 @@ Since C language allows usage of variables that have the same name to be declare
 
 %TODO: cite again here : alglave2018frightening + other Kernel references
 
+%MethCallE : bind parameters with values (load them to temp registers) + remember the return-register
+%reutrn event= assign the return-register + simple jump
+
 The invocation hooking module serves as a knowledge base that stores the semantics of functions.
 %TODO: rename HookManager -> XHookManager
 Once the X-compiler meets the function invocation, it calls the \texttt{XHookManager}, which tries to match the function signature (in case of program in C language -- only the function name) across all signatures it stores.
-Once the signature matches, the hook manager intercepts the compilation process and interprets the method according to the algorithm it stores.
+If the signature matches, the hook manager intercepts the function call and interprets the hook action instead of invoking the function directly.
 %TODO: say sth about the mode
 The hook manager operates multiple invocation hooks depending on the user-defined mode.
 All invocation hooks implement the interface \texttt{XInvocationHook}.
-Current version of \porthos[2] contains two invocation hooks, the \texttt{} and \texttt{XKernelInvocationHook} that contains ...............................
+The result of an invocation hook interception is the \texttt{XInvocationHookAction}, a delayed operation implemented on the top of lambda functions of Java.
+The hook action is invoked with actual arguments and returns an arbitrary \texttt{XEntity} as the result of invocation.
 
+Current version of \porthos[2] contains two invocation hooks, the \texttt{XPorthosInvocationHook} for describing the compatibility-mode functions of the input \porthos[2] input language, and \texttt{XKernelInvocationHook} for describing the Linux kernel-specific functions.
+An invocation hook can model any type of operations (memory, fence, computational, etc.).
+For instance, the \texttt{XPorthosInvocationHook} intercepts calls \texttt{`location.store(atomic, register)'} and processes the store operation with respect to the specified atomic.
+%TODO: more about described functions
 %TODO: rename InvocationHook -> XInvocationHook
-%, having access to the X-interpreter (see Section~\ref{ch:impl:proc:x-compiler:compilation}), 
 
-lambda-hook: knowledge base: InterceptionAction(BiFunction<XMemoryUnit, XMemoryUnit[], ? extends XEntity> action)
-
-todo: kernel hooks
 %TODO: kernel's : ACCESS_ONCE() access may be modeled as a volatile memory_order_relaxed access.  %http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4374.html
 
 % + RCU %https://www.kernel.org/doc/Documentation/RCU/whatisRCU.txt
@@ -783,6 +799,12 @@ todo: kernel hooks
 \label{ch:impl:proc:x-compiler:compilation}
 
 stateful
+
+X compilation error
+
+contexts
+
+computation: how not to collect (in which case we loose)
 
 stacks: context, readyContext, call, 
   BlockContext (rename): what stores, enum of states

@@ -306,7 +306,7 @@ The derived relations are encoded by fresh boolean variables according to the fo
 \hspace*{1em} \mathtt{tc}_{i+1}(e_1,e_2) \defeq r(e_1,e_2) \lor (\mathtt{tc}_{i}(e_1,e_2);\mathtt{tc}_{i}(e_1,e_2))$
 \end{itemize}
 
-Note that the \cat{} language allows mutually-recursive definitions of relations (for example, `$\mathtt{r_1} = \mathtt{r_2} \cup (r_1;r_1)$').
+Note that \cat{} language allows mutually-recursive definitions of relations (for example, `$\mathtt{r_1} = \mathtt{r_2} \cup (r_1;r_1)$').
 The basic idea of using the Kleene fixpoint iteration for encoding such relations was also proposed in~\cite{Porthos17a}: for any pair of events $e_1,e_2 \in \mathbb{E}$ and relation $r \subseteq \mathbb{E} \times \mathbb{E}$, we encode a new integer variable $\Phi_{e_1,e_2}^{r}$ that represents the round of Kleene iteration on which the variable $r(e_1, e_2)$ has been set.
  %is used for guessing the execution 
 

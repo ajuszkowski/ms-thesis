@@ -180,12 +180,12 @@ However, the execution shown in Figure~\ref{simple_wmm_x86_pic:sub3} is still co
 %However, the Power memory model allows such cycles, therefore %TODO: include load buffering example, see presentation pdf
 
 
-\section{The \cat{} language}
+\section{\cat{} language}
 \label{ch:wmm:cat}
 
-Weak memory models are defined via the \cat{} language~\cite{alglave2016syntax}.
+Weak memory models are defined via \cat{} language~\cite{alglave2016syntax}.
 This is a domain specific language for describing consistency properties of concurrent programs.
-The \cat{} language combines expressive power of a functional language (it is inspired by OCaml and adopts its types, first-class functions, pattern matching and other features) with types, operations and assertions that are specific for operating with relations and executions.
+The language combines expressive power of a functional language (it is inspired by OCaml and adopts its types, first-class functions, pattern matching and other features) with types, operations and assertions that are specific for operating with relations and executions.
 %represents the functional language extended by the theory of  allows to axiomatically define derived relations, architecture-specific fences, and constraints over relations.
 In \cat{}, new relations can be defined via the keyword \texttt{let} and the following operators over relations~\cite{alglave2016syntax}. % 3.1.6 Relations between events
 
