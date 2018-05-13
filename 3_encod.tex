@@ -1,4 +1,4 @@
-\chapter{Portability analysis as an SMT~problem}%Description of the method used by Porthos
+\chapter{Portability analysis as an SMT~problem}
 \label{ch:port}
 
 
@@ -36,14 +36,18 @@ Once the model has been constructed, it can be checked for compliance to the \te
 
 Usually, the specification defines temporal constraints over the properties of the system.
 For instance, the specification assert may state that the property \textit{always} holds (the \textit{safety}) or the property will \textit{eventually} hold (the \textit{liveness}).
-Commonly, the \underline{Linear Temporal Logic~(LTL)} or \textit{Computational Tree Logic~(CTL)} (along with their extensions) is used as a specification language due to the expressiveness and verifiability of their statements.
+Commonly, the \textit{Linear Temporal Logic~(LTL)} or \textit{Computational Tree Logic~(CTL)} (along with their extensions) is used as a specification language due to the expressiveness and verifiability of their statements.
 
-In the described scheme, the model checking problem is reducible to the reachability analysis, an iterative process of a systematic exhaustive search in the state space. This approach is called \textit{Unbounded Model Checking~(UMC)}.
-However, all model checking techniques are exposed to the \textit{state explosion problem} as the size of the state space grows exponentially with respect to the number of state variables used by the system (its size). In case of modelling concurrent systems, this problem becomes much more considerable due to exponential number of possible interleavings of states.
+In the described scheme, the model checking problem is reducible to the reachability analysis, an iterative process of a systematic exhaustive search in the state space.
+This approach is called \textit{Unbounded Model Checking~(UMC)}.
+However, all model checking techniques are exposed to the \textit{state explosion problem} as the size of the state space grows exponentially with respect to the number of state variables used by the system (its size).
+In case of modelling concurrent systems, this problem becomes much more considerable due to exponential number of possible interleavings of states.
 Therefore, the research in model checking over past 40 years was fighting the state explosion problem mostly by optimising search space, search strategy or basic data structures of existing algorithms.
 
-One of the first techniques that optimises the search space considerably is the symbolic model checking with \textit{Binary Decision Diagrams~(BDDs)}. Instead of processing each state individually, in this approach the set of states is represented by the BDD, a data structure that allow to perform operations on large boolean formulas efficiently~\cite{clarke2012model}.
-The BDD representation can be linear of size of variables it encodes if the ordering of variables is optimal, otherwise the size of BDD is exponential. The problem of finding such an optimal ordering is known as NP-complete problem, which makes this approach inapplicable in some cases.
+One of the first techniques that optimises the search space considerably is the symbolic model checking with \textit{Binary Decision Diagrams~(BDDs)}.
+Instead of processing each state individually, in this approach the set of states is represented by the BDD, a data structure that allow to perform operations on large boolean formulas efficiently~\cite{clarke2012model}.
+The BDD representation can be linear of size of variables it encodes if the ordering of variables is optimal, otherwise the size of BDD is exponential.
+The problem of finding such an optimal ordering is known as NP-complete problem, which makes this approach inapplicable in some cases.
 
 The other idea is to use satisfiability solvers for symbolic exploration of state space~\cite{clarke2001bounded}.
 In this approach, the state space exploration consists of the sequence of queries to the SAT-solver, represented as boolean formulas that encode the constraints of the model and the finite path to a state in the corresponding transition system.  
@@ -78,7 +82,7 @@ $cons_{\mathcal{M_T}}(P) \subseteq cons_{\mathcal{M_S}}(P)$
 \end{definition}
 
 Note that the definition of portability requirements against \textit{executions} is strong enough, as it implies the portability against \textit{states} (the \textit{state-portability})~\cite{Porthos17b}.
-The result SMT-formula $\phi$ that encodes the portability problem should contain both encodings of control-flow $\phi_{CF}$ and data-flow $\phi_{DF}$ of the program, and assertions of both memory models: ${\phi = \phi_{CF} \land \phi_{DF} \land \phi_{\mathcal{M_T}} \land \phi_{\lnot\mathcal{M_S}}}$. If the formula is satisfiable, there exist a portability bug.
+The result SMT-formula $\phi$ that encodes the portability problem should contain both encodings of control-flow $\phi_{CF}$ and data-flow $\phi_{DF}$ of the program, and assertions of both memory models: ${\phi \defeq \phi_{CF} \land \phi_{DF} \land \phi_{\mathcal{M_T}} \land \phi_{\lnot\mathcal{M_S}}}$. If the formula is satisfiable, there exist a portability bug.
 %The control-flow and data-flow encodings are standard for BMC~\cite{collavizza2006exploration}, they are described below. 
 %However, encoding of memory models requires additional techniques due to recursive definitions of relations, that were proposed in~\cite{Porthos17a}.
 
@@ -86,8 +90,8 @@ The result SMT-formula $\phi$ that encodes the portability problem should contai
 \subsection{Encoding for the control-flow} %Encoding the control-flow constraints}
 \label{ch:port:enc:cf}
 
-The control-flow of a program is represented in the \textit{control-flow graph}, a directed acyclic connected graph with single source and multiple sink nodes, obtained by the \textit{loop unrolling} (see Section~\ref{ch:impl:proc:x-transf}).%TODO: footnote why multiple sinks
-In the control-flow graph, there are two types of transitions (edges): \textit{primary transitions} that denote unconditional jumps or if-true-transitions (pictured with solid lines), and \textit{alternative transitions} that denote if-false-transitions (pictured with dotted lines).
+The control-flow of a program is represented by the \textit{control-flow graph}, a directed acyclic connected graph with single source and multiple sink nodes. %TODO: footnote why multiple sinks
+In a control-flow graph, there are two types of edges (transitions): \textit{primary transitions} that denote unconditional jumps or if-true-transitions (pictured with solid lines), and \textit{alternative transitions} that denote if-false-transitions (pictured with dotted lines).
 Each node on graph can have either one successor (primary) or two successors (both primary and alternative); only computation events can serve as a branching point).
 However, each merge node can have any positive number of predecessors, where each edge may be either primary or alternative.
 
@@ -98,9 +102,9 @@ We show %TODO! to show, actually!!!
 that the new encoding is smaller than the old one used in \porthos{} since it does not produces new variables for each high-level statement of the input language.
 %The \tool{PORTHOS} tool encodes the \textit{instructions}, which have recursive nature, in a recursive manner. This means, it adds synthetic composite instructions for both linear (sequential) and non-linear (branching) instructions. 
 For instance, \porthos{} uses the encoding scheme where the control-flow of the sequential instruction $i_1 = i_2; i_3$ was encoded as
-$\phi_{CF}(i_2;i_3) = (cf_{i_1} \Leftrightarrow (cf_{i_2} \land cf_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)$,
+$\phi_{CF}(i_2;i_3) \defeq (cf_{i_1} = (cf_{i_2} \land cf_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)$,
 and control-flow of the branching instruction $i_1 = (c \; ? \; i_2 \; : \; i_3)$ was encoded as
-$\phi_{CF}( \; c \; ? \; i_2 \; : \; i_3) = (cf_{i_1} \Leftrightarrow (cf_{i_2} \lor cf_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)$
+$\phi_{CF}( \; c \; ? \; i_2 \; : \; i_3) \defeq (cf_{i_1} \Leftrightarrow (cf_{i_2} \lor cf_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)$
 (here we used the notation of C-like ternary operator `\texttt{x?y:z}' for defining the conditional expression `$\mathtt{if}\;x\;\mathtt{then}\;y\;\mathtt{else}\;z$').
 In contrast, the new scheme implemented in \porthos[2] firstly compiles the recursive high-level code into the linear low-level event-based representation, that is then encoded into an SMT-formula. The encoding of branching nodes depends on the \textit{guards}, the value of conditional variable on the branching state, which in turn is encoded as data-flow constraint (see Section~\ref{ch:port:enc:df}).
 
@@ -177,11 +181,11 @@ In Equation~\ref{enc:cf:merge}, which encodes the control-flow of a merge-point 
 %TODO: maybe add the overall formula \phi_{CF} ?
 
 \begin{align}
-\phi_{CF_{seq}}   = \ & \ \fx(e_2) \rightarrow \fx(e_1) \label{enc:cf:seq} \\
-\phi_{CF_{br}}    = \ & \ [\fx(e_2) \rightarrow \fx(e_1)] \land [\fx(e_3) \rightarrow \fx(e_1)] \land \nonumber \\
+\phi_{CF_{seq}}   \defeq \ & \ \fx(e_2) \rightarrow \fx(e_1) \label{enc:cf:seq} \\
+\phi_{CF_{br}}    \defeq \ & \ [\fx(e_2) \rightarrow \fx(e_1)] \land [\fx(e_3) \rightarrow \fx(e_1)] \land \nonumber \\
                       & \ [\fx(e_2) \rightarrow \fv(e_1)] \land [\fx(e_3) \rightarrow \lnot\fv(e_1)] \land \nonumber \\
                       & \lnot [\fx(e_2) \land \fx(e_3)]  \label{enc:cf:br} \\
-\phi_{CF_{mer}} = \ & \fx(e_k) \rightarrow (\bigvee\limits_{e_p \in \mathtt{pred}(e_k)}^{} \fx(e_p)) \label{enc:cf:merge}
+\phi_{CF_{mer}} \defeq \ & \fx(e_k) \rightarrow (\bigvee\limits_{e_p \in \mathtt{pred}(e_k)}^{} \fx(e_p)) \label{enc:cf:merge}
 \end{align}
 
 
@@ -232,9 +236,9 @@ These rules determine the following encoding of load, store and computation even
 %TODO: maybe add the overall formula \phi_{DF} ?
 %
 \begin{align}
-    \phi_{DF_{e = \mathtt{load}(r \leftarrow l)}} = \ & \fx(e) \rightarrow (r_{i+1} = l_{i+1}) \\
-    \phi_{DF_{e = \mathtt{store}(l \leftarrow r)}} = \ & \fx(e) \rightarrow (l_{i+1} = r_i) \\
-    \phi_{DF_{e = \mathtt{eval}(...)}} = \ & \fx(e) \rightarrow \fv(e) % \\
+    \phi_{DF_{e = \mathtt{load}(r \leftarrow l)}} \defeq \ & \fx(e) \rightarrow (r_{i+1} = l_{i+1}) \\
+    \phi_{DF_{e = \mathtt{store}(l \leftarrow r)}} \defeq \ & \fx(e) \rightarrow (l_{i+1} = r_i) \\
+    \phi_{DF_{e = \mathtt{eval}(\cdot)}} \defeq \ & \fx(e) \rightarrow \fv(e) % \\
 \end{align}
 
 To convert the program into SSA form, for each event each variable that is declared so far (either local or shared) is mapped to its indexed reference; this information is stored in the SSA-map "event \textit{to} variable \textit{to} SSA-index". %for each event stores the map that each declared variable maps to its SSA-index
@@ -276,7 +280,7 @@ of data-flow stored in equivalence assertions over the SSA-variables.
 The encoding of this linkage left untouched as it is implemented in \porthos: for each pair of events $e_1$ and $e_2$ linked by the \rf-relation, we add the following constraint:
 %
 \begin{align}
-\phi_{DF_{mem}}(e_1, e_2) = \ & \mathtt{rf}(e_1, e_2) \rightarrow (l_i = l_j) 
+\phi_{DF_{mem}}(e_1, e_2) \defeq \ & \mathtt{rf}(e_1, e_2) \rightarrow (l_i = l_j) 
 \end{align}
 
 where the variable of location $l$ is mapped to the SSA-variable $l_i$ for event $e_1$, and to the SSA-variable $l_j$ for event $e_2$; and the predicate $\mathtt{rf}(e_1, e_2)$ is encoded as a boolean variable, which itself equals $true$ if $e_2$ reads the shared variable that was written in $e_1$.
@@ -285,7 +289,33 @@ where the variable of location $l$ is mapped to the SSA-variable $l_i$ for event
 \subsection{Encoding for the memory model} %Encoding the memory model constraints}
 \label{ch:port:enc:wmm}
 
-todo
+The basic scheme for encoding the memory model is proposed in~\cite{Porthos17a}.
+The encoding consists of two parts: encoding the \textit{derived relations} and encoding the memory model \textit{assertions}.
+
+In an SMT-formula, the relation $x \relation{r} y$ is represented by a boolean variable $r(x, y)$ that indicates whether the relation holds.
+The derived relations are encoded by fresh boolean variables according to the following rules~\cite{Porthos17b}:
+\begin{itemize}[noitemsep,topsep=0pt]
+\item $r_1 \cup r_2(e_1, e_2) \defeq r_1(e_1, e_2) \lor r_2(e_1, e_2)$
+\item $r_1 \cap r_2(e_1, e_2) \defeq r_1(e_1, e_2) \land r_2(e_1, e_2)$
+\item $r_1 \relminus r_2(e_1, e_2) \defeq r_1(e_1, e_2) \land \neg r_2(e_1, e_2)$
+\item $r^{-1}(e_1, e_2) \defeq r(e_2, e_1)$
+\item $r^{*}(e_1, e_2) \defeq r^{+}(e_1, e_2) \lor (e_1 = e_2)$
+\item $r_1;r_2(e_1,e_2) \defeq \bigvee\limits_{e_k \in \mathbb(E)}^{} r_1(e_1,e_k) \land r_2(e_k,e_2)$
+\item $r^{+}(e_1, e_2) \defeq \mathtt{tc}_{\left\lceil log|\mathbb{E}| \right\rceil} (e_1, e_2), where \\
+\hspace*{1em} \mathtt{tc}_{0}(e_1,e_2) \defeq r(e_1,e_2), and \\ 
+\hspace*{1em} \mathtt{tc}_{i+1}(e_1,e_2) \defeq r(e_1,e_2) \lor (\mathtt{tc}_{i}(e_1,e_2);\mathtt{tc}_{i}(e_1,e_2))$
+\end{itemize}
+
+Note that the \cat{} language allows mutually-recursive definitions of relations (for example, `$\mathtt{r_1} = \mathtt{r_2} \cup (r_1;r_1)$').
+The basic idea of using the Kleene fixpoint iteration for encoding such relations was also proposed in~\cite{Porthos17a}: for any pair of events $e_1,e_2 \in \mathbb{E}$ and relation $r \subseteq \mathbb{E} \times \mathbb{E}$, we encode a new integer variable $\Phi_{e_1,e_2}^{r}$ that represents the round of Kleene iteration on which the variable $r(e_1, e_2)$ has been set.
+ %is used for guessing the execution 
+
+The memory model can assert acyclicity, irreflexivity of emptiness of a relation or a set of events.
+As it has been proposed in~\cite{Porthos17a}, encoding the acyclicity assertion uses numerical variable $\Psi_e \in \mathbb{N}$ for each event $e$ in the relation to be asserted: $acyclic(r) \defeq (r(e_1,e_2) \Rightarrow (\Psi_{e_1} < \Psi_{e_2}))$.
+The irreflexivity assertion as $irreflexive(r) \defeq \bigvee\limits_{e_k \in \mathbb(E)}^{} \lnot r(e_k,e_k)$.
+
+%The ... \wmodel{}
+
 %Most bounded model-checking problems are solved via computing the fixpoint for the
 
 %The encoding of a weak memory model itself does not depend on the analysing program. The problem here...

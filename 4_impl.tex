@@ -3,7 +3,7 @@
 
 The main call for commencing the work on \porthos[2] was the need for processing real-world C programs, which, at first, requires the input language to be extended.
 This implies the support not only for new syntactic structures of C language (such as the \texttt{switch} statement or the postfix increment operator \texttt{i++}), but also for its fundamental concepts and features (such as types, pointer arithmetic or first-order functions), which requires revision of the whole architecture of the tool.
-Yet far from all of the C language has been supported (that, considering its complexity and numerous pitfalls, goes far beyond current thesis%
+Yet far from all of C language has been supported (that, considering its complexity and numerous pitfalls, goes far beyond current thesis%
 %
 \footnote{For ensuring this, one merely has to look at existing C compilers, for instance, the open-source \tool{gcc} compiler, which uses the C parser written in more than 18.5 thousand lines of code (see \url{https://github.com/gcc-mirror/gcc/blob/master/gcc/c/c-parser.c})}%
 %
@@ -412,7 +412,7 @@ The following interfaces model basic kinds of events (see Figure~\ref{fig:class-
     \\
     According to the Rice's theorem~\cite{rice1953classes}, in general case there always will be functions unresolved within an analysis launch.
     If the function has not been resolved, it can be safely assumed to be a no-operation function.
-    In other words, we suppose that the knowledge base of \porthos{} is complete and the tool can resolve all memory-operation functions and fence instructions.
+    In other words, we suppose that the knowledge base of \porthos[2] is complete and the tool can resolve all memory-operation functions and fence instructions.
     Although this can affect the completeness of the analysis, it is safe to make such an assumption as the user can check the log file and manually analyse the semantics of an unresolved call and it to the knowledge base if necessary.
 
   \1 \texttt{XFenceEvent} \\
@@ -480,7 +480,7 @@ picture of the CF-graph:
 \label{ch:impl:model:wmodel}
 %TODO: almost not implemented !
 
-A \wmodel{} represents a recursively defined AST of relations defined by the memory model and an assertion expression.
+A \wmodel{} represents a recursive AST of \textit{computations over relations} and assertion expressions defined by the memory model.
 The atomic elements of \wmodel{} are the basic relations (\po, \rf and \co; see Section~\ref{ch:wmm:model:relations}) and sets of events ($\mathbb{R}$, $\mathbb{W}$, $\mathbb{IW}$, etc.; see Section~\ref{ch:wmm:model:events}).
 The expressions of \wmodel{} are unary (such as complement, transitive closure, etc.) and binary operations (such as union, intersection, etc.) over relations or sets of events; see Section~\ref{ch:wmm:cat}.
 For the sake of transparency, each element of a \wmodel{} contains the origin location as the coordinates of the string in the model file. %TODO: implement origin for w-model
@@ -622,35 +622,24 @@ written in OCaml.
 \label{ch:impl:proc:w-constr}
 
 %TODO: <not implemented yet>
-The \wmodel{} is constructed by the converter \texttt{Cat2WmodelConverter}, which calls \texttt{Cat2WmodelConverterVisitor}, the stateless visitor of memory-model ANTLR syntax tree. %TODO: Implement this!!!
-Currently, the visitor supports only the declarative subset of the \cat{} language, and does not process the functional-style definitions (it can to be supported by implementing the 
+The \wmodel{} is constructed by the stateless visitor \texttt{Cat2WmodelConverterVisitor} from the ANTLR syntax tree \texttt{CatParser.MainContext} of the memory-model defined in \cat{} language.
+Currently, the visitor supports the small subset of the \cat{} language, which constitutes only non-functional declarative expressions of the language as the support for functional-style expressions requires implementing the full OCaml interpreter.
+However, some most commonly used functional-style expressions may be supported by mapping them syntactically to corresponding W-elements by the \wmodel{} constructor.
 
+Following the principle of transparency, the \wmodel{} constructor aborts its work with the \texttt{NotSupportedException} if received the unrecognised syntax construction (in contrast to the \porthos[1] approach in which the \texttt{null} value was produced in all exceptional states).
 
-visitor of antlr tree: almost direct
-
-todo: file tree of w-model to appendix
-
-in perspective: work with functional-style definitions
-
-builder: filling in + verification
+<todo: file tree of w-model to appendix -- after code fixing>
 
 
 \subsubsection{Y-tree constructor (4)}
 \label{ch:impl:proc:y-constr}
 
-from \tool{ANTLR} syntax tree of C
+The \ytree{} is constructed by the stateless visitor \texttt{C2YtreeConverterVisitor} from the ANTLR syntax tree \texttt{C11Parser.MainContext} of C language.
+As the \wmodel{} constructor, the \ytree{} constructor aborts its work with the \texttt{NotSupportedException} once it meets an unsupported syntax construction.
+%TODO: Rename YConverterException <- YParserException
+A syntax exception \texttt{YConverterException} is thrown if the converted syntax tree contains semantic errors that prevent it to be converted to the \ytree{}.
 
-- desugar, equiv transform
-
-- variables distinguished from 
-
-- if we don't support , our parser still parses it, and the error is thrown at the moment of converting syntax tree to the AST (Y-tree).
-
-- So, The language-dependent syntax tree is converted to the AST by the stateless Visitor (e.g., for C11 -> Ytree conversion is made by 'C2YtreeConverterVisitor') + short structure of this visitor (how?.. need ly?)
-
-- Y-Sytnax error
-
-The construction of a \zformula{} is performed by the \texttt{ZformulaBuilder}.%TODO: check this class existence
+As a \ytree{} constitutes a generic AST, the \ytree{} constructor performs code desugaring (for example, a \texttt{switch}-statement is converted to the equivalent \texttt{if}-statement).
 
 
 \subsubsection{X-graph pre-compiler (5)}
@@ -675,15 +664,15 @@ This information is used during compilation to set up unconditional jumps.
 \paragraph{Type analysis}
 \label{ch:impl:proc:x-pre-compiler:type}
 
-The C language has a static (resolved at compile-time) manifest (all types are declared explicitly) type system.
+C language has a static (resolved at compile-time) manifest (all types are declared explicitly) type system.
 Comparing to languages that use type inference, the type analysis of a C program constitutes a simple propagating the type information (obtained from variables declarations) to all expressions. % according the rules of propagation. For example, 
-Being carried at Y- and X- representation levels, the type is converted to a Z-type at the stage of the Z-formula encoding (see Section~\ref{ch:impl:proc:z-encoder}).
+Being carried at Y- and X- representation levels, the type is converted to a~Z-type at the stage of the Z-formula encoding (see Section~\ref{ch:impl:proc:z-encoder}).
 
 %TODO: YOU REALLY NEED TO THINK MORE ABOUT TYPES ON Y, X, Z LEVELS + reconsider this paragraph (and others about types)
 Currently, \porthos[2] handles only the primitive C types (such as \texttt{int}, \texttt{char}, \texttt{float}, etc.), which is modelled as an enumeration \texttt{XType}. %TODO: model it.
 Array dimension is stored as an integer number at the Y-level (at the X- and Z- levels, \textbf{TODO: think about it}). %the array operations are converted to ).
 In addition, \porthos[2] has a built-in extensible database storing the semantics of non-primitive C types stored by the \texttt{X2ZTypeConverter}, %TODO: Or XTypeHookManager?
-which can be requested for converting an X-type to a Z-type. %TODO: implement this.
+which can be requested for converting an X-type to a~Z-type. %TODO: implement this.
 %TODO: describe the XType (before) + implement this clearly! + definitely get rid of bit32
 
 
@@ -760,7 +749,7 @@ The X-compiler accesses all memory units via the \texttt{XMemoryManager}, which 
 However, the memory manager is a stateful component of the compiler as it offers the methods for declaring and removing local memory units dynamically at the compilation time.
 At each time of the compilation process, the \texttt{XMemoryManager} can resolve the memory unit by its name.
 Following the C standard, local memory units have higher priority over global ones.
-Since the C language allows usage of variables that have the same name to be declared in nested contexts, the \texttt{XMemoryManager} carries the stack of block block-contexts for local variables. %TODO: refactor XMemoryManager!
+Since C language allows usage of variables that have the same name to be declared in nested contexts, the \texttt{XMemoryManager} carries the stack of block block-contexts for local variables. %TODO: refactor XMemoryManager!
 
 <some picture ? >
 

@@ -104,11 +104,20 @@ Porthos\ifthenelse%
 \newcommand{\co}{\ensuremath{\,\mathtt{co}\,}}
 \newcommand{\com}{\ensuremath{\,\mathtt{po}\,}}
 \newcommand{\sr}{\ensuremath{\,\mathtt{sr}\,}}
-\newcommand{\cat}{\texttt{cat}}
+\newcommand{\cat}{CAT}
 \newcommand{\relation}[1]{\ensuremath{\overset{\mathtt{#1}}{\rightarrow}}}
 \newcommand{\rel}[1]{\texttt{#1}}
 \newcommand{\mathr}[1]{\ensuremath{\mathtt{#1}}}
 \newcommand{\invrel}[1]{\ensuremath{\mathr{#1}\!\!\mathbin{\char`\^}\!\!\text{-1}}} %inversion or a relation in math mode: r^-1
+\newcommand{\relminus}{\!\smallsetminus\!}
+
+\makeatletter
+\newcommand*{\defeq}{\mathrel{\rlap{%
+                     \raisebox{0.3ex}{$\m@th\cdot$}}%
+                     \raisebox{-0.3ex}{$\m@th\cdot$}}%
+                     =}
+\makeatother
+
 
 \newcommand{\ytree}{\ensuremath{\text{Y-tree}}}
 \newcommand{\wmodel}{\ensuremath{\text{W-model}}}%\mathtt{W\text{-}model}}}

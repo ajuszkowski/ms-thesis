@@ -145,28 +145,28 @@ Since each thread performs single write followed by a single read, the \co-relat
 \begin{subfigure}[t]{.28\textwidth}
   \centering
   \includegraphics[width=1.2\linewidth]{img/my/sb-example/SB-dot.png}
-  \caption{Final state: \texttt{(0:EAX=1~/\textbackslash~1:EAX=1)}}
+  \caption{Final state: \texttt{(0:EAX=1,~1:EAX=1)}}
   \label{simple_wmm_x86_pic:sub1}
 \end{subfigure}
 \hfill
 \begin{subfigure}[t]{.23\textwidth}
   \centering
   \includegraphics[width=.9\linewidth]{img/my/sb-example/SB-dot-2.png}
-  \caption{Final state: \texttt{(0:EAX=1~/\textbackslash~1:EAX=0)}}
+  \caption{Final state: \texttt{(0:EAX=1,~1:EAX=0)}}
   \label{simple_wmm_x86_pic:sub2}
 \end{subfigure}
 \hfill
 \begin{subfigure}[t]{.23\textwidth}
   \centering
   \includegraphics[width=.9\linewidth]{img/my/sb-example/SB-dot-3.png}
-  \caption{Final state: \texttt{(0:EAX=1~/\textbackslash~1:EAX=1)}}
+  \caption{Final state: \texttt{(0:EAX=1,~1:EAX=1)}}
   \label{simple_wmm_x86_pic:sub3}
 \end{subfigure}
 \hfill
 \begin{subfigure}[t]{.23\textwidth}
   \centering
   \includegraphics[width=.9\linewidth]{img/my/sb-example/SB-dot-4.png}
-  \caption{Final state: \texttt{(0:EAX=0~/\textbackslash~1:EAX=0)}}
+  \caption{Final state: \texttt{(0:EAX=0,~1:EAX=0)}}
   \label{simple_wmm_x86_pic:sub4}
 \end{subfigure}
 \hfill
@@ -206,7 +206,7 @@ Below we enumerate pre-defined operators over relations and sets of events:
   \begin{itemize}
     \item \textit{the union} of two relations \rel{r1} and \rel{r2} is \rel{r1\,|\,r2},
     \item \textit{the intersection} of two relations \rel{r1} and \rel{r2} is \rel{r1\,\&\,r2},
-    \item \textit{the difference} of two relations \rel{r1} and \rel{r2} is $\mathtt{r1\,\backslash\,r2}$, and
+      \item \textit{the difference} of two relations \rel{r1} and \rel{r2} is $\mathtt{r1 \relminus r2}$, and
     \item \textit{the sequence} of two relations \rel{r1} and \rel{r2} is \rel{r1;r2}, which is defined as the set of pairs \rel{(x,y)} such that there exists an intervening \rel{z}, such that $\rel{(x,z)} \in \rel{r1}$ and $\rel{(z,y)} \in \rel{r2}$.
   \end{itemize}
 \end{enumerate}
