@@ -37,7 +37,7 @@ Therefore, while working on the new design of \porthos[2], we decided to clearly
 Such a modular architecture allows to support multiple input languages by parsing them and converting parsed syntax trees to a simplified AST. which, along with all other data-transfer objects (DTO), must be immutable, so that it is possible to guarantee the correctness of the program by controlling its invariants.
 The immutability in \porthos[2] is implemented via \texttt{final} fields that are assigned by the immutable-object values (either a primitive type, or another immutable object, or an immutable collection provided by the library Guava by Google%
 %
-\footnote{Guava project repository: \url{https://github.com/google/guava/}}%
+\footnote{The Guava project repository: \url{https://github.com/google/guava/}}%
 %
 ).
 
@@ -78,9 +78,9 @@ As a robust and transparent tool, \porthos[2] must adhere to the strategy of abo
 %immut: preservation of invariants
 %The transparency, efficiency and extensibility are the necessary criteria of any good tool.
 
-As its predecessor, \porthos[2] uses the open-source SMT-solver \tool{Z3} %
+As its predecessor, \porthos[2] uses the open-source SMT-solver \tool{Z3}%
 %
-\footnote{The \tool{Z3} project repository: \url{https://github.com/Z3Prover/z3}}%
+\footnote{The \tool{Z3} project repository: \url{https://github.com/Z3Prover/z3}} %
 %
 by Microsoft Research~\cite{de2008z3}. However, unlikely its predecessor, the \porthos[2] has an additional abstraction level \zformula{} (see Section~\ref{ch:impl:model:zformula}) that allow to use any other SMT-solver. %TODO: *should* allow?
 
@@ -181,7 +181,7 @@ For example, the assignment of local computation to a register uses the symbol `
 In \porthos[2], the semantics of the data-flow operation is determined according to the types of operands, that are determined during the pre-compilation stage (see Section~\ref{ch:impl:proc:x-pre-compiler}).
 The semantics of the functions also is being resolved during the pre-compilation stage via the \textit{invocation hooking} mechanism (see Section~\ref{ch:impl:proc:x-compiler:hooking}).
 
-Thirdly, the grammar used by \porthos{} had restricted set of allowed operations. For example, it allowed only computations over the local variables, which might lead to inconsistency of the result SMT-formula if the same variable name was used both as a register and as a location, for instance, the in code snippet `\lstinline{x := reg1; reg2 <- (x + 1);}', the first statement interprets the variable \lstinline{x} as a location, while the grammar of second statement requires it to be a register. Also, only integers were processed by the input language parser of \porthos{}. In \porthos[2], we extended support for primitive types supported by the \tool{Z3} solver (this apply to 32-bit integers encoded as \texttt{Int}s of \tool{Z3}, floats encoded as \texttt{Real}s, enumerations encoded as \texttt{Scalar}s).
+Thirdly, the grammar used by \porthos{} had restricted set of allowed operations. For example, it allowed only computations over the local variables, which might lead to inconsistency of the result SMT-formula if the same variable name was used both as a register and as a location, for instance, the in code `\lstinline{x := reg1; reg2 <- (x + 1);}', the first statement interprets the variable \lstinline{x} as a location, while the grammar of second statement requires it to be a register. Also, only integers were processed by the input language parser of \porthos{}. In \porthos[2], we extended support for primitive types supported by the \tool{Z3} solver (this apply to 32-bit integers encoded as \texttt{Int}s of \tool{Z3}, floats encoded as \texttt{Real}s, enumerations encoded as \texttt{Scalar}s).
 %TODO : constant arrays? https://rise4fun.com/\tool{Z3}/tutorial/guide
 Although \tool{Z3} supports the array theory (characterised by the select-store axioms~\cite{de2011z3}), the complexity of static analysis of pointers and non-constant sized arrays moves the full support of arrays and pointers out of the scope of current thesis.
 %Thus, adding support for more advanced structures as pointers, arrays, function definitions and calls was one of the purposes of revising the tool architecture.
@@ -192,7 +192,7 @@ tialisation of the shared variable and only by default value \lstinline{0}. \por
 
 \porthos[2] uses the C language grammar of proposed in the C11 standard~\cite{jtc2011sc22}, that was extended by litmus test-specific syntax such as initialisation and final-state assertion statements (the original \tool{ANTLR} grammar can be found in the official repository containing the collection of \tool{ANTLR v4} grammars%
 %
-\footnote{Repository path:~\url{https://github.com/antlr/grammars-v4}}). %
+\footnote{ANTLR grammars repository path:~\url{https://github.com/antlr/grammars-v4}}). %
 %
 Current version of \porthos[2] does not recognise C processor directives (it ignores them), however, in future it can be extended to support them.
 
@@ -303,7 +303,7 @@ The syntax tree that contains set of definitions (e.g., litmus-initialisations, 
 The \ytree{} is compiled into the low-level event-based program representation called \textit{\xgraph{}}.
 The mathematical structure of event-flow graph was discussed in Section~\ref{ch:wmm:event}.
 %In general, \xgraph{} follows the structure described there, however it is constructed in several stages.
-The nodes of the graph are events, and the edges are basic relations: the control-flow relation \po and the data-flow relations \co and \rf.
+The nodes of the graph are events, and the edges are basic relations: the control-flow relation \po{} and the data-flow relations \co{} and \rf{}.
 Hereinafter, we denote the \xgraph{} with only control-flow edges as \xgraph[CF], the \xgraph{} with only data-flow edges as \xgraph[CF].
 The complete \xgraph{} is $\xgraph[CF+DF] = \xgraph[CF] \; \cup \; \xgraph[DF]$.
 The UML diagram on Figure~\ref{fig:class-diagrams:XEntity-interfaces} represents the hierarchy of main interfaces of the X-abstraction level.
@@ -398,7 +398,7 @@ The following interfaces model basic kinds of events (see Figure~\ref{fig:class-
     Thus, the \textit{computation} abstraction (as the CPU time spent for the computation itself) can be safely removed from the model, and the computation event can be seen as a zero-time operation that produces the \textit{value}.
     For analysing large expressions this optimisation is sensible because it considers the whole expression as a single computation event, encoded therefore as a single SMT-variable.
     \newline
-    Note, for the purpose of simplifying the X abstraction level, computation events may have been modelled as invocations of bodiless functions (for instance, the operation `\lstinline{x + y}' may be modelled as the invocation of the function `\lstinline{+}' with the arguments `\lstinline{x}' and `\lstinline{y}').
+    Note, for the purpose of simplifying the X abstraction level, computation events may have been modelled as invocations of bodiless functions (for instance, the operation `\lstinline{x + y}' may be modelled as the invocation of the function `\lstinline{+}' with the arguments \lstinline{x} and \lstinline{y}).
     However, current version of \porthos[2] maintains the \texttt{XComputationEvent} as the operators are supported by the SMT-solver.
     
   \1 \texttt{XControlFlowEvent} \\
@@ -441,7 +441,7 @@ Edges are stored as an immutable hash-map from source to target event.
 The type of edge is stored in the enumeration \texttt{XEdgeKind}:%TODO: IMPLEMENT THIS
 \begin{itemize}[noitemsep]
   \item the \textit{control-flow edges}: a primary edge (epsilon or if-then transition) and an alternative edge (if-else transition), see more in Section~\ref{ch:port:enc:cf};
-  \item the \textit{data-flow edges}: the \co-relation edge and the \rf-relation edge. %TODO! implement and then describe more!
+  \item the \textit{data-flow edges}: the \co{}-relation edge and the \rf{}-relation edge. %TODO! implement and then describe more!
 \end{itemize}
 
 
@@ -466,15 +466,8 @@ Once being constructed, the graph must conform the following requirements (see a
 %TODO: code : NOTE: 'FlowGraph<N extends FlowGraphNode>' may be just 'FlowGraph<N>'
 
 
-
-\paragraph{Graph example}
-\label{ch:impl:model:xgraph:example}
-
-consider the following code in C:
-
-picture of the CF-graph:
-
-<TODO: finish it later after fixing the code>
+%\paragraph{Graph example} %(in 5_eval.tex)
+%\label{ch:impl:model:xgraph:example}
 
 %hashcode, uniqueness
 
@@ -484,8 +477,8 @@ picture of the CF-graph:
 \label{ch:impl:model:wmodel}
 %TODO: almost not implemented !
 
-A \wmodel{} represents a recursive AST of \textit{computations over relations} and assertion expressions defined by the memory model.
-The atomic elements of \wmodel{} are the basic relations (\po, \rf and \co; see Section~\ref{ch:wmm:model:relations}) and sets of events ($\mathbb{R}$, $\mathbb{W}$, $\mathbb{IW}$, etc.; see Section~\ref{ch:wmm:model:events}).
+The \textit{\wmodel{}} represents a recursive AST of \textit{computations over relations} and assertion expressions defined by the memory model.
+The atomic elements of \wmodel{} are the basic relations (\po{}, \rf{} and \co{}; see Section~\ref{ch:wmm:model:relations}) and sets of events ($\mathbb{R}$, $\mathbb{W}$, $\mathbb{IW}$, etc.; see Section~\ref{ch:wmm:model:events}).
 The expressions of \wmodel{} are unary (such as complement, transitive closure, etc.) and binary operations (such as union, intersection, etc.) over relations or sets of events; see Section~\ref{ch:wmm:cat}.
 For the sake of transparency, each element of a \wmodel{} contains the origin location as the coordinates of the string in the model file. %TODO: implement origin for w-model
 
@@ -500,7 +493,7 @@ For the sake of transparency, each element of a \wmodel{} contains the origin lo
 
 %TODO: not implemented at all !
 
-The \zformula{} representation is a wrapper for an SMT-formula used as an additional abstraction level used to increase the transparency of the architecture, simplify the debugging process and ease the support of different SMT-solvers.
+The \textit{\zformula{}} representation is a wrapper for an SMT-formula used as an additional abstraction level used to increase the transparency of the architecture, simplify the debugging process and ease the support of different SMT-solvers.
 As all other internal representations, the \zformula{} is implemented as an immutable data structure.
 
 The Z-abstraction level models the the logical formulas (definitions and assertions) that are put on the assertion stack of the SMT-solver.
@@ -513,7 +506,7 @@ Basically, we distinguish \textit{boolean} and \textit{numeric} (integer, bitvec
 The typisation of a \zformula{} is necessary for checking the basic validity of its expressions and converting it to a typed SMT-LIB formula.
 For the sake of transparency, each element of a \zformula{} contains the origin location as the reference to the X-element that produced current Z-element. %TODO: implement origin for z-formula
 
-<todo: enumerate elements -- after completing>
+<todo: enumerate elements -- after refactoring>
 
 
 \subsection{The processing units} %Transformation}
@@ -614,7 +607,7 @@ As preprocessor statements may appear in arbitrary place of a program, the prepr
 The input memory model language \cat{} is discussed in Section~\ref{ch:wmm:cat}.
 The \tool{ANTLR} grammar for \cat{} language was extracted from the parser used by \tool{herd} tool%
 %
-\footnote{\tool{herd} project repository: \url{https://github.com/herd/herdtools7}} %
+\footnote{The \tool{herd} project repository: \url{https://github.com/herd/herdtools7}} %
 %
 written in OCaml.
 %TODO: upload the grammar to github
@@ -819,8 +812,8 @@ The first group constitute methods that emit events.
 These methods construct an event object (as events contain the \texttt{XEventInfo} structure that stores information about the owning process, all events must be created by the process constructor, i.e. X-interpreter) and change the state of interpreter considering the newly created event.
 Note that the methods \texttt{createComputationEvent} do not emit a computation event but only create one.
 This is performed as optimisation that removes unused computations from the model (otherwise, for instance, the assignment 
-`\texttt{x = 1 * (2 + 3)}' would be compiled to two consequent events `\texttt{eval(2 + 3); write(register <- 1 * (2 + 3));}' instead of single event `\texttt{write(register <- 1 * (2 + 3));}').
-If the computation event was not used at all (for example, in the following C code: `\texttt{foo(); 1; bar();}' the execution event `\texttt{eval(1)}' is not used by the model), it is also removed from the event-graph (see justification in Section~\ref{ch:impl:model:xgraph:evt}).
+`\texttt{x = 1 * (2 + 3)}' would be compiled to two consequent events `\texttt{eval(2 + 3); write(register <- eval(1 * eval(2 + 3)));}' instead of single event `\texttt{write(register <- eval(1 * eval(2 + 3)));}').
+If the computation event was not used at all (for example, in the following C code: `\texttt{foo(); 1; bar();}' the execution event `\texttt{eval(1)}' is skipped by the model), it is also removed from the event-graph (see justification in Section~\ref{ch:impl:model:xgraph:evt}).
 The second group of X-interpreter methods consists of the methods for defining non-linear statements (branchings and loops).
 These methods change the state of the interpreter and set up additional non-linear control-flow edges.
 %`\texttt{register = 1 * (location + 2)}' would be compiled to three consequent events `\texttt{load(temp\_reg\_1 <- location); eval(temp\_reg\_1 + 2); write(register <- 1 * (temp\_reg\_1 + 2));}',
@@ -845,7 +838,7 @@ If so, it iterates over all ready-contexts and sets up control-flow edges consid
 
 %The \texttt{almostReadyContexts} queue is necessary for not adding erroneous edges on 
 
-For simplicity of the interpretation, we keep the jump events (no-computation events) in the flow-graph, however they can be removed and the edges to and from them can be rewritten if necessary.
+For the sake of simplicity of the interpreter, jump events (no-computation events) are present in the flow-graph, however they can be removed from it with rebinding ingoing and outgoing edges.
 
 
 %algorithm for interpreting
@@ -864,7 +857,7 @@ Note, recursive function calls create unconditional jumps back in the event-flow
 
 Considering the new meaning of the unrolling bound, we create sink events of two types: the \textit{complete} and \textit{incomplete} sink event.
 The first one means that the loop has been executed a whole number of times, and the latter means that the unrolling bound triggered on not-the-last event of the loop.
-The Figure~\ref{fig:loop-unroll} illustrates unrolling for the cyclic control-flow graph on the left-hand side (the square node $S_{+}$ denotes the complete sink node, while the $S_{-}$ -- incomplete).
+Figure~\ref{fig:loop-unroll} illustrates unrolling for the cyclic control-flow graph on the left-hand side (the square node $S_{+}$ denotes the complete sink node, while the $S_{-}$ -- incomplete).
 
 %TODO: draw (and implement) diff types of exit nodes
 \begin{figure}[t]
@@ -932,18 +925,18 @@ The Figure~\ref{fig:loop-unroll} illustrates unrolling for the cyclic control-fl
 ;
 \end{tikzpicture}
 }
+\caption{Example of the flow graph unrolling up to bound $k = 6$}
 \label{fig:loop-unroll}
-\caption{Example of the flow graph from Figure~\ref{fig:merged-loop.....}, unwinded up to the bound $k = 6$}
 \end{figure}
 
 The unrolling procedure is performed by the \texttt{XFlowGraphUnroller}. %, which extends the \texttt{FlowGraphDfsTraverser}
 For unrolling the flow-graph, we perform the \textit{Deep-First Search (DFS)} while counting the Y-level instructions (for the unrolling bound) and keeping track of the depth stack (for detecting back edges needed for determining the type of sink node).
-Each next event increments the unrolling depth counter (the \textit{event reference-ID}), the integer that is stored by the \texttt{XEvent} thus making it \textit{an event reference} on non-zero values.
+Also, during the unrolling each next event increments the \textit{unrolling depth counter} (the \textit{event reference-ID}) -- the integer that is stored by the \texttt{XEvent} thus making it \textit{an event reference} on non-zero values.
 Each \texttt{XEvent} has the method `\texttt{XEvent asNodeRef(int refId)}' that clones the event-receiver with new value of reference-ID.
 The methods \texttt{hashCode} and \texttt{equals} consider the reference-ID as the uniqueness field for all events except sink and source events (considering the usage of \texttt{HashMap} and Guava's \texttt{ImmutableMap} for storing events, setting up hash-code methods properly is a crucial programming task).
 
-During the work on \porthos[2], we tested different schemes of loop unrolling.
-\\<TODO: Say sth about these schemes + pictures>
+During the work on \porthos[2], we have tested different schemes of loop unrolling.
+<TODO: Say sth about these schemes + pictures>
 
 %- After we acquired the event-based representation, we can perform some modifications/simplifications/optimisations on it (separately, allowing user to manage them)
 
@@ -951,15 +944,19 @@ During the work on \porthos[2], we tested different schemes of loop unrolling.
 \subsubsection{X-graph data-flow constructor (8)}
 \label{ch:impl:proc:x-df}%TODO: ref it in pre-word in this chapter
 
-- set up co, rf edges => new graph
+Once the graph is unrolled, it can be augmented by data-flow edges.
+As it was discussed in Paragraph~\ref{ch:impl:model:xgraph:edges}, the data-flow edges can represent either \rf{}- or \co{}-relation.
+The \rf{}-edges join each write event to all read events that access the same location; the \co{}-edges join write events to the same location.
 
-- computing SSA maps (now: during the encoding. should be: during the post-compilation) (as one of necessary steps before encoding)
+<TODO: why in old implementation we encode the negation of "co" ? same for "rf" above
+\url{https://github.com/hernanponcedeleon/Dat3M/blob/80341bec26021d41cf79eddc943e7cbe6f49322f/dartagnan/src/dartagnan/wmm/Domain.java#L204} >
 
 
 \subsubsection{Z-formula encoder (9)}
 \label{ch:impl:proc:z-encoder}
 
-todo
+The \zformula{} encoder transforms the program and the memory models to a single SMT-like representation.
+This includes ... <todo: recall said before>
 
 
 \subsubsection{SMT-formula converter (10)}
@@ -983,24 +980,22 @@ This is a structure that contains the result of analysis and auxiliary informati
 The app verdict may be rendered to any format convenient for the user.
 
 
-\subsection{Auxiliary components}
-\label{ch:impl:aux}
-
-There are some ...
-
-\subsubsection{Watchdog timer}
-\label{ch:impl:aux:watchdog}
-
-%<not implemented>
-
-todo
-
-\subsubsection{Logger}
-\label{ch:impl:aux:logger}
-
-%<not implemented>
-
-todo
+%\subsection{Auxiliary components}
+%\label{ch:impl:aux}
+%
+%\subsubsection{Watchdog timer}
+%\label{ch:impl:aux:watchdog}
+%
+%%<not implemented>
+%
+%todo
+%
+%\subsubsection{Logger}
+%\label{ch:impl:aux:logger}
+%
+%%<not implemented>
+%
+%todo
 
 
 %todo: some words on necessity of contexts and lack of them. How would we implement them
