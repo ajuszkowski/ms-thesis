@@ -6,9 +6,7 @@
 \section{The\;\texttt{ANTLR}\;grammar\;for\;the\;\texttt{porthos\,v1}\;input\;language}
 \label{apx:grammar}
 ]
-\begin{lstlisting}[language=antlr,
-        basicstyle=\tiny,
-        linewidth=.56\textwidth]
+\begin{lstlisting}[language=antlr,linewidth=.51\textwidth]
 grammar Porthos;
 
 main
@@ -59,13 +57,12 @@ store
   ;
 
 read
-  :   register '=' location '.' 'load' '(' 
-     ATOMIC ')'
+  :   register '=' location '.' 
+   'load' '(' ATOMIC ')'
   ;
 
 write
-  :   location '.' 'store' '(' ATOMIC ',' 
-     register ')'
+  :   location '.' 'store' '(' ATOMIC ',' register ')'
   ;
 
 instruction
@@ -91,7 +88,8 @@ sequence
   ;
 
 if
-  :   'if' bool_expression 'then' '{' instruction '}' 
+  :   'if' bool_expression 'then'
+   {' instruction '}' 
      ('else' '{' instruction '}')?
   ;
 
@@ -108,7 +106,10 @@ program
        )*
   ;
 
+
+
 // Lexer rules:
+
 
 ATOMIC
   :   '_na' | '_sc' | '_rx' | '_acq' | '_rel' | '_con'

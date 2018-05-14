@@ -320,6 +320,11 @@ The UML diagram on Figure~\ref{fig:class-diagrams:XEntity-interfaces} represents
 All elements of \xgraph{} implement the interface \texttt{XEntity}.
 There are two main kinds of X-entity: \textit{events} that implement the \texttt{XEvent} interface, and \textit{memory-units} that implement the \texttt{XMemoryUnit} interface.
 
+Following the litmus tests format, we distinguish three types of \xgraph{}: one for a process, one for a litmus-initialisation block and one for the assertion statement.
+However, all three types of \xgraph{} are modelled by the same graph structure \texttt{XProcess} with certain restrictions complied by the corresponding type of X-interpreter that constructs the graph. %TODO: rename to XThread ?
+This simplifies drastically the processing of different types of code blocks as they all are modelled by the same data structure.
+The examples of restrictions on X-graphs are the following: the initialisation block can not have branchings, fence events; the process cannot have assertion events; the assertion block can not have shared-memory events or fence events.
+We discuss the interpretation of different types of statements in more detail in Section~\ref{ch:impl:proc:x-compiler:compilation}.
 
 \paragraph{Memory units}
 \label{ch:impl:model:xgraph:mem}
@@ -346,15 +351,12 @@ The X-type is a symbolic representation of the C primitive type%
 \footnote{Here we should note that \porthos[2] can eventually evolve to be able to analyse programs written in an OOP language (for instance, in C++). In this case, the \texttt{XType} will have more complex structure than a simple enumeration, which it has when we need to emulate only primitive types of C language. See more detailed discussion on input language type system in Section~\ref{ch:impl:proc:x-pre-compiler:type}.} %TODO!!!!! Check that XType is really a simple enumeration
 %
 that is easily convertible to an SMT-type (modelled as \texttt{ZType}).%TODO: add the class ZType
+As the type of an X-memory unit may not be resolved correctly, the memory units keep this information as a boolean flag.
 
 The memory units are created and stored by the \texttt{XMemoryManager}, which provides interface for accessing memory units during compilation stage.
 For more detailed description of memory management see Section~\ref{ch:impl:proc:x-compiler:mem}.
 
-Following the litmus tests format, we distinguish three types of \xgraph{}: one for a process, one for a litmus-initialisation block and one for the assertion statement.
-However, all three types of \xgraph{} are modelled by the same graph structure \texttt{XProcess} with certain restrictions complied by the corresponding type of X-interpreter that constructs the graph. %TODO: rename to XThread ?
-This simplifies drastically the processing of different types of code blocks as they all are modelled by the same data structure.
-The examples of restrictions on X-graphs are the following: the initialisation block can not have branchings, fence events; the process cannot have assertion events; the assertion block can not have shared-memory events or fence events.
-We discuss the interpretation of different types of statements in more detail in Section~\ref{ch:impl:proc:x-compiler:compilation}.
+
 
 
 \paragraph{Events}
@@ -426,7 +428,9 @@ The following interfaces model basic kinds of events (see Figure~\ref{fig:class-
     %\begin{itemize}[noitemsep]
     \2 \texttt{XEntryEvent}, the per-process unique source event in the event-flow graph,
     \2 \texttt{XExitEvent}, the process sink event. There are two kinds of sink events: \textit{complete} and \textit{incomplete} (see description in Section~\ref{ch:impl:proc:x-unroll}),
-    \2 \texttt{XNopEvent}, the no-operation event (a jump to the next event), used for correct encoding in case when the control-flow branch does not have any event (see Figure~\ref{encode:branching:nop}).
+    \2 \texttt{XNopEvent}, the no-operation event (a jump to the next event), used for correct encoding in case when the control-flow branch does not have any event (see Figure~\ref{encode:branching:nop}),
+    \2 \texttt{XAssertionEvent}, the reachability assertion made at the postlude statement of the program.
+    An assertion is modelled as an event for the purpose of encoding the postlude statement as a separate process that is compatible with the encoder.
    % \end{itemize}
 %\end{itemize}
 \end{outline}
@@ -677,7 +681,6 @@ In addition, \porthos[2] has a built-in extensible database storing the semantic
 which can be requested for converting an X-type to a~Z-type. %TODO: implement this.
 %TODO: describe the XType (before) + implement this clearly! + definitely get rid of bit32
 
-
 %TODO: <not implemented>
 The type analysis algorithm should consider the type aliases supported by C language (defined by the \texttt{typedef} instruction).
 For resolving the type aliases, the precompiler should make an extra traverse of the \ytree{} before the pre-compilation stage and build up a symbol map.
@@ -722,8 +725,6 @@ The following types of variables are detected as \textit{global variables}:
 The X-compiler is the main component that transforms the recursive \ytree{} data structure to the plain \xgraph{} representation.
 It is a complex processing unit; Figure~\ref{fig:compiler} illustrates the relationship between the principal components of the X-compiler in the UML language.
 
-<TODO: in picture change: xmemorymaager belongs to the program interpreter!>
-
 \begin{figure}[!t]%[H]
     \centering
   %draft=true
@@ -738,14 +739,12 @@ The \texttt{Y2XConverter} creates an instance of the stateless visitor \texttt{Y
 The \texttt{XInterpreter} carries the \xgraph{}-builder and provides \textit{action} methods for changing its state and thus the filling in the builder.
 The interpreter requests the managers such as \texttt{XMemoryManager}, \texttt{XHookManager}, \texttt{XTypeManager} for additional information. 
 
-<TODO: ADD XTypeManager to the picture!>
-
-We distinguish three types of processes (each implement the \texttt{XInterpreter} interface):
+We distinguish three types of processes (each implementing the \texttt{XInterpreter} interface):
 \begin{itemize}[noitemsep,topsep=0pt]
 \item the prelude process \texttt{XPreludeInterpreter} (to be executed before all other processes) that allows only declaration of local or shared variables, computations and memory operations;
 \item the postlude process \texttt{XPostludeInterpreter} (to be executed after all other processes) that allows only declaration of local variables, memory operations, computations and assertions;
 \item the process \texttt{XProcessInterpreter} (to be executed in parallel) that allows all X-compiler interface operations except declaration of shared variables %(that should be declared during pre-compilation stage or during compilation of the prelude process)
-and program assertions (declarations of local variables, computations, barriers, unconditional jumps, non-linear branching statements, method calls).
+and program assertions (i.e., it allows declarations of local variables, computations, barriers, unconditional jumps, non-linear branching statements, and method calls).
 \end{itemize}
 
 As the prelude process can declare shared variables, its compilation must go first.
@@ -759,11 +758,18 @@ For transparency reasons, the first event of a process must be the \texttt{XEntr
 The \xgraph{} abstract machine model disposes infinitely many memory units, both local and shared (see Section~\ref{ch:impl:model:xgraph:mem}).
 The X-compiler accesses all memory units via the \texttt{XMemoryManager}, which by the end of pre-compilation stage is already initialised (has registered all shared memory units).
 However, the memory manager is a stateful component of the compiler as it offers the methods for declaring and removing local memory units dynamically at the compilation time.
-At each time of the compilation process, the \texttt{XMemoryManager} can resolve the memory unit by its name.
-Following the C standard, local memory units have higher priority over global ones.
-Since C language allows usage of variables that have the same name to be declared in nested contexts, the \texttt{XMemoryManager} carries the stack of block block-contexts for local variables. %TODO: refactor XMemoryManager!
 
-<some picture ? >
+The interface methods exposed by the \texttt{XMemoryManager} are presented in Figure~\ref{fig:mem-manager}.
+At each time of the compilation process, the \texttt{XMemoryManager} can resolve the memory unit by its name.
+Following the C standard, local memory units have higher priority over global ones (the method \texttt{getDeclaredUnitOrNull} returns the first memory unit found, either a global one or a local one, or null if no memory units with requested name have been registered).
+Since C language allows usage of variables that have the same name to be declared in nested contexts, the \texttt{XMemoryManager} carries the stack of block contexts for local variables. %TODO: refactor XMemoryManager! 
+
+\begin{figure}[h]
+\centering
+\lstinputlisting[language=java]{inc/lst/XMemoryManager.java}
+\caption{X-memory manager public interface}
+\label{fig:mem-manager}
+\end{figure}
 
 
 \paragraph{Invocation hook manager}
@@ -786,7 +792,7 @@ The hook action is invoked with actual arguments and returns an arbitrary \textt
 
 Current version of \porthos[2] contains two invocation hooks, the \texttt{XPorthosInvocationHook} for describing the compatibility-mode functions of the input \porthos[2] input language, and \texttt{XKernelInvocationHook} for describing the Linux kernel-specific functions.
 An invocation hook can model any type of operations (memory, fence, computational, etc.).
-For instance, the \texttt{XPorthosInvocationHook} intercepts calls \texttt{`location.store(atomic, register)'} and processes the store operation with respect to the specified atomic.
+For instance, the \texttt{XPorthosInvocationHook} intercepts calls \texttt{`location.store(atomic,register)'} and processes the store operation with respect to the specified atomic.
 %TODO: more about described functions
 %TODO: rename InvocationHook -> XInvocationHook
 
@@ -798,36 +804,62 @@ For instance, the \texttt{XPorthosInvocationHook} intercepts calls \texttt{`loca
 \paragraph{Interpreter}
 \label{ch:impl:proc:x-compiler:compilation}
 
-stateful
+%In this paragraph we discuss only the implementation of the process interpreter \texttt{XProcessInterpreter}.
+%This interpreter is used to build the branched event-flow graph with all kinds of jumps, memory operations and fences.
+The X-program interpreter is invoked by the \texttt{Y2XConverterVisitor} which walks down the recursive syntax tree \ytree{}.
+The calls to the X-program interpreter are dispatched to currently maintained X-process interpreter.
+To be able to properly recognise nested statements of the \ytree{}, the X-process interpreter needs to have stacks.
+On any semantic error, the X-interpreter throws an \texttt{XInterpretationError}.
 
-X compilation error
+The interface methods of the \texttt{XInterpreter} are presented in Appendix~\ref{apx:xinterpreter}.
+Note the clear modular independence of the X-interpreter as it has no methods that operate entities of the Y-level (all conversion work with Y-entities is done by the \texttt{Y2XConverterVisitor}).
 
-contexts
-
-computation: how not to collect (in which case we loose)
-
-stacks: context, readyContext, call, 
-  BlockContext (rename): what stores, enum of states
-  
-almostReadyContexts: for computation events. Flushed by invocation . When are filled.
-
-setting up edges depending of type of ready-context
-
-- hierarchy of Compilers: pic on inheritance (XCompiler is an stateful abstract machine). Restrictions of lude-compilers
-  postlude: assertion: a new event XAssertionEvent
-
-interfaces that offer compilers: listing of interface
-
-algorithm for interpreting
+All interface methods can be divided into two groups.
+The first group constitute methods that emit events.
+These methods construct an event object (as events contain the \texttt{XEventInfo} structure that stores information about the owning process, all events must be created by the process constructor, i.e. X-interpreter) and change the state of interpreter considering the newly created event.
+Note that the methods \texttt{createComputationEvent} do not emit a computation event but only create one.
+This is performed as optimisation that removes unused computations from the model (otherwise, for instance, the assignment 
+`\texttt{x = 1 * (2 + 3)}' would be compiled to two consequent events `\texttt{eval(2 + 3); write(register <- 1 * (2 + 3));}' instead of single event `\texttt{write(register <- 1 * (2 + 3));}').
+If the computation event was not used at all (for example, in the following C code: `\texttt{foo(); 1; bar();}' the execution event `\texttt{eval(1)}' is not used by the model), it is also removed from the event-graph (see justification in Section~\ref{ch:impl:model:xgraph:evt}).
+The second group of X-interpreter methods consists of the methods for defining non-linear statements (branchings and loops).
+These methods change the state of the interpreter and set up additional non-linear control-flow edges.
+%`\texttt{register = 1 * (location + 2)}' would be compiled to three consequent events `\texttt{load(temp\_reg\_1 <- location); eval(temp\_reg\_1 + 2); write(register <- 1 * (temp\_reg\_1 + 2));}',
 
 
+As a high-level instruction (Y-level) may be compiled into a sequence of low-level instructions (for example, a computation that involves shared variables should firstly load them into the local memory and then process the computation event over local-only memory), the interpreter must maintain the \textit{stack of contexts} and remember the \textit{previous event} to be able to correctly process nested non-linear statements of C language.
+The context is a data structure that carries the \textit{state} and some additional information in case of processing non-linear statements (e.g., conditional event, first and last then- and else-branch events for binding, etc.).
+Once the new event has been emitted, the interpreter sets up control-flow edges w.r.t. state of the context on the top of the stack (the context stack is always non empty: the bottom context is a linear one).
+The context state is an enumeration of the following values:
+\begin{itemize}
+\item \texttt{WaitingAdditionalCommand}: the interpreter is in the state of defining the complex (non-linear) statement and is not able to process any new event (will throw an exception if any) until the state is not changed,
+\item \texttt{WaitingFirstSubBlockEvent}, the first next emitted event will be accepted as the first event of the branching statement (later the interpreter will set up jumps to that event),
+\item \texttt{WaitingNextLinearEvent}, the standard interpreter state for processing next linear event,
+\item \texttt{Idle}, the interpreter does not set up the edge from the previous event to the new event.
+\end{itemize}
+
+Once the (non-linear) context has been popped out of the context stack (by the methods of the second group that finish non-linear branch definition) and added to the queue of \texttt{almostReadyContexts}.
+The almost-ready-context becomes a ready-context (i.e., it moves to the queue \texttt{readyContexts}) once the non-linear statement definition has finished (the method \texttt{finishNonlinearBlockDefinition}).
+
+Before processing a newly emitted event, the interpreter checks whether the queue \texttt{readyContexts} is not empty.
+If so, it iterates over all ready-contexts and sets up control-flow edges considering that the newly emitted event is an exit-event" of the non-linear context (e.g., for a branching context the interpreter adds primary edges from condition-event to the first-true-branch-event and from the last-true-branch-event to the exit-event, the same is done with alternative edges for the false-branch).
+
+%The \texttt{almostReadyContexts} queue is necessary for not adding erroneous edges on 
+
+For simplicity of the interpretation, we keep the jump events (no-computation events) in the flow-graph, however they can be removed and the edges to and from them can be rewritten if necessary.
+
+%algorithm for interpreting
+
+%The method \texttt{tryConvertToLocalOrNull} makes an attempt to convert an arbitrary X-entity to the local memory unit: registers and computation events are casted and returned by the method as-is, shared memory units are copied to a temporary register (\texttt{declareTempRegister}), which is returned by the method.
+%In other cases, the method returns \texttt{null}.
 
 \subsubsection{X-graph unroller (7)}
 \label{ch:impl:proc:x-unroll}
 
-up to bound $k$ 
+The compiled graph needs to be unrolled up to the user-defined bound $k$.
+Comparing to \porthos[1], we have change the meaning of the bound: instead of executing all cycles at most $k$ times, the \porthos[2] interprets the bound as the maximum number of Y-instructions to be executed after the unrolling.
+The meaning of a bound was changed in order to increase predictability of the size of the result SMT-formula.
 
-recursion -- may be, if calls are supported
+Note, recursive function calls create unconditional jumps back in the event-flow graph, which will also be recognised as a loop and be affected by the unrolling algorithm.
 
 two kinds of exits
 
@@ -928,31 +960,34 @@ sth about hashcodes and collections
 \subsubsection{Z-formula encoder (9)}
 \label{ch:impl:proc:z-encoder}
 
-Z-type : SMT-specific (say about smt-lib)
+todo
 
 
 \subsubsection{SMT-formula converter (10)}
 \label{ch:impl:proc:smt-converter}%TODO: ref in pre-word
 
+As the \zformula{} follows the SMT-LIB standard, its translation to an SMT-formula constitutes almost one-to-one mapping.
+The translation is performed by the stateless visitor \texttt{Z2SmtTranslator}.
 
-\subsubsection{SMT-formula translator (11)}
-\label{ch:impl:proc:smt-solver}%TODO: ref it in pre-word in this chapter
+
+\subsubsection{SMT solver (11)}
+\label{ch:impl:proc:smt-solver}
 %TODO: check that we have ALL references in pre-word in this chapter
-
-%todo: mention The SMT-LIB standard http://smtlib.cs.uiowa.edu/papers/smt-lib-reference-v2.6-r2017-07-18.pdf
+As it has been mentioned in Section~\ref{ch:impl:principles}, \porthos[2] uses the third-party SMT-solver \tool{Z3}, which offers the Java API for constructing requests to the Z3 solver and interpreting its responses.
 
 
 \subsection{Program output}
 \label{ch:impl:out}
 
-structure: verdict
-
-%TODO: say sth about syntax errors handling: still now, what if parser does not accept syntax?
-
+The result of execution of \porthos[2] is the verdict modelled by the class \texttt{AppVerdict}.
+This is a structure that contains the result of analysis and auxiliary information such as collected errors and time of execution.
+The app verdict may be rendered to any format convenient for the user.
 
 
 \subsection{Auxiliary components}
 \label{ch:impl:aux}
+
+There are some ...
 
 \subsubsection{Watchdog timer}
 \label{ch:impl:aux:watchdog}
