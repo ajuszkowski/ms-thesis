@@ -857,7 +857,7 @@ Note, recursive function calls create unconditional jumps back in the event-flow
 
 Considering the new meaning of the unrolling bound, we create sink events of two types: the \textit{complete} and \textit{incomplete} sink event.
 The first one means that the loop has been executed a whole number of times, and the latter means that the unrolling bound triggered on not-the-last event of the loop.
-Figure~\ref{fig:loop-unroll} illustrates unrolling for the cyclic control-flow graph on the left-hand side (the square node $S_{+}$ denotes the complete sink node, while the $S_{-}$ -- incomplete).
+Figure~\ref{fig:loop-unroll} illustrates unrolling for the cyclic control-flow graph on the left-hand side (the square node $S_{+}$ denotes the complete sink node, and the $S_{-}$ denotes the incomplete sink).
 
 %TODO: draw (and implement) diff types of exit nodes
 \begin{figure}[t]

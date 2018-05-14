@@ -54,7 +54,7 @@ Also, it is important to separate the set of initial write events $\mathbb{IW}~\
 
 A \textit{computation event} $e_c \in \mathbb{C} \subseteq \mathbb{E}$, represents a low-level assembly computation operation performed solely on local-memory arguments.
 An example of computation event may be the event $e_c = r_1 \leftarrow add(r_2, 1)$ that writes the sum of values stored in register $r_2$ and constant $1$ (which is modelled as a register as well) to the register $r_1$.
-For modelling branching statements, we distinguish the set $\mathbb{C_{g}}~\subseteq~\mathbb{C}$ of \textit{guard} computation events (also called as \textit{branching events}), that are evaluated as a boolean value.
+For modelling branching statements, we define the set $\mathbb{C}_{g}~\subseteq~\mathbb{C}$ of \textit{guard} computation events (also called as \textit{branching events}), that are evaluated to a boolean value.
 
 The synchronisation instructions (fences) cause the \textit{barrier events}, that do not perform any computation or memory value transfer, instead, they add new relations to the program model that restrict the set of allowed behaviours.
 Functionally, a fence may be a synchronisation barrier or a instruction of flushing the local memory caches, etc.
