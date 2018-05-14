@@ -427,7 +427,7 @@ The following interfaces model basic kinds of events (see Figure~\ref{fig:class-
     The fake events are the auxiliary elements of \xgraph{}.
     %\begin{itemize}[noitemsep]
     \2 \texttt{XEntryEvent}, the per-process unique source event in the event-flow graph,
-    \2 \texttt{XExitEvent}, the process sink event. There are two kinds of sink events: \textit{complete} and \textit{incomplete} (see description in Section~\ref{ch:impl:proc:x-unroll}),
+    \2 \texttt{XExitEvent}, the process sink event,
     \2 \texttt{XNopEvent}, the no-operation event (a jump to the next event), used for correct encoding in case when the control-flow branch does not have any event (see Figure~\ref{encode:branching:nop}),
     \2 \texttt{XAssertionEvent}, the reachability assertion made at the postlude statement of the program.
     An assertion is modelled as an event for the purpose of encoding the postlude statement as a separate process that is compatible with the encoder.
@@ -832,9 +832,9 @@ Once the new event has been emitted, the interpreter sets up control-flow edges 
 The context state is an enumeration of the following values:
 \begin{itemize}
 \item \texttt{WaitingAdditionalCommand}: the interpreter is in the state of defining the complex (non-linear) statement and is not able to process any new event (will throw an exception if any) until the state is not changed,
-\item \texttt{WaitingFirstSubBlockEvent}, the first next emitted event will be accepted as the first event of the branching statement (later the interpreter will set up jumps to that event),
-\item \texttt{WaitingNextLinearEvent}, the standard interpreter state for processing next linear event,
-\item \texttt{Idle}, the interpreter does not set up the edge from the previous event to the new event.
+\item \texttt{WaitingFirstSubBlockEvent}: the first next emitted event will be accepted as the first event of the branching statement (later the interpreter will set up jumps to that event),
+\item \texttt{WaitingNextLinearEvent}: the standard interpreter state for processing next linear event,
+\item \texttt{Idle}: the interpreter does not set up the edge from the previous event to the new event.
 \end{itemize}
 
 Once the (non-linear) context has been popped out of the context stack (by the methods of the second group that finish non-linear branch definition) and added to the queue of \texttt{almostReadyContexts}.
@@ -847,6 +847,7 @@ If so, it iterates over all ready-contexts and sets up control-flow edges consid
 
 For simplicity of the interpretation, we keep the jump events (no-computation events) in the flow-graph, however they can be removed and the edges to and from them can be rewritten if necessary.
 
+
 %algorithm for interpreting
 
 %The method \texttt{tryConvertToLocalOrNull} makes an attempt to convert an arbitrary X-entity to the local memory unit: registers and computation events are casted and returned by the method as-is, shared memory units are copied to a temporary register (\texttt{declareTempRegister}), which is returned by the method.
@@ -855,32 +856,18 @@ For simplicity of the interpretation, we keep the jump events (no-computation ev
 \subsubsection{X-graph unroller (7)}
 \label{ch:impl:proc:x-unroll}
 
-The compiled graph needs to be unrolled up to the user-defined bound $k$.
+In order to be encoded into an SMT-formula, the compiled graph needs to be acyclic~\cite{Porthos17b}.
+To convert it to an acyclic form, we perform the \textit{unrolling} (sometimes called \textit{unwinding}) transfomation: each cycle is unrolled up to the user-defined bound $k$.
 Comparing to \porthos[1], we have change the meaning of the bound: instead of executing all cycles at most $k$ times, the \porthos[2] interprets the bound as the maximum number of Y-instructions to be executed after the unrolling.
 The meaning of a bound was changed in order to increase predictability of the size of the result SMT-formula.
-
 Note, recursive function calls create unconditional jumps back in the event-flow graph, which will also be recognised as a loop and be affected by the unrolling algorithm.
 
-two kinds of exits
-
-- unrolling: why we cannot encode cyclic structures. reference to the paper (see arXiv version)
-% If the analysing program contains a loop, then its control-flow graph represents the cyclic directed graph. Although, in order to be able to encode such a cyclic structure as a boolean formula, this graph needs to be
-
-simple algorithm
-
-setting up backward edges
-
-how we attempted, why it didn't work in general case:
-
-why we changed the notion of unrolling bound
-
-sth about hashcodes and collections
-
-- After we acquired the event-based representation, we can perform some modifications/simplifications/optimisations on it (separately, allowing user to manage them)
-
+Considering the new meaning of the unrolling bound, we create sink events of two types: the \textit{complete} and \textit{incomplete} sink event.
+The first one means that the loop has been executed a whole number of times, and the latter means that the unrolling bound triggered on not-the-last event of the loop.
+The Figure~\ref{fig:loop-unroll} illustrates unrolling for the cyclic control-flow graph on the left-hand side (the square node $S_{+}$ denotes the complete sink node, while the $S_{-}$ -- incomplete).
 
 %TODO: draw (and implement) diff types of exit nodes
-\begin{figure}[h]
+\begin{figure}[t]
 \centering
 \resizebox{\linewidth}{!}{
 \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
@@ -897,56 +884,68 @@ sth about hashcodes and collections
 ;
 \node[draw=none] (impl) [right=3cm of 3] {$\overset{k = 6}{\longmapsto}$};
 ;
-\node[c] (21) [right=3cm of impl] {$2_1$};
-\node[c] (11) [above right=1cm and 1cm of 21]{$1_1$};
-\node[c] (31) [below right=1cm and 1cm of 11] {$3_1$};
-\node[c] (41) [below of=31] {$4_1$};
-\node[c] (12) [below of=21] {$1_2$};
-\node[c] (22) [below left=1cm and 1cm of 12] {$2_2$};
-\node[c] (32) [below right=1cm and 1cm of 12] {$3_2$};
-\node[c] (13) [below of=41] {$1_3$};
-\node[c] (14) [below of=22] {$1_4$};
+\node[c] (22) [right=3cm of impl] {$2_2$};
+\node[c] (11) [above right=1cm and 1cm of 22]{$1_1$};
+\node[c] (32) [below right=1cm and 1cm of 11] {$3_2$};
 \node[c] (43) [below of=32] {$4_3$};
-\node[c] (23) [below of=13] {$2_3$};
-\node[c] (33) [below of=13] {$3_3$};
-\node[c] (24) [below left=1cm and 1cm of 14] {$2_4$};
-\node[c] (34) [below right=1cm and 1cm of 14] {$3_4$};
-\node[c] (15) [below right=1cm and -0.3cm of 43] {$1_5$};
-\node[c] (44) [below of=33] {$4_4$};
-\node[c] (6) [below left=1cm and 1cm of 15] {$6$};
-\node[] (11k) [right=3.2cm of 11] {$(k = 1)$};
-\node[] (31k) [right=1.7cm of 31] {$(k = 2)$};
-\node[] (41k) [right=1.7cm of 41] {$(k = 3)$};
-\node[] (13k) [right=1.7cm of 13] {$(k = 4)$};
-\node[] (33k) [right=1.7cm of 33] {$(k = 5)$};
-\node[] (44k) [right=1.7cm of 44] {$(k = 6)$};
+\node[c] (13) [below of=22] {$1_3$};
+\node[c] (24) [below left=1cm and 1cm of 13] {$2_4$};
+\node[c] (34) [below right=1cm and 1cm of 13] {$3_4$};
+\node[c] (14) [below of=43] {$1_4$};
+\node[c] (15) [below of=24] {$1_5$};
+\node[c] (45) [below of=34] {$4_5$};
+\node[c] (25) [below of=14] {$2_5$};
+\node[c] (35) [below of=14] {$3_5$};
+\node[c] (26) [below left=1cm and 1cm of 15] {$2_6$};
+\node[c] (36) [below right=1cm and 1cm of 15] {$3_6$};
+\node[c] (16) [below right=1cm and 0.2cm of 45] {$1_6$};
+\node[c] (46) [below right=1cm and 0.3cm of 35] {$4_6$};
+\node[rectangle,draw] (6inc) [below left=1cm and 0.6cm of 16] {$S_{-}$};
+\node[rectangle,draw] (6com) [below of=6inc] {$S_{+}$};
+\node[] (k1) [right=3.2cm of 11] {$(k = 1)$};
+\node[] (k2) [right=1.7cm of 32] {$(k = 2)$};
+\node[] (k3) [right=1.7cm of 43] {$(k = 3)$};
+\node[] (k4) [right=1.7cm of 14] {$(k = 4)$};
+\node[] (k5) [right=1.7cm of 35] {$(k = 5)$};
+\node[] (k6) [right=1cm of 46] {$(k = 6)$};
 \path[->]
-(11) edge [] node {} (21)
-(11) edge [] node {} (31)
-(31) edge [] node {} (41)
-(21) edge [] node {} (12)
-(12) edge [bend right=10] node {} (22)
-(12) edge [bend left=10] node {} (32)
-(41) edge [] node {} (13)
-(22) edge [] node {} (14)
+(11) edge [] node {} (22)
+(11) edge [] node {} (32)
 (32) edge [] node {} (43)
-(13) edge [] node {} (23)
-(13) edge [] node {} (33)
-(14) edge [bend right=10] node {} (24)
-(14) edge [bend left=10] node {} (34)
-(43) edge [] node {} (15)
-(33) edge [bend right=10] node {} (15)
-(33) edge [bend left=10] node {} (44)
-(24) edge [bend right=20] node {} (6)
-(34) edge [] node {} (6)
-(15) edge [] node {} (6)
-(44) edge [bend left=20] node {} (6)
+(22) edge [] node {} (13)
+(13) edge [bend right=10] node {} (24)
+(13) edge [bend left=10] node {} (34)
+(43) edge [] node {} (14)
+(24) edge [] node {} (15)
+(34) edge [] node {} (45)
+(14) edge [] node {} (25)
+(14) edge [] node {} (35)
+(15) edge [bend right=10] node {} (26)
+(15) edge [bend left=10] node {} (36)
+(45) edge [] node {} (16)
+(35) edge [bend right=10] node {} (16)
+(35) edge [bend left=10] node {} (46)
+(26) edge [bend right=20] node {} (6com)
+(36) edge [] node {} (6inc)
+(16) edge [] node {} (6inc)
+(46) edge [bend left=20] node {} (6com)
 ;
 \end{tikzpicture}
 }
-\label{fig:loop-unwind}
+\label{fig:loop-unroll}
 \caption{Example of the flow graph from Figure~\ref{fig:merged-loop.....}, unwinded up to the bound $k = 6$}
 \end{figure}
+
+The unrolling procedure is performed by the \texttt{XFlowGraphUnroller}. %, which extends the \texttt{FlowGraphDfsTraverser}
+For unrolling the flow-graph, we perform the \textit{Deep-First Search (DFS)} while counting the Y-level instructions (for the unrolling bound) and keeping track of the depth stack (for detecting back edges needed for determining the type of sink node).
+Each next event increments the unrolling depth counter (the \textit{event reference-ID}), the integer that is stored by the \texttt{XEvent} thus making it \textit{an event reference} on non-zero values.
+Each \texttt{XEvent} has the method `\texttt{XEvent asNodeRef(int refId)}' that clones the event-receiver with new value of reference-ID.
+The methods \texttt{hashCode} and \texttt{equals} consider the reference-ID as the uniqueness field for all events except sink and source events (considering the usage of \texttt{HashMap} and Guava's \texttt{ImmutableMap} for storing events, setting up hash-code methods properly is a crucial programming task).
+
+During the work on \porthos[2], we tested different schemes of loop unrolling.
+\\<TODO: Say sth about these schemes + pictures>
+
+%- After we acquired the event-based representation, we can perform some modifications/simplifications/optimisations on it (separately, allowing user to manage them)
 
 
 \subsubsection{X-graph data-flow constructor (8)}
