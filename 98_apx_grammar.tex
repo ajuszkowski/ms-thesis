@@ -3,7 +3,7 @@
 %\begin{figure}[h!]%[H]
 \begin{multicols*}{2}
 [
-\section{The\;\texttt{ANTLR}\;grammar\;for\;the\;\texttt{porthos\,v1}\;input\;language}
+\section{The\;ANTLR\;grammar\;for\;the\;Porthos\,v1\;input\;language}
 \label{apx:grammar}
 ]
 \begin{lstlisting}[language=antlr,linewidth=.51\textwidth]
@@ -89,21 +89,22 @@ sequence
 
 if
   :   'if' bool_expression 'then'
-   {' instruction '}' 
-     ('else' '{' instruction '}')?
+    '{' instruction '}' 
+    ('else' '{' instruction '}')?
   ;
 
 while_
-  :   'while' bool_expression '{' instruction '}'
+  :   'while' bool_expression '{' 
+    instruction '}'
   ;
 
 program
-  :   '{' location (',' location)* '}'
-       ('thread t' DIGIT '{' instruction '}'
-         ('exists' (location '=' DIGIT ','
-         | DIGIT ':' register '=' DIGIT ',')   
-         )*
+  : '{' location (',' location)* '}'
+     ('thread t' DIGIT '{' instruction '}'
+       ('exists' (location '=' DIGIT ','
+       | DIGIT ':' register '=' DIGIT ',')   
        )*
+     )*
   ;
 
 

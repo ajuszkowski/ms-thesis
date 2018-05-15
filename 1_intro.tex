@@ -42,7 +42,7 @@ MOV EAX,[y] & MOV EBX,[x] \\
 \multicolumn{2}{|l|}{x86: allow} \tabularnewline
 \hline
 \end{tabular}
-\caption{Store buffering: A litmus test on write-read reordering allowed under the x86-TSO and forbidden under the SC memory model}
+\caption{Store buffering: A litmus test illustrating the write-read reordering allowed by the x86-TSO memory model}
 \label{simple_wmm_x86}
 \end{figure}
 
@@ -85,7 +85,7 @@ One of the most well-known frameworks for weak memory model-aware analysis was f
 It is the event-based non-deterministic model without global time (see Section~\ref{ch:wmm:event} for details).
 
 In addition to developing the theoretical basis, researchers work on extracting the memory models for hardware architectures from existing implementations or from the specifications, which are written in natural language and thus suffer from ambiguities and incompleteness.
-Over the last decade the memory models have been defined for most mainstream multiprocessor architectures, such as x86-TSO and Sparc-TSO (for \textit{Total Store Order}) model for x86 and Sparc architectures~\cite{owens2009better}, much more relaxed memory model for Power and ARM architectures~\cite{alglave2009semantics,sarkar2011understanding, alglave2014herding}, etc. %, or Alpha architecture~\cite{alphaWMM}~, and others.
+Over the last decade, memory models have been defined for most mainstream multiprocessor architectures, such as x86-TSO and Sparc-TSO (for \textit{Total Store Order}) model for x86 and Sparc architectures~\cite{owens2009better}, much more relaxed memory model for Power and ARM architectures~\cite{alglave2009semantics,sarkar2011understanding, alglave2014herding}, etc. %, or Alpha architecture~\cite{alphaWMM}~, and others.
 There are projects for validating hardware architectures wrt. a memory model as well, e.g.~\cite{lustig2014pipecheck,lustig2016coatcheck}.
 
 %TODO: litmus test synthesis 
@@ -136,11 +136,11 @@ All the tools listed above consider only a single memory model, however, in real
 One of these problems is the \textit{portability} of the program from one hardware architecture to another.
 A program written in a high-level language is then compiled for different hardware.
 Even if all the compiler optimisations were disabled (which is rare case nowadays), the behaviour of two compiled versions of the same program may differ due to differences between hardware memory models.
-As the result, a program compiled under the platforms $\mathcal{T}$ can reach states that are unreachable on the platform $\mathcal{S}$, which is a \textit{portability bug} from the source platform $\mathcal{S}$ to the target platform $\mathcal{T}$~\cite{Porthos17a}.
+As the result, a program compiled under the platform $\mathcal{T}$ can reach states that are unreachable on the platform $\mathcal{S}$, which is a \textit{portability bug} from the source platform $\mathcal{S}$ to the target platform $\mathcal{T}$~\cite{Porthos17a}.
 
 The very first tool that performs the WMM-aware portability analysis is \porthos%
 %
-\footnote{The \porthos{} project web site: \url{http://github.com/hernanponcedeleon/PORTHOS}} %
+\footnote{The \porthos{} project web site: \url{http://github.com/hernanponcedeleon/Dat3M}} %
 %
 introduced in April~2017~\cite{Porthos17b}.
 This tool reduces described problem to a bounded reachability problem, which can be solved via an SMT-solver.
@@ -171,13 +171,15 @@ As most modern SMT-solvers are efficient enough to be able to operate the state 
 \label{ch:intro:task}
 
 The current work aims to rework the proof-of-concept tool \textit{\porthos{}} by extending the input language, which currently represents the minimum subset of C, and revising the general architecture of the tool in order to enhance performance, extensibility, reliability and maintainability.
-One of the directions of development was the ability to process the \textit{kernel litmus tests} written in C~\cite{TODO: KERNEL LITMUS TESTS WORK+REPOSITORY}.
+One of the directions of development was the ability to process the \textit{kernel litmus tests} written in C~\cite{mckenney2017wg21}.
+For that, in addition to supporting the C syntax (augmented by litmus-style definitions such as initialisation or assertion statements), the tool must be able to recognise kernel-specific functions and macros (such as the macro \texttt{READ\_ONCE} that guarantees memory read).
 %interprocedural analysis
+
 As the general architecture and almost all components of \porthos{} have been redesigned, the tool received a new name \textit{\porthos[2]}\,%
 %
 \footnote{Hereinafter with the name `\porthos{}' we refer to the tool \porthos{} of version 1, whereas the new implementation of \porthos{} is called \porthos[2].}. %
 %
-Considering the enhancements of the architectural design, \porthos[2] represents a generalised framework for SMT-based memory model-aware analysis, which can not only perform the portability analysis, but can serve as a basis for other kinds of static code analysis.
+Considering the enhancements of the architectural design, \porthos[2] represents a generalised framework for SMT-based memory model-aware analysis, which can not only perform the portability analysis, but can serve as a basis for other kinds of static analysis of concurrent programs.
 
 
 \section{Thesis structure}
@@ -187,9 +189,5 @@ The thesis is organised as following.
 Chapter~\ref{ch:wmm} gives a general view on the weak memory model-aware analysis.
 Chapter~\ref{ch:port} examines the portability analysis as an bounded reachability problem that can be encoded into an SMT-formula in order to be solved automatically by an SMT~solver.
 Chapter~\ref{ch:impl} delves into the description of architectural solutions and implementation details of the \porthos[2] framework.
-\textbf{TODO: other chapters!!!}
-
-
-%Clarke's goto-cc : \cite{clarke2004tool} : http://www.cprover.org/goto-cc/
-% (perhaps, goto-cc is a part of cprover) : cprover https://www.cprover.org/cbmc/doc/manual.pdf
-%cbmc http://www.cprover.org/cbmc/
+Chapter~\ref{ch:eval} provides an example of the portability analysis via \porthos[2] and presents some evaluation results comparing to other tools. %TODO: check if it's true
+Chapter~\ref{ch:summary} summarises results of the work and proposes future work directions. %TODO: check if it's true

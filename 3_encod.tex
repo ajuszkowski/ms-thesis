@@ -95,13 +95,13 @@ In a control-flow graph, there are two types of edges (transitions): \textit{pri
 Each node on graph can have either one successor (primary) or two successors (both primary and alternative); only computation events can serve as a branching point).
 However, each merge node can have any positive number of predecessors, where each edge may be either primary or alternative.
 
-While working on the \porthos[2], we applied some modifications of the encoding scheme for the control-flow.
-The changes are conditioned by the need to be able to process an arbitrary control-flow produced by conditional and unconditional jumps of C language.
-For that, we compile the recursive abstract syntax tree~(AST) of the parsed C-code to the plain (non-recursive) event-flow graph.
+While working on the \porthos[2], we have applied some modifications to the encoding scheme for the control-flow.
+The changes are conditioned by the need to be able to process an arbitrary control-flow produced by conditional and unconditional jumps of the C language.
+For that, we compile the abstract syntax tree~(AST) of the parsed C-code to the plain event-flow graph.
 We show %TODO! to show, actually!!!
 that the new encoding is smaller than the old one used in \porthos{} since it does not produces new variables for each high-level statement of the input language.
 %The \tool{PORTHOS} tool encodes the \textit{instructions}, which have recursive nature, in a recursive manner. This means, it adds synthetic composite instructions for both linear (sequential) and non-linear (branching) instructions. 
-For instance, \porthos{} uses the encoding scheme where the control-flow of the sequential instruction $i_1 = i_2; i_3$ was encoded as
+For instance, \porthos{} used the encoding scheme where the control-flow of the sequential instruction $i_1 = i_2; i_3$ was encoded as
 $\phi_{CF}(i_2;i_3) \defeq (cf_{i_1} = (cf_{i_2} \land cf_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)$,
 and control-flow of the branching instruction $i_1 = (c \; ? \; i_2 \; : \; i_3)$ was encoded as
 $\phi_{CF}( \; c \; ? \; i_2 \; : \; i_3) \defeq (cf_{i_1} \Leftrightarrow (cf_{i_2} \lor cf_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)$
@@ -295,15 +295,15 @@ The encoding consists of two parts: encoding the \textit{derived relations} and 
 In an SMT-formula, the relation $x \relation{r} y$ is represented by a boolean variable $r(x, y)$ that indicates whether the relation holds.
 The derived relations are encoded by fresh boolean variables according to the following rules~\cite{Porthos17b}:
 \begin{itemize}[noitemsep,topsep=0pt]
-\item $r_1 \cup r_2(e_1, e_2) \defeq r_1(e_1, e_2) \lor r_2(e_1, e_2)$
-\item $r_1 \cap r_2(e_1, e_2) \defeq r_1(e_1, e_2) \land r_2(e_1, e_2)$
-\item $r_1 \relminus r_2(e_1, e_2) \defeq r_1(e_1, e_2) \land \neg r_2(e_1, e_2)$
-\item $r^{-1}(e_1, e_2) \defeq r(e_2, e_1)$
-\item $r^{*}(e_1, e_2) \defeq r^{+}(e_1, e_2) \lor (e_1 = e_2)$
-\item $r_1;r_2(e_1,e_2) \defeq \bigvee\limits_{e_k \in \mathbb(E)}^{} r_1(e_1,e_k) \land r_2(e_k,e_2)$
-\item $r^{+}(e_1, e_2) \defeq \mathtt{tc}_{\left\lceil log|\mathbb{E}| \right\rceil} (e_1, e_2), where \\
-\hspace*{1em} \mathtt{tc}_{0}(e_1,e_2) \defeq r(e_1,e_2), and \\ 
-\hspace*{1em} \mathtt{tc}_{i+1}(e_1,e_2) \defeq r(e_1,e_2) \lor (\mathtt{tc}_{i}(e_1,e_2);\mathtt{tc}_{i}(e_1,e_2))$
+\item $r_1 \cup r_2(e_1, e_2) \defeq r_1(e_1, e_2) \lor r_2(e_1, e_2)$;
+\item $r_1 \cap r_2(e_1, e_2) \defeq r_1(e_1, e_2) \land r_2(e_1, e_2)$;
+\item $r_1 \relminus r_2(e_1, e_2) \defeq r_1(e_1, e_2) \land \neg r_2(e_1, e_2)$;
+\item $r^{-1}(e_1, e_2) \defeq r(e_2, e_1)$;
+\item $r^{*}(e_1, e_2) \defeq r^{+}(e_1, e_2) \lor (e_1 = e_2)$;
+\item $r_1;r_2(e_1,e_2) \defeq \bigvee\limits_{e_k \in \mathbb{E}}^{} r_1(e_1,e_k) \land r_2(e_k,e_2)$; \ and
+\item $r^{+}(e_1, e_2) \defeq \mathtt{tc}_{\left\lceil log|\mathbb{E}| \right\rceil} (e_1, e_2), \ where \\
+\hspace*{1em} \mathtt{tc}_{0}(e_1,e_2) \defeq r(e_1,e_2), \ and \\ 
+\hspace*{1em} \mathtt{tc}_{i+1}(e_1,e_2) \defeq r(e_1,e_2) \lor (\mathtt{tc}_{i}(e_1,e_2);\mathtt{tc}_{i}(e_1,e_2))$.
 \end{itemize}
 
 Note that \cat{} language allows mutually-recursive definitions of relations (for example, `$\mathtt{r_1} = \mathtt{r_2} \cup (r_1;r_1)$').

@@ -46,7 +46,7 @@
 \newcommand{\startcoverpage}{\pagenumbering{arabic}}
 \newcommand{\startfirstchapter}{}
 % The number of pages is counted based on the labels.
-% The lastpage package calculates the position of the LastPage label. 
+% The lastpage package calculates the position of the LastPage label.
 % A plain label may not work if last pages contain floats that are placed 
 % after text.
 \newcommand{\PAGES}{\pageref{LastPage}}
@@ -212,7 +212,8 @@
 {\noindent
 \small 
 \ATTHESIS \\
-\ATCITY, \ATDATE
+\ATCITY \\
+\ATDATE
 \vskip 2em 
 
 \DRAFT
@@ -267,10 +268,10 @@
 \begin{tabularx}{\textwidth}{|p{3cm}Xlp{2cm}|}
 \hline
 \textbf{\ATAUTHORNAME:} & \multicolumn{3}{l|}{Artem Yushkovskiy} \\%{\AUTHOR} \\
-\multicolumn{4}{|l|}{\allowlinebreaks{14.5cm}{\textbf{\ATTITLENAME:}\\
-\ATTITLE\ \ATSUBTITLE}}\\
+\textbf{\ATTITLENAME:}  & \multicolumn{3}{l|}{\ATTITLE} \\
+%\multicolumn{4}{|l|}{\allowlinebreaks{14.5cm}{\textbf{\ATTITLENAME:} \ATTITLE\ \ATSUBTITLE}}\\
 \hline
-\textbf{\ATDATENAME:} & \ATDATE & \textbf{\ATPAGESNAME:} & \PAGES\\
+\textbf{\ATDATENAME:} & \ATDATE & \textbf{\ATPAGESNAME:} & \PAGES \\
 %\hline
 %\textbf{\ATPROFSHIPNAME:} & \ATPROFSHIP & 
 %\textbf{\ATPROFCODENAME:} & \PROFCODE\\

@@ -1,7 +1,7 @@
 \chapter{Memory model-aware analysis}
 \label{ch:wmm}
 
-The main idea behind the memory model-aware program analysis is that the set of all possible interleavings of the concurrent program (\textit{anarchic semantics}) can be specified by the axiomatic constraints of the memory model that filter out executions inconsistent in particular architecture (\textit{analytic semantics})~\cite{alglave2016syntax}.
+The main idea behind the memory model-aware program analysis is that the set of all possible interleavings of the concurrent program (the \textit{anarchic semantics}) can be specified by the axiomatic constraints of the memory model that filter out executions inconsistent in particular architecture (the \textit{analytic semantics})~\cite{alglave2016syntax}.
 The anarchic semantics of the program is a truly parallel semantics with no global time that describes all possible computations with all possible communications.
 However, the analytic semantics captures the program behaviours on a certain execution environment more precisely.
 %"The semantics of a program is a set of executions" https://johnwickerson.github.io/papers/memalloy.pdf
@@ -23,7 +23,7 @@ The graph represents the set of executions (sequences of events; see Section~\re
 There are three main types of sources of non-determinism in concurrent programs~\cite{musuvathi2008fair}:
 \begin{enumerate}[noitemsep,topsep=0pt]
 \item \textit{input non-determinism}, which is a standard undecidable problem for all static analysis methods: to resolve the user input, system call from the environment, unresolved function calls, etc.;
-\item \textit{scheduling non-determinism}, caused by the interleavings, which in turn are caused by the scheduler activity;
+\item \textit{scheduling non-determinism}, caused by the interleavings, which in turn are caused by the scheduler activity; and
 \item \textit{memory-model non-determinism}, caused by hardware and compiler relaxations.
 \end{enumerate}
 
@@ -79,8 +79,8 @@ The basic relations are the following~\cite{alglave2010shared}:
 
     \item The \textit{data-flow} of a program is defined by \textit{communication relations}:
     \begin{itemize}[noitemsep]
-        \item the \textit{read-from} relation \rf{}~$\subseteq~\mathbb{W}~\times~\mathbb{R}$ that maps each write event to the read event that reads the value written by write event;
-        \item the \textit{coherence order} relation \co{}~$\subseteq~\mathbb{W}~\times~\mathbb{W}$ that defines the total order on writes to the same location across all processes (also called the \textit{write serialisation}, \texttt{ws}-relation);
+        \item the \textit{read-from} relation \rf{}~$\subseteq~\mathbb{W}~\times~\mathbb{R}$ that maps each write event to the read event that reads the value written by write event; and
+        \item the \textit{coherence order} relation \co{}~$\subseteq~\mathbb{W}~\times~\mathbb{W}$ that defines the total order on writes to the same location across all processes (also called the \textit{write serialisation}, \texttt{ws}-relation).
     \end{itemize}
 
     \item Events from the same process are related by the \textit{scope relation} \sr{}~$\subseteq~\mathbb{E}~\times~\mathbb{E}$.
@@ -94,22 +94,22 @@ Below we enumerate some derived relations~\cite{alglave2010shared}:
 \begin{itemize}
 
     \item the \textit{from-read} relation $\fr \subseteq~\mathbb{R}~\times~\mathbb{W}$ that maps a read event to all write events succeeding the write event from which the read event gets its value: \\
-    $r \relation{fr} w ~\triangleq~ (\exists w' . w' \relation{rf} r \land w' \relation{co} w)$
+    $r \relation{fr} w ~\triangleq~ (\exists w' . w' \relation{rf} r \land w' \relation{co} w)$;
 
     %\item the \textit{data dependency} relation \texttt{dp}, which is a subset of \po-relation that always has a read at its source (it connects the read to the write which it depends on)
     %TO-DO: formula for dp or exclude
 
     \item the \textit{communication} relation \com over memory events, that fully describes the data-flow of a program: \\
     %$\mathtt{com} \triangleq (\mathtt{rf} \cup \mathtt{co} \cup \mathtt{fr})$
-    $m_1 \relation{com} m_2~\triangleq~((m_1\relation{rf}m_2) \lor (m_1\relation{co}m_2) \lor (m_1\relation{fr}m_2))$
+    $m_1 \relation{com} m_2~\triangleq~((m_1\relation{rf}m_2) \lor (m_1\relation{co}m_2) \lor (m_1\relation{fr}m_2))$;
 
     \item the \textit{external} (and \textit{internal}) \textit{from-read} relations that restrict the \fr-relation to the different (respectively, same) processes: \\
-    $w \relation{fre} r ~\triangleq~ (w \relation{fr} r \land \mathtt{proc}(w) = \mathtt{proc}(w))$ \\
-    $w \relation{fri} r ~\triangleq~ (w \relation{fr} r \land \mathtt{proc}(w) \neq \mathtt{proc}(w))$
+    $w \relation{fre} r ~\triangleq~ (w \relation{fr} r \land \mathtt{proc}(w) = \mathtt{proc}(r))$, \\
+    $w \relation{fri} r ~\triangleq~ (w \relation{fr} r \land \mathtt{proc}(w) \neq \mathtt{proc}(r))$;
     
     %TODO: say that po-relation is *static*
     \item the \texttt{po-loc} relation that is the \po-relation over events that access to the same shared variable: \\
-    $m_1 \relation{po-loc} m_2 ~\triangleq~ (m_1 \relation{po} m_2 \land \mathtt{loc}(m_1) = \mathtt{loc}(m_2))$
+    $m_1 \relation{po-loc} m_2 ~\triangleq~ (m_1 \relation{po} m_2 \land \mathtt{loc}(m_1) = \mathtt{loc}(m_2))$; and
 
     \item the semantics of \textit{fences} (memory barriers) specific for different architectures may be defined as derived relations.
 
@@ -170,7 +170,7 @@ Since each thread performs single write followed by a single read, the \co-relat
   \label{simple_wmm_x86_pic:sub4}
 \end{subfigure}
 \hfill
-\caption{Possible candidate executions for the litmus test Example~\ref{simple_wmm_x86}}
+\caption{Candidate executions for the litmus test in Example~\ref{simple_wmm_x86}}
 \label{simple_wmm_x86_pic}
 \end{figure}
 
@@ -180,7 +180,7 @@ However, the execution shown in Figure~\ref{simple_wmm_x86_pic:sub3} is still co
 %However, the Power memory model allows such cycles, therefore %TODO: include load buffering example, see presentation pdf
 
 
-\section{\cat{} language}
+\section{The \cat{} language}
 \label{ch:wmm:cat}
 
 Weak memory models are defined via \cat{} language~\cite{alglave2016syntax}.

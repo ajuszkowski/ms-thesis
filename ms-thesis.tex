@@ -79,7 +79,6 @@
     tabsize=2,
     captionpos=b,
     escapeinside={[*}{*]},
-    %keywordstyle={\ttfamily\color{red}},
 }
 \newcommand{\tool}[1]{#1}%{\texttt{#1}}
 
@@ -295,7 +294,7 @@ sorting=anyvt,%Sort by alphabetic label, name, year, title,
 %\newcommand{\FSUBTITLE}{}
 %\newcommand{\FDATE}{?.?.2018} % TODO
 \newcommand{\SUBTITLE}{}
-\newcommand{\DATE}{?.?.2018 \textbf{TODO}} % TODO
+\newcommand{\DATE}{18.6.2018}
 
 % Supervisors and instructors
 % ------------------------------------------------------------------
@@ -305,7 +304,7 @@ sorting=anyvt,%Sort by alphabetic label, name, year, title,
 % ``twoinstructors'' to the aalto-thesis package so that the titles are in
 % plural.
 % Example of one supervisor:
-\newcommand{\SUPERVISOR}{Assoc. Prof. Keijo Heljanko\\Docent Igor I. Komarov} % TODO
+\newcommand{\SUPERVISOR}{Assoc. Prof. Keijo Heljanko\\Docent Igor I. Komarov}
 %\newcommand{\FSUPERVISOR}{} % TODO
 %\newcommand{\SSUPERVISOR}{} % TODO
 
@@ -339,7 +338,7 @@ sorting=anyvt,%Sort by alphabetic label, name, year, title,
 %\newcommand{\FPROFESSORSHIP}{?} % TODO check
 % Professorship code is the same in all languages
 %\newcommand{\PROFCODE}{AS-116} % TODO check
-\newcommand{\KEYWORDS}{Software verification, bounded reachability analysis, weak memory models, portability analysis}
+\newcommand{\KEYWORDS}{Weak memory models, concurrent programming, software verification, portability analysis, bounded reachability analysis, SMT-encoding}
 %\newcommand{\FKEYWORDS}{Diplomityöpohja} % TODO
 \newcommand{\LANGUAGE}{English}
 %\newcommand{\FLANGUAGE}{Englanti} % TODO
@@ -426,19 +425,18 @@ sorting=anyvt,%Sort by alphabetic label, name, year, title,
 % Place all formatting commands and such before this line.
 % ------------------------------------------------------------------
 \begin{document}
-% This command adds a PDF bookmark to the cover page. You may leave
-% it out if you don't like it...
+% This command adds a PDF bookmark to the cover page
 \pdfbookmark[0]{Cover}{bookmark.0.cover}
-% This command is defined in aalto-thesis.sty. It controls the page
-% numbering based on whether the doublenumbering option is specified
+
 \startcoverpage
 
 % Cover page
 % ------------------------------------------------------------------
 % Options: finnish, english, and swedish
-% These control in which language the cover-page information is shown
-  \coverpage{english}
+\coverpage{english}
 
+%change page numbering:
+%\addtocounter{page}{1}
 
 % Abstract in English
 % ------------------------------------------------------------------
@@ -446,13 +444,14 @@ sorting=anyvt,%Sort by alphabetic label, name, year, title,
 The software verification is considered as a hard computational problem vulnerable to the state explosion problem.
 The concurrent software verification raises the complexity of the problem to a power determined by %by the factor defined
 all possible interleavings of states of the system. %concurrent parts of the system.
-Moreover, the architecture of a modern shared-memory multi-core processor or optimisations performed by the compiler can cause new program behaviours, unexpected from the point of view of traditional concurrency.
-The guarantees that an execution environment can provide to a programmer are described by its \textit{weak memory model (WMM)}.
+Moreover, the architecture of a modern shared-memory multi-core processor or optimisations performed by a compiler can cause program behaviours that are unexpected from the point of view of traditional concurrency.
+The guarantees that an execution environment can provide to a programmer are formalised in its \textit{weak memory model (WMM)}.
 %The formalisation of weak memory models
-Over the last decade, weak memory models were formally defined for numerous hardware architectures and programming languages.
+Over the last decade, weak memory models were defined for multiple hardware architectures and programming languages.
 %Thus, the memory model-aware software analysis 
 %This opens/brings new 
-This opens new challenges for developing new and adapting existing methods for software verification with respect to a memory model.
+%This opens new challenges in developing new and adapting existing methods for software verification with respect to a memory model.
+This opens new challenges in software verification with respect to a weak memory model.
 %Moreover, a modern shared-memory multiprocessor architecture or an optimising compiler can cause new program behaviours, unexpected from the point of view of traditional concurrency.
 %These behaviours are described by the formal \textit{weak memory model} of an execution environment. %a processor architecture. % or a programming language.
 %This opens large opportunities for missing bugs that are extremely difficult to reproduce and eliminate.
@@ -461,19 +460,17 @@ This opens new challenges for developing new and adapting existing methods for s
 Most existing tools that perform memory model-aware software analysis examine behaviours of the program against a single memory model.
 %Generally, they perform static 
 %finite-state system
-The first tool that analyses the \textit{portability} of the concurrent program from one platform to another is \textit{\porthos{}}~\cite{Porthos17a} released in April~2017.
+The first tool that analyses the \textit{portability} of a concurrent program from one platform to another is \textit{\porthos{}}~\cite{Porthos17a} released in April~2017.
 \porthos{} can verify that the program is portable from the source platform $\mathcal{S}$ to the target platform $\mathcal{T}$ by checking that the program has no extra states under $\mathcal{T}$.
 For that, it performs an SMT-based bounded reachability analysis by encoding the constraints of the program and two memory models $\mathcal{M_S}$ and $\mathcal{M_T}$ into a single SMT-formula.
 
 Although the approach has been proven to be efficient, the tool accepts as input the small C-like toy language. % and remains to have hardly extensible architecture. %proof-of-concept 
-Current thesis aims to extend the input language of \porthos{} so that it is able to process real-world C programs.
-However, current implementation of \porthos{} seems to be hardly extensible, which implies redesign of the whole architecture of the tool in order to increase its robustness, transparency, efficiency and extensibility.
-The result of the work is \textit{\porthos[2]}, a generalised framework for SMT-based memory model-aware analysis.
-
+Current thesis aims to rework \porthos{} by extending its input language, so that it is able to process real-world C programs.
+However, current implementation of \porthos{} seems to be hardly extensible, which raises the need to redesign its whole architecture in order to increase the robustness, transparency, efficiency and extensibility.
+The result of the work is \textit{\porthos[2]}, a framework for SMT-based memory model-aware analysis.
 %to redesign \porthos{} so that 
 %considers the problem of the memory model-aware program verification, especially verification the portability from one architecture to another.
 %The main goal of the work was to rework the proof-of-concept tool \porthos{}, <extend the input lang>, rework architecture towards the framework for analysis of C 
-
 }
 
 % Acknowledgements
@@ -492,32 +489,23 @@ The result of the work is \textit{\porthos[2]}, a generalised framework for SMT-
   % that the work matters
 %Prof. Stavros Tripakis
 %Vladimir Kochetkov and Stanislav Matveyev
-In id fringilla velit. Maecenas sed ante sit amet nisi iaculis bibendum sed vel
-elit. Quisque eleifend lacus nec ipsum lobortis ornare. Nam lectus diam,
-facilisis eget porttitor ac, fringilla quis massa. Phasellus ac dolor sem, eget
-varius lacus. Sed sit amet ipsum eget arcu tristique aliquam. Integer aliquam
-velit sit amet odio tempus commodo. Quisque commodo lacus in leo sagittis vel
-dignissim quam vestibulum. Cras fringilla velit et diam dictum faucibus.
-Pellentesque at eros non mauris auctor euismod. Nullam convallis arcu vel lectus
-sollicitudin rutrum. Praesent consequat, nisl at pretium posuere, neque arcu
-dapibus lacus, ut sollicitudin elit velit ultricies libero. Vestibulum ante
-ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;
+
+\textbf{<TODO>}
 
 \vskip 10mm
 
-\noindent Saint Petersburg \& Espoo 
+\noindent \ATCITY
 \newline
 \DATE
 \vskip 5mm
 \noindent Artem Yushkovskiy
 
-% Acronyms
+
 % ------------------------------------------------------------------
 % Use \cleardoublepage so that IF two-sided printing is used
 % (which is not often for masters theses), then the pages will still
 % start correctly on the right-hand side.
 \cleardoublepage
-% Example acronyms are placed in a separate file, abbreviations.tex
 \input{abbreviations}
 
 % Table of contents
@@ -534,19 +522,24 @@ ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;
 % ------------------------------------------------------------------
 % You only need a list of tables for your thesis if you have very
 % many tables. If you do, uncomment the following two lines.
-% \cleardoublepage
-% \listoftables
+%\cleardoublepage
+%\listoftables
 
 % Table of figures
 % ------------------------------------------------------------------
 % You only need a list of figures for your thesis if you have very
 % many figures. If you do, uncomment the following two lines.
-% \cleardoublepage
-% \listoffigures
-
-% The following label is used for counting the prelude pages
-\label{pages-prelude}
 \cleardoublepage
+\listoffigures
+
+% The following label is used for counting the prelude pages %https://latex.org/forum/viewtopic.php?t=21520 :
+%\phantomsection %does not work either
+%\newcounter{dummy}\refstepcounter{dummy}
+
+\label{pages-prelude}
+
+\cleardoublepage
+
 
 %%%%%%%%%%%%%%%%% The main content starts here %%%%%%%%%%%%%%%%%%%%%
 % ------------------------------------------------------------------
