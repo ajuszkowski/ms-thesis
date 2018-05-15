@@ -74,11 +74,11 @@ $\texttt{SAT}( \textit{Init}(\vec{x_0}) \land \textit{Trans}(\vec{x}_0, \vec{x}_
 
 The portability analysis problem may also be stated as a reachability problem, where the undesirable state is one reachable under the target~$\mathcal{M_T}$ memory model and unreachable under the source memory model~$\mathcal{M_S}$.
 %However, unlikely a BMC problem, the portability analysis does not require to call the SMT-solver repeatedly, since (imperative) programs may be converted as acyclic state graph (by reducing the loops, see Section~\ref{ch:impl:proc:x-transf}) and the $Trans$ predicate may be stated only for the final state of a program.
-Consider the function $cons_{\mathcal{M}}(P)$ calculates the set of executions of program $P$ consistent under the memory model $\mathcal{M}$. Then, the program $P$ is called portable from the source architecture (memory model) $\mathcal{M_S}$ to the target architecture $\mathcal{M_T}$ if all executions consistent under $\mathcal{M_T}$ are consistent under $\mathcal{M_S}$~\cite{Porthos17a}:
+Consider the function $\textit{cons}_{\mathcal{M}}(P)$ calculates the set of executions of program $P$ consistent under the memory model $\mathcal{M}$. Then, the program $P$ is called portable from the source architecture (memory model) $\mathcal{M_S}$ to the target architecture $\mathcal{M_T}$ if all executions consistent under $\mathcal{M_T}$ are consistent under $\mathcal{M_S}$~\cite{Porthos17a}:
 
 \begin{definition}[Portability]
 Let $\mathcal{M_S}$, $\mathcal{M_T}$ be two weak memory models. A program $P$ is portable from $\mathcal{M_S}$ to $\mathcal{M_T}$ if 
-$cons_{\mathcal{M_T}}(P) \subseteq cons_{\mathcal{M_S}}(P)$
+$\textit{cons}_{\mathcal{M_T}}(P) \subseteq \textit{cons}_{\mathcal{M_S}}(P)$
 \end{definition}
 
 Note that the definition of portability requirements against \textit{executions} is strong enough, as it implies the portability against \textit{states} (the \textit{state-portability})~\cite{Porthos17b}.
@@ -103,8 +103,8 @@ that the new encoding is smaller than the old one used in \porthos{} since it do
 %The \tool{PORTHOS} tool encodes the \textit{instructions}, which have recursive nature, in a recursive manner. This means, it adds synthetic composite instructions for both linear (sequential) and non-linear (branching) instructions. 
 For instance, \porthos{} used the encoding scheme where the control-flow of the sequential instruction $i_1 = i_2; i_3$ was encoded as
 $\phi_{CF}(i_2;i_3) \defeq (cf_{i_1} \Leftrightarrow (cf_{i_2} \land cf_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)$,
-and control-flow of the branching instruction $i_1 = (c \; ? \; i_2 \; : \; i_3)$ was encoded as
-$\phi_{CF}( \; c \; ? \; i_2 \; : \; i_3) \defeq (cf_{i_1} \Leftrightarrow (cf_{i_2} \lor cf_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)$
+and control-flow of the branching instruction $i_1 = (c\,?\,i_2\!:\!i_3)$ was encoded as
+$\phi_{CF}(c\,?\,i_2\!:\!i_3) \defeq (\textit{cf}_{i_1} \Leftrightarrow (\textit{cf}_{i_2} \lor \textit{cf}_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)$
 (here we used the notation of C-like ternary operator `\texttt{x?y:z}' for defining the conditional expression `$\texttt{if}\;x\;\texttt{then}\;y\;\texttt{else}\;z$').
 In contrast, the new scheme implemented in \porthos[2] firstly compiles the recursive high-level code into the linear low-level event-based representation, that is then encoded into an SMT-formula. The encoding of branching nodes depends on the \textit{guards}, the value of conditional variable on the branching state, which in turn is encoded as data-flow constraint (see Section~\ref{ch:port:enc:df}).
 
@@ -176,7 +176,7 @@ We distinguish the function ${\fv_g\;:\;\mathbb{C}_g\;\rightarrow\;\{0,1\}}$ tha
 Consider the possible mutual arrangements of nodes in a control-flow graph presented in Figure~\ref{encode:cf}.
 For these cases, we propose the encoding scheme that uniquely encodes each node of graph and at the same time allows to encode partially executed program.
 Equation~\ref{enc:cf:seq} encodes the sequential control-flow represented in Figure~\ref{encode:cf:seq} and reflects the fact that the event $e_2$ can be executed iff the event $e_1$ has been executed.
-Equation~\ref{enc:cf:br} encodes the branching control-flow depicted in Figure~\ref{encode:cf:br} by allowing only following executions: $\{\emptyset, \; (e_1), \; (e_1\,\rightarrow\,e_2), \; (e_1\,\rightarrow\,e_3)\}$.
+Equation~\ref{enc:cf:br} encodes the branching control-flow depicted in Figure~\ref{encode:cf:br} by allowing only following executions: $\{\emptyset, \; (e_1), \; (e_1\,\rightarrow\,e_2), \; (e_1\,\Rightarrow\,e_3)\}$.
 In Equation~\ref{enc:cf:merge}, which encodes the control-flow of a merge-point represented in Figure~\ref{encode:cf:merge}, the event $e_k$ is executed if either of its predecessors has been executed, regardless the type of the transition.
 %TODO: maybe add the overall formula \phi_{CF} ?
 
@@ -224,7 +224,7 @@ Thus, for branching statements that do not have any events in one of the branche
 To encode the data-flow constraints, we use the \textit{Static Single-Assignment~(SSA) form} in order to be able to capture an arbitrary data-flow into a single SMT-formula.
 The SSA form requires each variable to be assigned only once within entire program.
 In contrast, \porthos{} used the \textit{Dynamic Single-Assignment~(DSA)} form, that requires indices to be unique within a branch.
-Although the number of variable references (each of which is encoded as unique SMT-variable) on average is logarithmically less in case of the DSA form than the SSA form, the result SMT-formula still needs to be complemented by same number of equality assertions when encoding the data-flow of merge points~\cite{Porthos17a}.
+Although the number of variable references (each of which is encoded as unique SMT-variable) on average is logarithmically less in the case of the DSA form than the SSA form, the result SMT-formula still needs to be complemented by same number of equality assertions when encoding the data-flow of merge points~\cite{Porthos17a}.
 
 Following~\cite{Porthos17b}, the indexed references of variables are computed in accordance with the following rules:
 %\begin{enumerate}[noitemsep,topsep=0pt]
@@ -280,7 +280,7 @@ of data-flow stored in equivalence assertions over the SSA-variables.
 The encoding of this linkage left untouched as it is implemented in \porthos: for each pair of events $e_1$ and $e_2$ linked by the \rf-relation, we add the following constraint:
 %
 \begin{align}
-\phi_{DF_{mem}}(e_1, e_2) \defeq \ & \texttt{rf}(e_1, e_2) \rightarrow (l_i = l_j)
+\phi_{DF_{mem}}(e_1, e_2) \defeq \ & \texttt{rf}(e_1, e_2) \Rightarrow (l_i = l_j)
 \end{align}
 
 where the variable of location $l$ is mapped to the SSA-variable $l_i$ for event $e_1$, and to the SSA-variable $l_j$ for event $e_2$; and the predicate $\texttt{rf}(e_1, e_2)$ is encoded as a boolean variable, which itself equals $true$ if $e_2$ reads the shared variable that was written in $e_1$.
@@ -312,8 +312,8 @@ The basic idea of using the Kleene fixpoint iteration for encoding such relation
  %is used for guessing the execution 
 
 The memory model can assert acyclicity, irreflexivity of emptiness of a relation or a set of events.
-As it has been proposed in~\cite{Porthos17a}, encoding the acyclicity assertion uses numerical variable $\Psi_e \in \mathbb{N}$ for each event $e$ in the relation to be asserted: $acyclic(r) \defeq (r(e_1,e_2) \Rightarrow (\Psi_{e_1} < \Psi_{e_2}))$.
-The irreflexivity assertion as $irreflexive(r) \defeq \bigvee\limits_{e_k \in \mathbb(E)}^{} \lnot r(e_k,e_k)$.
+As it has been proposed in~\cite{Porthos17a}, encoding the acyclicity assertion uses numerical variable $\Psi_e \in \mathbb{N}$ for each event $e$ in the relation to be asserted: $\textit{acyclic}(r) \defeq (r(e_1,e_2) \Rightarrow (\Psi_{e_1} < \Psi_{e_2}))$.
+The irreflexivity assertion as $\textit{irreflexive}(r) \defeq \bigwedge\limits_{e_k \in \mathbb(E)}^{} \lnot r(e_k,e_k)$.
 
 %The ... \wmodel{}
 

@@ -13,5 +13,5 @@ once:
 	# OK
 
 clean:
-	rm -f {,$(OUTPUT)/}{*.bbl,*.aux,*.blg,*.log,*.bcf,*.out,*.toc,*.run,*.xml,*.pdf,*.synctex.gz}
+	rm -f $(OUTPUT)/*
 
