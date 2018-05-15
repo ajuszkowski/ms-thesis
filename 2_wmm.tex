@@ -45,11 +45,11 @@ Only memory events change the state of an abstract machine executing the code, s
 Since memory is the crucial low-level resource shared by multiple processes, most relations are defined over memory events. 
 The processes can access a shared memory location (denoted by~$l_i$, for \textit{location}), or a local one (denoted by~$r_i$, for \textit{register}).
 A memory event can access at most one shared memory location, high-level instructions that address more than one shared variable must be transformed into a sequence of events.
-A memory event is specified by its direction with respect to the shared variable, its location~$\mathtt{loc}(e_m)$, its processor label~$\mathtt{proc}(e_m)$, and a unique event label~$\mathtt{id}(e_m)$~\cite{alglave2010shared}.
+A memory event is specified by its direction with respect to the shared variable, its location~$\texttt{loc}(e_m)$, its processor label~$\texttt{proc}(e_m)$, and a unique event label~$\texttt{id}(e_m)$~\cite{alglave2010shared}.
 %\texttt{load} for read the value of a shared-memory location, or \texttt{store} for write, or neither of them if both locations are local
 
 The set of memory events $\mathbb{M}$ is divided into write events $\mathbb{W}$ (that write values to shared-memory locations) and read events $\mathbb{R}$ (that read values stored in shared-memory locations).
-We add a restriction that each memory event uses at most one shared location, so that the write instruction $i = write(l_1, l_2)$, that encodes the write from the shared location $l_2$ to the shared location $l_1$, is represented as two consequent events $e_1~=~\mathtt{load}(r_1~\leftarrow~l_2); \ e_2~=~\mathtt{store}(l_1~\leftarrow~r_1)$.
+We add a restriction that each memory event uses at most one shared location, so that the write instruction $i = write(l_1, l_2)$, that encodes the write from the shared location $l_2$ to the shared location $l_1$, is represented as two consequent events $e_1~=~\texttt{load}(r_1~\leftarrow~l_2); \ e_2~=~\texttt{store}(l_1~\leftarrow~r_1)$.
 Also, it is important to separate the set of initial write events $\mathbb{IW}~\subseteq~\mathbb{W}$ that perform initialisation of program variables.
 
 A \textit{computation event} $e_c \in \mathbb{C} \subseteq \mathbb{E}$, represents a low-level assembly computation operation performed solely on local-memory arguments.
@@ -74,7 +74,7 @@ The basic relations are the following~\cite{alglave2010shared}:
 %TODO: say that 
 \begin{itemize}
     \item The \textit{control-flow} of a program is defined by the \textit{program-order} relation \po~$\subseteq~\mathbb{E}~\times~\mathbb{E}$, which represents the total order of events of same process.
-    For instance, if the instruction $i_1$ generates the event $e_1$ and the instruction $i_2$ follows $i_1$ and generates the event $e_2$, then $e_1 \relation{po} e_2$.
+    For instance, if the instruction $i_1$ generates the event $e_1$ and the instruction $i_2$ follows $i_1$ and generates the event $e_2$, then $e_1 \relarrow{po} e_2$.
     %Some new relations may be acquired : dp, po-loc
 
     \item The \textit{data-flow} of a program is defined by \textit{communication relations}:
@@ -94,22 +94,22 @@ Below we enumerate some derived relations~\cite{alglave2010shared}:
 \begin{itemize}
 
     \item the \textit{from-read} relation $\fr \subseteq~\mathbb{R}~\times~\mathbb{W}$ that maps a read event to all write events succeeding the write event from which the read event gets its value: \\
-    $r \relation{fr} w ~\triangleq~ (\exists w' . w' \relation{rf} r \land w' \relation{co} w)$;
+    $r \relarrow{fr} w ~\triangleq~ (\exists w' . w' \relarrow{rf} r \land w' \relarrow{co} w)$;
 
     %\item the \textit{data dependency} relation \texttt{dp}, which is a subset of \po-relation that always has a read at its source (it connects the read to the write which it depends on)
     %TO-DO: formula for dp or exclude
 
     \item the \textit{communication} relation \com over memory events, that fully describes the data-flow of a program: \\
-    %$\mathtt{com} \triangleq (\mathtt{rf} \cup \mathtt{co} \cup \mathtt{fr})$
-    $m_1 \relation{com} m_2~\triangleq~((m_1\relation{rf}m_2) \lor (m_1\relation{co}m_2) \lor (m_1\relation{fr}m_2))$;
+    %$\texttt{com} \triangleq (\texttt{rf} \cup \texttt{co} \cup \texttt{fr})$
+    $m_1 \relarrow{com} m_2~\triangleq~((m_1\relarrow{rf}m_2) \lor (m_1\relarrow{co}m_2) \lor (m_1\relarrow{fr}m_2))$;
 
     \item the \textit{external} (and \textit{internal}) \textit{from-read} relations that restrict the \fr-relation to the different (respectively, same) processes: \\
-    $w \relation{fre} r ~\triangleq~ (w \relation{fr} r \land \mathtt{proc}(w) = \mathtt{proc}(r))$, \\
-    $w \relation{fri} r ~\triangleq~ (w \relation{fr} r \land \mathtt{proc}(w) \neq \mathtt{proc}(r))$;
+    $w \relarrow{fre} r ~\triangleq~ (w \relarrow{fr} r \land \texttt{proc}(w) = \texttt{proc}(r))$, \\
+    $w \relarrow{fri} r ~\triangleq~ (w \relarrow{fr} r \land \texttt{proc}(w) \neq \texttt{proc}(r))$;
     
     %TODO: say that po-relation is *static*
     \item the \texttt{po-loc} relation that is the \po-relation over events that access to the same shared variable: \\
-    $m_1 \relation{po-loc} m_2 ~\triangleq~ (m_1 \relation{po} m_2 \land \mathtt{loc}(m_1) = \mathtt{loc}(m_2))$; and
+    $m_1 \relarrow{po-loc} m_2 ~\triangleq~ (m_1 \relarrow{po} m_2 \land \texttt{loc}(m_1) = \texttt{loc}(m_2))$; and
 
     \item the semantics of \textit{fences} (memory barriers) specific for different architectures may be defined as derived relations.
 
@@ -135,7 +135,7 @@ The \textit{candidate execution} is an execution that is not yet constrained by 
 %The order of events in particular execution is denoted as `$\rightarrow$', an empty execution is denoted as $\emptyset$.
 %associated with the instructions of the program
 %An execution is considered to be \textit{valid} if the memory events follow a single global timeline, i.e., can be embedded in a single partial order allowed by the memory model restrictions~\cite{alglave2010shared}.
-%An execution is uniquely defined by the set $\mathbb{X}$ of events have been executed in each thread (the \textit{control-flow} of a program), and the relations $\mathtt{rf}$ and $\mathtt{co}$~\cite{alglave2010shared}.
+%An execution is uniquely defined by the set $\mathbb{X}$ of events have been executed in each thread (the \textit{control-flow} of a program), and the relations $\texttt{rf}$ and $\texttt{co}$~\cite{alglave2010shared}.
 Figure~\ref{simple_wmm_x86_pic} illustrates four possible candidate executions for the litmus test Example~\ref{simple_wmm_x86} (the pictures are generated by the \tool{herd7} tool, version~7.47).
 Since there are no conditional jumps, the \po-relation is defined and we do not need to guess it.
 Since each thread performs single write followed by a single read, the \co-relation is also defined (it relates the initial write event with the write event to the same location).
@@ -196,19 +196,19 @@ Below we enumerate pre-defined operators over relations and sets of events:
 \begin{enumerate}
   \item \textit{Unary operations}:
     \begin{itemize}
-      \item \textit{the complement} of a relation \rel{r} is $\rel{\textasciitilde r}$,
-      \item \textit{the transitive closure} of a relation \rel{r} is $\rel{r+}$,
-      \item \textit{the reflexive closure} of a relation \rel{r} is $\rel{r?}$,
-      \item \textit{the reflexive-transitive closure} of a relation \rel{r} is $\rel{r*}$, and
-      \item \textit{the inverse} of a relation \rel{r} is $\invrel{r}$.
+      \item the \textit{complement} of a relation \texttt{r} is $\texttt{\textasciitilde r}$,
+      \item the \textit{transitive closure} of a relation \texttt{r} is $\texttt{r+}$,
+      \item the \textit{reflexive closure} of a relation \texttt{r} is $\texttt{r?}$,
+      \item the \textit{reflexive-transitive closure} of a relation \texttt{r} is $\texttt{r*}$, and
+      \item the \textit{inverse} of a relation \texttt{r} is $\invrel{r}$.
     \end{itemize}
   \item \textit{Binary operations:}
   \begin{itemize}
-    \item \textit{the union} of two relations \rel{r1} and \rel{r2} is \rel{r1\,|\,r2},
-    \item \textit{the intersection} of two relations \rel{r1} and \rel{r2} is \rel{r1\,\&\,r2},
-      \item \textit{the difference} of two relations \rel{r1} and \rel{r2} is $\mathtt{r1 \relminus r2}$, and
-    \item \textit{the sequence} of two relations \rel{r1} and \rel{r2} is \rel{r1;r2}, which is defined as the set of pairs \rel{(x,y)} such that there exists an intervening \rel{z}, such that $\rel{(x,z)} \in \rel{r1}$ and $\rel{(z,y)} \in \rel{r2}$.
+    \item the \textit{union} of two relations \texttt{r1} and \texttt{r2} is \texttt{r1\,|\,r2},
+    \item the \textit{intersection} of two relations \texttt{r1} and \texttt{r2} is \texttt{r1\,\&\,r2},
+      \item the \textit{difference} of two relations \texttt{r1} and \texttt{r2} is $\texttt{r1} \relminus \texttt{r2}$, and
+    \item \textit{the sequence} of two relations \texttt{r1} and \texttt{r2} is \texttt{r1;r2}, which is defined as the set of pairs \texttt{(x,y)} such that there exists an intervening \texttt{z}, such that $\texttt{(x,z)} \in \texttt{r1}$ and $\texttt{(z,y)} \in \texttt{r2}$.
   \end{itemize}
 \end{enumerate}
 
-For instance, the \fr-relation is defined as a sequence of inverted \rf-relation and \co-relation: $\mathr{fr} = (\mathr{rf}^{-1};\mathr{co})$. As an example memory model definition in \cat{} language, the the x86-TSO can be found in Appendix~\ref{apx:x86cat}. This memory model asserts acyclicity of communication relation, \rel{po-loc} relation, \rel{mfence} relation and some other derived relations~\cite{owens2009better}.
+For instance, the \fr-relation is defined as a sequence of inverted \rf-relation and \co-relation: $\texttt{fr} = (\invrel{rf};\texttt{co})$. As an example memory model definition in \cat{} language, the the x86-TSO can be found in Appendix~\ref{apx:x86cat}. This memory model asserts acyclicity of communication relation, \texttt{po-loc} -relation, \texttt{mfence}-relation and some other derived relations~\cite{owens2009better}.

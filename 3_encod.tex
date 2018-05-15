@@ -66,10 +66,10 @@ However, there exist numerous techniques for making BMC complete for finite-stat
 %TODO: overapproximation. loops, Rice's thm. Within the bound, the method is complete.
 
 In general, a BMC problem aims to examine the non-reachability of the "undesirable" states of a finite-state system.
-Let $\vec{x} = (x_1, x_2, ..., x_n)$ be a vector of $n$ variables that uniquely distinguishes states of the system; let $Init(\vec{x})$ be an \textit{initial-state predicate} that defines the set of initial states of the system; let $Trans(\vec{x}, \pvec{x}')$ be a \textit{transition predicate} that signifies whether there the transition from state $\vec{x}$ to state $\pvec{x}'$ is valid; let $Bad(\vec{x})$ be a \textit{bad-state predicate} that defines the set of undesirable states.
+Let $\vec{x} = (x_1, x_2, ..., x_n)$ be a vector of $n$ variables that uniquely distinguishes states of the system; let $\textit{Init}(\vec{x})$ be an \textit{initial-state predicate} that defines the set of initial states of the system; let $\textit{Trans}(\vec{x}, \pvec{x}')$ be a \textit{transition predicate} that signifies whether there the transition from state $\vec{x}$ to state $\pvec{x}'$ is valid; let $\textit{Bad}(\vec{x})$ be a \textit{bad-state predicate} that defines the set of undesirable states.
 Then, the BMC problem, stated as the reachability of the undesirable state withing $k$ steps, is formulated as following:
 %\begin{equation}
-$\mathtt{SAT}( Init(\vec{x_0}) \land Trans(\vec{x}_0, \vec{x}_1) \land ... \land Trans(\vec{x}_{k-1}, \vec{x}_k) \land Bad(\vec{x}_k) )$.
+$\texttt{SAT}( \textit{Init}(\vec{x_0}) \land \textit{Trans}(\vec{x}_0, \vec{x}_1) \land ... \land \textit{Trans}(\vec{x}_{k-1}, \vec{x}_k) \land \textit{Bad}(\vec{x}_k) )$.
 %\end{equation}
 
 The portability analysis problem may also be stated as a reachability problem, where the undesirable state is one reachable under the target~$\mathcal{M_T}$ memory model and unreachable under the source memory model~$\mathcal{M_S}$.
@@ -97,15 +97,15 @@ However, each merge node can have any positive number of predecessors, where eac
 
 While working on the \porthos[2], we have applied some modifications to the encoding scheme for the control-flow.
 The changes are conditioned by the need to be able to process an arbitrary control-flow produced by conditional and unconditional jumps of the C language.
-For that, we compile the abstract syntax tree~(AST) of the parsed C-code to the plain event-flow graph.
+For that, we compile the \textit{abstract syntax tree~(AST)} of the parsed C-code to the plain event-flow graph.
 We show %TODO! to show, actually!!!
 that the new encoding is smaller than the old one used in \porthos{} since it does not produces new variables for each high-level statement of the input language.
 %The \tool{PORTHOS} tool encodes the \textit{instructions}, which have recursive nature, in a recursive manner. This means, it adds synthetic composite instructions for both linear (sequential) and non-linear (branching) instructions. 
 For instance, \porthos{} used the encoding scheme where the control-flow of the sequential instruction $i_1 = i_2; i_3$ was encoded as
-$\phi_{CF}(i_2;i_3) \defeq (cf_{i_1} = (cf_{i_2} \land cf_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)$,
+$\phi_{CF}(i_2;i_3) \defeq (cf_{i_1} \Leftrightarrow (cf_{i_2} \land cf_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)$,
 and control-flow of the branching instruction $i_1 = (c \; ? \; i_2 \; : \; i_3)$ was encoded as
 $\phi_{CF}( \; c \; ? \; i_2 \; : \; i_3) \defeq (cf_{i_1} \Leftrightarrow (cf_{i_2} \lor cf_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)$
-(here we used the notation of C-like ternary operator `\texttt{x?y:z}' for defining the conditional expression `$\mathtt{if}\;x\;\mathtt{then}\;y\;\mathtt{else}\;z$').
+(here we used the notation of C-like ternary operator `\texttt{x?y:z}' for defining the conditional expression `$\texttt{if}\;x\;\texttt{then}\;y\;\texttt{else}\;z$').
 In contrast, the new scheme implemented in \porthos[2] firstly compiles the recursive high-level code into the linear low-level event-based representation, that is then encoded into an SMT-formula. The encoding of branching nodes depends on the \textit{guards}, the value of conditional variable on the branching state, which in turn is encoded as data-flow constraint (see Section~\ref{ch:port:enc:df}).
 
 Let $\fx:\,\mathbb{E}\,\rightarrow\,\{0,1\}$ be the predicate that signifies the fact that the event has been e\textbf{x}ecuted (and, consequently, has changed the state of the system).
@@ -181,11 +181,11 @@ In Equation~\ref{enc:cf:merge}, which encodes the control-flow of a merge-point 
 %TODO: maybe add the overall formula \phi_{CF} ?
 
 \begin{align}
-\phi_{CF_{seq}}   \defeq \ & \ \fx(e_2) \rightarrow \fx(e_1) \label{enc:cf:seq} \\
-\phi_{CF_{br}}    \defeq \ & \ [\fx(e_2) \rightarrow \fx(e_1)] \land [\fx(e_3) \rightarrow \fx(e_1)] \land \nonumber \\
-                      & \ [\fx(e_2) \rightarrow \fv(e_1)] \land [\fx(e_3) \rightarrow \lnot\fv(e_1)] \land \nonumber \\
+\phi_{CF_{seq}}   \defeq \ & \ \fx(e_2) \Rightarrow \fx(e_1) \label{enc:cf:seq} \\
+\phi_{CF_{br}}    \defeq \ & \ [\fx(e_2) \Rightarrow \fx(e_1)] \land [\fx(e_3) \Rightarrow \fx(e_1)] \land \nonumber \\
+                      & \ [\fx(e_2) \Rightarrow \fv(e_1)] \land [\fx(e_3) \Rightarrow \lnot\fv(e_1)] \land \nonumber \\
                       & \lnot [\fx(e_2) \land \fx(e_3)]  \label{enc:cf:br} \\
-\phi_{CF_{mer}} \defeq \ & \fx(e_k) \rightarrow (\bigvee\limits_{e_p \in \mathtt{pred}(e_k)}^{} \fx(e_p)) \label{enc:cf:merge}
+\phi_{CF_{mer}} \defeq \ & \fx(e_k) \Rightarrow (\bigvee\limits_{e_p \in \texttt{pred}(e_k)}^{} \fx(e_p)) \label{enc:cf:merge}
 \end{align}
 
 
@@ -236,9 +236,9 @@ These rules determine the following encoding of load, store and computation even
 %TODO: maybe add the overall formula \phi_{DF} ?
 %
 \begin{align}
-    \phi_{DF_{e = \mathtt{load}(r \leftarrow l)}} \defeq \ & \fx(e) \rightarrow (r_{i+1} = l_{i+1}) \\
-    \phi_{DF_{e = \mathtt{store}(l \leftarrow r)}} \defeq \ & \fx(e) \rightarrow (l_{i+1} = r_i) \\
-    \phi_{DF_{e = \mathtt{eval}(\cdot)}} \defeq \ & \fx(e) \rightarrow \fv(e) % \\
+    \phi_{DF_{e = \texttt{load}(r \leftarrow l)}} \defeq \ & \fx(e) \Rightarrow (r_{i+1} = l_{i+1}) \\
+    \phi_{DF_{e = \texttt{store}(l \leftarrow r)}} \defeq \ & \fx(e) \Rightarrow (l_{i+1} = r_i) \\
+    \phi_{DF_{e = \texttt{eval}(\cdot)}} \defeq \ & \fx(e) \Rightarrow \fv(e) % \\
 \end{align}
 
 To convert the program into SSA form, for each event each variable that is declared so far (either local or shared) is mapped to its indexed reference; this information is stored in the SSA-map "event \textit{to} variable \textit{to} SSA-index". %for each event stores the map that each declared variable maps to its SSA-index
@@ -254,10 +254,10 @@ The SSA-map is computed iteratively while traversing the event-flow graph in top
         \Function{Compute-SSA-Map}{G}
             \State {$S \gets$ empty map; $S[e_0] \gets$ empty map}
             \ForAll {event $e_i \in G.N$ in topological order}
-                \ForAll {predecessor $e_j \in \mathtt{pred}(e_i)$}
-                    \State {$S[e_i] \gets \mathtt{copy}(S[e_j])$}
+                \ForAll {predecessor $e_j \in \texttt{pred}(e_i)$}
+                    \State {$S[e_i] \gets \texttt{copy}(S[e_j])$}
                     \ForAll {variable $v_k \in$ set of variables accessed by $e_i$ }
-                        \State {$S[e_i][v_k] \gets \mathtt{max}(S[e_i][v_k], \ S[e_j][v_k])$}
+                        \State {$S[e_i][v_k] \gets \texttt{max}(S[e_i][v_k], \ S[e_j][v_k])$}
                         \If {need to update the index of $v_k$} \Comment {cases (1)-(2)}
                             \State {$S[e_i][v_k] \gets S[e_i][v_k] + 1$}
                         \EndIf
@@ -280,10 +280,10 @@ of data-flow stored in equivalence assertions over the SSA-variables.
 The encoding of this linkage left untouched as it is implemented in \porthos: for each pair of events $e_1$ and $e_2$ linked by the \rf-relation, we add the following constraint:
 %
 \begin{align}
-\phi_{DF_{mem}}(e_1, e_2) \defeq \ & \mathtt{rf}(e_1, e_2) \rightarrow (l_i = l_j) 
+\phi_{DF_{mem}}(e_1, e_2) \defeq \ & \texttt{rf}(e_1, e_2) \rightarrow (l_i = l_j)
 \end{align}
 
-where the variable of location $l$ is mapped to the SSA-variable $l_i$ for event $e_1$, and to the SSA-variable $l_j$ for event $e_2$; and the predicate $\mathtt{rf}(e_1, e_2)$ is encoded as a boolean variable, which itself equals $true$ if $e_2$ reads the shared variable that was written in $e_1$.
+where the variable of location $l$ is mapped to the SSA-variable $l_i$ for event $e_1$, and to the SSA-variable $l_j$ for event $e_2$; and the predicate $\texttt{rf}(e_1, e_2)$ is encoded as a boolean variable, which itself equals $true$ if $e_2$ reads the shared variable that was written in $e_1$.
 
 
 \subsection{Encoding for the memory model} %Encoding the memory model constraints}
@@ -292,7 +292,7 @@ where the variable of location $l$ is mapped to the SSA-variable $l_i$ for event
 The basic scheme for encoding the memory model is proposed in~\cite{Porthos17a}.
 The encoding consists of two parts: encoding the \textit{derived relations} and encoding the memory model \textit{assertions}.
 
-In an SMT-formula, the relation $x \relation{r} y$ is represented by a boolean variable $r(x, y)$ that indicates whether the relation holds.
+In an SMT-formula, the relation $x \relarrow{r} y$ is represented by a boolean variable $r(x, y)$ that indicates whether the relation holds.
 The derived relations are encoded by fresh boolean variables according to the following rules~\cite{Porthos17b}:
 \begin{itemize}[noitemsep,topsep=0pt]
 \item $r_1 \cup r_2(e_1, e_2) \defeq r_1(e_1, e_2) \lor r_2(e_1, e_2)$;
@@ -301,12 +301,13 @@ The derived relations are encoded by fresh boolean variables according to the fo
 \item $r^{-1}(e_1, e_2) \defeq r(e_2, e_1)$;
 \item $r^{*}(e_1, e_2) \defeq r^{+}(e_1, e_2) \lor (e_1 = e_2)$;
 \item $r_1;r_2(e_1,e_2) \defeq \bigvee\limits_{e_k \in \mathbb{E}}^{} r_1(e_1,e_k) \land r_2(e_k,e_2)$; \ and
-\item $r^{+}(e_1, e_2) \defeq \mathtt{tc}_{\left\lceil log|\mathbb{E}| \right\rceil} (e_1, e_2), \ where \\
-\hspace*{1em} \mathtt{tc}_{0}(e_1,e_2) \defeq r(e_1,e_2), \ and \\ 
-\hspace*{1em} \mathtt{tc}_{i+1}(e_1,e_2) \defeq r(e_1,e_2) \lor (\mathtt{tc}_{i}(e_1,e_2);\mathtt{tc}_{i}(e_1,e_2))$.
+\item $r^{+}(e_1, e_2) \defeq \texttt{tc}_{\left\lceil log|\mathbb{E}| \right\rceil} (e_1, e_2), \ where \vspace{0.25em} \\
+\texttt{tc}_{0}(e_1,e_2) \defeq r(e_1,e_2), \ and \\
+\texttt{tc}_{i+1}(e_1,e_2) \defeq r(e_1,e_2) \lor (\texttt{tc}_{i}(e_1,e_2);\texttt{tc}_{i}(e_1,e_2))$.
 \end{itemize}
+\vspace{1em}
 
-Note that \cat{} language allows mutually-recursive definitions of relations (for example, `$\mathtt{r_1} = \mathtt{r_2} \cup (r_1;r_1)$').
+Note that \cat{} language allows mutually-recursive definitions of relations (for example, `$\texttt{r}_\texttt{1} = \texttt{r}_\texttt{2} \cup (\texttt{r}_\texttt{1}; \texttt{r}_\texttt{1})$').
 The basic idea of using the Kleene fixpoint iteration for encoding such relations was also proposed in~\cite{Porthos17a}: for any pair of events $e_1,e_2 \in \mathbb{E}$ and relation $r \subseteq \mathbb{E} \times \mathbb{E}$, we encode a new integer variable $\Phi_{e_1,e_2}^{r}$ that represents the round of Kleene iteration on which the variable $r(e_1, e_2)$ has been set.
  %is used for guessing the execution 
 
