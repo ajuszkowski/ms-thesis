@@ -268,19 +268,6 @@ sorting=anyvt,%Sort by alphabetic label, name, year, title,
 % Bibliography
 \addbibresource{bib/ms-thesis.bib}
 
-% The aalto-thesis package provides typesetting instructions for the
-% standard -thesis parts (abstracts, front page, and so on)
-% Load this package second-to-last, just before the hyperref package.
-% Options that you can use:
-%   mydraft - renders the thesis in draft mode.
-%             Do not use for the final version.
-%   doublenumbering - [optional] number the first pages of the thesis
-%                     with roman numerals (i, ii, iii, ...); and start
-%                     arabic numbering (1, 2, 3, ...) only on the
-%                     first page of the first chapter
-%   twoinstructors  - changes the title of instructors to plural form
-%   twosupervisors  - changes the title of supervisors to plural form
-%\usepackage[mydraft,doublenumbering]{aalto-thesis}
 \usepackage[doublenumbering,twosupervisors]{lib/aalto-thesis}
 
 
@@ -303,24 +290,6 @@ sorting=anyvt,%Sort by alphabetic label, name, year, title,
 % Hyperref can also set up the PDF metadata fields. These are
 % set a bit later on, after the thesis setup.
 
-
-% Thesis setup
-% ==================================================================
-% Change these to fit your own thesis.
-% \COMMAND always refers to the English version;
-% \FCOMMAND refers to the Finnish version; and
-% \SCOMMAND refers to the Swedish version.
-% You may comment/remove those language variants that you do not use
-% (but then you must not include the abstracts for that language)
-% ------------------------------------------------------------------
-% If you do not find the command for a text that is shown in the cover page or
-% in the abstract texts, check the aalto-thesis.sty file and locate the text
-% from there.
-% All the texts are configured in language-specific blocks (lots of commands
-% that look like this: \renewcommand{\ATCITY}{Espoo}.
-% You can just fix the texts there. Just remember to check all the language
-% variants you use (they are all there in the same place).
-% ------------------------------------------------------------------
 \newcommand{\TITLE}{\nohyphens{Automated Analysis of Weak Memory Models}}
 %\newcommand{\FTITLE}{?}
 %\newcommand{\FSUBTITLE}{}
@@ -370,7 +339,7 @@ sorting=anyvt,%Sort by alphabetic label, name, year, title,
 %\newcommand{\FPROFESSORSHIP}{?} % TODO check
 % Professorship code is the same in all languages
 %\newcommand{\PROFCODE}{AS-116} % TODO check
-\newcommand{\KEYWORDS}{\textbf{TODO: }Thesis template, master's thesis} % TODO
+\newcommand{\KEYWORDS}{Software verification, bounded reachability analysis, weak memory models, portability analysis}
 %\newcommand{\FKEYWORDS}{Diplomityöpohja} % TODO
 \newcommand{\LANGUAGE}{English}
 %\newcommand{\FLANGUAGE}{Englanti} % TODO
@@ -471,31 +440,40 @@ sorting=anyvt,%Sort by alphabetic label, name, year, title,
   \coverpage{english}
 
 
-% Abstracts
-% ------------------------------------------------------------------
-% Include an abstract in the language that the thesis is written in,
-% and if your native language is Finnish or Swedish, one in that language.
-
 % Abstract in English
 % ------------------------------------------------------------------
 \thesisabstract{english}{
-In id fringilla velit. Maecenas sed ante sit amet nisi iaculis bibendum sed vel
-elit. Quisque eleifend lacus nec ipsum lobortis ornare. Nam lectus diam,
-facilisis eget porttitor ac, fringilla quis massa. Phasellus ac dolor sem, eget
-varius lacus. Sed sit amet ipsum eget arcu tristique aliquam. Integer aliquam
-velit sit amet odio tempus commodo. Quisque commodo lacus in leo sagittis vel
-dignissim quam vestibulum. Cras fringilla velit et diam dictum faucibus.
-Pellentesque at eros non mauris auctor euismod. Nullam convallis arcu vel lectus
-sollicitudin rutrum. Praesent consequat, nisl at pretium posuere, neque arcu
-dapibus lacus, ut sollicitudin elit velit ultricies libero. Vestibulum ante
-ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;
+The software verification is considered as a hard computational problem vulnerable to the state explosion problem.
+The concurrent software verification raises the complexity of the problem to a power determined by %by the factor defined
+all possible interleavings of states of the system. %concurrent parts of the system.
+Moreover, the architecture of a modern shared-memory multi-core processor or optimisations performed by the compiler can cause new program behaviours, unexpected from the point of view of traditional concurrency.
+The guarantees that an execution environment can provide to a programmer are described by its \textit{weak memory model (WMM)}.
+%The formalisation of weak memory models
+Over the last decade, weak memory models were formally defined for numerous hardware architectures and programming languages.
+%Thus, the memory model-aware software analysis 
+%This opens/brings new 
+This opens new challenges for developing new and adapting existing methods for software verification with respect to a memory model.
+%Moreover, a modern shared-memory multiprocessor architecture or an optimising compiler can cause new program behaviours, unexpected from the point of view of traditional concurrency.
+%These behaviours are described by the formal \textit{weak memory model} of an execution environment. %a processor architecture. % or a programming language.
+%This opens large opportunities for missing bugs that are extremely difficult to reproduce and eliminate.
+%formally described by <wmms> : guarantees even with aggressive hw and compiler optimisations
 
-Nulla semper hendrerit molestie. Pellentesque blandit velit sit amet est
-vestibulum faucibus. Nullam massa turpis, venenatis non mollis fringilla, mattis
-et diam. Fusce molestie convallis elementum. Morbi nec lacus dapibus arcu mollis
-gravida. Aliquam erat volutpat. Nam vitae magna nunc. Nunc ut ipsum at massa
-porttitor vestibulum. Praesent diam lorem, ultrices nec vestibulum id, volutpat
-nec lacus.
+Most existing tools that perform memory model-aware software analysis examine behaviours of the program against a single memory model.
+%Generally, they perform static 
+%finite-state system
+The first tool that analyses the \textit{portability} of the concurrent program from one platform to another is \textit{\porthos{}}~\cite{Porthos17a} released in April~2017.
+\porthos{} can verify that the program is portable from the source platform $\mathcal{S}$ to the target platform $\mathcal{T}$ by checking that the program has no extra states under $\mathcal{T}$.
+For that, it performs an SMT-based bounded reachability analysis by encoding the constraints of the program and two memory models $\mathcal{M_S}$ and $\mathcal{M_T}$ into a single SMT-formula.
+
+Although the approach has been proven to be efficient, the tool accepts as input the small C-like toy language. % and remains to have hardly extensible architecture. %proof-of-concept 
+Current thesis aims to extend the input language of \porthos{} so that it is able to process real-world C programs.
+However, current implementation of \porthos{} seems to be hardly extensible, which implies redesign of the whole architecture of the tool in order to increase its robustness, transparency, efficiency and extensibility.
+The result of the work is \textit{\porthos[2]}, a generalised framework for SMT-based memory model-aware analysis.
+
+%to redesign \porthos{} so that 
+%considers the problem of the memory model-aware program verification, especially verification the portability from one architecture to another.
+%The main goal of the work was to rework the proof-of-concept tool \porthos{}, <extend the input lang>, rework architecture towards the framework for analysis of C 
+
 }
 
 % Acknowledgements
