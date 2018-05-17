@@ -33,8 +33,8 @@ public interface XInterpreter {
   void finishBlockBranchDefinition();
   void finishNonlinearBlockDefinition();
   void processJumpStatement(JumpKind kind);
-  XEntity processMethodCall(String methodName,
-                            XMemoryUnit... arguments);
+  XEntity processMethodCall(String methodName, XMemoryUnit... arguments);
+  
   
   // --
   

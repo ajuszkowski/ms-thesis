@@ -188,12 +188,12 @@ Consider the possible mutual arrangements of nodes in a control-flow graph prese
 
 \begin{align}
 \phi_{CF_{seq}} \defeq \quad & \fx(e_{i+1}) \Rightarrow \fx(e_i) \label{enc:cf:seq} \\
-\phi_{CF_{br}}  \defeq \quad & [\fx(e_i) \Rightarrow \fx(e_k)] \land \cdots \land [\fx(e_{i+j}) \Rightarrow \fx(e_k)] \nonumber \\
-                       \land & [\fx(e_i) \land \fx(e_k) \Rightarrow g_{i,k}] \land \cdots \land [\fx(e_{i+j}) \land \fx(e_k) \Rightarrow g_{i+j,k}] \nonumber \\
-                       \land & \cdots \nonumber \\
-                       \land & \bigvee_{e_l \in \ \texttt{succ}(e_m)} \ \
+\phi_{CF_{br}}  \defeq \quad & [\fx(e_i) \Rightarrow \fx(e_k)] \ \land \ \cdots \ \land \ [\fx(e_{i+j}) \Rightarrow \fx(e_k)] \nonumber \\
+                       \land & \ [\fx(e_i) \land \fx(e_k) \Rightarrow g_{i,k}] \ \land \ \cdots \ \land \ [\fx(e_{i+j}) \land \fx(e_k) \Rightarrow g_{i+j,k}] \nonumber \\
+                       \land & \ \cdots \nonumber \\
+                       \land & \ ( \bigvee_{e_l \in \ \texttt{succ}(e_m)} \ \
                                \bigvee_{\begin{subarray}{l}e_n \in \ \texttt{succ}(e_k) \\ e_n \neq e_m\end{subarray}} 
-                               \lnot [\fx(e_m) \land \fx(e_n)]  \label{enc:cf:br} \\
+                              \! \lnot [\fx(e_m) \land \fx(e_n)] \ ) \label{enc:cf:br} \\
 \phi_{CF_{mer}} \defeq \quad & \fx(e_k) \Rightarrow (\bigvee\limits_{e_p \in \ \texttt{pred}(e_k)}^{} \fx(e_p)) \label{enc:cf:merge}
 \end{align}
 
@@ -201,10 +201,9 @@ For these cases, we propose the encoding scheme that uniquely encodes each node 
 %TODO: say about epsilon on (c) picture
 Equation~\ref{enc:cf:seq} shows the encoding for the sequential control-flow represented in Figure~\ref{encode:cf:seq} and reflects the fact that the event $e_2$ can be executed iff the event $e_1$ has been executed.
 Equation~\ref{enc:cf:br} shows the encoding for the branching control-flow depicted in Figure~\ref{encode:cf:br}, that considers both transitions and guards.
- %(similarly to the sequential control-flow)  %$\{\emptyset, \; (e_1), \; (e_1\,\Rightarrow\,e_2), \; (e_1\,\Rightarrow\,e_3)\}$.
 Also, adding negations of pairwise conjunctions over all successors of the branching node, the encoding forbids the execution of two branches simultaneously.
 Equation~\ref{enc:cf:merge} shows the encoding for the control-flow of a merge-point represented in Figure~\ref{encode:cf:merge}: the event $e_k$ is executed if either of its predecessors has been executed, regardless the type of the transition.
-Note that the sequential control-flow is a special case of branching with the only transition guarded by $\epsilon$ (that is encoded as \texttt{true}).
+Note that the sequential control-flow is a special case of branching with the only transition guard $\epsilon$ (that is encoded as \texttt{true}).
 %TODO: maybe add the overall formula \phi_{CF} ?
 
 For sake of correctness of the encoding, we require all branches to have at least one event.
@@ -300,9 +299,9 @@ These rules determine the following encoding of load, store and computation even
 %TODO: maybe add the overall formula \phi_{DF} ?
 %
 \begin{align}
-    \phi_{DF_{e = \texttt{load}(r \leftarrow l)}} \defeq \ & \fx(e) \Rightarrow (r_{i+1} = l_{i+1}) \\
-    \phi_{DF_{e = \texttt{store}(l \leftarrow r)}} \defeq \ & \fx(e) \Rightarrow (l_{i+1} = r_i) \\
-    \phi_{DF_{e = \texttt{eval}(\cdot)}} \defeq \ & \fx(e) \Rightarrow \fv(e) % \\
+    \phi_{DF_{e = \texttt{load}(r \leftarrow l)}}  \defeq \ & [\fx(e) \Rightarrow (r_{i+1} = l_{i+1})] \\
+    \phi_{DF_{e = \texttt{store}(l \leftarrow r)}} \defeq \ & [\fx(e) \Rightarrow (l_{i+1} = r_i)] \\
+    \phi_{DF_{e = \texttt{eval}(\cdot)}}           \defeq \ & [\fx(e) \Rightarrow \fv(e)] % \\
 \end{align}
 
 To convert the program into SSA form, for each event each variable that is declared so far (either local or shared) is mapped to its indexed reference; this information is stored in the SSA-map "event \textit{to} variable \textit{to} SSA-index". %for each event stores the map that each declared variable maps to its SSA-index
@@ -344,7 +343,7 @@ of data-flow stored in equivalence assertions over the SSA-variables.
 The encoding of this linkage left untouched as it is implemented in \porthos: for each pair of events $e_1$ and $e_2$ linked by the \rf-relation, we add the following constraint:
 %
 \begin{align}
-\phi_{DF_{mem}}(e_1, e_2) \defeq \ & \texttt{rf}(e_1, e_2) \Rightarrow (l_i = l_j)
+\phi_{DF_{mem}}(e_1, e_2) \defeq \ & [\texttt{rf}(e_1, e_2) \Rightarrow (l_i = l_j)]
 \end{align}
 
 where the variable of location $l$ is mapped to the SSA-variable $l_i$ for event $e_1$, and to the SSA-variable $l_j$ for event $e_2$; and the predicate $\texttt{rf}(e_1, e_2)$ is encoded as a boolean variable, which itself equals $true$ if $e_2$ reads the shared variable that was written in $e_1$.

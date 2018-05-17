@@ -328,7 +328,7 @@ Similarly to expressions, all \ytree{} statements implement the \texttt{YStateme
   
   \item \texttt{YJumpStatement} representing unconditional jump (\texttt{goto}-jump to a label and loop-jumps \texttt{break} and \texttt{continue});
   
-  \item \texttt{YCompoundStatement} (block statement) representing sequence of \texttt{N} statements grouped into one syntactic unit;
+  \item \texttt{YCompoundStatement} (block statement) representing sequence of \textit{N} statements grouped into one syntactic unit;
   
   \item \texttt{YLinearStatement} representing a single expression; and
   
@@ -1035,7 +1035,7 @@ As it has been mentioned in Section~\ref{ch:impl:principles}, \porthos[2] uses t
 \label{ch:impl:out}
 
 The result of execution of \porthos[2] is the verdict modelled by the class \texttt{AppVerdict}.
-This is a structure that contains the result of analysis and auxiliary information such as collected errors and time of execution.
+This is a structure that contains the result of analysis and auxiliary information such as collected errors and time of execution (separately for each stage of computing).
 The app verdict may be rendered to any format convenient for the user.
 
 
