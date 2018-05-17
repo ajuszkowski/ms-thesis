@@ -82,17 +82,17 @@ As a robust and transparent tool, \porthos[2] must adhere to the strategy of abo
 %immut: preservation of invariants
 %The transparency, efficiency and extensibility are the necessary criteria of any good tool.
 
-As its predecessor, \porthos[2] uses the open-source SMT-solver \tool{Z3}%
+As its predecessor, \porthos[2] uses the open-source SMT solver \tool{Z3}%
 %
 \footnote{The \tool{Z3} project repository: \url{https://github.com/Z3Prover/z3}} %
 %
-by Microsoft Research~\cite{de2008z3}. However, unlike its predecessor, the \porthos[2] has an additional abstraction level, \zformula{} (see Section~\ref{ch:impl:model:zformula}), that allows the use any other SMT-solver.
+by Microsoft Research~\cite{de2008z3}. However, unlike its predecessor, the \porthos[2] has an additional abstraction level, \zformula{} (see Section~\ref{ch:impl:model:zformula}), that allows the use any other SMT solver.
 
 %We have decided to implement \porthos[2] in \textit{Java}
 As its predecessor, \porthos[2] is written in \textit{Java},
 %The programming language choice for \porthos[2] was also made in favour of \textit{java},
 firstly, in order to be able to reuse some parts and concepts of \porthos{} also written in Java, and secondly, because the authors find the object-oriented (OOP) concepts of Java suitable for modelling languages.
-Although Java does not show the best results in performance benchmarks (for example, compared to C++~\cite{hundt2011loop}), the performance cornerstone of \porthos[2] (as well as any other SMT-based code analyser) is the phase of solving the SMT-formula, which is left to the third-party SMT-solver invoked by \porthos[2] via a Java API.
+Although Java does not show the best results in performance benchmarks (for example, compared to C++~\cite{hundt2011loop}), the performance cornerstone of \porthos[2] (as well as any other SMT-based code analyser) is the phase of solving the SMT-formula, which is left to the third-party SMT solver invoked by \porthos[2] via a Java API.
 However, considering the perspective of using \porthos[2] as a static analyser for real-world programs, the memory optimisation problem must also be taken into account during both encoding and solving stages.
 It is worth noting that, for the reasons of simplicity, the \porthos[2] is not a concurrent program, however, we believe that, due to its modular architecture, it can be easily parallelised on the level of program modules.
 
@@ -101,12 +101,12 @@ It is worth noting that, for the reasons of simplicity, the \porthos[2] is not a
 \label{ch:impl:arch}
 
 The general architecture scheme of \porthos[2] is presented in Figure~\ref{fig:arch}.
-The rectangles in the picture denote processing units (marked with gear sign with a unique number of the component), and labels of the arrows describe the internal representation carried out during the transformation.
+%The rectangles in the picture denote processing units (marked with gear sign with a unique number of the component), and labels of the arrows describe the internal representation carried out during the transformation.
 
 \begin{figure}
   \centering
   %draft=true
-  \includegraphics[height=.99\textheight,keepaspectratio]{img/my/draw.io/general_arch.png}
+  \includegraphics[height=.99\textheight,keepaspectratio]{img/my/draw.io/general_arch-no_numbering.png} %{img/my/draw.io/general_arch.png}
   \caption{The general architecture of \porthos[2]}
   \label{fig:arch}
 \end{figure}
@@ -121,7 +121,7 @@ The \ytree{} then is being compiled (Section~\ref{ch:impl:proc:x-compiler}) to a
 The compiled \xgraph{} then is being converted to an acyclic form (Section~\ref{ch:impl:proc:x-unroll}) in order to be encoded into a \zformula{} (Section~\ref{ch:impl:model:zformula}).
 Apart from that, the memory-model constructor (Section~\ref{ch:impl:proc:w-constr}) constructs the abstract syntax tree of derived relations of the weak memory model \wmodel{} (Section~\ref{ch:impl:model:wmodel}).
 %on the basis of the \xgraph{} in order to build the weak memory model \wmodel{} (Section~\ref{ch:impl:model:wmodel}).
-Thereafter, \wmodel{} and acyclic \xgraph{} are encoded (Section~\ref{ch:impl:proc:z-encoder}) to a \zformula{} representation (a wrapper over an SMT-formula), which then is translated to an SMT-formula (Section~\ref{ch:impl:proc:smt-converter}), which then is solved by the SMT-solver (Section~\ref{ch:impl:proc:smt-solver}).
+Thereafter, \wmodel{} and acyclic \xgraph{} are encoded (Section~\ref{ch:impl:proc:z-encoder}) to a \zformula{} representation (a wrapper over an SMT-formula), which then is translated to an SMT-formula (Section~\ref{ch:impl:proc:smt-converter}), which then is solved by the SMT solver (Section~\ref{ch:impl:proc:smt-solver}).
 
 
 \subsection{Program input}
@@ -264,18 +264,25 @@ For keeping the architecture transparent, we build all abstraction levels with i
 \subsubsection{Y-tree}
 \label{ch:impl:model:ytree}
 
-The first internal representation used by \porthos[2] is the \textit{\ytree{}}, which represents a high-level AST.
+The first internal representation used by \porthos[2] is the \textit{\ytree{}}, which represents a high-level recursively%
+%
+\footnote{Hereinafter we use the term \textit{recursive} data structure (sometimes called \textit{inductive}) to refer a complex data type which can contain elements that contain other elements of the same type.
+For example, an unary expression contains references to the operator and the child expression of the same type.} %
+%
+defined AST.
 The Apendix~\ref{apx:trees} presents the file tree of the main classes that constitute the \ytree{} hierarchy (as the inheritance tree might be obvious for the C-like AST, we confine ourselves to presenting the classes file tree only, which we tend to retain clearly structured).
 
 %\columnratio{0.7}%\begin{paracol}{2}
 %\switchcolumn%\VerbatimInput{inc/lst/Ytree-tree.out}%\end{paracol}
 The abstract syntax tree, \ytree{}, is an abstraction level suitable for compiling the program to a low-level representation (in the case of processing low-level assembly code, it may be directly converted to the \xgraph{} representation).
-As the \tool{ANTLR} syntax tree follows the same structure as the grammar, which is a superset of the real (meaningful) grammar of C language, it lacks multiple concepts of the language (for example, the syntax of indexer access corresponds the grammar rule "\lstinline{postfixExpression '[' expression ']'}", that is converted to the \texttt{YIndexerExpression}).
-However some details of the syntax might have been abstracted away (for instance, array operations may be emulated by functions invocations, see~\cite[Chapter 5]{gries2012science}), we found this level of abstraction suitable enough for our tasks.
+In terms of \porthos[1], the \ytree{} is the level of \textit{instructions}.
+%In contrast to \ytree{} representation, the \tool{ANTLR} syntax tree follows the same structure as the grammar, which is a superset of the real (meaningful) grammar of the C language.
+%However, it lacks some concepts of the language (for example, the syntax of indexer access corresponds the grammar rule "\lstinline{postfixExpression '[' expression ']'}" for an arbitrary postfix %, that is converted to the \texttt{YIndexerExpression}).
+However some details of the syntax might have been abstracted away (for instance, array operations may be emulated by functions invocations, see~\cite[Chapter 5]{gries2012science}), we find this level of abstraction suitable enough for modelling a high-level language.
 
 Each \ytree{} element implements the interface \texttt{YEntity} and carries the \texttt{OriginLocation} %
 %\textbf{(TODO: Rename CodeLocation->OriginLocation in the code!)} %TODO <--
-instance that contains information about the coordinates of the input text that generated the \ytree{} element.
+instance that contains information about the coordinates of the input text that has generated the \ytree{} element.
 
 Following the C11 standard~\cite{iso2012iec}, we distinguish a \textit{statement} (\textit{"an~action to be performed"}) from an \textit{expression} (\textit{"a sequence of operators and operands that specifies computation of a value, or that designates an object or a function, or that generates side effects, or that performs a combination thereof"}).
 
@@ -297,7 +304,7 @@ The \ytree{} expressions are the following:
 
   \item \texttt{YMemberAccessExpression} that has an arbitrary expression of type \texttt{YExpression} as its base expression (it will be resolved during the compilation stage);%TODO: pre-compilation??
 
-  \item \texttt{YIndexerExpression} and \texttt{YInvocationExpression} that as arbitrary expression as its base or arguments (strictly speaking, the indexer expression is an unary-function invocation, but as the SMT-solver we use supports the constant-array theory, we can maintain the array type);
+  \item \texttt{YIndexerExpression} and \texttt{YInvocationExpression} that as arbitrary expression as its base or arguments (strictly speaking, the indexer expression is an unary-function invocation, but as the SMT solver we use supports the constant-array theory, we can maintain the array type);
 
   \item \texttt{YAssignmentExpression} that assigns an \texttt{YExpression} to an \texttt{YAtom};
 
@@ -348,6 +355,8 @@ The syntax tree that contains set of definitions (e.g., litmus-initialisations, 
 
 \subsubsection{X-graph}
 \label{ch:impl:model:xgraph}
+
+\textbf{TODO: say sth about old event hierarchy: very restricted (e.g., only loc<-reg)}
 
 The \ytree{} is compiled into the low-level event-based program representation called \textit{\xgraph{}}.
 The mathematical structure of event-flow graph was discussed in Section~\ref{ch:wmm:event}.
@@ -407,7 +416,6 @@ For more detailed description of memory management see Section~\ref{ch:impl:proc
 
 
 
-
 \paragraph{Events}
 \label{ch:impl:model:xgraph:evt}
 
@@ -448,7 +456,7 @@ The following interfaces model basic kinds of events (see Figure~\ref{fig:class-
     For analysing large expressions this optimisation is sensible because it considers the whole expression as a single computation event, encoded therefore as a single SMT-variable.
     \newline
     Note, for the purpose of simplifying the X abstraction level, computation events may have been modelled as invocations of bodiless functions (for instance, the operation `\lstinline{x + y}' may be modelled as the invocation of the function `\lstinline{+}' with the arguments \lstinline{x} and \lstinline{y}).
-    However, current version of \porthos[2] maintains the \texttt{XComputationEvent} as the operators are supported by the SMT-solver.
+    However, current version of \porthos[2] maintains the \texttt{XComputationEvent} as the operators are supported by the SMT solver.
     
   \1 \texttt{XControlFlowEvent} \\
     The control-flow event indicates a non-linear jump in the code. We distinguish two kinds of control-flow events: 
@@ -508,7 +516,7 @@ Once being constructed, the graph must conform the following requirements (see a
 \item only nodes of type \texttt{XComputationEvent} can have two direct control-flow successors,
 %\item each node except the source node must have at least one parent
 \item a \co{}-edge connects two writes, an \rf{}-relation edge connects a write and a read,
-\item all write-event nodes except initial write-nodes must have exactly one \co-predecessor
+\item all write-event nodes except initial write-nodes must have exactly one \co-predecessor, and
 \item all write-event nodes except final write-nodes must have exactly one \co-successor.
 %TODO: \item \textbf{TODO: more?}
 \end{enumerate}
@@ -534,7 +542,7 @@ The atomic elements of \wmodel{} are the basic relations (\po{}, \rf{} and \co{}
 The expressions of \wmodel{} are unary (such as complement, transitive closure, etc.) and binary operations (such as union, intersection, etc.) over relations or sets of events; see Section~\ref{ch:wmm:cat}.
 For the sake of transparency, each element of a \wmodel{} contains the origin location as the coordinates of the string in the model file. %TODO: implement origin for w-model
 
-<todo: enumerate elements -- after refactoring>
+%todo: enumerate elements -- after refactoring>
 
 
 %todo: rename everywhere assertions <- axioms
@@ -545,20 +553,20 @@ For the sake of transparency, each element of a \wmodel{} contains the origin lo
 
 %TODO: not implemented at all !
 
-The \textit{\zformula{}} representation is a wrapper for an SMT-formula used as an additional abstraction level used to increase the transparency of the architecture, simplify the debugging process and ease the support of different SMT-solvers.
+The \textit{\zformula{}} representation is a wrapper for an SMT-formula used as an additional abstraction level used to increase the transparency of the architecture, simplify the debugging process and ease the support of different SMT solvers.
 As all other internal representations, the \zformula{} is implemented as an immutable data structure.
 
-The Z-abstraction level models the the logical formulas (definitions and assertions) that are put on the assertion stack of the SMT-solver.
+The Z-abstraction level models the the logical formulas (definitions and assertions) that are put on the assertion stack of the SMT solver.
 Generally, a \zformula{} represents the S-expression-based syntax of the SMT-LIB language~\cite{smt-lib}. % the semantics of SMT-LIB formulas defined in~\cite[Chapter 5]{smt-lib}.
 Currently, the \zformula{} supports definitions and assertions over \textit{variables} and binary and unary \textit{expressions}.
 However, in future it may be extended to support \textit{function symbols} and \textit{binders} (existential and universal quantification, pattern matching and functional type construction).
 
 All expressions of a \zformula{} are \textit{typed} (or \textit{sorted}, in terms of SMT-LIB standard).
 Basically, we distinguish \textit{boolean} and \textit{numeric} (integer, bitvector, real) expressions.
-The typisation of a \zformula{} is necessary for checking the basic validity of its expressions and converting it to a typed SMT-LIB formula.
+The typing of a \zformula{} is necessary for checking the basic validity of its expressions and converting it to a typed SMT-LIB formula.
 For the sake of transparency, each element of a \zformula{} contains the origin location as the reference to the X-element that produced current Z-element. %TODO: implement origin for z-formula
 
-<todo: enumerate elements -- after refactoring>
+%todo: enumerate elements -- after refactoring>
 
 
 \subsection{The processing units} %Transformation}
@@ -567,8 +575,9 @@ For the sake of transparency, each element of a \zformula{} contains the origin 
 %todo: after all, list HERE which modules (classes, managers) are being initialised during the pre-compilation. I'ts good to have the dependencies graph on moduls (operational semantics:) )
 
 This section describes program units that construct, transform and analyse internal representations described before. % steps of construction of the program representations and transformations applied to them.
-Further in this Section, the subsection titles have a number in parentheses, which correspond to a unique number of the  processing unit being discussed.
-These numbers are pictured within the gear in the top-left corner of each processing unit in Figure~\ref{fig:arch}.
+We assign unique numbers to the processing units, which can checked in Figure~\ref{fig:arch} (within gears depicted in the top-left corner of each processing unit).
+%Further in current Section, the subsection titles have a number in parentheses, which correspond to a unique number of the  processing unit being discussed.
+%These numbers are pictured within the gear in the top-left corner of each processing unit in Figure~\ref{fig:arch}.
 %he numbers in parentheses correspond the numbers of processing units pictured within gears in Figure~\ref{fig:arch}.
 
 The construction of the \xgraph{} is performed in three stages.
@@ -576,15 +585,13 @@ First, the \ytree{} is compiled to a \textit{cyclic} control-flow event-based gr
 Then, this graph is unrolled to an \textit{acyclic} control-flow event-based graph \xgraphU[CF].
 After that, the compiler is able to perform the data-flow analysis and produce the full event-based graph \xgraphU[CF+DF], which remains to be \textit{CF-acyclic} (no cycles among control-flow edges).
 
-
-All recursive data structures are processed by units that implement the \textit{visitor} pattern~\cite{palsberg1998essence}.
+Most data structures are processed by units that implement the \textit{visitor} pattern~\cite{palsberg1998essence}.
 This is a behavioural pattern that separates the program logic from the object implementation by specifying handling methods for each element of the object.
-The visitor pattern performs the double-dispatching mechanism: the visiting class defines the method for accepting a visitor, and the visitor itself defines the 
-<TODO!!!!>
-
-To visit an instance \lstinline{x} by a visitor \lstinline{v}, the program should call the accept-method of \lstinline{x} and pass \lstinline{v} as an argument.
-In our implementation, the visitor must carry out the continuation of traversing the recursive data structure itself.
 The general structure of the visitor pattern is illustrated by the pseudo-java code in Figure~\ref{fig:visitor}.
+The visitor pattern performs the double-dispatching, a mechanism for decreasing the cohesion between the DTO (the visitee) and the processor class (the visitor): the visitee implements the \textit{accepting} method that gets the visitor as an argument and invokes its \textit{visiting} method with itself as an argument.
+Thus, the method call resolution is performed statically at compile-time without any overhead at run-time.
+%To visit an instance \lstinline{x} by a visitor \lstinline{v}, the program should call the accept-method of \lstinline{x} and pass \lstinline{v} as an argument.
+In our implementation, the visitor (not the visitee) cares about the continuation of traversing its children.
 
 \begin{figure}[h]
 \centering
@@ -631,11 +638,10 @@ We consider the visitor pattern as the most natural way for operating the hierar
 However, we use its double-dispatching capabilities to reduce cost of multiple type casting performed while traversing the elements of a non-recursive data structure.
 The operator instance, instead of having a single method that handles and element of the instance, extends the visitor interface and splits the handler method into multiple methods, one for each type of element.
 
-For traversing plain (non-recursive) complex data structures, we mostly follow the \texttt{iterator} pattern: the special object Iterator, that has access to elements of the data structure, iterates over them and ...
-. Since in \porthos[] we usually do not need to browse an object elements in different order, the iterator creation is performed by the data structure itself.
-However, in contrast to the visitor of a recursive data structure, the visitor of a plain data structure should be used with an \textit{iterator} that has access to the elements of the object and passes them to the visitor.
-
-Construction of immutable data structures is performed by units that follow the \textit{builder} pattern.
+For traversing graph data structures, we mostly follow the \textit{iterator} pattern: the special object \texttt{Iterator}, that has access to elements of the data structure, iterates over them in some order (for example, in topological order as it is implemented for \xgraph{}).
+%Since in \porthos{} we usually do not need to browse an object elements in different order, the iterator creation is performed by the data structure itself.
+%However, in contrast to the visitor pattern, the visitor of a plain data structure should be used with an \textit{iterator} that has access to the elements of the object and passes them to the visitor.
+The construction of immutable data structures is performed by units that follow the \textit{builder} pattern.
 A builder is a mutable object that contains methods "filling" it by the elements that will constitute the result complex object.
 The methods contain basic validity checks of the elements.
 Once a builder has been built, it cannot be modified.
@@ -643,11 +649,11 @@ Once a builder has been built, it cannot be modified.
 
 % todo: test pre-/post-fix operations //+think how current tool will behave if there's more than one post-operation //and pre-operation
 
-\subsubsection{Input parsers (1,2)}
+\subsubsection{Input parsers}
 \label{ch:impl:proc:input-parser}
 
 Both input-language and input-model parsers are implemented via \tool{ANTLR} parser generator.
-
+%In Figure~\ref{fig:arch}, the input parsers are denoted as (1) and (2) processing units.
 Details on the input program language grammar are discussed in Section~\ref{ch:impl:input}.
 Currently, \porthos[2] does not consider preprocessor instructions (it ignores them).
 For implementing the inter-procedural mode of \porthos{}, it is crucial to support inclusion of header files (the \texttt{\#include} preprocessor directive).
@@ -669,31 +675,32 @@ written in OCaml.
 %todo: maybe: move something from the input language chapter here
 
 
-\subsubsection{W-model constructor (3)}
+\subsubsection{W-model constructor}
 \label{ch:impl:proc:w-constr}
 
 %TODO: <not implemented yet>
 The \wmodel{} representation is constructed by the stateless visitor \texttt{Cat2WmodelConverterVisitor} from the ANTLR syntax tree \texttt{CatParser.MainContext} of the memory-model defined in \cat{} language.
+%In Figure~\ref{fig:arch}, the \wmodel{} constructor is denoted as the (3) processing unit.
 Currently, the visitor supports the small subset of \cat{} language, which constitutes only non-functional declarative expressions of the language as the support for functional-style expressions requires implementing the full OCaml interpreter.
 However, some most commonly used functional-style expressions may be supported by mapping them syntactically to corresponding W-elements by the \wmodel{} constructor.
 
 Following the principle of transparency, the \wmodel{} constructor aborts its work with the \texttt{NotSupportedException} if met the unrecognised syntax construction (in contrast to the \porthos[1] approach in which the \texttt{null} value was produced in all exceptional states).
 
-<todo: file tree of w-model to appendix -- after code fixing>
+%todo: file tree of w-model to appendix -- after code fixing>
 
 
-\subsubsection{Y-tree constructor (4)}
+\subsubsection{Y-tree constructor}
 \label{ch:impl:proc:y-constr}
 
-The \ytree{} is constructed by the stateless visitor \texttt{C2YtreeConverterVisitor} from the ANTLR syntax tree \texttt{C11Parser.MainContext} of C language.
+The \ytree{} is constructed by the stateless visitor \texttt{C2YtreeConverterVisitor} from the ANTLR syntax tree \texttt{C11Parser.MainContext} of the C language.
 As the \wmodel{} constructor, the \ytree{} constructor aborts its work with the \texttt{NotSupportedException} once it meets an unsupported syntax construction.
 %TODO: Rename YConverterException <- YParserException
 A syntax exception \texttt{YConverterException} is thrown if the converted syntax tree contains semantic errors that prevent it to be converted to the \ytree{}.
 
-As a \ytree{} constitutes a generic AST, the \ytree{} constructor performs code desugaring (for example, a \texttt{switch}-statement is converted to the equivalent \texttt{if}-statement).
+As a \ytree{} constitutes a generic AST, the \ytree{} constructor expands the syntactic sugar expressions and statements (for example, a \texttt{switch}-statement is converted to the equivalent \texttt{if}-statement).
 
 
-\subsubsection{X-graph pre-compiler (5)}
+\subsubsection{X-graph pre-compiler}
 \label{ch:impl:proc:x-pre-compiler}
 
 The precompiler traverses the \ytree{} and collects information necessary for its compilation into an \xgraph{}.
@@ -758,13 +765,13 @@ The following types of variables are detected as \textit{global variables}:
 \begin{itemize}
 \item a variable was declared as a pointer;
 \item a variable whose address was accessed by any process;
-\item a variable that was declared as a parameter of the process function;
+\item a variable that was declared as a parameter of the process function; and
 %TODO: say sth about KERNEL ANALYSIS MODE BEFORE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-\item a variable that was exported by the \texttt{extern} keyword (in the kernel-analysis mode, the functions \texttt{EXPORT\_SYMBOL} and \texttt{EXPORT\_SYMBOL\_GPL} also export symbols for dynamic linking); %https://lwn.net/Articles/154602/
+\item a variable that was exported by the \texttt{extern} keyword (in the kernel-analysis mode, the functions \texttt{EXPORT\_SYMBOL} and \texttt{EXPORT\_SYMBOL\_GPL} also export symbols for dynamic linking). %https://lwn.net/Articles/154602/
 \end{itemize}
 
 
-\subsubsection{X-graph compiler (6)}
+\subsubsection{X-graph compiler}
 \label{ch:impl:proc:x-compiler}
 
 The X-compiler is the main component that transforms the recursive \ytree{} data structure to the plain \xgraph{} representation.
@@ -878,7 +885,7 @@ The context state is an enumeration of the following values:
 \begin{itemize}
 \item \texttt{WaitingAdditionalCommand}: the interpreter is in the state of defining the complex (non-linear) statement and is not able to process any new event (will throw an exception if any) until the state is not changed,
 \item \texttt{WaitingFirstSubBlockEvent}: the first next emitted event will be accepted as the first event of the branching statement (later the interpreter will set up jumps to that event),
-\item \texttt{WaitingNextLinearEvent}: the standard interpreter state for processing next linear event,
+\item \texttt{WaitingNextLinearEvent}: the standard interpreter state for processing next linear event, and
 \item \texttt{Idle}: the interpreter does not set up the edge from the previous event to the new event.
 \end{itemize}
 
@@ -898,7 +905,7 @@ For the sake of simplicity of the interpreter, jump events (no-computation event
 %The method \texttt{tryConvertToLocalOrNull} makes an attempt to convert an arbitrary X-entity to the local memory unit: registers and computation events are casted and returned by the method as-is, shared memory units are copied to a temporary register (\texttt{declareTempRegister}), which is returned by the method.
 %In other cases, the method returns \texttt{null}.
 
-\subsubsection{X-graph unroller (7)}
+\subsubsection{X-graph unroller}
 \label{ch:impl:proc:x-unroll}
 
 In order to be encoded into an SMT-formula, the compiled graph needs to be acyclic~\cite{Porthos17b}.
@@ -987,41 +994,41 @@ Also, during the unrolling each next event increments the \textit{unrolling dept
 Each \texttt{XEvent} has the method `\texttt{XEvent asNodeRef(int refId)}' that clones the event-receiver with new value of reference-ID.
 The methods \texttt{hashCode} and \texttt{equals} consider the reference-ID as the uniqueness field for all events except sink and source events (considering the usage of \texttt{HashMap} and Guava's \texttt{ImmutableMap} for storing events, setting up hash-code methods properly is a crucial programming task).
 
-During the work on \porthos[2], we have tested different schemes of loop unrolling.
-<TODO: Say sth about these schemes + pictures>
+%TODO: Say sth about these schemes + pictures> !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+%During the work on \porthos[2], we have tested different schemes of loop unrolling.
 
 %- After we acquired the event-based representation, we can perform some modifications/simplifications/optimisations on it (separately, allowing user to manage them)
 
 
-\subsubsection{X-graph data-flow constructor (8)}
-\label{ch:impl:proc:x-df}%TODO: ref it in pre-word in this chapter
+\subsubsection{X-graph data-flow constructor}
+\label{ch:impl:proc:x-df}
 
 Once the graph is unrolled, it can be augmented by data-flow edges.
 As it was discussed in Paragraph~\ref{ch:impl:model:xgraph:edges}, the data-flow edges can represent either \rf{}- or \co{}-relation.
 The \rf{}-edges join each write event to all read events that access the same location; the \co{}-edges join write events to the same location.
 
-<TODO: why in old implementation we encode the negation of "co" ? same for "rf" above
-\url{https://github.com/hernanponcedeleon/Dat3M/blob/80341bec26021d41cf79eddc943e7cbe6f49322f/dartagnan/src/dartagnan/wmm/Domain.java#L204} >
+%TODO: why in old implementation we encode the negation of "co" ? same for "rf" above
+%\url{https://github.com/hernanponcedeleon/Dat3M/blob/80341bec26021d41cf79eddc943e7cbe6f49322f/dartagnan/src/dartagnan/wmm/Domain.java#L204} >
 
 
-\subsubsection{Z-formula encoder (9)}
+\subsubsection{Z-formula encoder}
 \label{ch:impl:proc:z-encoder}
 
 The \zformula{} encoder transforms the program and the memory models to a single SMT-like representation.
-This includes ... <todo: recall said before>
+It follows the encoding scheme described in Chapter~\ref{ch:enc}.
+%TODO: say more!
 
-
-\subsubsection{SMT-formula converter (10)}
-\label{ch:impl:proc:smt-converter}%TODO: ref in pre-word
+\subsubsection{SMT-formula converter}
+\label{ch:impl:proc:smt-converter}
 
 As the \zformula{} follows the SMT-LIB standard, its translation to an SMT-formula constitutes almost one-to-one mapping.
 The translation is performed by the stateless visitor \texttt{Z2SmtTranslator}.
 
 
-\subsubsection{SMT solver (11)}
+\subsubsection{SMT solver}
 \label{ch:impl:proc:smt-solver}
 %TODO: check that we have ALL references in pre-word in this chapter
-As it has been mentioned in Section~\ref{ch:impl:principles}, \porthos[2] uses the third-party SMT-solver \tool{Z3}, which offers the Java API for constructing requests to the Z3 solver and interpreting its responses.
+As it has been mentioned in Section~\ref{ch:impl:principles}, \porthos[2] uses the third-party SMT solver \tool{Z3}, which offers the Java API for constructing requests to the Z3 solver and interpreting its responses.
 
 
 \subsection{Program output}

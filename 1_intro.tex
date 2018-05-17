@@ -143,9 +143,9 @@ The very first tool that performs the WMM-aware portability analysis is \porthos
 \footnote{The \porthos{} project web site: \url{http://github.com/hernanponcedeleon/Dat3M}} %
 %
 introduced in April~2017~\cite{Porthos17b}.
-This tool reduces described problem to a bounded reachability problem, which can be solved via an SMT-solver.
+This tool reduces described problem to a bounded reachability problem, which can be solved via an SMT solver.
 This approach allows to capture symbolically the semantics of analysing program and both weak memory models into a single SMT-formula, augmented by the reachability assertion.
-As most modern SMT-solvers are efficient enough to be able to operate the state space of size millions of variables bounded by millions of constraints~(\cite{malik2009boolean}), the used method can be applicable in solving the real-world problems.
+As most modern SMT solvers are efficient enough to be able to operate the state space of size millions of variables bounded by millions of constraints~(\cite{malik2009boolean}), the used method can be applicable in solving the real-world problems.
 % TODO: search space size: https://courses.cs.washington.edu/courses/csep573/11wi/lectures/ashish-satsolvers.pdf slide 
 
 %In the work~\cite{Porthos17b}, the SMT-based approach was defined for analysing the portability of a program from one hardware architechture to another, which is defined as ``an execution that is consistent with the target but inconsistent with the source memory model". Although encoding the control-flow and the data-flow of a program into an SMT-formula seems to be a tril problem of symbolic execution, encoding of the weak memory model is more tedious. The reason is that some relations of WMMs are defined as mutually-recursive and need to be linearised in order to be encoded into an equivalent logical formula.
@@ -187,7 +187,7 @@ Considering the enhancements of the architectural design, \porthos[2] represents
 
 The thesis is organised as following.
 Chapter~\ref{ch:wmm} gives a general view on the weak memory model-aware analysis.
-Chapter~\ref{ch:port} examines the portability analysis as an bounded reachability problem that can be encoded into an SMT-formula in order to be solved automatically by an SMT~solver.
+Chapter~\ref{ch:enc} examines the portability analysis as an bounded reachability problem that can be encoded into an SMT-formula in order to be solved automatically by an SMT~solver.
 Chapter~\ref{ch:impl} delves into the description of architectural solutions and implementation details of the \porthos[2] framework.
 Chapter~\ref{ch:eval} provides an example of the portability analysis via \porthos[2] and presents some evaluation results comparing to other tools. %TODO: check if it's true
 Chapter~\ref{ch:summary} summarises results of the work and proposes future work directions. %TODO: check if it's true

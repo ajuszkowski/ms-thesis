@@ -1,5 +1,5 @@
 \chapter{Portability analysis as an SMT~problem}
-\label{ch:port}
+\label{ch:enc}
 
 
 % TODO: Add intro to the bounded reachability analysis using SAT -- ? 
@@ -24,7 +24,7 @@ as a \textit{bounded reachability} problem, which in turn can be reduced to a SM
 %TODO: sound, complete...
 
 \section{Model checking and reachability analysis}
-\label{ch:port:mc}
+\label{ch:enc:mc}
 
 The model checking is the problem of verifying the system (the model) against a set of constraints (the specification)~\cite{dkw2008}.
 As the state machine model is the most widespread mathematical model of computation, most classical model checking algorithms explore the state space of a system in order to find states that violate the specification.
@@ -61,7 +61,7 @@ However, there exist numerous techniques for making BMC complete for finite-stat
 
 
 \section{Portability analysis as a bounded reachability problem}
-\label{ch:port:enc}
+\label{ch:enc:enc}
 
 %TODO: overapproximation. loops, Rice's thm. Within the bound, the method is complete.
 
@@ -73,7 +73,7 @@ $\texttt{SAT}( \textit{Init}(\vec{x_0}) \land \textit{Trans}(\vec{x}_0, \vec{x}_
 %\end{equation}
 
 The portability analysis problem may also be stated as a reachability problem, where the undesirable state is one reachable under the target~$\mathcal{M_T}$ memory model and unreachable under the source memory model~$\mathcal{M_S}$.
-%However, unlikely a BMC problem, the portability analysis does not require to call the SMT-solver repeatedly, since (imperative) programs may be converted as acyclic state graph (by reducing the loops, see Section~\ref{ch:impl:proc:x-transf}) and the $Trans$ predicate may be stated only for the final state of a program.
+%However, unlikely a BMC problem, the portability analysis does not require to call the SMT solver repeatedly, since (imperative) programs may be converted as acyclic state graph (by reducing the loops, see Section~\ref{ch:impl:proc:x-transf}) and the $Trans$ predicate may be stated only for the final state of a program.
 Consider the function $\textit{cons}_{\mathcal{M}}(P)$ calculates the set of executions of program $P$ consistent under the memory model $\mathcal{M}$. Then, the program $P$ is called portable from the source architecture (memory model) $\mathcal{M_S}$ to the target architecture $\mathcal{M_T}$ if all executions consistent under $\mathcal{M_T}$ are consistent under $\mathcal{M_S}$~\cite{Porthos17a}:
 
 \begin{definition}[Portability]
@@ -88,7 +88,7 @@ The result SMT-formula $\phi$ that encodes the portability problem should contai
 
 
 \subsection{Encoding for the control-flow} %Encoding the control-flow constraints}
-\label{ch:port:enc:cf}
+\label{ch:enc:enc:cf}
 
 The control-flow of a program is represented by the \textit{control-flow graph}, a directed acyclic connected graph with single source and multiple sink nodes. %TODO: footnote why multiple sinks
 In a control-flow graph, there are two types of edges (transitions): \textit{primary transitions} that denote unconditional jumps or if-true-transitions (pictured with solid lines), and \textit{alternative transitions} that denote if-false-transitions (pictured with dotted lines).
@@ -97,7 +97,7 @@ However, each merge node can have any positive number of predecessors, where eac
 
 While working on the \porthos[2], we have applied some modifications to the encoding scheme for the control-flow.
 The changes are conditioned by the need to be able to process an arbitrary control-flow produced by conditional and unconditional jumps of the C language.
-For that, we compile the \textit{abstract syntax tree~(AST)} of the parsed C-code to the plain event-flow graph.
+For that, we compile the \textit{Abstract Syntax Tree~(AST)} of the parsed C-code to the plain event-flow graph.
 We show %TODO! to show, actually!!!
 that the new encoding is smaller than the old one used in \porthos{} since it does not produces new variables for each high-level statement of the input language.
 %The \tool{PORTHOS} tool encodes the \textit{instructions}, which have recursive nature, in a recursive manner. This means, it adds synthetic composite instructions for both linear (sequential) and non-linear (branching) instructions. 
@@ -106,7 +106,7 @@ $\phi_{CF}(i_2;i_3) \defeq (cf_{i_1} \Leftrightarrow (cf_{i_2} \land cf_{i_3})) 
 and control-flow of the branching instruction $i_1 = (c\,?\,i_2\!:\!i_3)$ was encoded as
 $\phi_{CF}(c\,?\,i_2\!:\!i_3) \defeq (\textit{cf}_{i_1} \Leftrightarrow (\textit{cf}_{i_2} \lor \textit{cf}_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)$
 (here we used the notation of C-like ternary operator `\texttt{x?y:z}' for defining the conditional expression `$\texttt{if}\;x\;\texttt{then}\;y\;\texttt{else}\;z$').
-In contrast, the new scheme implemented in \porthos[2] firstly compiles the recursive high-level code into the linear low-level event-based representation, that is then encoded into an SMT-formula. The encoding of branching nodes depends on the \textit{guards}, the value of conditional variable on the branching state, which in turn is encoded as data-flow constraint (see Section~\ref{ch:port:enc:df}).
+In contrast, the new scheme implemented in \porthos[2] firstly compiles the recursive high-level code into the linear low-level event-based representation, that is then encoded into an SMT-formula. The encoding of branching nodes depends on the \textit{guards}, the value of conditional variable on the branching state, which in turn is encoded as data-flow constraint (see Section~\ref{ch:enc:enc:df}).
 
 Let $\fx:\,\mathbb{E}\,\rightarrow\,\{0,1\}$ be the predicate that signifies the fact that the event has been e\textbf{x}ecuted (and, consequently, has changed the state of the system).
 % TODO: attention to these non-breakable spaces
@@ -135,6 +135,7 @@ We distinguish the function ${\fv_g\;:\;\mathbb{C}_g\;\rightarrow\;\{0,1\}}$ tha
         \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
             \node[c] (1) [] {$e_1$};
             \node[c] (2) [below left of=1] {$e_2$};
+            \node[c] (2) [below of=1] {$e_2$};
             \node[c] (3) [below right of=1] {$e_3$};
             \path[->]
             (1) edge [] node {} (2)
@@ -219,7 +220,7 @@ Thus, for branching statements that do not have any events in one of the branche
 
 
 \subsection{Encoding for the data-flow}
-\label{ch:port:enc:df}
+\label{ch:enc:enc:df}
 
 To encode the data-flow constraints, we use the \textit{Static Single-Assignment~(SSA) form} in order to be able to capture an arbitrary data-flow into a single SMT-formula.
 The SSA form requires each variable to be assigned only once within entire program.
@@ -287,7 +288,7 @@ where the variable of location $l$ is mapped to the SSA-variable $l_i$ for event
 
 
 \subsection{Encoding for the memory model} %Encoding the memory model constraints}
-\label{ch:port:enc:wmm}
+\label{ch:enc:enc:wmm}
 
 The basic scheme for encoding the memory model is proposed in~\cite{Porthos17a}.
 The encoding consists of two parts: encoding the \textit{derived relations} and encoding the memory model \textit{assertions}.
