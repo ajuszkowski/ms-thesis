@@ -108,42 +108,49 @@ $\phi_{CF}(c\,?\,i_2\!:\!i_3) \defeq (\textit{cf}_{i_1} \Leftrightarrow (\textit
 (here we used the notation of C-like ternary operator `\texttt{x?y:z}' for defining the conditional expression `$\texttt{if}\;x\;\texttt{then}\;y\;\texttt{else}\;z$').
 In contrast, the new scheme implemented in \porthos[2] firstly compiles the recursive high-level code into the linear low-level event-based representation, that is then encoded into an SMT-formula. The encoding of branching nodes depends on the \textit{guards}, the value of conditional variable on the branching state, which in turn is encoded as data-flow constraint (see Section~\ref{ch:enc:enc:df}).
 
-Let $\fx:\,\mathbb{E}\,\rightarrow\,\{0,1\}$ be the predicate that signifies the fact that the event has been e\textbf{x}ecuted (and, consequently, has changed the state of the system).
-% TODO: attention to these non-breakable spaces
-Let $\fv:\,\mathbb{C}\,\rightarrow\,\mathbb{R}$ be the function that returns the value of the computation event (evaluates it) that will be computed once the event is executed (strictly speaking, it returns the \textit{set} of values determined by the \rf-relation; see Section~\ref{ch:wmm:model:relations} for details on relations).
-We distinguish the function ${\fv_g\;:\;\mathbb{C}_g\;\rightarrow\;\{0,1\}}$ that evaluates the guard computation event. In the result formula, all symbols $\fx(e_i)$ and $\fv(e_i)$ are encoded as boolean variables.
+All control-flow edges contain a label that denotes the \textit{guard}, a predicate that determines the transition.
+An empty guard (a \textit{true} predicate) is denoted as $\epsilon$.
+A guard depends on the data-flow of the program, it represents a memory unit or a computational expression that is liable to the weak memory model relaxations.
+The branching expressions that support more than two outgoing control-flow edges may be useful for describing non-deterministic transition systems, where the guards are not necessarily mutually exclusive.
+However, as the C language supports only binary logic (\textit{if-then-else} branching), \porthos[2] builds only two possible outcomes of evaluating a guard (\textit{primary} and \textit{alternative} transition).
 
-\begin{figure}[b]
+
+\begin{figure}%[b]
   \centering
   \begin{minipage}{\textwidth}
       \begin{subfigure}[b]{0.3\textwidth}
         \makebox[\textwidth]{
         \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
-            \node[c] (1) [] {$e_1$};
-            \node[c] (2) [below of=1] {$e_2$};
+            \node[c] (1) [] {$e_i$};
+            \node[c] (2) [below of=1] {$e_{i+1}$};
             \path[->]
-            (1) edge [] node {} (2)
+            (1) edge [] node {$\epsilon$} (2)
             ;
         \end{tikzpicture}
         }
-        \caption{Sequential events (\texttt{seq})}
+        \caption{Sequence of events (seq)}
         \label{encode:cf:seq}
     \end{subfigure}
     ~
     \begin{subfigure}[b]{0.35\textwidth}
-        \makebox[\textwidth]{
+        \makebox[\textwidth] {
         \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
-            \node[c] (1) [] {$e_1$};
-            \node[c] (2) [below left of=1] {$e_2$};
-            \node[c] (2) [below of=1] {$e_2$};
-            \node[c] (3) [below right of=1] {$e_3$};
+            \node[c]           (k)   [] {$e_k$};
+            \node[c,draw=none] (iii) [below of=k] {$...$};
+            \node[c,draw=none] (ii)  [left=0.2cm of iii] {};
+            \node[c]           (i)   [left=0.2cm of ii] {$e_i$};
+            \node[c,draw=none] (iv)  [right=0.2cm of iii] {};
+            \node[c]           (v)   [right=0.2cm of iv] {$e_{i+j}$};
             \path[->]
-            (1) edge [] node {} (2)
-            (1) edge [dotted] node {} (3)
+            (k) edge [above] node {$g_{i,k}$} (i)
+            (k) edge [] node {} (ii)
+            (k) edge [] node {} (iii)
+            (k) edge [] node {} (iv)
+            (k) edge [above] node {$g_{i+j,k}$} (v)
             ;
         \end{tikzpicture}
         }
-        \caption{Conditional branching (\texttt{br})}
+        \caption{Conditional branching (br)}
         \label{encode:cf:br}
     \end{subfigure}
     ~
@@ -157,43 +164,53 @@ We distinguish the function ${\fv_g\;:\;\mathbb{C}_g\;\rightarrow\;\{0,1\}}$ tha
             \node[c] (v) [right=0.2cm of iv] {$e_{i+j}$};
             \node[c] (k) [below of=iii] {$e_k$};
             \path[->]
-            (i) edge [] node {} (k)
-            (ii) edge [] node {} (k)
-            (iii) edge [dotted] node {} (k)
-            (iv) edge [dotted] node {} (k)
-            (v) edge [] node {} (k)
+            (i) edge [above] node {$g_{i,k}$} (k)
+            (ii) edge [above] node {} (k)
+            (iii) edge [] node {} (k)
+            (iv) edge [] node {} (k)
+            (v) edge [] node {} (k) %sloped
             ;
         \end{tikzpicture}
         }
-        \caption{Branch merging (\texttt{mer})}
+        \caption{Branch merging (mer)}
         \label{encode:cf:merge}
     \end{subfigure}
     %
-    \caption{Linear and non-linear cases of a control-flow graph}
+    \caption{Possible mutual arrangements of events in a control-flow graph} %Linear and non-linear cases of a control-flow graph}
     \label{encode:cf}
 \end{minipage}
 \end{figure}
 
+Let $\fx:\,\mathbb{E}\,\rightarrow\,\{0,1\}$ be the predicate that signifies the fact that the event has been e\textbf{x}ecuted (and, consequently, has changed the state of the system).
+%Let $\fv:\,\mathbb{C}\,\rightarrow\,\mathbb{R}$ be the function that returns the value of the computation event (evaluates it) that will be computed once the event is executed (strictly speaking, it returns the \textit{set} of values determined by the \rf-relation; see Section~\ref{ch:wmm:model:relations} for details on relations).
+%We distinguish the function ${\fv_g\;:\;\mathbb{C}_g\;\rightarrow\;\{0,1\}}$ that evaluates the guard computation event. In the result formula, all symbols $\fx(e_i)$ and $\fv(e_i)$ are encoded as boolean variables.
 Consider the possible mutual arrangements of nodes in a control-flow graph presented in Figure~\ref{encode:cf}.
-For these cases, we propose the encoding scheme that uniquely encodes each node of graph and at the same time allows to encode partially executed program.
-Equation~\ref{enc:cf:seq} encodes the sequential control-flow represented in Figure~\ref{encode:cf:seq} and reflects the fact that the event $e_2$ can be executed iff the event $e_1$ has been executed.
-Equation~\ref{enc:cf:br} encodes the branching control-flow depicted in Figure~\ref{encode:cf:br} by allowing only following executions: $\{\emptyset, \; (e_1), \; (e_1\,\rightarrow\,e_2), \; (e_1\,\Rightarrow\,e_3)\}$.
-In Equation~\ref{enc:cf:merge}, which encodes the control-flow of a merge-point represented in Figure~\ref{encode:cf:merge}, the event $e_k$ is executed if either of its predecessors has been executed, regardless the type of the transition.
-%TODO: maybe add the overall formula \phi_{CF} ?
 
 \begin{align}
-\phi_{CF_{seq}}   \defeq \ & \ \fx(e_2) \Rightarrow \fx(e_1) \label{enc:cf:seq} \\
-\phi_{CF_{br}}    \defeq \ & \ [\fx(e_2) \Rightarrow \fx(e_1)] \land [\fx(e_3) \Rightarrow \fx(e_1)] \land \nonumber \\
-                      & \ [\fx(e_2) \Rightarrow \fv(e_1)] \land [\fx(e_3) \Rightarrow \lnot\fv(e_1)] \land \nonumber \\
-                      & \lnot [\fx(e_2) \land \fx(e_3)]  \label{enc:cf:br} \\
-\phi_{CF_{mer}} \defeq \ & \fx(e_k) \Rightarrow (\bigvee\limits_{e_p \in \texttt{pred}(e_k)}^{} \fx(e_p)) \label{enc:cf:merge}
+\phi_{CF_{seq}} \defeq \quad & \fx(e_{i+1}) \Rightarrow \fx(e_i) \label{enc:cf:seq} \\
+\phi_{CF_{br}}  \defeq \quad & [\fx(e_i) \Rightarrow \fx(e_k)] \land \cdots \land [\fx(e_{i+j}) \Rightarrow \fx(e_k)] \nonumber \\
+                       \land & [\fx(e_i) \land \fx(e_k) \Rightarrow g_{i,k}] \land \cdots \land [\fx(e_{i+j}) \land \fx(e_k) \Rightarrow g_{i+j,k}] \nonumber \\
+                       \land & \cdots \nonumber \\
+                       \land & \bigvee_{e_l \in \ \texttt{succ}(e_m)} \ \
+                               \bigvee_{\begin{subarray}{l}e_n \in \ \texttt{succ}(e_k) \\ e_n \neq e_m\end{subarray}} 
+                               \lnot [\fx(e_m) \land \fx(e_n)]  \label{enc:cf:br} \\
+\phi_{CF_{mer}} \defeq \quad & \fx(e_k) \Rightarrow (\bigvee\limits_{e_p \in \ \texttt{pred}(e_k)}^{} \fx(e_p)) \label{enc:cf:merge}
 \end{align}
 
+For these cases, we propose the encoding scheme that uniquely encodes each node of graph and at the same time allows to encode partially executed program.
+%TODO: say about epsilon on (c) picture
+Equation~\ref{enc:cf:seq} shows the encoding for the sequential control-flow represented in Figure~\ref{encode:cf:seq} and reflects the fact that the event $e_2$ can be executed iff the event $e_1$ has been executed.
+Equation~\ref{enc:cf:br} shows the encoding for the branching control-flow depicted in Figure~\ref{encode:cf:br}, that considers both transitions and guards.
+ %(similarly to the sequential control-flow)  %$\{\emptyset, \; (e_1), \; (e_1\,\Rightarrow\,e_2), \; (e_1\,\Rightarrow\,e_3)\}$.
+Also, adding negations of pairwise conjunctions over all successors of the branching node, the encoding forbids the execution of two branches simultaneously.
+Equation~\ref{enc:cf:merge} shows the encoding for the control-flow of a merge-point represented in Figure~\ref{encode:cf:merge}: the event $e_k$ is executed if either of its predecessors has been executed, regardless the type of the transition.
+Note that the sequential control-flow is a special case of branching with the only transition guarded by $\epsilon$ (that is encoded as \texttt{true}).
+%TODO: maybe add the overall formula \phi_{CF} ?
 
 For sake of correctness of the encoding, we require all branches to have at least one event.
-Thus, for branching statements that do not have any events in one of the branches (such a branch represents a conditional jump forward), we add the synthetic \texttt{nop}-event as it is shown in Figure~\ref{encode:branching:nop}.
+Thus, for branching statements that do not have any events in one of the branches (such a branch represents a conditional jump forward), we add the synthetic \textit{nop-event} as it is shown in Figure~\ref{encode:branching:nop}.
 
-\begin{figure}
+\begin{figure}%[!h]
     \centering
     \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
         \node[c] at (0,0) (1a) {$e_1$};
@@ -202,7 +219,7 @@ Thus, for branching statements that do not have any events in one of the branche
         \node[c,draw=none] at (3,-1.5) (arr) {$\longrightarrow$};
         \node[c] at (6,0) (1b) {$e_1$};
         \node[c] at (6,-1.5) (2b) {$e_2$};
-        \node[c,fill=black!15] at (7.5,-1.5) (nop) {$e_{\mbox{\tiny NOP}}$};
+        \node[c,fill=black!15] at (7.5,-1.5) (nop) {$e_{_{\mbox{\tiny NOP}}}$};
         \node[c] at (6,-3) (3b) {$e_3$};
         \path[->]
         (1a) edge [] node {} (2a)
@@ -214,8 +231,54 @@ Thus, for branching statements that do not have any events in one of the branche
         (nop) edge [dotted,bend left] node {} (3b)
         ;
     \end{tikzpicture}
-    \caption{Transformation of the empty-branch nonlinear control-flow}
+    \caption{Transformation of the forward-jump control-flow}
     \label{encode:branching:nop}
+\end{figure}
+
+As an example of the control-flow encoding, consider the event-flow graph in Figure~\ref{fig:graph-example}, which has two branching points and one merge point with three incoming transitions.
+To illustrate the correctness of the encoding, consider the path $e_1 \rightarrow e_2 \rightarrow e_4$.
+This means, in the formula $\phi_{CF}$, the variables $\fx(e_1)$, $\fx(e_2)$ and $\fx(e_4)$ will have the value $1$, and the variable $\fx(e_3)$ will be assigned to $0$.
+It is easy to check that the $\phi_{CF}$ is satisfiable by the chosen SMT-model (considering the guards $g_{1,2}$ and $g_{2,4}$ that define this path to be evaluated to $1$).
+
+Next, consider the path $e_1 \rightarrow e_3 \rightarrow e_4$, which is not allowed by the control-flow graph.
+The corresponding model $\fx(e_1)=1$, $\fx(e_2)=0$, $\fx(e_3)=1$ and $\fx(e_4)=1$ does not satisfy the formula $\phi_{CF}$.
+The proposed encoding for the control-flow works not only for the whole graph: it can be used for encoding partial control-flow graph.
+For example, the model $\fx(e_1)=1$, $\fx(e_2)=1$, $\fx(e_3)=0$ and $\fx(e_4)=0$, which encodes the path $e_1 \rightarrow e_2$, satisfies $\phi_{CF}$.
+
+\begin{figure}
+\begin{minipage}{.4\textwidth}
+\centering
+\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
+    \node[c] (i)   [] {$e_1$};
+    \node[c] (ii)  [below of=i] {$e_2$};
+    \node[c] (iii) [below of=ii] {$e_3$};
+    \node[c] (iv)  [below of=iii] {$e_4$};
+    \path[->]
+    (i) edge [right] node {$g_{1,2}$} (ii)
+    (ii) edge [left] node {$g_{2,3}$} (iii)
+    (iii) edge [right] node {$\epsilon$} (iv)
+    (i) edge [left,bend right=45] node {$g_{1,4}$} (iv)
+    (ii) edge [right,bend left=55] node {$g_{2,4}$} (iv) %sloped
+    ;
+\end{tikzpicture}
+\end{minipage}
+%
+\begin{minipage}{.6\textwidth}
+\centering
+\begin{align*}
+\phi_{CF} \defeq \ & [\fx(e_2) \Rightarrow \fx(e_1)] \\
+                 \ & \land [\fx(e_3) \Rightarrow \fx(e_2)] \\
+                 \ & \land [\fx(e_4) \Rightarrow (\fx(e_1) \lor \fx(e_2) \lor \fx(e_3))] \\
+                 \ & \land [\fx(e_1) \land \fx(e_2) \Rightarrow g_{1,2}] \\
+                 \ & \land [\fx(e_1) \land \fx(e_4) \Rightarrow g_{1,4}] \\
+                 \ & \land [\fx(e_2) \land \fx(e_3) \Rightarrow g_{2,3}] \\
+                 \ & \land [\fx(e_2) \land \fx(e_4) \Rightarrow g_{2,4}] \\
+                 \ & \land \lnot [\fx(e_2) \land \fx(e_4)] \\
+                 \ & \land \lnot [\fx(e_3) \land \fx(e_4)]
+\end{align*}
+\end{minipage}
+\caption{Example of encoding for the control-flow of the event-flow graph}
+\label{fig:graph-example}
 \end{figure}
 
 
