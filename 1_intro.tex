@@ -93,8 +93,11 @@ There are projects for validating hardware architectures wrt. a memory model as 
 % 2) kernel litmus tests % <----------------------------- OBIAZATELNO!!!
 
 Most modern high-level programming languages rely on relaxed memory model as well.
-Thus, the memory model for Java is based on the \textit{happens-before} principle~\cite{lamport1978time}, it was introduced in J2SE 5.0 in 2004~\cite{manson2005java}; the C++11 standard~\cite{iso2012iec} has introduced the set of hardware-independent synchronisation fences and atomic operations.
-The C++17 memory model~\cite{batty2011mathematizing} is based on the relation \textit{strongly happens-before}. Weak memory are being formalised for even more abstract software environments, the notable project in this area is the project on formalising the Linux kernel memory model, which is being actively developing these days~\cite{alglave2018frightening, kernel1}.
+Thus, the memory model for Java is based on the \textit{happens-before} principle~\cite{lamport1978time} and was introduced in J2SE 5.0 in 2004~\cite{manson2005java}.
+The transformations valid for the Java memory model were discussed in~\cite{sevcik2009program}. 
+A weak memory model for C and C++ is based on the relation \textit{strongly happens-before} and was introduced in the C++17 standard~\cite{batty2011mathematizing}.
+Before that, the C++11 standard~\cite{iso2012iec} proposed the set of hardware-independent synchronisation fences and atomic operations.
+Weak memory models are being formalised for even more abstract software environments, the notable project in this area is the project on formalising the Linux kernel memory model, which is being actively developing these days~\cite{alglave2018frightening, kernel1}.
 
 Furthermore, there exists a wide range of tools that perform memory model-aware analysis.
 \begin{itemize}[noitemsep,topsep=0pt]
