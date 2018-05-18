@@ -356,7 +356,9 @@ The syntax tree that contains set of definitions (e.g., litmus-initialisations, 
 \subsubsection{X-graph}
 \label{ch:impl:model:xgraph}
 
-\textbf{TODO: say sth about old event hierarchy: very restricted (e.g., only loc<-reg)}
+<TODOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO!!!!!!!!!!!!!!!!!!!!!!>
+%TODOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+\textit{\textbf{TODO: say sth about old event hierarchy: very restricted (e.g., only loc<-reg)}}
 
 The \ytree{} is compiled into the low-level event-based program representation called \textit{\xgraph{}}.
 The mathematical structure of event-flow graph was discussed in Section~\ref{ch:wmm:event}.
@@ -365,8 +367,7 @@ The nodes of the graph are events, and the edges are basic relations: the contro
 Hereinafter, we denote the \xgraph{} with only control-flow edges as \xgraph[CF], the \xgraph{} with only data-flow edges as \xgraph[CF].
 The complete \xgraph{} is $\xgraph[CF+DF] = \xgraph[CF] \; \cup \; \xgraph[DF]$.
 The UML diagram on Figure~\ref{fig:class-diagrams:XEntity-interfaces} represents the hierarchy of main interfaces of the X-abstraction level.
-%The \xgraph{} is constructed by the mutable graph builder. %TODO: name of builder -- after refactoring
-
+Internally, the graph is represented by an adjacency matrix (to be exact, by multiple adjacency matrices that store edges of different kinds, see more details in Section~\ref{ch:impl:model:xgraph:edges}).
 
 \begin{figure}[t]%[!b]%[H]
   \centering
@@ -497,17 +498,22 @@ The following interfaces model basic kinds of events (see Figure~\ref{fig:class-
 
 \paragraph{Edges}
 \label{ch:impl:model:xgraph:edges}
-Edges are stored as an immutable hash-map from source to target event.
-The type of edge is stored in the enumeration \texttt{XEdgeKind}:%TODO: IMPLEMENT THIS
-\begin{itemize}[noitemsep]
-  \item the \textit{control-flow edges}: a primary edge (epsilon or if-then transition) and an alternative edge (if-else transition), see more in Section~\ref{ch:port:enc:cf}; and
-  \item the \textit{data-flow edges}: the \co{}-relation edge and the \rf{}-relation edge. %TODO! implement and then describe more!
-\end{itemize}
+As the graph is represented by an adjacency matrix, its edges are stored in (immutable) hash-maps.
+We distinguish the following kinds of edges:
+
+\begin{outline}%[noitemsep]
+  \1 the \textit{control-flow edges}:
+    \2 the \textit{primary edges}, that denote both $\epsilon$-labelled transitions (in case of linear sequence of events) and conditional transition that evaluates the conditional event (the source of the transition) to the \textit{true}, and
+    \2 the \textit{alternative edges}, that denote conditional transitions for which the conditional event (the source) was evaluated to the \textit{false}; and
+  \1 the \textit{data-flow edges}:
+    \2 the \co{}-relation edges, and 
+    \2 the \rf{}-relation edges. %TODO! implement 
+\end{outline}
 
 
 \paragraph{Graph invariants}
 \label{ch:impl:model:xgraph:invariants}
-Once being constructed, the graph must conform the following requirements (see also Section~\ref{ch:port:enc:cf}):
+Once being constructed, the graph must conform the following requirements (see also Section~\ref{ch:enc:bmc:cf}):
 
 \begin{enumerate}[noitemsep]
 \item the graph must have a single source with no ingoing edges, and two sinks of different kinds without outgoing edges,
