@@ -3,8 +3,6 @@
 
 The main call for commencing the work on \porthos[2] was the need for processing real-world C programs, which, at first, requires the input language to be extended.
 This implies the support not only for new syntactic structures of the C language (such as the \texttt{switch} statement or the postfix increment operator \texttt{i++}), but also for its fundamental concepts and features (such as types, pointer arithmetic or first-order functions), which requires revision of the whole architecture of the tool.
-This implies the support not only for new syntactic structures of the C language (such as the \texttt{switch} statement or the postfix increment operator \texttt{i++}), but also for its fundamental concepts and features (such as types, pointer arithmetic or first-order functions), which requires revision of the whole architecture of the tool.
-This implies the support not only for new syntactic structures of the C language (such as the \texttt{switch} statement or the postfix increment operator \texttt{i++}), but also for its fundamental concepts and features (such as types, pointer arithmetic or first-order functions), which requires revision of the whole architecture of the tool.
 Yet far from all the C language is supported (which, considering its complexity and numerous pitfalls, goes far beyond current thesis%
 %
 \footnote{To ensure this, one merely has to look at existing C compiler implementations, for instance, the open-source \tool{gcc} compiler, which uses the C parser written in more than 18.5 thousand lines of code (see \url{https://github.com/gcc-mirror/gcc/blob/master/gcc/c/c-parser.c})}%
@@ -958,8 +956,8 @@ Figure~\ref{fig:loop-unroll} illustrates unrolling for the cyclic control-flow g
 \node[c] (36) [below right=1cm and 1cm of 15] {$3_6$};
 \node[c] (16) [below right=1cm and 0.2cm of 45] {$1_6$};
 \node[c] (46) [below right=1cm and 0.3cm of 35] {$4_6$};
-\node[rectangle,draw] (6inc) [below left=1cm and 0.6cm of 16] {$S_{-}$};
-\node[rectangle,draw] (6com) [below of=6inc] {$S_{+}$};
+\node[rectangle,draw] (6inc) [below left=1cm and 3cm of 16] {$S_{-}$};
+\node[rectangle,draw] (6com) [right=3cm of 6inc] {$S_{+}$};
 \node[] (k1) [right=3.2cm of 11] {$(k = 1)$};
 \node[] (k2) [right=1.7cm of 32] {$(k = 2)$};
 \node[] (k3) [right=1.7cm of 43] {$(k = 3)$};
@@ -983,9 +981,9 @@ Figure~\ref{fig:loop-unroll} illustrates unrolling for the cyclic control-flow g
 (45) edge [] node {} (16)
 (35) edge [bend right=10] node {} (16)
 (35) edge [bend left=10] node {} (46)
-(26) edge [bend right=20] node {} (6com)
-(36) edge [] node {} (6inc)
-(16) edge [] node {} (6inc)
+(26) edge [bend right=10] node {} (6com)
+(36) edge [bend right=5] node {} (6inc)
+(16) edge [bend left=20] node {} (6inc)
 (46) edge [bend left=20] node {} (6com)
 ;
 \end{tikzpicture}

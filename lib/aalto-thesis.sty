@@ -239,6 +239,7 @@
 % Language can be either english, finnish, or swedish
 % Text and logos are selected accordingly
 \newcommand{\thesisabstract}[2]{
+\thispagestyle{empty}
 \selectlanguage{#1}
 \selectterms{#1}
 {%
@@ -269,7 +270,8 @@
 \hline
 \textbf{\ATAUTHORNAME:} & \multicolumn{3}{l|}{Artem Yushkovskiy} \\%{\AUTHOR} \\
 \textbf{\ATTITLENAME:}  & \multicolumn{3}{l|}{\ATTITLE} \\
-%\multicolumn{4}{|l|}{\allowlinebreaks{14.5cm}{\textbf{\ATTITLENAME:} \ATTITLE\ \ATSUBTITLE}}\\
+%\multicolumn{4}{|l|}{\allowlinebreaks{14.5cm}{\textbf{\ATTITLENAME:}\\
+%\ATTITLE\ \ATSUBTITLE}}\\
 \hline
 \textbf{\ATDATENAME:} & \ATDATE & \textbf{\ATPAGESNAME:} & \PAGES \\
 %\hline
