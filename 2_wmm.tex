@@ -84,7 +84,7 @@ The basic relations are the following~\cite{alglave2010shared}:
     \end{itemize}
 
     \item Events from the same process are related by the \textit{scope relation} \sr{}~$\subseteq~\mathbb{E}~\times~\mathbb{E}$.
-    In contrast to the \tool{herd} tool, the \porthos[2] does not use hierarchy of scopes (depicted as the scope tree); instead, it uses simple labels that indicate which process has produced certain event.
+    In contrast to the \tool{herd} tool, \porthos[2] does not use hierarchy of scopes (depicted as the scope tree); instead, it uses simple labels that indicate which process has produced certain event.
 \end{itemize}
 
 %TODO: add ppo = characteristics of memory model. "Architectures are instances of our model. An architecture is a triple of functions (ppo, fences, prop), which specifies the preserved program order ppo, the fences fences and the propagation order prop." (herding cats, p.13)
@@ -212,5 +212,5 @@ Below we enumerate pre-defined operators over relations and sets of events:
 \end{enumerate}
 
 For instance, the \fr-relation is defined as a sequence of inverted \rf-relation and \co-relation: $\texttt{fr} = (\invrel{rf};\texttt{co})$.
-As an example of memory model definition in \cat{} language, the x86-TSO model~\cite{herdtutorial} can be found in Appendix~\ref{apx:x86cat}.
+As an example of memory model definition in \cat{} language, the x86-TSO model~\cite{herd10tutorial} can be found in Appendix~\ref{apx:x86cat}.
 This memory model asserts acyclicity of communication relation, \texttt{po-loc} -relation, \texttt{mfence}-relation and some other derived relations~\cite{owens2009better}.

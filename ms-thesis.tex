@@ -434,10 +434,10 @@ sorting=anyvt,%Sort by alphabetic label, name, year, title,
 % Abstract in English
 % ------------------------------------------------------------------
 \thesisabstract{english}{
-The software verification is considered as a hard computational problem vulnerable to the state explosion problem.
-The concurrent software verification raises the complexity of the problem to a power determined by %by the factor defined
-all possible interleavings of states of the system. %concurrent parts of the system.
-Moreover, the architecture of a modern shared-memory multi-core processor or optimisations performed by a compiler can cause program behaviours that are unexpected from the point of view of traditional concurrency.
+Software verification is considered to be a hard computational problem vulnerable to the state explosion problem.
+Concurrent software verification raises the complexity of the problem to a power determined by %by the factor defined
+all the possible interleavings of states of the system. %concurrent parts of the system.
+Moreover, the architecture of a modern shared-memory multi-core processor and optimisations performed by a compiler can cause program behaviour that is unexpected from the point of view of traditional concurrency.
 The guarantees that an execution environment can provide to a programmer are formalised in its \textit{weak memory model (WMM)}.
 %The formalisation of weak memory models
 Over the last decade, weak memory models were defined for multiple hardware architectures and programming languages.
@@ -459,7 +459,7 @@ For that, it performs an SMT-based bounded reachability analysis by encoding the
 
 Although the approach has been proven to be efficient, the tool accepts as input the small C-like toy language. % and remains to have hardly extensible architecture. %proof-of-concept 
 Current thesis aims to rework \porthos{} by extending its input language, so that it is able to process real-world C programs.
-However, current implementation of \porthos{} seems to be hardly extensible, which raises the need to redesign its whole architecture in order to increase the robustness, transparency, efficiency and extensibility.
+However, current implementation of \porthos{} seems to be hard to extend, which raises the need to redesign its whole architecture in order to increase the robustness, transparency, efficiency and extensibility.
 The result of the work is \textit{\porthos[2]}, a framework for SMT-based memory model-aware analysis.
 %to redesign \porthos{} so that 
 %considers the problem of the memory model-aware program verification, especially verification the portability from one architecture to another.

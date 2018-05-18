@@ -28,7 +28,7 @@ Yet far from all the C language is supported (which, considering its complexity 
 \section{General principles}
 \label{ch:impl:principles}
 
-The existing implementation of \porthos{} does not distinguish the event-based program model from the high-level AST, they both are encoded into single SMT-formula (see classes of package `\texttt{dartagnan.program}' of \porthos{} tool).
+The existing implementation of \porthos{} does not distinguish the event-based program model from the high-level AST, they both are encoded into a single SMT-formula (see classes of package `\texttt{dartagnan.program}' of \porthos{} tool).
 Moreover, the syntax tree was implemented as a mutable data structure, which is being modified at all stages of the program (for instance, see the methods `\texttt{dartagnan.program.Program.compile(...)}' of \porthos{} that recursively compute some properties of the AST and change its state).
 We are inclined to consider this architecture as one that is fast to develop, but hard to maintain (since it is difficult to guarantee the correctness of the program) and extend (since adding the support for a new high-level instruction requires changing multiple components of the program, from parser to encoder).
 %Moreover, we encounter serious problems when we need to add support for control-flow jumps (as \texttt{continue}, \texttt{break}, \texttt{goto} in C).
@@ -86,7 +86,7 @@ As its predecessor, \porthos[2] uses the open-source SMT solver \tool{Z3}%
 %
 \footnote{The \tool{Z3} project repository: \url{https://github.com/Z3Prover/z3}} %
 %
-by Microsoft Research~\cite{de2008z3}. However, unlike its predecessor, the \porthos[2] has an additional abstraction level, \zformula{} (see Section~\ref{ch:impl:model:zformula}), that allows the use any other SMT solver.
+by Microsoft Research~\cite{de2008z3}. However, unlike its predecessor, \porthos[2] has an additional abstraction level, \zformula{} (see Section~\ref{ch:impl:model:zformula}), that allows the use any other SMT solver.
 
 %We have decided to implement \porthos[2] in \textit{Java}
 As its predecessor, \porthos[2] is written in \textit{Java},
@@ -94,7 +94,7 @@ As its predecessor, \porthos[2] is written in \textit{Java},
 firstly, in order to be able to reuse some parts and concepts of \porthos{} also written in Java, and secondly, because the authors find the object-oriented (OOP) concepts of Java suitable for modelling languages.
 Although Java does not show the best results in performance benchmarks (for example, compared to C++~\cite{hundt2011loop}), the performance cornerstone of \porthos[2] (as well as any other SMT-based code analyser) is the phase of solving the SMT-formula, which is left to the third-party SMT solver invoked by \porthos[2] via a Java API.
 However, considering the perspective of using \porthos[2] as a static analyser for real-world programs, the memory optimisation problem must also be taken into account during both encoding and solving stages.
-It is worth noting that, for the reasons of simplicity, the \porthos[2] is not a concurrent program, however, we believe that, due to its modular architecture, it can be easily parallelised on the level of program modules.
+It is worth noting that, for the reasons of simplicity, \porthos[2] is not a concurrent program, however, we believe that, due to its modular architecture, it can be easily parallelised on the level of program modules.
 
 
 \section{Architecture}
@@ -871,7 +871,7 @@ The first group constitute methods that emit events.
 These methods construct an event object (as events contain the \texttt{XEventInfo} structure that stores information about the owning process, all events must be created by the process constructor, i.e. X-interpreter) and change the state of interpreter considering the newly created event.
 Note that the methods \texttt{createComputationEvent} do not emit a computation event but only create one.
 This is performed as optimisation that removes unused computations from the model (otherwise, for instance, the assignment 
-`\texttt{x = 1 * (2 + 3)}' would be compiled to two consequent events `\texttt{eval(2 + 3); write(register <- eval(1 * eval(2 + 3)));}' instead of single event `\texttt{write(register <- eval(1 * eval(2 + 3)));}').
+`\texttt{x = 1 * (2 + 3)}' would be compiled to two consequent events `\texttt{eval(2 + 3); write(register <- eval(1 * eval(2 + 3)));}' instead of a single event `\texttt{write(register <- eval(1 * eval(2 + 3)));}').
 If the computation event was not used at all (for example, in the following C code: `\texttt{foo(); 1; bar();}' the execution event `\texttt{eval(1)}' is skipped by the model), it is also removed from the event-graph (see justification in Section~\ref{ch:impl:model:xgraph:evt}).
 The second group of X-interpreter methods consists of the methods for defining non-linear statements (branchings and loops).
 These methods change the state of the interpreter and set up additional non-linear control-flow edges.

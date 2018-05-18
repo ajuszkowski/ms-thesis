@@ -55,7 +55,7 @@ In this approach, the state space exploration consists of the sequence of querie
 %Due to the SAT-solver.
 This technique is called \textit{bounded model checking (BMC)} as the search process is being repeated up to the user-defined bound $k$, which may result to incomplete analysis in general case.
 However, there exist numerous techniques for making BMC complete for finite-state systems~(e.g.,~\cite{shtrichman2000tuning}).
-%As well as the BMC problem, the approach used by the \porthos{}
+%As well as the BMC problem, the approach used by \porthos{}
 
 %For instance, the idea of grouping states with similar properties into equivalence classes lead to the concept of traces in concurrent systems proposed by A.~Mazurkiewicz in 1986~\cite{mazurkiewicz1986trace}. 
 
@@ -90,12 +90,12 @@ The result SMT-formula $\phi$ that encodes the portability problem should contai
 \subsection{Encoding for the control-flow} %Encoding the control-flow constraints}
 \label{ch:enc:enc:cf}
 
-The control-flow of a program is represented by the \textit{control-flow graph}, a directed acyclic connected graph with single source and multiple sink nodes. %TODO: footnote why multiple sinks
+The control-flow of a program is represented by the \textit{control-flow graph}, a directed acyclic connected graph with a single source and multiple sink nodes. %TODO: footnote why multiple sinks
 In a control-flow graph, there are two types of edges (transitions): \textit{primary transitions} that denote unconditional jumps or if-true-transitions (pictured with solid lines), and \textit{alternative transitions} that denote if-false-transitions (pictured with dotted lines).
 Each node on graph can have either one successor (primary) or two successors (both primary and alternative); only computation events can serve as a branching point).
 However, each merge node can have any positive number of predecessors, where each edge may be either primary or alternative.
 
-While working on the \porthos[2], we have applied some modifications to the encoding scheme for the control-flow.
+While working on \porthos[2], we have applied some modifications to the encoding scheme for the control-flow.
 The changes are conditioned by the need to be able to process an arbitrary control-flow produced by conditional and unconditional jumps of the C language.
 For that, we compile the \textit{Abstract Syntax Tree~(AST)} of the parsed C-code to the plain event-flow graph.
 We show %TODO! to show, actually!!!
@@ -332,7 +332,7 @@ The SSA-map is computed iteratively while traversing the event-flow graph in top
     \label{algorithm:ssa-map}
 \end{algorithm}
 
-The time of described algorithm is linear of the size of event-flow graph since it performs only single traverse of the graph.
+The time of described algorithm is linear of the size of event-flow graph since it performs only one graph traverse.
 %Notwithstanding the overhead of storing (or, equivalently, computing with %TODO: are you sure that 'with'?
 %linear time) the predecessors of each node in order to be able to convert the program into an SSA form, the time of such a transformation reduced %TODO: How much ????
 %comparing to the algorithm implemented in \porthos, which recomputed SSA-indices recursively for each instruction. %TODO: PROOF OR REMOVE !  Maybe, some words of copying, merging SSA maps ?
