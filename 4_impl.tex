@@ -97,12 +97,6 @@ However, considering the perspective of using \porthos[2] as a static analyser f
 It is worth noting that, for the reasons of simplicity, \porthos[2] is not a concurrent program, however, we believe that, due to its modular architecture, it can be easily parallelised on the level of program modules.
 
 
-\section{Architecture}
-\label{ch:impl:arch}
-
-The general architecture scheme of \porthos[2] is presented in Figure~\ref{fig:arch}.
-%The rectangles in the picture denote processing units (marked with gear sign with a unique number of the component), and labels of the arrows describe the internal representation carried out during the transformation.
-
 \begin{figure}
   \centering
   %draft=true
@@ -110,6 +104,12 @@ The general architecture scheme of \porthos[2] is presented in Figure~\ref{fig:a
   \caption{The general architecture of \porthos[2]}
   \label{fig:arch}
 \end{figure}
+
+\section{The architecture}
+\label{ch:impl:arch}
+
+The general architecture scheme of \porthos[2] is presented in Figure~\ref{fig:arch}.
+%The rectangles in the picture denote processing units (marked with gear sign with a unique number of the component), and labels of the arrows describe the internal representation carried out during the transformation.
 
 The program takes as input the program to be analysed and one (the reachability analysis mode) or two (the portability analysis mode) memory models.
 The parsed program syntax tree is then converted (Section~\ref{ch:impl:proc:y-constr}) to a program AST called \ytree{}%
@@ -138,7 +138,7 @@ Although this parser may not be as efficient as a hand-written language-optimise
 Among other advantages \tool{ANTLR}, it has a rather large collection of officially supported grammars.
 Nonetheless, the intuitive syntax for defining grammars and numerous of tools for debugging grammars make the \tool{ANTLR} an attractive instrument for solving the parsing problem.
 
-\begin{figure}%[!h]%[!hb]
+\begin{figure}[t]%[!h]%[!hb]
 \centering
 %basicstyle=\ttfamily\tiny,
 \begin{lstlisting}[basicstyle=\rmfamily\scriptsize,%
@@ -255,7 +255,7 @@ is left beyond current thesis.
 %TODO: say sth about 100500 litmus-tests for kernel
 
 
-\subsection{The internal representations}
+\subsection{Internal representations}
 \label{ch:impl:model}
 
 %As it has already been mentioned, all internal representations used by \porthos[2] are immutable.
@@ -569,7 +569,7 @@ For the sake of transparency, each element of a \zformula{} contains the origin 
 %todo: enumerate elements -- after refactoring>
 
 
-\subsection{The processing units} %Transformation}
+\subsection{Processing units} %Transformation}
 \label{ch:impl:proc}
 
 %todo: after all, list HERE which modules (classes, managers) are being initialised during the pre-compilation. I'ts good to have the dependencies graph on moduls (operational semantics:) )
