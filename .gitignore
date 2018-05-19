@@ -9,5 +9,5 @@
 # output directory, except *.pdf
 /out/*
 !/out/*.pdf
-/build/*
-!/build/*.pdf
+/slides/out/*
+!/slides/out/*.pdf

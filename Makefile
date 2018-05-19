@@ -14,6 +14,10 @@ once:
 	pdflatex --synctex=1 --output-directory=$(OUTPUT) $(TEXFILE).tex 
 	# OK
 
+slides:
+	rm -f slides/out/*
+	pdflatex --output-directory=slides/out slides/slides.tex
+
 clean:
 	rm -f $(OUTPUT)/*
 
