@@ -1,7 +1,31 @@
 \documentclass{beamer}
 
-\usepackage[english]{babel}
-%\usepackage[doublenumbering,twosupervisors]{../lib/aalto-thesis}
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[russian,english]{babel}
+%\usepackage{tikz}
+%\usetikzlibrary{tikzmark}
+%\usetikzlibrary{calc}
+
+\usepackage[font=scriptsize]{caption}
+\setlength{\abovecaptionskip}{5pt plus 0pt minus 2pt} % Chosen fairly arbitrarily
+
+\usepackage[backend=biber]{biblatex}
+\addbibresource{../bib/ms-thesis.bib}
+%\newcommand{\tikzmark}[1]{\tikz[remember picture] \node[coordinate] (#1) {#1};}
+
+
+\usepackage{array}
+\usepackage{xcolor}
+
+\usepackage{hyphenat} % for using \nohyphens
+%\usepackage{multirow} %Used for tables with merged cells
+%\usepackage{collcell} %pdflatex.exe hangs without this one
+
+\usepackage{booktabs}% http://ctan.org/pkg/booktabs
+\newcommand{\tabitem}{~~\llap{\textbullet}~~}
+
+
 %\RequirePackage{aaltologo}
 %\RequirePackage{beamercolorthemeAalto}
 %\RequirePackage{beamerthemeAalto}
@@ -44,17 +68,15 @@
 %\titlegraphic{\includegraphics[height=1cm,width=2cm]{logo1}}
 %\titlegraphicii{\includegraphics[height=1cm,width=2cm]{logo2}}
 
-
-
-\title{Automated Analysis of Weak Memory Models}
+\title{\nohyphens{\textbf{Automated~Analysis~of~Weak~Memory~Models}}}
 
 % A subtitle is optional and this may be deleted
 %\subtitle{Optional Subtitle}
-\author{Artem Yushkovskiy\inst{1,2} \\ 
+\author{\textbf{Artem Yushkovskiy}\inst{1,2} \\ 
 {\scriptsize MSc Candidate}
 \\ \vspace{1em}
-{\footnotesize\raggedleft Supervisors: Assoc. Prof. Keijo Heljanko\inst{1} \newline
-\hphantom{Supervis} Docent Igor I. Komarov\inst{2} }
+{\footnotesize\raggedleft Supervisors: \textbf{Assoc. Prof. Keijo Heljanko}\inst{1} \newline
+\hphantom{Supervis} \textbf{Docent Igor I. Komarov}\inst{2} }
 }%\small
 %{\footnotesize%\raggedleft%does not work
 %Supervisor 1: Assoc. Prof. Keijo Heljanko\inst{1} \newline
@@ -62,17 +84,17 @@
 %}
 
 
-\institute[Universities of Somewhere and Elsewhere] % (optional, but mostly needed)
+\institute % (optional, but mostly needed)
 {
   \inst{1}%
   Department of Computer Science, \\
   School of Science, \\
-  Aalto University (Espoo, Finland)%
+  \textbf{Aalto University} (Espoo, Finland)%
   \and
   \inst{2}%
   Faculty of Information Security \\
   and Computer Technologies, \\
-  ITMO University (Saint Petersburg, Russia)%
+  \textbf{ITMO University} (Saint Petersburg, Russia)%
 }
 
 \date{\scriptsize Espoo, Saint Petersburg, 2018}
@@ -100,7 +122,12 @@
   \end{frame}
 }
 
-
+\usepackage{colortbl}
+\definecolor{ltgrey}{rgb}{0.85,0.85,0.85}
+\definecolor{dkblue}{rgb} {0,   0.1, 0.6}
+\definecolor{dkred} {rgb} {0.6, 0.1, 0}
+\renewcommand{\r}[1]{\ensuremath{\textcolor{dkred}{#1}}}
+\renewcommand{\b}[1]{\ensuremath{\textcolor{dkblue}{#1}}}
 
 
 % Let's get started
@@ -114,6 +141,176 @@
   \tableofcontents
   % You might wish to add the option [pausesections]
 \end{frame}
+
+
+\section{Introduction}
+
+\subsection{Weak memory model-aware analysis}
+
+\begin{frame}{Verification of concurrent software}
+\framesubtitle{Example: Write-write reordering (by compiler)}
+%1) mckenney  http://www.rdrop.com/users/paulmck/scalability/paper/whymb.2010.06.07c.pdf
+%2) http://preshing.com/20120515/memory-reordering-caught-in-the-act/
+\begin{table}
+\centering
+\ttfamily
+\begin{tabular}{ |>{\color{dkblue}}l | >{\color{dkred}}l| }
+\hline
+\multicolumn{2}{|l|}{ \{ x=0; y=0; \}} \tabularnewline \hline
+P & Q \\ \hline
+$p_0$ : $x \leftarrow 1$   & $q_0$: $y \leftarrow 1$   \\
+$p_1$ : $r_p \leftarrow y$ & $q_1$: $r_q \leftarrow x$ \\
+\hline
+\end{tabular}
+\end{table}
+
+%\tikzmark{p1} 
+%\begin{tikzpicture}[remember picture, overlay]
+%  \path[draw=red,thick,<->]<4-> (pic cs: p0) to [] (pic cs: p1);
+%\end{tikzpicture}
+
+\addtolength{\tabcolsep}{-3pt}
+
+\def\firstrowcolor{}
+\def\secondrowcolor{}
+\hspace{-20pt}
+\begin{minipage}{.25\textwidth}
+\small
+\onslide<2-> 
+\begin{tabular}{ l r}
+\rowcolor{ltgrey} $\b{p_0}, \b{p_1}, \r{q_0}, \r{q_1}$ & $(\b{0}; \r{1})$ \\
+\rowcolor{ltgrey} $\r{q_0}, \r{q_1}, \b{p_0}, \b{p_1}$ & $(\b{1}; \r{0})$ \\
+%\hline
+\pause
+\onslide<3-> 
+$\b{p_0}, \r{q_0}, \b{p_1}, \r{q_1}$ & $(\b{1}; \r{1})$ \\
+$\b{p_0}, \r{q_0}, \r{q_1}, \b{p_1}$ & $(\b{1}; \r{1})$ \\
+$\r{q_0}, \b{p_0}, \b{p_1}, \r{q_1}$ & $(\b{1}; \r{1})$ \\
+$\r{q_0}, \b{p_0}, \r{q_1}, \b{p_1}$ & $(\b{1}; \r{1})$ \\
+%\hline
+\pause
+\end{tabular}
+\end{minipage}
+%
+\hspace{5pt}
+\begin{minipage}{.6\textwidth}
+\small
+\onslide<4->
+%\vspace{-1em}
+%"delay the effect of a store past any load from a different location."
+\vspace{-11pt}
+\begin{tabular}{ | l r | l r | l r }
+\rowcolor{ltgrey} $\underline{\b{p_1}}, \underline{\b{p_0}}, \r{q_0}, \r{q_1}$ & $(\b{0}; \r{1})$  &  $\b{p_0}, \b{p_1}, \underline{\r{q_1}}, \underline{\r{q_0}}$ & $(\b{0}; \r{1})$  &  $\underline{\b{p_1}}, \underline{\b{p_0}}, \underline{\r{q_1}}, \underline{\r{q_0}}$ & $(\b{0}; \r{1})$ \\
+\rowcolor{ltgrey} $\r{q_0}, \r{q_1}, \underline{\b{p_1}}, \underline{\b{p_0}}$ & $(\b{1}; \r{0})$  &  $\underline{\r{q_1}}, \underline{\r{q_0}}, \b{p_0}, \b{p_1}$ & $(\b{1}; \r{0})$  &  $\underline{\r{q_1}}, \underline{\r{q_0}}, \underline{\b{p_1}}, \underline{\b{p_0}}$ & $(\b{1}; \r{0})$ \\
+$\underline{\b{p_1}}, \r{q_0}, \underline{\b{p_0}}, \r{q_1}$ & $(\b{0}; \r{1})$  &  $\b{p_0}, \underline{\r{q_1}}, \b{p_1}, \underline{\r{q_0}}$ & $(\b{0}; \r{1})$  &  $\underline{\b{p_1}}, \underline{\r{q_1}}, \underline{\b{p_0}}, \underline{\r{q_0}}$ & $(\b{0}; \r{0})$ \\
+$\underline{\b{p_1}}, \r{q_0}, \r{q_1}, \underline{\b{p_0}}$ & $(\b{0}; \r{0})$  &  $\b{p_0}, \underline{\r{q_1}}, \underline{\r{q_0}}, \b{p_1}$ & $(\b{1}; \r{1})$  &  $\underline{\b{p_1}}, \underline{\r{q_1}}, \underline{\r{q_0}}, \underline{\b{p_0}}$ & $(\b{0}; \r{0})$ \\
+$\r{q_0}, \underline{\b{p_1}}, \underline{\b{p_0}}, \r{q_1}$ & $(\b{1}; \r{1})$  &  $\underline{\r{q_1}}, \b{p_0}, \b{p_1}, \underline{\r{q_0}}$ & $(\b{0}; \r{0})$  &  $\underline{\r{q_1}}, \underline{\b{p_1}}, \underline{\b{p_0}}, \underline{\r{q_0}}$ & $(\b{0}; \r{0})$ \\
+$\r{q_0}, \underline{\b{p_1}}, \r{q_1}, \underline{\b{p_0}}$ & $(\b{1}; \r{0})$  &  $\underline{\r{q_1}}, \b{p_0}, \underline{\r{q_0}}, \b{p_1}$ & $(\b{1}; \r{0})$  &  $\underline{\r{q_1}}, \underline{\b{p_1}}, \underline{\r{q_0}}, \underline{\b{p_0}}$ & $(\b{0}; \r{0})$ \\
+\end{tabular}
+\end{minipage}
+
+\end{frame}
+
+
+
+\begin{frame}{Verification of concurrent software}
+\framesubtitle{Example: Store buffering (by hardware)}
+\begin{center}
+\scalebox{0.7}{
+\ttfamily
+\begin{tabular}{ |>{\color{dkblue}}l | >{\color{dkred}}l| }
+\hline
+\multicolumn{2}{|l|}{ \{ x=0; y=0; \}} \tabularnewline \hline
+P & Q \\ \hline
+$p_0$ : $x \leftarrow 1$   & $q_0$: $y \leftarrow 1$   \\
+$p_1$ : $r_p \leftarrow y$ & $q_1$: $r_q \leftarrow x$ \\
+\hline
+\end{tabular}
+}
+\end{center}
+
+\vspace{-5pt}
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{img/candidate.png}
+\caption{The four candidate executions}
+\end{figure}
+
+\end{frame}
+
+
+
+\begin{frame}{Verification of concurrent software}
+\framesubtitle{A weak memory model: Operational semantics} %{Example: Store buffering (hardware)}
+\begin{center}
+\scalebox{0.7}{
+\ttfamily
+\begin{tabular}{ |>{\color{dkblue}}l | >{\color{dkred}}l| }
+\hline
+\multicolumn{2}{|l|}{ \{ x=0; y=0; \}} \tabularnewline \hline
+P & Q \\ \hline
+$p_0$ : $x \leftarrow 1$   & $q_0$: $y \leftarrow 1$   \\
+$p_1$ : $r_p \leftarrow y$ & $q_1$: $r_q \leftarrow x$ \\
+\hline
+\end{tabular}
+}
+\end{center}
+
+\begin{figure}
+\includegraphics[scale=0.37]{img/x86-arch-full.png}
+\caption{An x86-TSO abstract machine~\cite{sewell2010x86}}
+%\label{fig:x86-arch}
+\end{figure}
+\end{frame}
+
+
+%\framesubtitle{A weak memory model: Axiomatic semantics}
+
+\begin{frame}{Verification of concurrent software}
+\framesubtitle{A weak memory model: Axiomatic semantics}
+
+\begin{itemize}
+  \item 
+\end{itemize}
+
+\end{frame}
+
+
+
+
+
+%\subsection{Актуальность}
+
+
+\subsection{Problem statement (Цель исследования)}
+
+
+\subsection{Task specification (Задачи исследования)}
+
+1) 
+2)
+3)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 % Section and subsections will appear in the presentation overview
 % and table of contents.
@@ -212,27 +409,7 @@ Here is an example of an example block.
 
 \begin{frame}[allowframebreaks]
   \frametitle<presentation>{Bibliography}
-
-  \begin{thebibliography}{10}
-  
-  \beamertemplatebookbibitems
-  % Start with overview books.
-
-  \bibitem{Author1990}
-    A.~Author.
-    \newblock {\em Handbook of Everything}.
-    \newblock Some Press, 1990.
- 
-    
-  \beamertemplatearticlebibitems
-  % Followed by interesting articles. Keep the list short. 
-
-  \bibitem{Someone2000}
-    S.~Someone.
-    \newblock On this and that.
-    \newblock {\em Journal of This and That}, 2(1):50--100,
-    2000.
-  \end{thebibliography}
+  \printbibliography
 \end{frame}
 
 \end{document}
