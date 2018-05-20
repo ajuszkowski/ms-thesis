@@ -27,6 +27,7 @@ c/.style={
 }
 
 
+\newcommand{\tool}[1]{\texttt{#1}}
 \newcommand*{\fx}{\ensuremath{\mathbf{x}}}%x}}}
 \newcommand*{\fv}{\ensuremath{\mathbf{v}}} %v}}}
 \newcommand{\defeq}{\ensuremath{=}}%\coloneqq}}%\Leftrightarrow}}%\triangleq}}
@@ -171,7 +172,7 @@ c/.style={
 
 % Delete this, if you do not want the table of contents to pop up at
 % the beginning of each subsection:
-\AtBeginSubsection[]
+\AtBeginSection[]
 {
   \begin{frame}<beamer>{Outline}
     \tableofcontents[currentsection]%,currentsubsection]
@@ -202,6 +203,8 @@ c/.style={
 \end{frame}
 
 
+
+
 \section{Introduction}
 
 \subsection{The problem}
@@ -229,7 +232,7 @@ To rework the proof-of-concept memory model-aware analysis tool \texttt{Porthos}
 
 \subsection{The background: weak memory model-aware analysis}
 
-\begin{frame}{Verification of Concurrent Software} {Example: Write-write reordering (compiler  relaxations)}
+\begin{frame}{Verification of concurrent software} {Example: Write-write reordering (compiler  relaxations)}
 %1) mckenney  http://www.rdrop.com/users/paulmck/scalability/paper/whymb.2010.06.07c.pdf
 %2) http://preshing.com/20120515/memory-reordering-caught-in-the-act/
 
@@ -296,7 +299,7 @@ $\r{q_0}, \underline{\b{p_1}}, \r{q_1}, \underline{\b{p_0}}$ & $(\b{1}; \r{0})$ 
 
 
 
-\begin{frame}{Verification of Concurrent Software} {Example: Store buffering (by hardware)}
+\begin{frame}{Verification of concurrent software} {Example: Store buffering (hardware relaxations)}
 \begin{center}
 \scalebox{0.7}{
 \ttfamily
@@ -322,7 +325,7 @@ $p_1$ : $r_p \leftarrow y$ & $q_1$: $r_q \leftarrow x$ \\
 
 
 
-\begin{frame}{Weak Memory Model} {Axiomatic semantics}
+\begin{frame}{The weak memory model} {Axiomatic semantics: The definition}
 
 \begin{itemize}
   \addtolength{\tabcolsep}{0pt}
@@ -360,9 +363,40 @@ $p_1$ : $r_p \leftarrow y$ & $q_1$: $r_q \leftarrow x$ \\
 
 
 
-\begin{frame}{Weak Memory Model} {Example: Store buffering (hardware relaxations)}
-%\begin{center}
+\begin{frame}{The weak memory model} {Testing the candidate executions}
+\vspace{10pt}
+\begin{minipage}{.3\linewidth}
+\hfill
+\end{minipage}
+%
+\noindent\begin{minipage}{.4\linewidth}
+\scalebox{0.7}{
+\ttfamily
+\begin{tabular}{ |>{\color{dkblue}}c | >{\color{dkred}}c| }
+\hline
+\multicolumn{2}{|c|}{ \{ x=0; y=0; \}} \tabularnewline \hline
+P & Q \\ \hline
+$p_0$ : $x \leftarrow 1$   & $q_0$: $y \leftarrow 1$   \\
+$p_1$ : $r_p \leftarrow y$ & $q_1$: $r_q \leftarrow x$ \\
+\hline
+\end{tabular}
+}
+\end{minipage}
+%
+\noindent\begin{minipage}{.25\linewidth}
+\end{minipage}
+\vspace{-5pt}
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{img/candidate.png}
+\caption{The four candidate executions allowed under x86-TSO}
+\end{figure}
+\end{frame}
 
+
+
+
+\begin{frame}{The weak memory model} {Testing the candidate executions}
 \vspace{10pt}
 \begin{minipage}{.3\linewidth}
 \hfill
@@ -391,9 +425,6 @@ SC model: \\
 \color{red}\texttt{acyclic(fr $\cup$ po)}
 \end{minipage}
 }
-
-%\end{center}
-
 \vspace{-5pt}
 \begin{figure}
 \centering
@@ -405,7 +436,33 @@ SC model: \\
 
 
 
-\subsection{Portability analysis}
+
+
+
+
+
+
+
+
+\begin{frame}{Tools for memory model-aware analysis}
+\begin{itemize}
+\item \texttt{diy} tool suite:
+  \begin{itemize}
+  \item \tool{diy}, \tool{diycross} and \tool{diyone}, litmus tests generators,
+  \item \tool{litmus}, a litmus test concrete executor, and 
+  \item \tool{herd}, a weak memory model simulator;
+  \end{itemize}
+%\item the stateless model checkers (\tool{CHESS}~\cite{musuvathi2008fair}, \tool{Nidhugg}~\cite{abdulla2017stateless}); %TODO: description of statelessses
+\item the stateless model checkers (\tool{CHESS}, \tool{Nidhugg}); %TODO: description of statelessses
+\item the tool for automated synthesis of the synchronisation primitives \tool{musketeer};
+\item the instrumenting compiler \tool{goto-cc} which is a part of \tool{CBMC} model checker;
+\item the tool \texttt{Porthos} for analysing the portability of the C programs;
+\item and others.
+\end{itemize}
+\end{frame}
+
+
+\subsection{Portability Analysis}
 
 \begin{frame}{Portability analysis} {The \texttt{Porthos} tool}
 
@@ -433,20 +490,23 @@ ${\phi = \phi_{CF} \land \phi_{DF} \land \phi_{\mathcal{M_T}} \land \phi_{\lnot\
 \subsection{SMT-encoding}
 
 
-\begin{frame}{Encoding for the control-flow}% {The \texttt{Porthos v1} encoding scheme}
-\begin{itemize}
-\item In \texttt{Porthos}, the high-level instructions were represented in the SMT-formula by separate variables.
-\item For example, the sequential instruction $i_1 = i_2; i_3$ was encoded as
-$\phi_{CF}(i_2;i_3) = (cf_{i_1} \Leftrightarrow (cf_{i_2} \land cf_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)$,
-\end{itemize}
-\end{frame}
+%\begin{frame}{Encoding for the control-flow}% {The \texttt{Porthos v1} encoding scheme}
+%\begin{itemize}
+%\item In \texttt{Porthos}, the high-level instructions were represented in the SMT-formula by separate variables.
+%\item For example, the sequential instruction $i_1 = i_2; i_3$ was encoded as
+%$\phi_{CF}(i_2;i_3) = (cf_{i_1} \Leftrightarrow (cf_{i_2} \land cf_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)$,
+%\end{itemize}
+%\end{frame}
 
 
 \begin{frame}{Encoding for the control-flow}% {The \texttt{PorthosC} encoding scheme}
 
 \begin{itemize}
-\item The new encoding scheme of \texttt{PorthosC} follows~\cite{heljanko2008unfoldings} in general.
-\item The high-level AST is compiled into the \textit{event-flow graph}, where edges (transitions) are labelled by the \textit{guard} ($\epsilon$ is an empty guard).
+%\item The new encoding scheme of \texttt{PorthosC} follows~\cite{heljanko2008unfoldings} in general.
+\item \texttt{Porthos v1} used another encoding scheme, where the high-level instructions were represented in the SMT-formula by separate variables:
+$\phi_{CF}(i_2;i_3) = (cf_{i_1} \Leftrightarrow (cf_{i_2} \land cf_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)$.
+\item In \texttt{PorthosC}, the high-level AST firstly is compiled into the \textit{event-flow graph} with events as nodes and relations as edges.
+\item All edges are labelled by \textit{guards}, local-memory computations ($\epsilon$~denotes an empty guard).
 \end{itemize}
 
 \begin{figure}[b]
@@ -517,7 +577,12 @@ $\phi_{CF}(i_2;i_3) = (cf_{i_1} \Leftrightarrow (cf_{i_2} \land cf_{i_3})) \land
 
 \begin{frame}{Encoding for the control-flow} %{The \texttt{PorthosC} encoding scheme}
 
-The control-flow is encoded as following:
+\begin{itemize}
+\item Let $\fx:\,\mathbb{E}\,\rightarrow\,\{0,1\}$ be the predicate that signifies the fact that the event has been e\textbf{x}ecuted.
+\item The control-flow of the program is encoded as following:
+\end{itemize}
+
+\vspace{-20pt}
 \begin{align}
 \phi_{CF_{seq}} \defeq \quad & \fx(e_{i+1}) \Rightarrow \fx(e_i) \nonumber\\
 \phi_{CF_{br}}  \defeq \quad & [\fx(e_i) \Rightarrow \fx(e_k)] \ \land \ \cdots \ \land \ [\fx(e_{i+j}) \Rightarrow \fx(e_k)] \nonumber \nonumber\\
@@ -580,20 +645,7 @@ The data-flow of an event is encoded as following:
 %\end{frame}
 
 
-\subsection{Architecture}
-
-\begin{frame}{Architecture}%{The general architecture}
-\vspace{-30pt}
-\begin{figure}
-  \centering
-  \includegraphics[height=.99\textheight,keepaspectratio]{../img/my/draw.io/general_arch-no_numbering.png} %{img/my/draw.io/general_arch.png}
-  %\caption{The general architecture of \texttt{PorthosC}}
-  %\label{fig:arch}
-\end{figure}
-\end{frame}
-
-
-
+\subsection{The input language and general architecture}
 
 
 \begin{frame}{The input language}
@@ -608,9 +660,22 @@ The input language parser used by \texttt{Porthos} suffered from several disadva
 \end{frame}
 
 
+\begin{frame}{Architecture}%{The general architecture}
+\vspace{-30pt}
+\begin{figure}
+  \centering
+  \includegraphics[height=.99\textheight,keepaspectratio]{../img/my/draw.io/general_arch-no_numbering.png} %{img/my/draw.io/general_arch.png}
+  %\caption{The general architecture of \texttt{PorthosC}}
+  %\label{fig:arch}
+\end{figure}
+\end{frame}
 
 
-\begin{frame}{The \texttt{X-graph}}
+
+
+\subsection{The \texttt{X-graph}: structure and construction}
+
+\begin{frame}{The \texttt{X-graph} internal representation}
   \centering
   \begin{figure}
     \includegraphics[width=1.1\textwidth,keepaspectratio]{../img/my/class-diagrams/XEntity-interfaces.png}
@@ -618,7 +683,6 @@ The input language parser used by \texttt{Porthos} suffered from several disadva
   \end{figure}
   
 \end{frame}
-
 
 
 \begin{frame}{The \texttt{X-graph} compiler}
@@ -703,15 +767,11 @@ The input language parser used by \texttt{Porthos} suffered from several disadva
 
 
 
+\section{Evaluation}
 
-
-
-
-
-
-
-
-
+\begin{frame}{Evaluation}
+\alert{[to be done]}
+\end{frame}
 
 
 
@@ -719,25 +779,15 @@ The input language parser used by \texttt{Porthos} suffered from several disadva
 \section*{Summary}
 
 \begin{frame}{Summary}
-  \begin{itemize}
-  \item
-    The \alert{first main message} of your talk in one or two lines.
-  \item
-    The \alert{second main message} of your talk in one or two lines.
-  \item
-    Perhaps a \alert{third message}, but not more than that.
-  \end{itemize}
-  
-  \begin{itemize}
-  \item
-    Outlook
-    \begin{itemize}
-    \item
-      Something you haven't solved.
-    \item
-      Something else you haven't solved.
-    \end{itemize}
-  \end{itemize}
+\begin{itemize}
+\item The general framework for memory model-aware analysis was implemented in \texttt{PorthosC};
+%\item Review existing tools for memory model-aware analysis;
+\item The input language has been extended; %TODO: how exactly?
+\item The old architecture of \texttt{Porthos} has been analysed and considered while designing the new architecture for \texttt{PorthosC};
+%\item Design a new architecture for \texttt{PorthosC} that \textit{allow to} easily support the C input language, be robust, transparent, efficient and extensible.
+\item \alert{to be done: more}
+%\item the new architecture for the tool was designed,
+\end{itemize}
 \end{frame}
 
 
