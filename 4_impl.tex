@@ -805,7 +805,7 @@ and program assertions (i.e., it allows declarations of local variables, computa
 
 As the prelude process can declare shared variables, its compilation must go first.
 %TODO: think about sorting processes at the pre-compilation stage
-For transparency reasons, the first event of a process must be the \texttt{XEntryEvent} and the last events must be events of type \texttt{XExitEvent}.
+The first event of each process must be the \texttt{XEntryEvent} and the last events must be events of type \texttt{XExitEvent}.
 
 
 \paragraph{Memory manager}
@@ -887,13 +887,20 @@ The context is a data structure that carries the \textit{state} and some additio
 Once the new event has been emitted, the interpreter sets up control-flow edges w.r.t. state of the context on the top of the stack (the context stack is always non empty: the bottom context is a linear one).
 The context state is an enumeration of the following values:
 \begin{itemize}
-\item \texttt{WaitingAdditionalCommand}: the interpreter is in the state of defining the complex (non-linear) statement and is not able to process any new event (will throw an exception if any) until the state is not changed,
-\item \texttt{WaitingFirstSubBlockEvent}: the first next emitted event will be accepted as the first event of the branching statement (later the interpreter will set up jumps to that event),
+\item \texttt{WaitingAdditionalCommand}: the interpreter is in the state of defining the complex (non-linear) statement and is not able to process any new event (will throw an exception if any) until the state is not changed;
+\item \texttt{WaitingFirstConditionEvent}: the first next emitted event will be accepted as the first event of the condition evaluation (later, the loop edges will be set to this event);
+\item \texttt{WaitingLastConditionEvent}: the next event must be of type \texttt{XComputationEvent}; it will be saved as the conditional branching event;
+\item \texttt{WaitingFirstSubBlockEvent}: the first next emitted event will be accepted as the first event of the branching statement (later the interpreter will set up jumps to that event);
 \item \texttt{WaitingNextLinearEvent}: the standard interpreter state for processing next linear event, and
 \item \texttt{Idle}: the interpreter does not set up the edge from the previous event to the new event.
 \end{itemize}
 
-Once the (non-linear) context has been popped out of the context stack (by the methods of the second group that finish non-linear branch definition) and added to the queue of \texttt{almostReadyContexts}.
+Each new event emitted by the interpreter is processed considering the state of the context stack:
+the interpreter iterates over the context stack and sets up the edges by the graph builder depending on the state of each stack.
+The state \texttt{WaitingFirstConditionEvent} is necessary for correctly interpreting the branching conditions, which shared variables are involved in.
+If the non-linear statement is a loop statement, the loop back-edges will be set to this event.
+
+Once interpretation of the (non-linear) branch is completed, its non-linear context is being popped out of the context stack (by interpreter method \texttt{startBlockBranchDefinition}) and added to the queue of \texttt{almostReadyContexts}.
 The almost-ready-context becomes a ready-context (i.e., it moves to the queue \texttt{readyContexts}) once the non-linear statement definition has finished (the method \texttt{finishNonlinearBlockDefinition}).
 
 Before processing a newly emitted event, the interpreter checks whether the queue \texttt{readyContexts} is not empty.
@@ -914,13 +921,21 @@ For the sake of simplicity of the interpreter, jump events (no-computation event
 
 In order to be encoded into an SMT-formula, the compiled graph needs to be acyclic~\cite{Porthos17b}.
 To convert it to an acyclic form, we perform the \textit{unrolling} (sometimes called \textit{unwinding}) transfomation: each cycle is unrolled up to the user-defined bound $k$.
-Comparing to \porthos[1], we have change the meaning of the bound: instead of executing all cycles at most $k$ times, the \porthos[2] interprets the bound as the maximum number of Y-instructions to be executed after the unrolling.
+Comparing to \porthos[1], we have changed the meaning of the bound: instead of executing all cycles at most $k$ times, the \porthos[2] interprets the bound as the maximum number of events in the trace of the unrolled graph%
+%
+\footnote{The original specification of \porthos[2] stated that the unrolling bound $k$ must be interpreted as the maximum number of instruction in the original code (technically, the number of expressions in the ANTLR syntax tree).
+Nonetheless, current implementation of the \xgraph{} unroller counts the X-level events as it is much simpler to implement (the questions about how to count complex expressions that involve multiple shared variables and method invocations are left open for the future versions of \porthos[2]).
+For now, the information about the element of the ANTLR tree that corresponds to the X-event or Y-tree element is being lost during the transformations.
+Instead, we use the \texttt{LocationService} discussed in Section~\ref{ch:impl:model:ytree} that in perspective may be extended for providing this information along with the text citation of the original code.}
+%
+.
 The meaning of a bound was changed in order to increase predictability of the size of the result SMT-formula.
-Note, recursive function calls create unconditional jumps back in the event-flow graph, which will also be recognised as a loop and be affected by the unrolling algorithm.
+Not that recursive function calls create unconditional jumps back in the event-flow graph, which will also be recognised as a loop and be affected by the unrolling algorithm.
 
-Considering the new meaning of the unrolling bound, we create sink events of two types: the \textit{complete} and \textit{incomplete} sink event.
-The first one means that the loop has been executed a whole number of times, and the latter means that the unrolling bound triggered on not-the-last event of the loop.
-Figure~\ref{fig:loop-unroll} illustrates unrolling for the cyclic control-flow graph on the left-hand side (the square node $S_{+}$ denotes the complete sink node, and the $S_{-}$ denotes the incomplete sink).
+Considering the new meaning of the unrolling bound, the graph unrolling may be \textit{complete} (the loop has been executed a whole number of times) or \textit{incomplete} (the unrolling bound has triggered on not-the-last event of the loop), which can be modelled by two types of the sink events.
+The user may need this information for understanding how the \porthos[2] interprets the cyclic program.
+However, current implementation loses this information by having only one sink event.
+Figure~\ref{fig:loop-unroll} illustrates the unrolling for the left-hand side cyclic control-flow graph (the square node $S_{+}$ denotes the complete sink node, and the $S_{-}$ denotes the incomplete sink).
 
 %TODO: draw (and implement) diff types of exit nodes
 \begin{figure}[t]
@@ -996,10 +1011,12 @@ The unrolling procedure is performed by the \texttt{XFlowGraphUnroller}. %, whic
 For unrolling the flow-graph, we perform the \textit{Deep-First Search (DFS)} while counting the Y-level instructions (for the unrolling bound) and keeping track of the depth stack (for detecting back edges needed for determining the type of sink node).
 Also, during the unrolling each next event increments the \textit{unrolling depth counter} (the \textit{event reference-ID}) -- the integer that is stored by the \texttt{XEvent} thus making it \textit{an event reference} on non-zero values.
 Each \texttt{XEvent} has the method `\texttt{XEvent asNodeRef(int refId)}' that clones the event-receiver with new value of reference-ID.
-The methods \texttt{hashCode} and \texttt{equals} consider the reference-ID as the uniqueness field for all events except sink and source events (considering the usage of \texttt{HashMap} and Guava's \texttt{ImmutableMap} for storing events, setting up hash-code methods properly is a crucial programming task).
+The methods \texttt{hashCode} and \texttt{equals} consider the reference-ID as the uniqueness field for all events except sink and source events (considering the usage of \texttt{HashMap} and Guava's \texttt{ImmutableMap} for storing events, proper setting of the hash-code methods is a crucial programming task).
 
-%TODO: Say sth about these schemes + pictures> !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-%During the work on \porthos[2], we have tested different schemes of loop unrolling.
+
+%TODO!!!!!!!!!!! other schemes!\textsl{}
+%During the work on \porthos[2], we have tested several different schemes of loop unrolling.
+
 
 %- After we acquired the event-based representation, we can perform some modifications/simplifications/optimisations on it (separately, allowing user to manage them)
 
