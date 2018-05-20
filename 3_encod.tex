@@ -93,10 +93,10 @@ If the formula is satisfiable, there exist a portability bug.
 \label{ch:enc:bmc:cf}
 
 The control-flow of a program is represented by the \textit{control-flow graph}, a directed acyclic connected graph with a single source and multiple sink nodes. %TODO: footnote why multiple sinks
-The edges of 
+%The edges of 
 %In a control-flow graph, there are two types of edges (transitions): \textit{primary transitions} that denote unconditional jumps or if-true-transitions (pictured with solid lines), and \textit{alternative transitions} that denote if-false-transitions (pictured with dotted lines).
-All control-flow edges contain a label that denotes the \textit{guard}, a predicate that determines the transition.
-An empty guard (a \textit{true} predicate) is denoted as $\epsilon$.
+Each control-flow edge contains the label that denotes the \textit{guard}, a predicate determining the transition.
+The empty guard (a \textit{true} predicate) is denoted as $\epsilon$.
 A guard depends on the data-flow of the program, it represents a memory unit or a computational expression that is liable to the weak memory model relaxations.
 The branching expressions that support more than two outgoing control-flow edges may be useful for describing non-deterministic transition systems, where the guards are not necessarily mutually exclusive.
 However, as the C language supports only binary logic (\textit{if-then-else} branching), \porthos[2] builds only two possible outcomes of evaluating a guard (\textit{primary} and \textit{alternative} transition), see Section~\ref{ch:impl:model:xgraph:edges} for details.
@@ -222,7 +222,7 @@ Thus, for branching statements that do not have any events in one of the branche
         \node[c,draw=none] at (3,-1.5) (arr) {$\longrightarrow$};
         \node[c] at (6,0) (1b) {$e_1$};
         \node[c] at (6,-1.5) (2b) {$e_2$};
-        \node[c,fill=black!15] at (7.5,-1.5) (nop) {$e_{_{\mbox{\tiny NOP}}}$};
+        \node[c,fill=black!15] at (7.5,-1.5) (nop) {$e_{nop}$};
         \node[c] at (6,-3) (3b) {$e_3$};
         \path[->]
         (1a) edge [] node {} (2a)
@@ -243,10 +243,11 @@ To illustrate the correctness of the encoding, consider the path $e_1 \rightarro
 This means, in the formula $\phi_{CF}$, the variables $\fx(e_1)$, $\fx(e_2)$ and $\fx(e_4)$ will have the value $1$, and the variable $\fx(e_3)$ will be assigned to $0$.
 It is easy to check that the $\phi_{CF}$ is satisfiable by the chosen SMT-model (considering the guards $g_{1,2}$ and $g_{2,4}$ that define this path to be evaluated to $1$).
 
+Note that the generalised encoding scheme does not require the branching transitions to be mutually-exclusive (for instance, consider two branching transitions from the event $e_2$, both labelled by non-epsilon guards $g_{2,3}$ and $g_{2,4}$).
 Next, consider the path $e_1 \rightarrow e_3 \rightarrow e_4$, which is not allowed by the control-flow graph.
 The corresponding model $\fx(e_1)=1$, $\fx(e_2)=0$, $\fx(e_3)=1$ and $\fx(e_4)=1$ does not satisfy the formula $\phi_{CF}$.
-The proposed encoding for the control-flow works not only for the whole graph: it can be used for encoding partial control-flow graph.
-For example, the model $\fx(e_1)=1$, $\fx(e_2)=1$, $\fx(e_3)=0$ and $\fx(e_4)=0$, which encodes the path $e_1 \rightarrow e_2$, satisfies $\phi_{CF}$.
+The proposed encoding for the control-flow works also for encoding the partial graph.
+For example, the SMT-model $\fx(e_1)=1$, $\fx(e_2)=1$, $\fx(e_3)=0$ and $\fx(e_4)=0$ encodes the path $e_1 \rightarrow e_2$, satisfies $\phi_{CF}$.
 
 \begin{figure}
 \begin{minipage}{.4\textwidth}
@@ -254,14 +255,18 @@ For example, the model $\fx(e_1)=1$, $\fx(e_2)=1$, $\fx(e_3)=0$ and $\fx(e_4)=0$
 \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
     \node[c] (i)   [] {$e_1$};
     \node[c] (ii)  [below of=i] {$e_2$};
+    \node[c,fill=black!15] (lnop) [below left = 0.25cm and 0.7cm of ii] {$e_{nop_{1}}$};
     \node[c] (iii) [below of=ii] {$e_3$};
+    \node[c,fill=black!15] (rnop) [right = 0.4cm of iii] {$e_{nop_{2}}$};
     \node[c] (iv)  [below of=iii] {$e_4$};
     \path[->]
-    (i) edge [right] node {$g_{1,2}$} (ii)
-    (ii) edge [left] node {$g_{2,3}$} (iii)
+    (i) edge [right] node {$\epsilon$} (ii)
+    (i) edge [right,bend right=25] node {$g_{1,4}$} (lnop)
+    (lnop) edge [right,bend right=25] node {$\epsilon$} (iv)
+    (ii) edge [right] node {$g_{2,3}$} (iii)
     (iii) edge [right] node {$\epsilon$} (iv)
-    (i) edge [left,bend right=45] node {$g_{1,4}$} (iv)
-    (ii) edge [right,bend left=55] node {$g_{2,4}$} (iv) %sloped
+    (ii) edge [right,bend left=25] node {$g_{2,4}$} (rnop)
+    (rnop) edge [right,bend left=25] node {$\epsilon$} (iv)
     ;
 \end{tikzpicture}
 \end{minipage}
@@ -271,20 +276,19 @@ For example, the model $\fx(e_1)=1$, $\fx(e_2)=1$, $\fx(e_3)=0$ and $\fx(e_4)=0$
 \begin{align*}
 \phi_{CF} \defeq \ & [\fx(e_2) \Rightarrow \fx(e_1)] \\
                  \ & \land [\fx(e_3) \Rightarrow \fx(e_2)] \\
-                 \ & \land [\fx(e_4) \Rightarrow (\fx(e_1) \lor \fx(e_2) \lor \fx(e_3))] \\
-                 \ & \land [\fx(e_1) \land \fx(e_2) \Rightarrow g_{1,2}] \\
-                 \ & \land [\fx(e_1) \land \fx(e_4) \Rightarrow g_{1,4}] \\
-                 \ & \land [\fx(e_2) \land \fx(e_3) \Rightarrow g_{2,3}] \\
-                 \ & \land [\fx(e_2) \land \fx(e_4) \Rightarrow g_{2,4}] \\
-                 \ & \land \lnot [\fx(e_2) \land \fx(e_4)] \\
-                 \ & \land \lnot [\fx(e_3) \land \fx(e_4)]
+                 \ & \land [\fx(e_{nop_{1}}) \Rightarrow \fx(e_1)] \\
+                 \ & \land [\fx(e_{nop_{2}}) \Rightarrow \fx(e_2)] \\
+                 \ & \land [\fx(e_4) \Rightarrow (\fx(e_{nop_{1}}) \lor \fx(e_3) \lor \fx(e_{nop_{2}}))] \\
+                 \ & \land [\fx(e_{nop_{1}}) \land \fx(e_1) \Rightarrow g_{1,4}] \\
+                 \ & \land [(\fx(e_3) \land \fx(e_2)) \Rightarrow g_{2,3}] \\
+                 \ & \land [(\fx(e_{nop_{2}}) \land \fx(e_2)) \Rightarrow g_{2,4}] \\
+                 \ & \land \lnot [\fx(e_2) \land \fx(e_{nop_{1}})] \\
+                 \ & \land \lnot [\fx(e_3) \land \fx(e_{nop_{2}})]
 \end{align*}
 \end{minipage}
 \caption{Example of encoding for the control-flow of the event-flow graph}
 \label{fig:graph-example}
 \end{figure}
-
-\textbf{TODOOOOOOOOOOOOOOOOOOOOOOOOOOOO!!!!!!!!!!!!!!!!!!!!!!! NOPS IN THIS PICTURE!!!!}
 
 
 \subsection{Encoding for the data-flow}

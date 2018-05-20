@@ -26,7 +26,7 @@ Yet far from all the C language is supported (which, considering its complexity 
 \section{General principles}
 \label{ch:impl:principles}
 
-The existing implementation of \porthos{} does not distinguish the event-based program model from the high-level AST, they both are encoded into a single SMT-formula (see classes of package `\texttt{dartagnan.program}' of \porthos{} tool).
+The previous version of \porthos{} did not distinguish the event-based program model from the high-level AST, they both were encoded into a single SMT-formula (see classes of package `\texttt{dartagnan.program}' of \porthos[1]).
 Moreover, the syntax tree was implemented as a mutable data structure, which is being modified at all stages of the program (for instance, see the methods `\texttt{dartagnan.program.Program.compile(...)}' of \porthos{} that recursively compute some properties of the AST and change its state).
 We are inclined to consider this architecture as one that is fast to develop, but hard to maintain (since it is difficult to guarantee the correctness of the program) and extend (since adding the support for a new high-level instruction requires changing multiple components of the program, from parser to encoder).
 %Moreover, we encounter serious problems when we need to add support for control-flow jumps (as \texttt{continue}, \texttt{break}, \texttt{goto} in C).
@@ -256,6 +256,8 @@ is left beyond current thesis.
 \subsection{Internal representations}
 \label{ch:impl:model}
 
+%Internal representations used in \porthos[1] 
+
 %As it has already been mentioned, all internal representations used by \porthos[2] are immutable.
 For keeping the architecture transparent, we build all abstraction levels with interfaces, even if some of them does not add any new functionality.% (as java does not support multiple inheritance for classes (only for interfaces), we 
 
@@ -353,10 +355,6 @@ The syntax tree that contains set of definitions (e.g., litmus-initialisations, 
 
 \subsubsection{X-graph}
 \label{ch:impl:model:xgraph}
-
-<TODOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO!!!!!!!!!!!!!!!!!!!!!!>
-%TODOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-\textit{\textbf{TODO: say sth about old event hierarchy: very restricted (e.g., only loc<-reg)}}
 
 The \ytree{} is compiled into the low-level event-based program representation called \textit{\xgraph{}}.
 The mathematical structure of event-flow graph was discussed in Section~\ref{ch:wmm:event}.
