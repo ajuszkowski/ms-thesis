@@ -498,106 +498,146 @@ ${\phi = \phi_{CF} \land \phi_{DF} \land \phi_{\mathcal{M_T}} \land \phi_{\lnot\
 %\end{itemize}
 %\end{frame}
 
+%\begin{frame}{Encoding for the control-flow}% {The \texttt{PorthosC} encoding scheme}
+%\begin{itemize}
+%%\item The new encoding scheme of \texttt{PorthosC} follows~\cite{heljanko2008unfoldings} in general.
+%\item \texttt{Porthos v1} used another encoding scheme, where the high-level instructions were represented in the SMT-formula by separate variables:
+%$\phi_{CF}(i_2;i_3) = (cf_{i_1} \Leftrightarrow (cf_{i_2} \land cf_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)$.
+%\item In \texttt{PorthosC}, the high-level AST firstly is compiled into the \textit{event-flow graph} with events as nodes and relations as edges.
+%\item All edges are labelled by \textit{guards}, local-memory computations ($\epsilon$~denotes an empty guard).
+%\end{itemize}
+%
+%\begin{figure}[b]
+%  \centering
+%  \begin{minipage}{\textwidth}
+%      \begin{subfigure}[b]{0.25\textwidth}
+%        \makebox[\textwidth]{
+%        \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
+%            \node[c] (1) [] {$e_i$};
+%            \node[c] (2) [below of=1] {$e_{i+1}$};
+%            \path[->]
+%            (1) edge [] node {$\epsilon$} (2)
+%            ;
+%        \end{tikzpicture}
+%        }
+%        \caption{The sequence}
+%    \end{subfigure}
+%    ~
+%    \begin{subfigure}[b]{0.35\textwidth}
+%        \makebox[\textwidth] {
+%        \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
+%            \node[c]           (k)   [] {$e_k$};
+%            \node[c,draw=none] (iii) [below of=k] {$...$};
+%            \node[c,draw=none] (ii)  [left=0.2cm of iii] {};
+%            \node[c]           (i)   [left=0.2cm of ii] {$e_i$};
+%            \node[c,draw=none] (iv)  [right=0.2cm of iii] {};
+%            \node[c]           (v)   [right=0.2cm of iv] {$e_{i+j}$};
+%            \path[->]
+%            (k) edge [above] node {$g_{i,k}$} (i)
+%            (k) edge [] node {} (ii)
+%            (k) edge [] node {} (iii)
+%            (k) edge [] node {} (iv)
+%            (k) edge [above] node {$g_{i+j,k}$} (v)
+%            ;
+%        \end{tikzpicture}
+%        }
+%        \caption{Conditional branching}
+%    \end{subfigure}
+%    ~
+%    \begin{subfigure}[b]{0.3\textwidth}
+%        \makebox[\textwidth]{
+%        \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
+%            \node[c] (i) [] {$e_i$};
+%            \node[c,draw=none] (ii) [right=0.2cm of i] {};
+%            \node[c,draw=none] (iii) [right=0.2cm of ii] {$...$};
+%            \node[c,draw=none] (iv) [right=0.2cm of iii] {};
+%            \node[c] (v) [right=0.2cm of iv] {$e_{i+j}$};
+%            \node[c] (k) [below of=iii] {$e_k$};
+%            \path[->]
+%            (i) edge [above] node {$g_{i,k}$} (k)
+%            (ii) edge [above] node {} (k)
+%            (iii) edge [] node {} (k)
+%            (iv) edge [] node {} (k)
+%            (v) edge [] node {} (k) %sloped
+%            ;
+%        \end{tikzpicture}
+%        }
+%        \caption{Branch merging}
+%    \end{subfigure}
+%    %
+%    \caption{Possible mutual arrangements of events in a control-flow graph} %Linear and non-linear cases of a control-flow graph}
+%    \label{encode:cf}
+%\end{minipage}
+%\end{figure}
+%\end{frame}
 
-\begin{frame}{Encoding for the control-flow}% {The \texttt{PorthosC} encoding scheme}
 
-\begin{itemize}
-%\item The new encoding scheme of \texttt{PorthosC} follows~\cite{heljanko2008unfoldings} in general.
-\item \texttt{Porthos v1} used another encoding scheme, where the high-level instructions were represented in the SMT-formula by separate variables:
-$\phi_{CF}(i_2;i_3) = (cf_{i_1} \Leftrightarrow (cf_{i_2} \land cf_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)$.
-\item In \texttt{PorthosC}, the high-level AST firstly is compiled into the \textit{event-flow graph} with events as nodes and relations as edges.
-\item All edges are labelled by \textit{guards}, local-memory computations ($\epsilon$~denotes an empty guard).
-\end{itemize}
+%\begin{frame}{Encoding for the control-flow} %{The \texttt{PorthosC} encoding scheme}
+%\begin{itemize}
+%\item Let $\fx:\,\mathbb{E}\,\rightarrow\,\{0,1\}$ be the predicate that signifies the fact that the event has been e\textbf{x}ecuted.
+%\item The control-flow of the program is encoded as following:
+%\end{itemize}
+%\vspace{-20pt}
+%\begin{align}
+%\phi_{CF_{seq}} \defeq \quad & \fx(e_{i+1}) \Rightarrow \fx(e_i) \nonumber\\
+%\phi_{CF_{br}}  \defeq \quad & [\fx(e_i) \Rightarrow \fx(e_k)] \ \land \ \cdots \ \land \ [\fx(e_{i+j}) \Rightarrow \fx(e_k)] \nonumber \nonumber\\
+%                       \land & \ [\fx(e_i) \land \fx(e_k) \Rightarrow g_{i,k}] \ \land \ \cdots \ \land \ [\fx(e_{i+j}) \land \fx(e_k) \Rightarrow g_{i+j,k}] \nonumber \\
+%                       \land & \ \cdots \nonumber \nonumber\\
+%                       \land & \ ( \bigvee_{e_l \in \ \texttt{succ}(e_m)} \ \ \bigvee_{\begin{subarray}{l}e_n \in \ \texttt{succ}(e_k) \nonumber\\
+%                               e_n \neq e_m\end{subarray}} \! \lnot [\fx(e_m) \land \fx(e_n)] \ ) \nonumber\\
+%\phi_{CF_{mer}} \defeq \quad & \fx(e_k) \Rightarrow (\bigvee\limits_{e_p \in \ \texttt{pred}(e_k)}^{} \fx(e_p)) \nonumber
+%\end{align}
+%\end{frame}
 
-\begin{figure}[b]
-  \centering
-  \begin{minipage}{\textwidth}
-      \begin{subfigure}[b]{0.25\textwidth}
-        \makebox[\textwidth]{
-        \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
-            \node[c] (1) [] {$e_i$};
-            \node[c] (2) [below of=1] {$e_{i+1}$};
-            \path[->]
-            (1) edge [] node {$\epsilon$} (2)
-            ;
-        \end{tikzpicture}
-        }
-        \caption{The sequence}
-    \end{subfigure}
-    ~
-    \begin{subfigure}[b]{0.35\textwidth}
-        \makebox[\textwidth] {
-        \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
-            \node[c]           (k)   [] {$e_k$};
-            \node[c,draw=none] (iii) [below of=k] {$...$};
-            \node[c,draw=none] (ii)  [left=0.2cm of iii] {};
-            \node[c]           (i)   [left=0.2cm of ii] {$e_i$};
-            \node[c,draw=none] (iv)  [right=0.2cm of iii] {};
-            \node[c]           (v)   [right=0.2cm of iv] {$e_{i+j}$};
-            \path[->]
-            (k) edge [above] node {$g_{i,k}$} (i)
-            (k) edge [] node {} (ii)
-            (k) edge [] node {} (iii)
-            (k) edge [] node {} (iv)
-            (k) edge [above] node {$g_{i+j,k}$} (v)
-            ;
-        \end{tikzpicture}
-        }
-        \caption{Conditional branching}
-    \end{subfigure}
-    ~
-    \begin{subfigure}[b]{0.3\textwidth}
-        \makebox[\textwidth]{
-        \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
-            \node[c] (i) [] {$e_i$};
-            \node[c,draw=none] (ii) [right=0.2cm of i] {};
-            \node[c,draw=none] (iii) [right=0.2cm of ii] {$...$};
-            \node[c,draw=none] (iv) [right=0.2cm of iii] {};
-            \node[c] (v) [right=0.2cm of iv] {$e_{i+j}$};
-            \node[c] (k) [below of=iii] {$e_k$};
-            \path[->]
-            (i) edge [above] node {$g_{i,k}$} (k)
-            (ii) edge [above] node {} (k)
-            (iii) edge [] node {} (k)
-            (iv) edge [] node {} (k)
-            (v) edge [] node {} (k) %sloped
-            ;
-        \end{tikzpicture}
-        }
-        \caption{Branch merging}
-    \end{subfigure}
-    %
-    \caption{Possible mutual arrangements of events in a control-flow graph} %Linear and non-linear cases of a control-flow graph}
-    \label{encode:cf}
+
+
+\begin{frame}{Encoding for the control-flow: An example}
+%Let $\fx:\,\mathbb{E}\,\rightarrow\,\{0,1\}$ be the predicate that signifies the fact that the event has been e\textbf{x}ecuted (and, consequently, has changed the state of the system).
+\begin{figure}
+\begin{minipage}{.2\textwidth}
+\centering
+\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
+    \node[c] (i)   [] {$e_1$};
+    \node[c] (ii)  [below of=i] {$e_2$};
+    \node[c,fill=black!15] (lnop) [below left = 0.25cm and 0.7cm of ii] {$e_{nop_{1}}$};
+    \node[c] (iii) [below of=ii] {$e_3$};
+    \node[c,fill=black!15] (rnop) [right = 0.4cm of iii] {$e_{nop_{2}}$};
+    \node[c] (iv)  [below of=iii] {$e_4$};
+    \path[->]
+    (i) edge [right] node {$\epsilon$} (ii)
+    (i) edge [right,bend right=25] node {$g_{1,4}$} (lnop)
+    (lnop) edge [right,bend right=25] node {$\epsilon$} (iv)
+    (ii) edge [right] node {$g_{2,3}$} (iii)
+    (iii) edge [right] node {$\epsilon$} (iv)
+    (ii) edge [right,bend left=25] node {$g_{2,4}$} (rnop)
+    (rnop) edge [right,bend left=25] node {$\epsilon$} (iv)
+    ;
+\end{tikzpicture}
 \end{minipage}
+%
+\hspace{15pt}
+\begin{minipage}{.4\textwidth}
+\centering
+\begin{align*}
+\phi_{CF} \defeq \ & [\fx(e_2) \Rightarrow \fx(e_1)] \\
+                 \ & \land [\fx(e_3) \Rightarrow \fx(e_2)] \\
+                 \ & \land [\fx(e_{nop_{1}}) \Rightarrow \fx(e_1)] \\
+                 \ & \land [\fx(e_{nop_{2}}) \Rightarrow \fx(e_2)] \\
+                 \ & \land [\fx(e_4) \Rightarrow (\fx(e_{nop_{1}}) \lor \fx(e_3) \lor \fx(e_{nop_{2}}))] \\
+                 \ & \land [\fx(e_{nop_{1}}) \land \fx(e_1) \Rightarrow g_{1,4}] \\
+                 \ & \land [(\fx(e_3) \land \fx(e_2)) \Rightarrow g_{2,3}] \\
+                 \ & \land [(\fx(e_{nop_{2}}) \land \fx(e_2)) \Rightarrow g_{2,4}] \\
+                 \ & \land \lnot [\fx(e_2) \land \fx(e_{nop_{1}})] \\
+                 \ & \land \lnot [\fx(e_3) \land \fx(e_{nop_{2}})]
+\end{align*}
+\end{minipage}
+\caption{Example of encoding for the control-flow of the event-flow graph}
 \end{figure}
-
 \end{frame}
 
-
-\begin{frame}{Encoding for the control-flow} %{The \texttt{PorthosC} encoding scheme}
-
-\begin{itemize}
-\item Let $\fx:\,\mathbb{E}\,\rightarrow\,\{0,1\}$ be the predicate that signifies the fact that the event has been e\textbf{x}ecuted.
-\item The control-flow of the program is encoded as following:
-\end{itemize}
-
-\vspace{-20pt}
-\begin{align}
-\phi_{CF_{seq}} \defeq \quad & \fx(e_{i+1}) \Rightarrow \fx(e_i) \nonumber\\
-\phi_{CF_{br}}  \defeq \quad & [\fx(e_i) \Rightarrow \fx(e_k)] \ \land \ \cdots \ \land \ [\fx(e_{i+j}) \Rightarrow \fx(e_k)] \nonumber \nonumber\\
-                       \land & \ [\fx(e_i) \land \fx(e_k) \Rightarrow g_{i,k}] \ \land \ \cdots \ \land \ [\fx(e_{i+j}) \land \fx(e_k) \Rightarrow g_{i+j,k}] \nonumber \\
-                       \land & \ \cdots \nonumber \nonumber\\
-                       \land & \ ( \bigvee_{e_l \in \ \texttt{succ}(e_m)} \ \ \bigvee_{\begin{subarray}{l}e_n \in \ \texttt{succ}(e_k) \nonumber\\
-                               e_n \neq e_m\end{subarray}} \! \lnot [\fx(e_m) \land \fx(e_n)] \ ) \nonumber\\
-\phi_{CF_{mer}} \defeq \quad & \fx(e_k) \Rightarrow (\bigvee\limits_{e_p \in \ \texttt{pred}(e_k)}^{} \fx(e_p)) \nonumber
-\end{align}
-
-\end{frame}
 
 
 \begin{frame}{Encoding for the data-flow}
-
 \begin{itemize}
 \item SSA-indices are computed as following:
 \begin{itemize}
@@ -606,15 +646,16 @@ $\phi_{CF}(i_2;i_3) = (cf_{i_1} \Leftrightarrow (cf_{i_2} \land cf_{i_3})) \land
   \item no access to a constant variable or computed (evaluated) expression changes their SSA-index.
 \end{itemize}
 \end{itemize}
-
 The data-flow of an event is encoded as following:
 \begin{align}
     \phi_{DF_{e = \texttt{load}(r \leftarrow l)}}  \defeq \ & [\fx(e) \Rightarrow (r_{i+1} = l_{i+1})] \nonumber \\
     \phi_{DF_{e = \texttt{store}(l \leftarrow r)}} \defeq \ & [\fx(e) \Rightarrow (l_{i+1} = r_i)] \nonumber\\
     \phi_{DF_{e = \texttt{eval}(\cdot)}}           \defeq \ & [\fx(e) \Rightarrow \fv(e)] \nonumber \\
-    \phi_{DF_{mem}}(e_1, e_2) \defeq \ & [\texttt{rf}(e_1, e_2) \Rightarrow (l_i = l_j)] \nonumber
 \end{align}
+%    \phi_{DF_{mem}}(e_1, e_2) \defeq \ & [\texttt{rf}(e_1, e_2) \Rightarrow (l_i = l_j)] \nonumber
 \end{frame}
+
+
 
 
 \section{Implementation}
@@ -652,7 +693,7 @@ The data-flow of an event is encoded as following:
 The input language parser used by \texttt{Porthos} suffered from several disadvantages:
 \begin{itemize}
 \item it contained the parser code inlined directly into the grammar (hardly maintainable);
-\item the semantics of operations and kinds of variables (global or shared) were determined syntactically (4 different types of assignment:`\lstinline{=}', `\lstinline{:=}', `\lstinline{<-}' and `\lstinline{<:-}', each for different kinds of arguments);
+\item the semantics of operations and kinds of variables (global or shared) were determined syntactically (4 different types of assignment:`\texttt{=}', `\texttt{:=}', `\texttt{<-}' and `\texttt{<:-}', each for different kinds of arguments);
 \item restricted syntax for expressions.
 \item In contrast, \texttt{PorthosC} uses the full C language grammar of proposed in the C11 standard~\cite{jtc2011sc22} and the visitor that converts the ANTLR grammar to the AST (\texttt{Y-tree}).
 \end{itemize}
@@ -729,8 +770,7 @@ The input language parser used by \texttt{Porthos} suffered from several disadva
 \node[c] (36) [below right=1cm and 1cm of 15] {$3_6$};
 \node[c] (16) [below right=1cm and 0.2cm of 45] {$1_6$};
 \node[c] (46) [below right=1cm and 0.3cm of 35] {$4_6$};
-\node[rectangle,draw] (6inc) [below left=1cm and 3cm of 16] {$S_{-}$};
-\node[rectangle,draw] (6com) [right=3cm of 6inc] {$S_{+}$};
+\node[rectangle,draw] (6) [below left=1cm and 1cm of 16] {$S$};
 \node[] (k1) [right=3.2cm of 11] {$(k = 1)$};
 \node[] (k2) [right=1.7cm of 32] {$(k = 2)$};
 \node[] (k3) [right=1.7cm of 43] {$(k = 3)$};
@@ -754,10 +794,10 @@ The input language parser used by \texttt{Porthos} suffered from several disadva
 (45) edge [] node {} (16)
 (35) edge [bend right=10] node {} (16)
 (35) edge [bend left=10] node {} (46)
-(26) edge [bend right=10] node {} (6com)
-(36) edge [bend right=5] node {} (6inc)
-(16) edge [bend left=20] node {} (6inc)
-(46) edge [bend left=20] node {} (6com)
+(26) edge [bend right=10] node {} (6)
+(36) edge [bend right=5] node {} (6)
+(16) edge [bend left=20] node {} (6)
+(46) edge [bend left=20] node {} (6)
 ;
 \end{tikzpicture}
 }
