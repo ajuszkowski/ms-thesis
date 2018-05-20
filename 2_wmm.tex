@@ -66,7 +66,7 @@ Functionally, a fence may be a synchronisation barrier or a instruction of flush
 
 %In this section, we describe basic relations used in memory model-aware program analysis.
 
-The relation~$r\,\subseteq~\mathbb{E}~\times~\mathbb{E}$ is a set of pairs of events (a subset of Cartesian product of two sets of events). There are two kinds of relations between events: \textit{basic relations} that capture the semantics of the program, and \textit{derived relations} that are defined from the basic relations and events in the weak memory model specification. Constraints over relations that are specified by weak memory models are defined as requirements of acyclicity, irreflexivity or emptiness of specific relations~\cite{alglave2016syntax}.
+The relation~$r\,\subseteq~\mathbb{E}~\times~\mathbb{E}$ is a set of pairs of events (a subset of Cartesian product of two sets of events). There are two kinds of relations between events: \textit{basic relations} that capture the semantics of the program, and \textit{derived relations} that are defined from the basic relations and events in the weak memory model specification. Constraints over relations that are specified by weak memory models are defined as requirements of \textit{acyclicity}, \textit{irreflexivity} or \textit{emptiness} of specific relations~\cite{alglave2016syntax}.
 
 \vspace{1em}
 The basic relations are the following~\cite{alglave2010shared}:
@@ -80,7 +80,7 @@ The basic relations are the following~\cite{alglave2010shared}:
     \item The \textit{data-flow} of a program is defined by \textit{communication relations}:
     \begin{itemize}[noitemsep]
         \item the \textit{read-from} relation \rf{}~$\subseteq~\mathbb{W}~\times~\mathbb{R}$ that maps each write event to the read event that reads the value written by write event; and
-        \item the \textit{coherence order} relation \co{}~$\subseteq~\mathbb{W}~\times~\mathbb{W}$ that defines the total order on writes to the same location across all processes (also called the \textit{write serialisation}, \texttt{ws}-relation).
+        \item the \textit{coherence-order} relation \co{}~$\subseteq~\mathbb{W}~\times~\mathbb{W}$ that defines the total order on writes to the same location across all processes (also called the \textit{write serialisation}, \texttt{ws}-relation).
     \end{itemize}
 
     \item Events from the same process are related by the \textit{scope relation} \sr{}~$\subseteq~\mathbb{E}~\times~\mathbb{E}$.

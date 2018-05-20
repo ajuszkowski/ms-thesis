@@ -77,12 +77,14 @@ The portability analysis problem may also be stated as a reachability problem, w
 Consider the function $\textit{cons}_{\mathcal{M}}(P)$ calculates the set of executions of program $P$ consistent under the memory model $\mathcal{M}$. Then, the program $P$ is called portable from the source architecture (memory model) $\mathcal{M_S}$ to the target architecture $\mathcal{M_T}$ if all executions consistent under $\mathcal{M_T}$ are consistent under $\mathcal{M_S}$~\cite{Porthos17a}:
 
 \begin{definition}[Portability]
-Let $\mathcal{M_S}$, $\mathcal{M_T}$ be two weak memory models. A program $P$ is portable from $\mathcal{M_S}$ to $\mathcal{M_T}$ if 
+Let $\mathcal{M_S}$, $\mathcal{M_T}$ be two weak memory models.
+The program $P$ is portable from $\mathcal{M_S}$ to $\mathcal{M_T}$ if 
 $\textit{cons}_{\mathcal{M_T}}(P) \subseteq \textit{cons}_{\mathcal{M_S}}(P)$
 \end{definition}
 
 Note that the definition of portability requirements against \textit{executions} is strong enough, as it implies the portability against \textit{states} (the \textit{state-portability})~\cite{Porthos17b}.
-The result SMT-formula $\phi$ that encodes the portability problem should contain both encodings of control-flow $\phi_{CF}$ and data-flow $\phi_{DF}$ of the program, and assertions of both memory models: ${\phi \defeq \phi_{CF} \land \phi_{DF} \land \phi_{\mathcal{M_T}} \land \phi_{\lnot\mathcal{M_S}}}$. If the formula is satisfiable, there exist a portability bug.
+The result SMT-formula $\phi$ that encodes the portability problem should contain both encodings of control-flow $\phi_{CF}$ and data-flow $\phi_{DF}$ of the program, and assertions of both memory models: ${\phi \defeq \phi_{CF} \land \phi_{DF} \land \phi_{\mathcal{M_T}} \land \phi_{\lnot\mathcal{M_S}}}$.
+If the formula is satisfiable, there exist a portability bug.
 %The control-flow and data-flow encodings are standard for BMC~\cite{collavizza2006exploration}, they are described below. 
 %However, encoding of memory models requires additional techniques due to recursive definitions of relations, that were proposed in~\cite{Porthos17a}.
 
@@ -91,9 +93,15 @@ The result SMT-formula $\phi$ that encodes the portability problem should contai
 \label{ch:enc:bmc:cf}
 
 The control-flow of a program is represented by the \textit{control-flow graph}, a directed acyclic connected graph with a single source and multiple sink nodes. %TODO: footnote why multiple sinks
-In a control-flow graph, there are two types of edges (transitions): \textit{primary transitions} that denote unconditional jumps or if-true-transitions (pictured with solid lines), and \textit{alternative transitions} that denote if-false-transitions (pictured with dotted lines).
-Each node on graph can have either one successor (primary) or two successors (both primary and alternative); only computation events can serve as a branching point).
-However, each merge node can have any positive number of predecessors, where each edge may be either primary or alternative.
+The edges of 
+%In a control-flow graph, there are two types of edges (transitions): \textit{primary transitions} that denote unconditional jumps or if-true-transitions (pictured with solid lines), and \textit{alternative transitions} that denote if-false-transitions (pictured with dotted lines).
+All control-flow edges contain a label that denotes the \textit{guard}, a predicate that determines the transition.
+An empty guard (a \textit{true} predicate) is denoted as $\epsilon$.
+A guard depends on the data-flow of the program, it represents a memory unit or a computational expression that is liable to the weak memory model relaxations.
+The branching expressions that support more than two outgoing control-flow edges may be useful for describing non-deterministic transition systems, where the guards are not necessarily mutually exclusive.
+However, as the C language supports only binary logic (\textit{if-then-else} branching), \porthos[2] builds only two possible outcomes of evaluating a guard (\textit{primary} and \textit{alternative} transition), see Section~\ref{ch:impl:model:xgraph:edges} for details.
+%Each node on graph can have either one successor (primary) or two successors (both primary and alternative); only computation events can serve as a branching point).
+%However, each merge node can have any positive number of predecessors, where each edge may be either primary or alternative.
 
 While working on \porthos[2], we have applied some modifications to the encoding scheme for the control-flow.
 These changes were motivated by the need to process an arbitrary control-flow produced by conditional and unconditional jumps of the C language.
@@ -109,12 +117,6 @@ $\phi_{CF}(c\,?\,i_2\!:\!i_3) \defeq (\textit{cf}_{i_1} \Leftrightarrow (\textit
 (here we used the notation of C-like ternary operator `\texttt{x?y:z}' for defining the conditional expression `$\texttt{if}\;x\;\texttt{then}\;y\;\texttt{else}\;z$').
 In contrast, the new encoding scheme implemented in \porthos[2] firstly compiles the recursive high-level code into the linear low-level event-based representation, that is then encoded into an SMT-formula. The encoding of branching nodes depends on the \textit{guards}, the value of conditional variable on the branching state, which in turn is encoded as data-flow constraint (see Section~\ref{ch:enc:bmc:df}).
 In general, the new encoding scheme follows the one proposed in~\cite[Chapter 5.1.2]{heljanko2008unfoldings} for encoding Petri-nets.
-
-All control-flow edges contain a label that denotes the \textit{guard}, a predicate that determines the transition.
-An empty guard (a \textit{true} predicate) is denoted as $\epsilon$.
-A guard depends on the data-flow of the program, it represents a memory unit or a computational expression that is liable to the weak memory model relaxations.
-The branching expressions that support more than two outgoing control-flow edges may be useful for describing non-deterministic transition systems, where the guards are not necessarily mutually exclusive.
-However, as the C language supports only binary logic (\textit{if-then-else} branching), \porthos[2] builds only two possible outcomes of evaluating a guard (\textit{primary} and \textit{alternative} transition), see Section~\ref{ch:impl:model:xgraph:edges} for details.
 
 
 \begin{figure}%[b]
@@ -282,6 +284,8 @@ For example, the model $\fx(e_1)=1$, $\fx(e_2)=1$, $\fx(e_3)=0$ and $\fx(e_4)=0$
 \label{fig:graph-example}
 \end{figure}
 
+\textbf{TODOOOOOOOOOOOOOOOOOOOOOOOOOOOO!!!!!!!!!!!!!!!!!!!!!!! NOPS IN THIS PICTURE!!!!}
+
 
 \subsection{Encoding for the data-flow}
 \label{ch:enc:bmc:df}
@@ -292,11 +296,9 @@ In contrast, \porthos{} used the \textit{Dynamic Single-Assignment~(DSA)} form, 
 Although the number of variable references (each of which is encoded as unique SMT-variable) on average is logarithmically less in the case of the DSA form than the SSA form, the result SMT-formula still needs to be complemented by same number of equality assertions when encoding the data-flow of merge points~\cite{Porthos17a}.
 
 Following~\cite{Porthos17b}, the indexed references of variables are computed in accordance with the following rules:
-%\begin{enumerate}[noitemsep,topsep=0pt]
 (1)~any access to a shared variable (both read and write) increments its SSA-index;
 (2)~only writes to a local variable increment its SSA-index (reads preserve indices);
-(3)~no access to a constant variable or computed (evaluated) expression changes their %SSA-index.
-%\end{enumerate}
+(3)~no access to a constant variable or computed (evaluated) expression changes their SSA-index.
 These rules determine the following encoding of load, store and computation events within single thread:
 %TODO: maybe add the overall formula \phi_{DF} ?
 %

@@ -22,6 +22,8 @@ Considering all interleavings of the processes, one could expect the final state
 \item \texttt{(0:EAX=1,\,1:EBX=0)},
 \item \texttt{(0:EAX=1,\,1:EBX=1)}.
 \end{itemize}
+%TODO!!!!!!!!!!!!!!!!!!! cite "mcKenney - Memory Barriers a Hardware View for Software Hackers.pdf" -- a table for multiple architectures
+
 %As the program specifies the write to~\texttt{x} to precede the read of~\texttt{y} in process~\texttt{P0}, one could expect the final state `\texttt{(0:EAX=0~/\textbackslash~1:EAX=0)}' to be unreachable.
 However, on the x86 architecture the state `\texttt{(0:EAX=0,\,1:EAX=0)}' is also reachable as the processors may cache the write to shared memory into their local write buffers, so that the write does not immediately become visible by processes running on other cores.
 This behaviour is known as \textit{store buffering~(SB)}.

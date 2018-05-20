@@ -205,7 +205,7 @@ Moreover, only the operator `\lstinline{<-}' could have an expression as the sou
 In \porthos[2], the semantics of the data-flow operation is determined according to the types of operands, that are determined during the pre-compilation stage (see Section~\ref{ch:impl:proc:x-pre-compiler}).
 The semantics of the functions also is being resolved during the pre-compilation stage via the \textit{invocation hooking} mechanism (see Section~\ref{ch:impl:proc:x-compiler}).
 
-Thirdly, the grammar used by \porthos{} allowed only a small set of operations.
+Thirdly, the grammar used by \porthos{} allowed only a restricted set of operations.
 For example, it accepted the computation expressions only over local variables.
 Thus, in the assignment expression `\lstinline{r <- (x + 1);}', the variable \lstinline{x} was parsed as a local variable even though it can be used as a shared variable in other parts of the program.
 In \porthos[2], all shared variables involved into a computation expression are tentatively copied to temporary local variables.
