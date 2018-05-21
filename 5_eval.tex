@@ -1,11 +1,12 @@
 \chapter{Evaluation}
 \label{ch:eval}
 
-%TODO: resource trebovaniya
 
-\section{The \texttt{PorthosC} in work}
+\section{\texttt{PorthosC} in work}
+\label{ch:eval:show}
 
 \subsection{The X-graph compilation}
+\label{ch:eval:show:compil}
 
 As a simple example of the compilation process discussed in Section~\ref{ch:impl:proc:x-compiler:compilation}, consider the tiny C test in Figure~\ref{ex:compilation}.
 This function does not perform any useful computation, however it contains several syntactic elements (such as prefix increment or loop-breaking statements), which are supported by \porthos[2] comparing to its predecessor.
@@ -59,6 +60,7 @@ Note that if the computation expression has not been used by any other event (fo
 
 
 \subsection{The X-graph unrolling}
+\label{ch:eval:show:unrol}
 
 Once the \xgraph[CF] is constructed, it should be unrolled to an acyclic flow-graph (as it was discussed in Section~\ref{ch:impl:proc:x-unroll}).
 The Figure~\ref{ex:unrolling} shows the control-flow subgraph \xgraphU{CF} of the event-flow graph from the previous example (see Figure~\ref{ex:compilation}) unrolled up to bound $k=16$.
@@ -79,26 +81,28 @@ For example, primary transitions of both events `\lstinline{[r <- 11, 10]}' and 
 \end{figure}
 
 
-\section{Performance}
+\section{Performance evaluation}
+\label{ch:eval:perf}
 
 \subsection{State reachability analysis}
+\label{ch:eval:perf:reach}
 
 As an example of the C program liable for the reachability and portability analysis, consider the Dekker's algorithm for mutual exclusion of two processes, originally described by Dijkstra~\cite{dijkstra1962over}; the program is presented in Appendix~\ref{apx:dekker}.
-
-For checking the reachability of the final state of the last states (sink events) of unrolled graphs compiled for a certain hardware architecture, \porthos[2] encodes both program and hardware memory model constraints as it was discussed in Section~\ref{ch:enc:bmc}.
+For checking the reachability of the final state of the last states (sink events) of unrolled graphs compiled for a certain hardware architecture, the tool encodes both program and hardware memory model constraints as it was discussed in Section~\ref{ch:enc:bmc}.
+For testing \porthos[1], we used the same file in old \porthos{} input language (\texttt{dekker.pts}), which was used in evaluation tests in the original paper~\cite{Porthos17a}.
 %The result formula is then solved by the Z3 
 
 %TO-DO: fix interface
 %To run \porthos[2] in reachability analysis mode, we use the command `\lstinline{mousquetaires.DartagnanApp -i benchmarks/litmus_C11/Dekker.c -s tso}'
 
-The standard output of the tool looks as following:
+The standard output of \porthos[2] looks as following:
 \begin{lstlisting}
 $ java Dartagnan -i benchmarks/C11/Dekker.c -s tso
 Interpreting...
 Unrolling...
 Program encoding...
 Memory model encoding...
-#=59
+#=82(59)
 Solving...
 {
   "result": "NonReachable",
@@ -124,68 +128,112 @@ Solving...
 For time benchmarking we ran the tool 5 times and computed the median of the encoding time.
 Benchmarking was performed on the Linux machine 8-core Intel(R) Core(TM) i7-3632QM CPU @ 2.20GHz, Java(TM) SE Runtime Environment (build 1.8.0\_161-b12) (Java virtual machine was configured by default parameters).
 The time was measured by the tool itself via the Java method \texttt{System.currentTimeMillis}.
-For \porthos[1] we specify the unrolling bound $k_1 = 2$ (which means that all loops are executed twice), and for \porthos[2] we specify the bound $k_2 = 32$ (which means approximately the same, because
+For \porthos[1] we specify the unrolling bound $k_1 = 2$ (which means that all loops are executed twice), and for \porthos[2] we specify the bound $k_2 = 32$ (which means approximately the same, because there are 16 events in one iteration).
 
 \porthos[2] shows the full encoding time for the Dekker's algorithm 2.699 sec (from which 0.152 sec spent for the program encoding, and other part spent for the memory model encoding).
 In contrast, \porthos[1] shows the encoding time 6.152 sec (from which 0.223 sec spent for the program encoding). %, which is considerably better result.
-Thus, the performance of the encoding stage has been improved \textbf{in 2.7 times}.
+Thus, the performance of the encoding stage has been\textbf{ improved in 2.7 times}.
 
-As the time spent for the interpretation and unrolling stages is negligible comparing to the encoding time, we conclude that the new architecture implies minor performance overhead comparing to the previous version of the tool.
+As the time spent for the interpretation and unrolling stages is negligible comparing to the encoding time, we conclude that the new architecture implies insignificant performance overhead comparing to the previous version of the tool.
 The time spent by the SMT solver while considering the SMT formula encoded by \porthos[2] was 0.039 sec, and in case of \porthos[1] the time was 1.291 sec.
 The number of events in the event-flow graph of \porthos[2] is 82 events (among them 59 memory events), and the number of events encoded by \porthos[1] is 95 (among them 51 memory events).
 Even though the number of memory events processed by \porthos[1] was less, the time of solving the result SMT-formula was significantly more.
-We consider this improvement to be the result of technical optimisations applied to \porthos[2].
-The optimisations include:
-\begin{itemize}
-\item \textit{Memoisation} of the frequently requested calls. \\
-    For example, the code of \porthos[1] contains 39 calls that take the subset of a set of events. The pattern is the following: `\lstinline{program.getEvents().stream().filter(e -> e instanceof MemEvent || e instanceof Local).collect(Collectors.toSet())}', \\
-    10 of them are performed in a loop over all events (in \texttt{Domain.encode} method of \porthos[2]).
-    These calls were replaced by the lazily initialisable memoising methods of \texttt{XProgram}: \\
+We consider this improvement to be the result of some technical optimisations applied to the encoding stage of \porthos[2].
+The major optimisation is the \textit{memoisation} of frequently requested calls.
+For example, the code of \porthos[1] contains 39 calls that take the subset of a set of events, 10 of them are performed in a loop over all events (in \texttt{Domain.encode} method of \porthos[2]).
+The pattern is the following: `\lstinline{program.getEvents().stream().filter(e -> e instanceof MemEvent || e instanceof Local).collect(Collectors.toSet())}'.
+%TODO: refactor X-program inheritance
+In \porthos[2], these calls were replaced by the lazily initialisable memoisation methods (see \texttt{XProgram}): \\
+
+\vspace{-1em}
 \begin{lstlisting}[language=Java]
 public ImmutableSet<XMemoryEvent> getMemoryEvents() {
     return memoryEvents != null
-            ? memoryEvents
-            : (memoryEvents = getAllNodesExceptSource(XMemoryEvent.class));
+        ? memoryEvents
+        : (memoryEvents = getAllNodesExceptSource(XMemoryEvent.class));
 }
 \end{lstlisting}
-\item Usage of \textit{immutable data structures} (as it was discussed in Chapter~\ref{ch:impl}).
-\end{itemize}
+
+%TODO: say how much the \textit{immutable data structures} helped (as it was discussed in Chapter~\ref{ch:impl}).
 
 <TODO: compare numbers of clauses of SMT formulas> !!!
 
-<TODO: profile both programs! And say sth about memory usage!> 
+<TODO: profile both programs! And say sth about memory usage! for both encoding and solving> 
 
 
-% state reachability
+\subsection{Portability analysis}
+\label{ch:eval:perf:port}
+
+For evaluating the tool working in the portability analysis mode, we used the same file \texttt{Dekker.c} tested for the state-portability from TSO to SC: %TODO: Say sth about state-portability
+
+!!! \textit{\textbf{TODO: change the main class name to PorthosC }} !!!
+
+\begin{lstlisting}
+$ java Porthos -i benchmarks/C11/Dekker.c -s tso -t sc -mode=state
+Program encoding...
+Interpreting...
+Unrolling...
+Unrolling...
+Program encoding...
+Memory model encoding...
+#=82(59)
+#=82(59)
+Solving...
+{
+  "result": "StatePortable",
+  "iterations": 0,
+  "interpretationTimer": {
+    "elapsedTimeSec": 0.213
+  },
+  "unrollingTimer": {
+    "elapsedTimeSec": 0.011
+  },
+  "programEncodingTimer": {
+    "elapsedTimeSec": 0.075
+  },
+  "memoryModelEncodingTimer": {
+    "elapsedTimeSec": 6.733
+  },
+  "solvingTimer": {
+    "elapsedTimeSec": 0.099
+  },
+  "errors": []
+}
+\end{lstlisting}
+
+Again, \porthos[2] shows better results: 6.733 sec comparing to 12.961 sec spent by \porthos[1].
+
+
+\subsection{New features}
+\label{ch:eval:perf:feat}
+
+The revised design of \porthos{} tool includes the following new features:
+\begin{itemize}
+\item Partial support for the \textit{Kernel litmus tests}.\\
+\porthos[2] is able to process simple litmus tests that use some macros of the Linux kernel (such as \texttt{READ\_ONCE} and \texttt{WRITE\_ONCE} for atomic load and store with relaxed memory ordering).
+For example, consider the SB litmus test for the Linux kernel (which is similar to the one presented in Figure~\ref{simple_wmm_x86}):
+\begin{lstlisting}
+{ int x = 0; int y = 0;}
+
+P0(volatile int* y, volatile int* x) {
+  int r0;
+  WRITE_ONCE(*x,1);
+  r0 = READ_ONCE(*y);
+}
+
+P1(volatile int* y, volatile int* x) {
+  int r0;
+  WRITE_ONCE(*y,1);
+  r0 = READ_ONCE(*x);
+}
+
+exists(x == 0 && y == 0)
+\end{lstlisting}
+If checking this litmus test by \porthos[2] in the state reachability mode, the test passes for TSO memory model and fails for SC model.
+
+\item \textbf{TODO! MORE!}
+\end{itemize}
 
 
 
-
-
-
-
-
-
-
-Compare sizes of formulas
-
-
-memory usage -- for both encoding and solving
-
-
-
-
-\section{Comparison with HERD}
-
-\subsection{Unique Features}
-
-- (inherited from the first version) : two memory models, smt, ... (?)
-
-- (new) -- ?
-
-- kernel?? TODO: SUPPORT some kernel funcs.
-
-
-\subsection{Performance}
-
-- perhaps, better performance on a large test
+%\section{Comparison with HERD}
