@@ -79,18 +79,92 @@ For example, primary transitions of both events `\lstinline{[r <- 11, 10]}' and 
 \end{figure}
 
 
-\subsection{Reachability analysis}
+\section{Performance}
+
+\subsection{State reachability analysis}
+
+As an example of the C program liable for the reachability and portability analysis, consider the Dekker's algorithm for mutual exclusion of two processes, originally described by Dijkstra~\cite{dijkstra1962over}; the program is presented in Appendix~\ref{apx:dekker}.
+
+For checking the reachability of the final state of the last states (sink events) of unrolled graphs compiled for a certain hardware architecture, \porthos[2] encodes both program and hardware memory model constraints as it was discussed in Section~\ref{ch:enc:bmc}.
+%The result formula is then solved by the Z3 
+
+%TO-DO: fix interface
+%To run \porthos[2] in reachability analysis mode, we use the command `\lstinline{mousquetaires.DartagnanApp -i benchmarks/litmus_C11/Dekker.c -s tso}'
+
+The standard output of the tool looks as following:
+\begin{lstlisting}
+$ java Dartagnan -i benchmarks/C11/Dekker.c -s tso
+Interpreting...
+Unrolling...
+Program encoding...
+Memory model encoding...
+#=59
+Solving...
+{
+  "result": "NonReachable",
+  "interpretationTimer": {
+    "elapsedTimeSec": 0.134
+  },
+  "unrollingTimer": {
+    "elapsedTimeSec": 0.031
+  },
+  "programEncodingTimer": {
+    "elapsedTimeSec": 0.14
+  },
+  "memoryModelEncodingTimer": {
+    "elapsedTimeSec": 2.984
+  },
+  "solvingTimer": {
+    "elapsedTimeSec": 0.037
+  },
+  "errors": []
+}
+\end{lstlisting}
+
+For time benchmarking we ran the tool 5 times and computed the median of the encoding time.
+Benchmarking was performed on the Linux machine 8-core Intel(R) Core(TM) i7-3632QM CPU @ 2.20GHz, Java(TM) SE Runtime Environment (build 1.8.0\_161-b12) (Java virtual machine was configured by default parameters).
+The time was measured by the tool itself via the Java method \texttt{System.currentTimeMillis}.
+For \porthos[1] we specify the unrolling bound $k_1 = 2$ (which means that all loops are executed twice), and for \porthos[2] we specify the bound $k_2 = 32$ (which means approximately the same, because
+
+\porthos[2] shows the full encoding time for the Dekker's algorithm 2.699 sec (from which 0.152 sec spent for the program encoding, and other part spent for the memory model encoding).
+In contrast, \porthos[1] shows the encoding time 6.152 sec (from which 0.223 sec spent for the program encoding). %, which is considerably better result.
+Thus, the performance of the encoding stage has been improved \textbf{in 2.7 times}.
+
+As the time spent for the interpretation and unrolling stages is negligible comparing to the encoding time, we conclude that the new architecture implies minor performance overhead comparing to the previous version of the tool.
+The time spent by the SMT solver while considering the SMT formula encoded by \porthos[2] was 0.039 sec, and in case of \porthos[1] the time was 1.291 sec.
+The number of events in the event-flow graph of \porthos[2] is 82 events (among them 59 memory events), and the number of events encoded by \porthos[1] is 95 (among them 51 memory events).
+Even though the number of memory events processed by \porthos[1] was less, the time of solving the result SMT-formula was significantly more.
+We consider this improvement to be the result of technical optimisations applied to \porthos[2].
+The optimisations include:
+\begin{itemize}
+\item \textit{Memoisation} of the frequently requested calls. \\
+    For example, the code of \porthos[1] contains 39 calls that take the subset of a set of events. The pattern is the following: `\lstinline{program.getEvents().stream().filter(e -> e instanceof MemEvent || e instanceof Local).collect(Collectors.toSet())}', \\
+    10 of them are performed in a loop over all events (in \texttt{Domain.encode} method of \porthos[2]).
+    These calls were replaced by the lazily initialisable memoising methods of \texttt{XProgram}: \\
+\begin{lstlisting}[language=Java]
+public ImmutableSet<XMemoryEvent> getMemoryEvents() {
+    return memoryEvents != null
+            ? memoryEvents
+            : (memoryEvents = getAllNodesExceptSource(XMemoryEvent.class));
+}
+\end{lstlisting}
+\item Usage of \textit{immutable data structures} (as it was discussed in Chapter~\ref{ch:impl}).
+\end{itemize}
+
+<TODO: compare numbers of clauses of SMT formulas> !!!
+
+<TODO: profile both programs! And say sth about memory usage!> 
+
+
+% state reachability
 
 
 
 
-\subsection{Performance}
 
-Measure time by \porthos[1], \porthos[2]:
 
-- enc-time absolute values
 
-- rate enc-time/solve-time
+
 
 
 Compare sizes of formulas

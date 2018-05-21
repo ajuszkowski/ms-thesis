@@ -27,6 +27,7 @@ Yet far from all the C language is supported (which, considering its complexity 
 \label{ch:impl:principles}
 
 The previous version of \porthos{} did not distinguish the event-based program model from the high-level AST, they both were encoded into a single SMT-formula (see classes of package `\texttt{dartagnan.program}' of \porthos[1]).
+%For 
 Moreover, the syntax tree was implemented as a mutable data structure, which is being modified at all stages of the program (for instance, see the methods `\texttt{dartagnan.program.Program.compile(...)}' of \porthos{} that recursively compute some properties of the AST and change its state).
 We are inclined to consider this architecture as one that is fast to develop, but hard to maintain (since it is difficult to guarantee the correctness of the program) and extend (since adding the support for a new high-level instruction requires changing multiple components of the program, from parser to encoder).
 %Moreover, we encounter serious problems when we need to add support for control-flow jumps (as \texttt{continue}, \texttt{break}, \texttt{goto} in C).
@@ -59,8 +60,9 @@ The following list summarises the main rules we followed during the development 
     \end{enumerate}
   \item \textit{Transparency:}
     \begin{enumerate}[label*=\arabic*.]
-      \item following the principles of simplicity and readability, and
-      \item clear and informative program output.
+      \item following the principles of simplicity and readability,
+      \item clear and informative program output, and
+      \item following the clear code style.
     \end{enumerate}
   \item \textit{Efficiency:}
     \begin{enumerate}[label*=\arabic*.]%[leftmargin=1.5em]
@@ -75,6 +77,9 @@ The following list summarises the main rules we followed during the development 
 Robustness of the analysis is the main criterion of \porthos[2] as a verification tool.
 Although it makes the analysis more sensitive to the combinatorial explosion, it preserves the completeness of analysis, which is necessary for a model-checking tool.
 As a robust and transparent tool, \porthos[2] must adhere to the strategy of aborting its work on any unexpected outcome (for instance, if a parser failed to parse the string and the recovery algorithm is not described).
+One of the transparency principles is following the clear code style.
+This mainly means the clear and informative naming of classes, functions and fields.
+It also implies the unified ordering of methods in classes, minimised size of methods code, clear tabulation, etc.
 %The modular architecture of \porthos[2] allow each its module to be tested independently.
 %Usage of immutable data structures for all DTOs helps 
 %immut: preservation of invariants
