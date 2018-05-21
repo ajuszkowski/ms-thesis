@@ -1,8 +1,11 @@
 \documentclass{beamer}
 
+
 \usepackage[utf8]{inputenc}
 \usepackage[T2A]{fontenc}
 \usepackage[russian,english]{babel}
+
+
 \usepackage{tikz}
 \usetikzlibrary{positioning}
 \usetikzlibrary{calc}
@@ -24,6 +27,10 @@ c/.style={
   draw=black,
   fill=white
   }
+}
+
+\newcommand*{\yellowemph}[1]{%
+  \tikz[baseline=(X.base)] \node[rectangle, fill=yellow, rounded corners, inner sep=0mm] (X) {#1};%
 }
 
 
@@ -99,7 +106,7 @@ c/.style={
 %\usetheme{Ilmenau}
 %\usetheme{JuanLesPins}
 %\usetheme{Luebeck}
-%\usetheme{Madrid}
+%\usetheme{Madrid}\colorbox{yellow}
 %\usetheme{Malmoe}
 %\usetheme{Marburg}
 %\usetheme{Montpellier}
@@ -124,7 +131,6 @@ c/.style={
       
 %\titlegraphic{\includegraphics[height=1cm,width=2cm]{logo1}}
 %\titlegraphicii{\includegraphics[height=1cm,width=2cm]{logo2}}
-
 \title{\nohyphens{\textbf{Automated~Analysis~of~Weak~Memory~Models}}}
 
 % A subtitle is optional and this may be deleted
@@ -223,9 +229,9 @@ To rework the proof-of-concept memory model-aware analysis tool \texttt{Porthos}
 \begin{frame}{Task specification (Задачи работы)}
 \begin{itemize}
 \item Study the general framework for memory model-aware analysis of concurrent programs~\cite{alglave2010shared};
-\item Review existing tools for memory model-aware analysis;
-\item Investigate existing architecture of \texttt{Porthos}, its strengths and weaknesses;
-\item Design a new architecture for \texttt{PorthosC} that \textit{allow to} easily support the C input language, be robust, transparent, efficient and extensible.
+\item Review the existing tools for memory model-aware analysis;
+\item Examine the existing architecture of \texttt{Porthos}, its strengths and weaknesses;
+\item Design a new architecture for \texttt{PorthosC} that allow to extend the input language to the (large subset of) C language, be robust, transparent, efficient and extensible.
 \end{itemize}
 \end{frame}
 
@@ -245,6 +251,8 @@ To rework the proof-of-concept memory model-aware analysis tool \texttt{Porthos}
 P & Q \\ \hline
 $p_0$ : $x \leftarrow 1$   & $q_0$: $y \leftarrow 1$   \\
 $p_1$ : $r_p \leftarrow y$ & $q_1$: $r_q \leftarrow x$ \\
+\hline
+\multicolumn{2}{|c|}{ exists ($r_p=0 \land r_q=0$) } \\
 \hline
 \end{tabular}
 \end{table}
@@ -287,10 +295,10 @@ $\r{q_0}, \b{p_0}, \r{q_1}, \b{p_1}$ & $(\b{1}; \r{1})$ \\
 \begin{tabular}{ | l r | l r | l r }
 $\underline{\b{p_1}}, \underline{\b{p_0}}, \r{q_0}, \r{q_1}$ & $(\b{0}; \r{1})$  &  $\b{p_0}, \b{p_1}, \underline{\r{q_1}}, \underline{\r{q_0}}$ & $(\b{0}; \r{1})$  &  $\underline{\b{p_1}}, \underline{\b{p_0}}, \underline{\r{q_1}}, \underline{\r{q_0}}$ & $(\b{0}; \r{1})$ \\
 $\r{q_0}, \r{q_1}, \underline{\b{p_1}}, \underline{\b{p_0}}$ & $(\b{1}; \r{0})$  &  $\underline{\r{q_1}}, \underline{\r{q_0}}, \b{p_0}, \b{p_1}$ & $(\b{1}; \r{0})$  &  $\underline{\r{q_1}}, \underline{\r{q_0}}, \underline{\b{p_1}}, \underline{\b{p_0}}$ & $(\b{1}; \r{0})$ \\
-$\underline{\b{p_1}}, \r{q_0}, \underline{\b{p_0}}, \r{q_1}$ & $(\b{0}; \r{1})$  &  $\b{p_0}, \underline{\r{q_1}}, \b{p_1}, \underline{\r{q_0}}$ & $(\b{0}; \r{1})$  &  $\underline{\b{p_1}}, \underline{\r{q_1}}, \underline{\b{p_0}}, \underline{\r{q_0}}$ & $(\b{0}; \r{0})$ \\
-$\underline{\b{p_1}}, \r{q_0}, \r{q_1}, \underline{\b{p_0}}$ & $(\b{0}; \r{0})$  &  $\b{p_0}, \underline{\r{q_1}}, \underline{\r{q_0}}, \b{p_1}$ & $(\b{1}; \r{1})$  &  $\underline{\b{p_1}}, \underline{\r{q_1}}, \underline{\r{q_0}}, \underline{\b{p_0}}$ & $(\b{0}; \r{0})$ \\
-$\r{q_0}, \underline{\b{p_1}}, \underline{\b{p_0}}, \r{q_1}$ & $(\b{1}; \r{1})$  &  $\underline{\r{q_1}}, \b{p_0}, \b{p_1}, \underline{\r{q_0}}$ & $(\b{0}; \r{0})$  &  $\underline{\r{q_1}}, \underline{\b{p_1}}, \underline{\b{p_0}}, \underline{\r{q_0}}$ & $(\b{0}; \r{0})$ \\
-$\r{q_0}, \underline{\b{p_1}}, \r{q_1}, \underline{\b{p_0}}$ & $(\b{1}; \r{0})$  &  $\underline{\r{q_1}}, \b{p_0}, \underline{\r{q_0}}, \b{p_1}$ & $(\b{1}; \r{0})$  &  $\underline{\r{q_1}}, \underline{\b{p_1}}, \underline{\r{q_0}}, \underline{\b{p_0}}$ & $(\b{0}; \r{0})$ \\
+$\underline{\b{p_1}}, \r{q_0}, \underline{\b{p_0}}, \r{q_1}$ & $(\b{0}; \r{1})$  &  $\b{p_0}, \underline{\r{q_1}}, \b{p_1}, \underline{\r{q_0}}$ & $(\b{0}; \r{1})$  &  $\underline{\b{p_1}}, \underline{\r{q_1}}, \underline{\b{p_0}}, \underline{\r{q_0}}$ & {\only<5>\yellowemph{$(\b{0}; \r{0})$}} \\
+$\underline{\b{p_1}}, \r{q_0}, \r{q_1}, \underline{\b{p_0}}$ & $(\b{0}; \r{1})$  &  $\b{p_0}, \underline{\r{q_1}}, \underline{\r{q_0}}, \b{p_1}$ & $(\b{1}; \r{1})$  &  $\underline{\b{p_1}}, \underline{\r{q_1}}, \underline{\r{q_0}}, \underline{\b{p_0}}$ & {\only<5>\yellowemph{$(\b{0}; \r{0})$}} \\
+$\r{q_0}, \underline{\b{p_1}}, \underline{\b{p_0}}, \r{q_1}$ & $(\b{1}; \r{1})$  &  $\underline{\r{q_1}}, \b{p_0}, \b{p_1}, \underline{\r{q_0}}$ & {\only<5>\yellowemph{$(\b{0}; \r{0})$}}  &  $\underline{\r{q_1}}, \underline{\b{p_1}}, \underline{\b{p_0}}, \underline{\r{q_0}}$ & {\only<5>\yellowemph{$(\b{0}; \r{0})$}} \\
+$\r{q_0}, \underline{\b{p_1}}, \r{q_1}, \underline{\b{p_0}}$ & $(\b{1}; \r{0})$  &  $\underline{\r{q_1}}, \b{p_0}, \underline{\r{q_0}}, \b{p_1}$ & $(\b{1}; \r{0})$  &  $\underline{\r{q_1}}, \underline{\b{p_1}}, \underline{\r{q_0}}, \underline{\b{p_0}}$ & {\only<5>\yellowemph{$(\b{0}; \r{0})$}} \\
 \end{tabular}
 \end{table}
 \end{minipage}
@@ -309,6 +317,8 @@ $\r{q_0}, \underline{\b{p_1}}, \r{q_1}, \underline{\b{p_0}}$ & $(\b{1}; \r{0})$ 
 P & Q \\ \hline
 $p_0$ : $x \leftarrow 1$   & $q_0$: $y \leftarrow 1$   \\
 $p_1$ : $r_p \leftarrow y$ & $q_1$: $r_q \leftarrow x$ \\
+\hline
+\multicolumn{2}{|c|}{ exists ($r_p=0 \land r_q=0$) } \\
 \hline
 \end{tabular}
 }
@@ -363,7 +373,7 @@ $p_1$ : $r_p \leftarrow y$ & $q_1$: $r_q \leftarrow x$ \\
 
 
 
-\begin{frame}{The weak memory model} {Testing the candidate executions}
+\begin{frame}{The weak memory model} {Testing candidate executions}
 \vspace{10pt}
 \begin{minipage}{.3\linewidth}
 \hfill
@@ -378,6 +388,8 @@ $p_1$ : $r_p \leftarrow y$ & $q_1$: $r_q \leftarrow x$ \\
 P & Q \\ \hline
 $p_0$ : $x \leftarrow 1$   & $q_0$: $y \leftarrow 1$   \\
 $p_1$ : $r_p \leftarrow y$ & $q_1$: $r_q \leftarrow x$ \\
+\hline
+\multicolumn{2}{|c|}{ exists ($r_p=0 \land r_q=0$) } \\
 \hline
 \end{tabular}
 }
@@ -387,16 +399,17 @@ $p_1$ : $r_p \leftarrow y$ & $q_1$: $r_q \leftarrow x$ \\
 \end{minipage}
 \vspace{-5pt}
 \begin{figure}
-\centering
+%\centering
 \includegraphics[width=\linewidth]{img/candidate.png}
 \caption{The four candidate executions allowed under x86-TSO}
 \end{figure}
+
 \end{frame}
 
 
 
 
-\begin{frame}{The weak memory model} {Testing the candidate executions}
+\begin{frame}{The weak memory model} {Testing candidate executions}
 \vspace{10pt}
 \begin{minipage}{.3\linewidth}
 \hfill
@@ -412,11 +425,12 @@ P & Q \\ \hline
 $p_0$ : $x \leftarrow 1$   & $q_0$: $y \leftarrow 1$   \\
 $p_1$ : $r_p \leftarrow y$ & $q_1$: $r_q \leftarrow x$ \\
 \hline
+\multicolumn{2}{|c|}{ exists ($r_p=0 \land r_q=0$) } \\
+\hline
 \end{tabular}
 }
 \end{minipage}
 %
-\raggedleft{
 \noindent\begin{minipage}{.25\linewidth}
 \scriptsize
 SC model: \\
@@ -424,10 +438,9 @@ SC model: \\
 \texttt{fr = (rf\^\,-1; co)} \\
 \color{red}\texttt{acyclic(fr $\cup$ po)}
 \end{minipage}
-}
 \vspace{-5pt}
 \begin{figure}
-\centering
+%\centering
 \includegraphics[width=\linewidth]{img/candidate-red.png}
 \caption{The four candidate executions allowed under x86-TSO}
 \end{figure}
@@ -810,6 +823,8 @@ The input language parser used by \texttt{Porthos} suffered from several disadva
 \section{Evaluation}
 
 \begin{frame}{Evaluation}
+Much better.
+
 \alert{[to be done]}
 \end{frame}
 
