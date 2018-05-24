@@ -115,6 +115,7 @@ The general architecture scheme of \porthos[2] is presented in Figure~\ref{fig:a
 %The rectangles in the picture denote processing units (marked with gear sign with a unique number of the component), and labels of the arrows describe the internal representation carried out during the transformation.
 
 The program takes as input the program to be analysed and one (the reachability analysis mode) or two (the portability analysis mode) memory models.
+However, instead of parsing memory models from the \cat{} file, the tool may operate with pre-defined memory models (\texttt{SC}, \texttt{TSO}, \texttt{PSO}, \texttt{RMO}, \texttt{ALPHA}, \texttt{POWER}, \texttt{ARM}; this feature is inherited from \porthos[1]).
 The parsed program syntax tree is then converted (Section~\ref{ch:impl:proc:y-constr}) to a program AST called \ytree{}%
 %
 \footnote{In order to avoid confusion between different internal representations, we prefix the names of elements of each internal representation with a letter. For instance, we picked the letter `Y' to denote the AST code representation as drawing of this letter resembles the tree branching; with letter `X' we prefix elements of the event-flow graph as the events are to be e\textbf{x}ecuted; and with letter `W' we prefix elements of the \textbf{w}eak memory model AST.}%
@@ -446,6 +447,7 @@ The following interfaces model basic kinds of events (see Figure~\ref{fig:class-
   %TODO: either say st about getLoc(), getReg(), or remove them from code
   
   \1 \texttt{XComputationEvent} \\
+  %TODO: say sth about how we not produce thousands of comput events
     We distinguish two types of computation events:
       %\begin{itemize}[noitemsep]
       \2 \texttt{XUnaryComputationEvent} that encodes bit negation and no-operation; and 
@@ -508,7 +510,7 @@ We distinguish the following kinds of edges:
     \2 the \textit{alternative edges}, that denote conditional transitions for which the conditional event (the source) was evaluated to the \textit{false}; and
   \1 the \textit{data-flow edges}:
     \2 the \co{}-relation edges, and 
-    \2 the \rf{}-relation edges. %TODO! implement 
+    \2 the \rf{}-relation edges.
 \end{outline}
 
 

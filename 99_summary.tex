@@ -1,26 +1,69 @@
-\chapter{Summary}
+\chapter{Conclusion}
 \label{ch:summary}
 
-enumerate goals (from Task specification) in past tense + justification
 
-contributions:
+\section{Solved tasks and contributions}
 
-  architecture:  framework; restate requirements
+During the work on this thesis, we solved the following engineering and scientific tasks:
 
-  new encoding: more laconic? + actually show num of clauses
+\begin{enumerate}[label=\Roman*.]
+\item
+Firstly, we studied existing weak memory model-aware analysis frameworks and tools to gather deep understanding of the problem (Sections~\ref{ch:intro:related} and~\ref{ch:enc:mc} and Chapter~\ref{ch:wmm}).
 
-  %kernel http://diy.inria.fr/doc/litmus.html#klitmus
+\item
+Then, we explored the existing implementation of the proof-of-concept tool \porthos[1] in order to understand components that need to be redesigned in order to facilitate the extension of the input language.
 
-
-
-  enumerate extensions of the grammar
+  \begin{enumerate}[label=\roman*.,leftmargin=\parindent]
+  \item The first stumbling block in the input language extension was the \porthos[1] input language parser, which performs the full semantic analysis of the program.
+  Although this works for a small toy language, the rich and expressive language such as C requires several stages of analysis before the compilation stage.
+  For handling that, we implemented the processing units that operate on the \textit{pre-compilation} stage discussed in Section~\ref{ch:impl:proc:x-pre-compiler}.
   
-  ... (?)
+  \item Secondly, as \porthos[2] determines the \textit{kind (shared or local) of each variable} on the pre-compilation phase, the shared variables can be accessed in arbitrary code location (comparing to \porthos[1] which determines the type of a variable syntactically, depending on the operator of function that uses the variable).
   
-\begin{itemize}
-\item Improved performance
-\item kernel partial support
-\end{itemize}
+  \item In addition, \porthos[2] supports some \textit{new syntactic constructions} of the C language: \texttt{break} and \texttt{continue} jumps, function invocations, multiple-variable declarations (as `\texttt{int a, b=2, z;}'), arbitrary expressions (corresponding to the C standard), and others (see Section~\ref{ch:impl:input}).
+
+  \item As the C language supports unconditional \texttt{goto}-jumps that can produce an arbitrary control-flow graph, which cannot be supported solely with the program AST, therefore we needed to compile the AST to the low-level hardware-agnostic program representation \xgraph{}.
+  For that, we implemented the \textit{full C interpreter} discussed in Section~\ref{ch:impl:proc:x-compiler}.
+  
+  \item Originally, the control-flow instructions were encoded directly into the SMT-formula~\cite{Porthos17a}.
+  In contrast, \porthos[2] encodes the low-level \xgraph{} representation, which can have arbitrary graph structure.
+  For encoding the \xgraph{} into the SMT-formula, we apply the \textit{new control-flow encoding scheme} that in general follows the one proposed in~\cite[Chapter 5.1.2]{heljanko2008unfoldings} (see Section~\ref{ch:enc:bmc:cf}).
+  As the new encoding scheme does not add new variables to every control-flow instruction, the number of variables in the result SMT-formula is expected to be smaller.
+  
+  \item For ease the process of adding support for new domain-specific functions (for example, the Kernel-specific atomic write function \texttt{atomic\_store}), we implemented the \textit{invocation hooking mechanism}, which allows to modify the compilation process without changing the interpreter.
+  The invocation hooks serve as a knowledge base for the program domain, that are to be extended in future.
+  We illustrate this mechanism with the basic support for Linux kernel litmus tests.
+  
+  \item Since the new tool compiles the program AST to the \xgraph{} before encoding it into the SMT-formula, we decided to change the \textit{unrolling algorithm} from the simple unrolling all loops $k$ times (where $k$ is the user-specified unrolling bound) to the DFS-based algorithm that explores all possible states that the program can reach within $k$ steps (see discussion on the unrolling in Sections~\ref{ch:impl:proc:x-unroll} and~\ref{ch:eval:show:compil}).
+  Although the new algorithm produces considerably more events than the old algorithm and thus the requires more time for the program domain encoding, we claim it to be complete.
+  
+  \end{enumerate}
+  
+\item 
+As the tests show, the overhead of the new architecture is negligible, therefore we consider the applied architectural changes as acceptable.
+
+\end{enumerate}
+
+Thus, the new tool \porthos[2] with easily extensible knowledge base that allow to support new domain-specific functions can be considered as a generalised framework for SMT-based memory model-aware analysis.
+
+%enumerate goals (from Task specification) in past tense + justification
 
 
-Future work
+\section{Limitations and future work}
+
+
+- improve the encoding: an abstraction over Z
+
+- typing: const-size arrays + structures and so on
+  -only basic datatypes
+
+- hooks : flexible. but still in Java, not as separate module (as it requires turing-complete language to be expressive enough) => extension of the knowledge base for supporting new platforms / languages
+
+- new modes: as it was discussed <before>, works only in the litmus test-mode. May work with complete projects. But here: 
+  - memory issues (we store same graph + back edges + memoised queries ==> multiple instances.);
+    - + will need the memory-guarding module
+  - ability to encode partially (once the 
+
+-only one mode litmus-test intra proc
+
+- testing with new solvers

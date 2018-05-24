@@ -92,7 +92,6 @@ There are projects for validating hardware architectures wrt. a memory model as 
 
 %TODO: litmus test synthesis 
 %1) http://research.nvidia.com/sites/default/files/pubs/2017-04_Automated-Synthesis-of//ASPLOS_2017_Memory_Model_Verification.pdf
-% 2) kernel litmus tests % <----------------------------- OBIAZATELNO!!!
 
 Most modern high-level programming languages rely on relaxed memory model as well.
 Thus, the memory model for Java is based on the \textit{happens-before} principle~\cite{lamport1978time} and was introduced in J2SE 5.0 in 2004~\cite{manson2005java}.
@@ -177,12 +176,12 @@ As most modern SMT solvers are efficient enough to be able to operate the state 
 
 The current work aims to rework the proof-of-concept tool \textit{\porthos{}} by extending the input language, which currently represents the minimum subset of C, and revising the general architecture of the tool in order to enhance performance, extensibility, reliability and maintainability.
 One of the directions of development was the ability to process the \textit{kernel litmus tests} written in C~\cite{mckenney2017wg21}.
-For that, in addition to supporting the C syntax (augmented by litmus-style definitions such as initialisation or assertion statements), the tool must be able to recognise kernel-specific functions and macros (such as the macro \texttt{READ\_ONCE} that guarantees memory read).
+For that, in addition to supporting the C syntax (augmented by litmus-style definitions such as initialisation or assertion statements), the tool must be able to recognise kernel-specific functions and macros (such as the macro \texttt{READ\_ONCE} that guarantees memory read) and be easily extensible for defining new functions (have the separate module for the purpose of a knowledge base).
 %interprocedural analysis
 
-As the general architecture and almost all components of \porthos{} have been redesigned, the tool received a new name \textit{\porthos[2]}\,%
+As the general architecture and almost all components of \porthos{} were to be redesigned, the tool received a new name \textit{\porthos[2]}\,%
 %
-\footnote{Hereinafter with the name `\porthos{}' we refer to the tool \porthos{} of version 1, whereas the new implementation of \porthos{} is called \porthos[2].}. %
+\footnote{Hereinafter with the names \textit{\porthos{}} and \textit{\porthos[1]} we refer to the tool \porthos{} of version 1, whereas the new implementation of \porthos{} is called \textit{\porthos[2]}.}. %
 %
 Considering the enhancements of the architectural design, \porthos[2] represents a generalised framework for SMT-based memory model-aware analysis, which can not only perform the portability analysis, but can serve as a basis for other kinds of static analysis of concurrent programs.
 
