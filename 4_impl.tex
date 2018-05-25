@@ -851,11 +851,52 @@ All invocation hooks implement the interface \texttt{XInvocationHook}.
 The result of an invocation hook interception is the \texttt{XInvocationHookAction}, a delayed operation implemented on the top of lambda functions of Java.
 The hook action is invoked with actual arguments and returns an arbitrary \texttt{XEntity} as the result of invocation.
 
-Current version of \porthos[2] contains two invocation hooks, the \texttt{XPorthosInvocationHook} for describing the compatibility-mode functions of the input \porthos[2] input language, and \texttt{XKernelInvocationHook} for describing the Linux kernel-specific functions.
+Current version of \porthos[2] contains two invocation hooks, the \texttt{XLegacyInvocationHook} for intercepting the compatibility-mode functions of the \porthos[2] input language, and \texttt{XKernelInvocationHook} for describing the Linux kernel-specific functions.
+%Note that the same mechanism (with several modifications) can be used for processing assembly language calls.
 An invocation hook can model any type of operations (memory, fence, computational, etc.).
-For instance, the \texttt{XPorthosInvocationHook} intercepts calls \texttt{`location.store(atomic,register)'} and processes the store operation with respect to the specified atomic.
-%TODO: more about described functions
-%TODO: rename InvocationHook -> XInvocationHook
+%For instance, the \texttt{XLegacyInvocationHook} intercepts calls \lstinline{`location.store(atomic, register)'} and processes the store operation with respect to the specified atomic.
+For instance, the \texttt{XKernelInvocationHook} intercepts the call \lstinline{`WRITE_ONCE(dst_shared, src_local)'} and replaces the invocation with its hook action shown in Figure~\ref{code-invoc-hook}.
+%and processes the store operation with respect to the following .
+
+\begin{figure}[!h]
+\begin{lstlisting}
+class XKernelInvocationHook
+       extends XInvocationHookBase 
+       implements XInvocationHook {
+ ...
+ @Override
+ public XInvocationHookAction intercept(String functionName) {
+   switch (functionName) {
+     case "WRITE_ONCE": {
+       return new XInvocationHookAction((receiver, arguments) -> {
+         if (arguments.length != 2 || receiver != null) {
+             return null;  // do not intercept
+         }
+         XMemoryUnit destUnit = arguments[0];
+         if (!(destUnit instanceof XSharedLvalueMemoryUnit)) {
+           throw new XMethodInvocationError(methodName, 
+               "arg 1: not a shared l-value memory unit: " + destUnit);
+         }
+         XSharedLvalueMemoryUnit dest = (XSharedLvalueMemoryUnit) destUnit;
+         XMemoryUnit srcUnit = arguments[1];
+         if (!(srcUnit instanceof XLocalMemoryUnit)) {
+           throw new XMethodInvocationError(methodName, 
+               "arg 2: not a local memory unit: " + srcUnit);
+         }
+         XLocalMemoryUnit src = (XLocalMemoryUnit) srcUnit;
+         return program.emitMemoryEvent(dest, src);
+     });
+   }
+   case "READ_ONCE": {
+     ...
+   }
+ }
+}
+\end{lstlisting}
+\caption{Example of the invocation hook}
+\label{code-invoc-hook}
+\end{figure}
+
 
 %TODO: kernel's : ACCESS_ONCE() access may be modeled as a volatile memory_order_relaxed access.  %http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4374.html
 
