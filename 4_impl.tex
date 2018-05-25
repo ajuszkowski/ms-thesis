@@ -99,11 +99,28 @@ Although Java does not show the best results in performance benchmarks (for exam
 However, considering the perspective of using \porthos[2] as a static analyser for real-world programs, the memory optimisation problem must also be taken into account during both encoding and solving stages.
 It is worth noting that, for the reasons of simplicity, \porthos[2] is not a concurrent program, however, we believe that, due to its modular architecture, it can be easily parallelised on the level of program modules.
 
+Currently, \porthos[2] can operate only in the intra-procedural analysis mode, assuming that each function defined in the input file is being executed in a separate thread.
+%TODO: describe more intra- and inter-procedural!
+However, the redesigned architecture of \porthos[2] can be easily extended to support the inter-procedural (cross-procedure) analysis that inlines function calls and binds variable contexts.
+%TODO : check in the implementation , THAT WE HAVE NOT IMPLEMENTED THIS FEATURE!!
+Thus, instead of analysing a single source code file, the user can analyse the whole code project.
+In this mode, the functions to be executed in parallel should be specified by the user.
+Also, the tool may be extended to detect the concurrent parts of the code automatically at the pre-compilation stage.
+For that, the pre-compiler should recognise functions that commence a new process (such as \texttt{pthread\_create} from \texttt{pthread.h}) and resolve the argument that points to the thread function.
+This functionality %implies an additional stage of the pre-compilation and 
+is left beyond current thesis.
+%resolve the semantics of function invocations and remember the functions 
+%function that commence new process or thread 
+%(for instance, the function \texttt{pthread\_create} of the library \texttt{pthread.h} that starts the new thread of the function it received as the first argument).
+%TODO: inter: user specifies the repository with code, functions that intended to work in parallel and runs. 
 
-\begin{figure}
+%TODO: say sth about 100500 litmus-tests for kernel
+
+%TODO: ATTENTION HERE TO THE PICTURE!!!!!!!!!!!!!!!!!!!!!!!!
+\begin{figure}[H]
   \centering
   %draft=true
-  \includegraphics[height=.99\textheight,keepaspectratio]{img/my/draw.io/general_arch-no_numbering.png} %{img/my/draw.io/general_arch.png}
+  \includegraphics[height=.83\textheight,keepaspectratio]{img/my/draw.io/general_arch-no_numbering.png} %{img/my/draw.io/general_arch.png}
   \caption{The general architecture of \porthos[2]}
   \label{fig:arch}
 \end{figure}
@@ -240,23 +257,6 @@ The litmus-specific syntax for variables initialisation was used only for declar
 \footnote{ANTLR grammars repository path:~\url{https://github.com/antlr/grammars-v4}}). %
 %
 Current version of \porthos[2] does not recognise C processor directives (it ignores them), however, in future it can be extended to support them.
-
-Currently, \porthos[2] can operate only in the intra-procedural analysis mode, assuming that each function defined in the input file is being executed in a separate thread.
-%TODO: describe more intra- and inter-procedural!
-However, the redesigned architecture of \porthos[2] can be easily extended to support the inter-procedural (cross-procedure) analysis that inlines function calls and binds variable contexts.
-%TODO : check in the implementation , THAT WE HAVE NOT IMPLEMENTED THIS FEATURE!!
-Thus, instead of analysing a single source code file, the user can analyse the whole code project.
-In this mode, the functions to be executed in parallel should be specified by the user.
-Also, the tool may be extended to detect the concurrent parts of the code automatically at the pre-compilation stage.
-For that, the pre-compiler should recognise functions that commence a new process (such as \texttt{pthread\_create} from \texttt{pthread.h}) and resolve the argument that points to the thread function.
-This functionality %implies an additional stage of the pre-compilation and 
-is left beyond current thesis.
-%resolve the semantics of function invocations and remember the functions 
-%function that commence new process or thread 
-%(for instance, the function \texttt{pthread\_create} of the library \texttt{pthread.h} that starts the new thread of the function it received as the first argument).
-%TODO: inter: user specifies the repository with code, functions that intended to work in parallel and runs. 
-
-%TODO: say sth about 100500 litmus-tests for kernel
 
 
 \subsection{Internal representations}
@@ -893,7 +893,7 @@ class XKernelInvocationHook
  }
 }
 \end{lstlisting}
-\caption{Example of the invocation hook}
+\caption{Example of the invocation hook for intercepting the Linux kernel-specific functions}
 \label{code-invoc-hook}
 \end{figure}
 
