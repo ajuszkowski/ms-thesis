@@ -6,7 +6,7 @@
 
 During the work on this thesis, we solved the following engineering and scientific tasks:
 
-\begin{enumerate}[label=\Roman*.]
+\begin{enumerate}[label=\arabic*.] %[label=\Roman*.]
 \item
 Firstly, we studied existing weak memory model-aware analysis frameworks and tools to gather deep understanding of the problem (Sections~\ref{ch:intro:related} and~\ref{ch:enc:mc} and Chapter~\ref{ch:wmm}).
 
@@ -16,9 +16,9 @@ The key aspects of the architectural design and implementations are the followin
 %explored the existing implementation of the proof-of-concept tool \porthos[1] redesigned the new architecture of \porthos[2] with consider
 
 
-  \begin{enumerate}[leftmargin=\parindent,label=\roman*.]
+  \begin{enumerate}[leftmargin=\parindent,label=\alph*.]
   \item The first stumbling block in the input language extension was the \porthos[1] input language parser, which performs the full semantic analysis of the program.
-  Although this works for a small toy language, the rich and expressive language such as C requires several stages of analysis before the compilation stage.
+  Although this works for a small subset of the C language, the rich and expressive language such as C requires several stages of analysis before the compilation stage.
   For handling that, we implemented the processing units that operate on the \textit{pre-compilation} stage discussed in Section~\ref{ch:impl:proc:x-pre-compiler}.
   
   \item Secondly, \porthos[1] determined the \textit{kind of a variable} (shared or local) syntactically, depending on the operator of the function that uses this variable.
@@ -75,13 +75,18 @@ Nonetheless, the small-size litmus test-like programs (containing hundreds of ev
 
 %\item As its predecessor, \porthos[2] does not propose any heuristic for finding the optimal unrolling bound.
 
-\item \textit{Extending the knowledge base} of domain-specific functions may be considered as the main future research direction.
+\item \textit{Extending the knowledge base} of domain-specific functions to model synchronisation primitives can be considered as the main future research direction.
 Thus, to be able to process most Linux kernel litmus tests, \porthos[2] needs to know the semantics of the barrier and memory operation functions that are specific for the Linux kernel in order to be able to compile them into the \xgraph{} and later encode them into the SMT-formula.
 Due to modular architecture of \porthos[2], the extension of the knowledge base can be done by modifying solely the invocation hooking mechanism.
 Note that the flip side of the flexibility of invocation hooks is their complexity: being written in Java, in addition they require from the user some knowledge of general architecture of the tool, the interface methods provided by the interpreter, the class hierarchy of the \xgraph{} elements, etc.
 
+\item Secondly, the wide range of existing litmus tests may require \porthos[2] to \textit{extend the support for input languages}.
+The first candidates for being supported are the LISA language (Litmus Instruction Set Architecture)~\cite{alglave2016syntax} and assembly languages of most common architectures (x86, POWER, Alpha, etc.).
+Note that the programs in low-level languages can be easily compiled to the \xgraph{} representation by existing compiler architecture since low-level assembly-like languages can be considered as the subset of the C language, that restricts the set of non-linear control-flow instructions to the conditional and unconditional jumps (which are supported by the current \xgraph{} compiler of \porthos[2]).
+%Note that adding support for low-level languages requires adding the new \xgraph{} compiler that will compile the low-level syntax tree (with non-conditional jumps as the only )
+
 \item Although \porthos[2] has an extended support for primitive data types (integers, reals, booleans), it still is not able to handle the \textit{complex data types}.
-However, as the Z3 solver supports the theory of constant-size arrays, it might be relatively easy to extend the support for constant-size arrays (declared as `\lstinline{int arr[10];}'), enumerations and structures.
+However, as the \tool{Z3} solver supports the theory of constant-size arrays, it might be relatively easy to extend the support for constant-size arrays (declared as `\lstinline{int arr[10];}'), enumerations and structures.
 Nevertheless, pointers and variable-size arrays (allocated in the heap by functions \lstinline{malloc}, \lstinline{calloc}, etc.) require a stronger pre-processing analysis before being encoded into an SMT-formula.
 
 \item Currently, \porthos[2] can operate only in the intra-procedural analysis mode by assuming that each function provided by the user represents a separate thread (so-called litmus test-mode).
@@ -89,11 +94,11 @@ One future direction of the work could be adding the \textit{inter-procedural an
 Although, processing large programs may require serious memory optimisations (for instance, in storing the full unrolled graph data structure), which can possibly lead to worsening the overall performance.
 In addition, when processing large code projects, \porthos[2] might need the memory-guarding module that tracks the memory consumption of the tool and aborts its work if necessary.
 
-\item As it was mentioned in Section~\ref{ch:enc:bmc:cf} devoted to the encoding for the control-flow of the program, the new encoding scheme used by \porthos[2] allows to analyse partial functions.
-Although the current \porthos[2] interpreter infrastructure does is not configured to perform a partial analysis, it can be easily supported.
+\item As it was mentioned in Section~\ref{ch:enc:bmc:cf} devoted to the encoding for the control-flow of the program, the new encoding scheme used by \porthos[2] allows to analyse \textit{partial functions}.
+Although the current \porthos[2] interpreter infrastructure is not configured to perform a partial analysis, it can be easily supported.
 
-\item During the implementation of \porthos[2], we intentionally skipped the time-consuming stage of writing the test suites for the tool.
-Thus, in order to increase the robustness and stability of \porthos[2], we need to cover its code by unit- and functional tests.
+\item During the implementation of \porthos[2], we have only done limited \textit{testing of the tool}.
+Thus, in order to increase the stability of \porthos[2], we need to cover its code by unit- and functional tests.
 
 \item One might want to compare the performance of \porthos[2] in cases of usage the different SMT-solvers.
 Due to the \zformula{} abstraction layer, new SMT-solvers may be easily added (the general way to support multiple SMT-solvers is to convert the \zformula{} to an SMT-LIB formula~\cite{smt-lib}, that can be passed as input to the SMT-solver run as an external process).

@@ -94,7 +94,7 @@ by Microsoft Research~\cite{de2008z3}. However, unlike its predecessor, \porthos
 %We have decided to implement \porthos[2] in \textit{Java}
 As its predecessor, \porthos[2] is written in \textit{Java},
 %The programming language choice for \porthos[2] was also made in favour of \textit{java},
-firstly, in order to be able to reuse some parts and concepts of \porthos{} also written in Java, and secondly, because the authors find the object-oriented (OOP) concepts of Java suitable for modelling languages.
+firstly, in order to be able to reuse some parts and concepts of \porthos{} also written in Java, and secondly, because the authors find the concepts of Object-Oriented Programming~(OOP) in Java suitable for modelling languages.
 Although Java does not show the best results in performance benchmarks (for example, compared to C++~\cite{hundt2011loop}), the performance cornerstone of \porthos[2] (as well as any other SMT-based code analyser) is the phase of solving the SMT-formula, which is left to the third-party SMT solver invoked by \porthos[2] via a Java API.
 However, considering the perspective of using \porthos[2] as a static analyser for real-world programs, the memory optimisation problem must also be taken into account during both encoding and solving stages.
 It is worth noting that, for the reasons of simplicity, \porthos[2] is not a concurrent program, however, we believe that, due to its modular architecture, it can be easily parallelised on the level of program modules.
@@ -125,7 +125,7 @@ is left beyond current thesis.
   \label{fig:arch}
 \end{figure}
 
-\section{The architecture}
+\section{Architecture}
 \label{ch:impl:arch}
 
 The general architecture scheme of \porthos[2] is presented in Figure~\ref{fig:arch}.
@@ -252,7 +252,7 @@ The litmus-specific syntax for variables initialisation was used only for declar
 %Also, \porthos{} supports only the litmus-specific syntax for the variables initialisation, however, it allows only initialisation of the shared variable and only by default value \lstinline{0}.
 %\porthos[2] supports arbitrary declaration to be performed in initialisation statement.
 
-\porthos[2] uses the C language grammar of proposed in the C11 standard~\cite{jtc2011sc22}, that was extended by litmus test-specific syntax such as initialisation and final-state assertion statements (the original \tool{ANTLR} grammar can be found in the official repository containing the collection of \tool{ANTLR v4} grammars%
+\porthos[2] uses the C language grammar of proposed in the C11 standard~\cite{c11}, that was extended by litmus test-specific syntax such as initialisation and final-state assertion statements (the original \tool{ANTLR} grammar can be found in the official repository containing the collection of \tool{ANTLR v4} grammars%
 %
 \footnote{ANTLR grammars repository path:~\url{https://github.com/antlr/grammars-v4}}). %
 %
@@ -290,7 +290,7 @@ Each \ytree{} element implements the interface \texttt{YEntity} and carries the 
 %\textbf{(TODO: Rename CodeLocation->OriginLocation in the code!)} %TODO <--
 instance that contains information about the coordinates of the input text that has generated the \ytree{} element.
 
-Following the C11 standard~\cite{iso2012iec}, we distinguish a \textit{statement} (\textit{"an~action to be performed"}) from an \textit{expression} (\textit{"a sequence of operators and operands that specifies computation of a value, or that designates an object or a function, or that generates side effects, or that performs a combination thereof"}).
+Following the C11 standard~\cite{c11}, we distinguish a \textit{statement} (\textit{"an~action to be performed"}) from an \textit{expression} (\textit{"a sequence of operators and operands that specifies computation of a value, or that designates an object or a function, or that generates side effects, or that performs a combination thereof"}).
 
 All \ytree{} expressions implement the \texttt{YExpression} interface.
 On the \ytree{} level, the pointer arithmetic is modelled by the integer number \textit{pointer level} of an expression (although in fact this is the property of a type not of an expression, the y-tree is an untyped syntax tree, therefore the elements \ytree{} should carry this property).
@@ -411,8 +411,8 @@ The X-type is a symbolic representation of the C primitive type%
 %
 \footnote{Here we should note that \porthos[2] can eventually evolve to be able to analyse programs written in an OOP language (for instance, in C++). In this case, the \texttt{XType} will have more complex structure than a simple enumeration, which it has when we need to emulate only primitive types of C language. See more detailed discussion on input language type system in Section~\ref{ch:impl:proc:x-pre-compiler:type}.} %TODO!!!!! Check that XType is really a simple enumeration
 %
-that is easily convertible to an SMT-type (modelled as \texttt{ZType}).%TODO: add the class ZType
-As the type of an X-memory unit may not be resolved correctly, the memory units keep this information as a boolean flag.
+that is easily convertible to an SMT-type (modelled as \texttt{ZType}). %TODO: add the class ZType
+All X-memory units carry the boolean flag that indicates whether it has been resolved correctly by the X-memory manager.
 
 The memory units are created and stored by the \texttt{XMemoryManager}, which provides interface for accessing memory units during compilation stage.
 For more detailed description of memory management see Section~\ref{ch:impl:proc:x-compiler:mem}.
@@ -473,7 +473,7 @@ The following interfaces model basic kinds of events (see Figure~\ref{fig:class-
     Each \texttt{return} statement creates the assignment of the function call event on the top of call stack.
     Note, this approach works for any kind of recursion, which is unrolled up the user-defined boundary as well as explicit loops.
     \\
-    According to the Rice's theorem~\cite{rice1953classes}, in general case there always will be functions unresolved within an analysis launch.
+    %According to the Rice's theorem~\cite{rice1953classes}, in general case there always will be functions unresolved within an analysis launch.
     If the function has not been resolved, it can be safely assumed to be a no-operation function.
     In other words, we suppose that the knowledge base of \porthos[2] is complete and the tool can resolve all memory-operation functions and fence instructions.
     Although this can affect the completeness of the analysis, it is safe to make such an assumption as the user can check the log file and manually analyse the semantics of an unresolved call and it to the knowledge base if necessary.

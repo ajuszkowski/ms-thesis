@@ -9,6 +9,9 @@
 
 Most modern computer systems contain large parts that operate concurrently.
 Although the parallelisation of a system can drastically improve its performance, it opens numerous of problems regarding correctness, robustness and reliability, which makes the concurrent program design one of the most difficult problems of programming~\cite{mckenney2017parallel}.
+In this work, we consider only \textit{Symmetric Multiprocessor (SMP)} parallelism (systems with multiple processors connected to a single shared memory), leaving aside the discussion on distributed concurrency (systems with autonomous nodes that communicate with each other by passing messages through the network).
+%Leaving aside questions on the performance improvement of the system parallelisation, we explore the questions of the \textit{memory consistency},
+We are discussing mostly the questions on the \textit{memory consistency} rather than performance benefits of the concurrency as the inconsistent memory operations can create new program behaviours, unexpected from the programmer's point of view (as well as the loss of expected behaviours), which all can be considered as a security flaw.
 
 Traditionally, studies related to concurrent programming focus on more fundamental theoretical questions of designing race-free and lock-free parallel algorithms, asynchronous data structures and synchronisation primitives of a programming language~\cite{ben2006principles}.
 Unfortunately, when it comes to real-world concurrent programs, the algorithmic level of abstraction is not enough for guaranteeing their correctness.
@@ -26,7 +29,7 @@ Considering all interleavings of the processes, one could expect the final state
 
 %As the program specifies the write to~\texttt{x} to precede the read of~\texttt{y} in process~\texttt{P0}, one could expect the final state `\texttt{(0:EAX=0~/\textbackslash~1:EAX=0)}' to be unreachable.
 However, on the x86 architecture the state `\texttt{(0:EAX=0,\,1:EAX=0)}' is also reachable as the processors may cache the write to shared memory into their local write buffers, so that the write does not immediately become visible by processes running on other cores.
-This behaviour is known as \textit{store buffering~(SB)}.
+This behaviour is known as \textit{Store Buffering~(SB)}.
 
 \begin{figure}[t]
 \centering
@@ -52,7 +55,7 @@ MOV EAX,[y] & MOV EBX,[x] \\
 %Meanwhile, the write cache of the process \texttt{P1} may not have an updated version of the variable~\texttt{[x]}, neither the main memory, so that the read `\texttt{MOV~EBX,[x]}' performed in the process~\texttt{P1} may read the initial value~\texttt{0} even if this variable has been already updated in the other process.
 %The automation of the memory model-aware program analysis constitutes the main research interest of the current thesis.
 
-The formal way to define the semantics of memory operations and synchronisation primitives of a parallel execution environment is to define its \textit{memory model}.
+The formal way to define the semantics of memory operations and synchronisation primitives of a parallel \textit{execution environment} (hardware, programming language, compiler, database, operation system, etc.) is to define its \textit{memory model}.
 %The behaviour of a concurrent execution environment is described by a formal memory model
 %The study of concurrency of a specific platform concerns on defining
 %and are widely used to illustrate its behaviour.
@@ -60,14 +63,15 @@ The formal way to define the semantics of memory operations and synchronisation 
 %The issues like one discussed above have led to the need for formalisation of semantics of memory operations within different concurrent architectures defined by \textit{memory models}.
 There are two main types of formal memory models.
 Models of the first type characterise the behaviour of the system (its \textit{operational semantics}) in terms of the abstract machine executing the code, as it was done for the SB example above.
-Models of the second type define the \textit{axiomatic semantics} of the system by specifying the set of assertions over states of the program.
+Models of the second type define the \textit{axiomatic semantics} of the system by specifying a set of assertions over states of the program.
 %There are two ways to define a memory model: by specifying its \textit{operational semantics} (in terms of an abstract machine executing the code, as it was done for the SB example above) or by defining its \textit{axiomatic semantics} (in terms of assertions over states of the program formed by sequences of operations).
 Although the former type of memory models may be easier to describe and interpret, existing numerous formal verification tools and methods address the research towards axiomatic memory models.
 
-The first memory model for a concurrent system was formulated by Leslie Lamport back in 1979~\cite{lamport1979make}.
-This memory model, called the \textit{sequential consistency (SC)}, allows only those executions that produce the same result as if the operations had been executed in an interleaved fashion in a single process%
+Chronologically the first memory model for a concurrent system was formulated by Leslie Lamport back in 1979~\cite{lamport1979make}.
+This memory model, called the \textit{Sequential Consistency (SC)}, allows only those executions that produce the same result as if the operations had been executed in an interleaved fashion in a single process%
 %
-\footnote{In order to prescind from the implementation details while discussing the memory models theory, we avoid the use of the software-specific term \textit{thread} and the hardware-specific term \textit{processor}. Instead, we adhere the terminology of the theory of concurrency employed by Ben-Ari~\cite{ben2006principles} by naming a concurrent piece of code the \textit{process}.}. %
+\footnote{In order to prescind from the implementation details while discussing the memory models theory, we avoid the use of the software-specific term \textit{thread} and the hardware-specific term \textit{processor}.
+Instead, we adhere the terminology of the theory of concurrency employed by Ben-Ari~\cite{ben2006principles} by naming a concurrent piece of code the \textit{process}.}. %
 %
 This means that the order of operations executed by a process is strictly defined by the program (the code) it executes.
 The SC model does require the write to a shared variable performed in one process to become visible by all other processes \textit{instantly} as each process writes directly to the shared memory, without local buffering.
@@ -75,30 +79,42 @@ Another important requirement of the SC memory model is that it forbids reorderi
 Originally, the operational semantics was defined for the SC model, however there exist axiomatic specifications for it~\cite{mansky2015axiomatic}.
 
 The SC model is considered to be a \textit{strong memory model} in the sense that it provides firm guarantees regarding the ordering and effect of memory operations.
-Different relaxations of the SC model lead to \textit{weak memory models~(WMMs)} that specify how processes interact through the shared memory, when a write becomes visible to processes running on other cores, and what value a read operation can get.
-Thus, WMMs serve as set of guarantees made by designers of execution environment (hardware, programming language, compiler, database, operation system, etc.) to programmers on which behaviours of their concurrent code they can rely on.
+%However, execution environments that provide weakened guarantees (\textit{relaxations} such as memory operations reordering, write buffering, etc.)
+Weakened guarantees (such as memory operations reordering, write buffering, etc.) are called \textit{relaxations} of the memory model.
+The relaxations of the SC model lead to \textit{Weak Memory Models~(WMMs)} that specify how processes interact through the shared memory, when a write becomes visible to processes running on other cores, and what value a read operation can get.
+Thus, WMMs serve as set of guarantees made by designers of an execution environment to programmers on which behaviours of their concurrent code they can rely on.
 
 
 \section{Related work}
 \label{ch:intro:related}
 
-Research on weak memory models firstly aims to \textit{formalise} a formal approach of understanding programs with respect to weak memory models, which is \textit{systematic}, \textit{sound} and \textit{complete}.
+Research on weak memory models firstly aims to \textit{formalise} an approach of understanding programs with respect to weak memory models, which is \textit{systematic}, \textit{sound} and \textit{complete}.
 One of the most well-known frameworks for weak memory model-aware analysis was formalised by J. Alglave in~2010~\cite{alglave2010shared}.
 It is the event-based non-deterministic model without global time (see Section~\ref{ch:wmm:event} for details).
 
 In addition to developing the theoretical basis, researchers work on extracting the memory models for hardware architectures from existing implementations or from the specifications, which are written in natural language and thus suffer from ambiguities and incompleteness.
 Over the last decade, memory models have been defined for most mainstream multiprocessor architectures, such as x86-TSO and Sparc-TSO (for \textit{Total Store Order}) model for x86 and Sparc architectures~\cite{owens2009better}, much more relaxed memory model for Power and ARM architectures~\cite{alglave2009semantics,sarkar2011understanding, alglave2014herding}, etc. %, or Alpha architecture~\cite{alphaWMM}~, and others.
-There are projects for validating hardware architectures wrt. a memory model as well, e.g.~\cite{lustig2014pipecheck,lustig2016coatcheck}.
+There are projects for validating hardware architectures wrt. a memory model as well, e.g.,~\cite{lustig2014pipecheck,lustig2016coatcheck}.
 
 %TODO: litmus test synthesis 
 %1) http://research.nvidia.com/sites/default/files/pubs/2017-04_Automated-Synthesis-of//ASPLOS_2017_Memory_Model_Verification.pdf
 
-Most modern high-level programming languages rely on relaxed memory model as well.
+Most modern high-level programming languages rely on relaxed memory models as well.
 Thus, the memory model for Java is based on the \textit{happens-before} principle~\cite{lamport1978time} and was introduced in J2SE 5.0 in 2004~\cite{manson2005java}.
-The transformations valid for the Java memory model were discussed in~\cite{sevcik2009program}. 
-A weak memory model for C and C++ is based on the relation \textit{strongly happens-before} and was introduced in the C++17 standard~\cite{batty2011mathematizing}.
-Before that, the C++11 standard~\cite{iso2012iec} proposed the set of hardware-independent synchronisation fences and atomic operations.
-Weak memory models are being formalised for even more abstract software environments, the notable project in this area is the project on formalising the Linux kernel memory model, which is being actively developing these days~\cite{alglave2018frightening, kernel1}.
+The transformations valid under the Java memory model are discussed in~\cite{sevcik2009program}.
+The weak memory model for C and C++ was defined the C++11 standard~\cite{c11}.
+The standard introduced a set of hardware-independent synchronisation fences and atomic operations, which were formalised in the work~\cite{batty2011mathematizing}.
+%This work influenced the C++11 standard~\cite{c11}, which introduced the set of hardware-independent synchronisation fences and atomic operations.
+The native support for the synchronisation primitives by the programming language, defined in the standard, has replaced the library-based approach for concurrency, therefore the compiler became aware of the concurrent parts of the code.
+%the concurrency libraries and language-independent standards that support concurrency (such as POSIX) that were used to write parallel programs in previous versions of C and C++.
+%is based on the \textit{strong happens-before} relation and was introduced in the C++17 standard~\cite{batty2011mathematizing}.
+Nonetheless, in 2015 some common compiler transformations were shown to be invalid under the C11 memory model~\cite{vafeiadis2015common}.
+%Therefore, the formal memory model of the programming language is an essential part of the compiler infrastructure.
+
+Weak memory models are being formalised for even more abstract software environments.
+The notable project in this area is the project on formalising the Linux kernel memory model, which is under active development nowadays~\cite{alglave2018frightening, kernel1, mckenney2017wg21}.
+This project has also an influence on the C language: the revision P0124R4 of the C standard~\cite{kernel2c} compares the Linux kernel and C11 memory models (including variable access, memory barriers, locking and atomic operations).
+
 
 Furthermore, there exists a wide range of tools that perform memory model-aware analysis.
 \begin{itemize}[noitemsep,topsep=0pt]
@@ -142,7 +158,7 @@ A program written in a high-level language is then compiled for different hardwa
 Even if all the compiler optimisations were disabled (which is rare case nowadays), the behaviour of two compiled versions of the same program may differ due to differences between hardware memory models.
 As the result, a program compiled under the platform $\mathcal{T}$ can reach states that are unreachable on the platform $\mathcal{S}$, which is a \textit{portability bug} from the source platform $\mathcal{S}$ to the target platform $\mathcal{T}$~\cite{Porthos17a}.
 
-The very first tool that performs the WMM-aware portability analysis is \porthos%
+The very first tool that performs the WMM-aware portability analysis is \porthos{}%
 %
 \footnote{The \porthos{} project web site: \url{http://github.com/hernanponcedeleon/Dat3M}} %
 %
@@ -193,5 +209,5 @@ The thesis is organised as following.
 Chapter~\ref{ch:wmm} gives a general view on the weak memory model-aware analysis.
 Chapter~\ref{ch:enc} examines the portability analysis as an bounded reachability problem that can be encoded into an SMT-formula in order to be solved automatically by an SMT~solver.
 Chapter~\ref{ch:impl} delves into the description of architectural solutions and implementation details of the \porthos[2] framework.
-Chapter~\ref{ch:eval} provides an example of the portability analysis via \porthos[2] and presents some evaluation results comparing to other tools. %TODO: check if it's true
-Chapter~\ref{ch:summary} summarises results of the work and proposes future work directions. %TODO: check if it's true
+Chapter~\ref{ch:eval} gives a comparison of key features of \porthos[2] and \porthos[1] by providing examples of the compilation and the unrolling stages; and it provides some performance benchmarks of \porthos[2] in both reachability and portability analysis modes.
+Chapter~\ref{ch:summary} summarises results of the work and proposes possible directions of the future work.

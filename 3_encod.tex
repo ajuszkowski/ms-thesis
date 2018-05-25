@@ -36,7 +36,7 @@ Once the model has been constructed, it can be checked for compliance to the \te
 
 Usually, the specification defines temporal constraints over the properties of the system.
 For instance, the specification assert may state that the property \textit{always} holds (the \textit{safety}) or the property will \textit{eventually} hold (the \textit{liveness}).
-Commonly, the \textit{Linear Temporal Logic~(LTL)} or \textit{Computational Tree Logic~(CTL)} (along with their extensions) is used as a specification language due to the expressiveness and verifiability of their statements.
+Commonly, the \textit{Linear Temporal Logic~(LTL)} or \textit{Computational Tree Logic~(CTL)} (along with their extensions) is used as a specification language due to the expressiveness and verifiability of their statements~\cite{clarke1999model}.
 
 In the described scheme, the model checking problem is reducible to the reachability analysis, an iterative process of a systematic exhaustive search in the state space.
 This approach is called \textit{Unbounded Model Checking~(UMC)}.
@@ -53,7 +53,7 @@ The other idea is to use satisfiability solvers for symbolic exploration of stat
 In this approach, the state space exploration consists of the sequence of queries to the SAT-solver, represented as boolean formulas that encode the constraints of the model and the finite path to a state in the corresponding transition system.  
 %This approach uses an iterative process of constructing queries to the SAT-solver as a boolean formula which encodes the constraints of the model and the finite path to a state in the corresponding transition system. 
 %Due to the SAT-solver.
-This technique is called \textit{bounded model checking (BMC)} as the search process is being repeated up to the user-defined bound $k$, which may result to incomplete analysis in general case.
+This technique is called \textit{Bounded Model Checking~(BMC)} as the search process is being repeated up to the user-defined bound $k$, which may result to incomplete analysis in general case.
 However, there exist numerous techniques for making BMC complete for finite-state systems~(e.g.,~\cite{shtrichman2000tuning}).
 %As well as the BMC problem, the approach used by \porthos{}
 
@@ -285,7 +285,7 @@ For example, the SMT-model $\fx(e_1)=1$, $\fx(e_2)=1$, $\fx(e_3)=0$ and $\fx(e_4
                  \ & \land \lnot [\fx(e_3) \land \fx(e_{nop_{2}})]
 \end{align*}
 \end{minipage}
-\caption{Example of encoding for the control-flow of the event-flow graph}
+\caption{Example of encoding for the control-flow of the \xgraph{}}
 \label{fig:graph-example}
 \end{figure}
 
@@ -374,7 +374,7 @@ Derived relations are encoded by fresh boolean variables according to the follow
 \item $r_1;r_2(e_1,e_2) \defeq \bigvee\limits_{e_k \in \mathbb{E}}^{} r_1(e_1,e_k) \land r_2(e_k,e_2)$; \ and
 \item $r^{+}(e_1, e_2) \defeq \texttt{tc}_{\left\lceil log|\mathbb{E}| \right\rceil} (e_1, e_2), \ where \vspace{0.25em} \\
 \texttt{tc}_{0}(e_1,e_2) \defeq r(e_1,e_2), \ and \\
-\texttt{tc}_{i+1}(e_1,e_2) \defeq r(e_1,e_2) \lor (\texttt{tc}_{i}(e_1,e_2);\texttt{tc}_{i}(e_1,e_2))$.
+\texttt{tc}_{i+1}(e_1,e_2) \defeq r(e_1,e_2) \lor (\texttt{tc}_{i}(e_1,e_3);\texttt{tc}_{i}(e_3,e_2))$.
 \end{itemize}
 \vspace{1em}
 

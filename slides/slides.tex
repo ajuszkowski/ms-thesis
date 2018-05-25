@@ -178,12 +178,12 @@ c/.style={
 
 % Delete this, if you do not want the table of contents to pop up at
 % the beginning of each subsection:
-\AtBeginSection[]
-{
-  \begin{frame}<beamer>{Outline}
-    \tableofcontents[currentsection]%,currentsubsection]
-  \end{frame}
-}
+%\AtBeginSection[]
+%{
+%  \begin{frame}<beamer>{Outline}
+%    \tableofcontents[currentsection]%,currentsubsection]
+%  \end{frame}
+%}
 
 \usepackage{colortbl}
 
@@ -204,9 +204,9 @@ c/.style={
   \titlepage
 \end{frame}
 
-\begin{frame}{Outline}
-  \tableofcontents
-\end{frame}
+%\begin{frame}{Outline}
+%  \tableofcontents
+%\end{frame}
 
 
 
@@ -267,7 +267,11 @@ $p_1$ : $r_p \leftarrow y$ & $q_1$: $r_q \leftarrow x$ \\
 \small
 \onslide<2-> 
 \begin{table}
-\caption*{SC}
+\caption*{Sequential Consistency}
+%"A multiprocessor is sequentially consistent if the result of any
+%execution is the same as some sequential order, and within any
+%processor, the operations are executed in program order"
+%– Lamport, 1979
 \begin{tabular}{ >{\columncolor{ltgrey}}l >{\columncolor{ltgrey}}r}
 $\b{p_0}, \b{p_1}, \r{q_0}, \r{q_1}$ & $(\b{0}; \r{1})$ \\
 $\r{q_0}, \r{q_1}, \b{p_0}, \b{p_1}$ & $(\b{1}; \r{0})$
@@ -291,7 +295,14 @@ $\r{q_0}, \b{p_0}, \r{q_1}, \b{p_1}$ & $(\b{1}; \r{1})$ \\
 %\vspace{-11pt}
 %\vspace{-2pt}
 \begin{table}
-\caption*{TSO}
+\caption*{Total Store Order}
+%http://events17.linuxfoundation.org/sites/events/files/slides/dbueso-elc2016-membarriers-final.pdf
+%SPARC, x86 (Intel, AMD)
+%Similar to SC, but:
+%‒ Loads may be reordered with writes.
+%Relaxed Models
+% Arbitrary reorder limited only by explicit memorybarrier
+%instructions.
 \begin{tabular}{ | l r | l r | l r }
 $\underline{\b{p_1}}, \underline{\b{p_0}}, \r{q_0}, \r{q_1}$ & $(\b{0}; \r{1})$  &  $\b{p_0}, \b{p_1}, \underline{\r{q_1}}, \underline{\r{q_0}}$ & $(\b{0}; \r{1})$  &  $\underline{\b{p_1}}, \underline{\b{p_0}}, \underline{\r{q_1}}, \underline{\r{q_0}}$ & $(\b{0}; \r{1})$ \\
 $\r{q_0}, \r{q_1}, \underline{\b{p_1}}, \underline{\b{p_0}}$ & $(\b{1}; \r{0})$  &  $\underline{\r{q_1}}, \underline{\r{q_0}}, \b{p_0}, \b{p_1}$ & $(\b{1}; \r{0})$  &  $\underline{\r{q_1}}, \underline{\r{q_0}}, \underline{\b{p_1}}, \underline{\b{p_0}}$ & $(\b{1}; \r{0})$ \\

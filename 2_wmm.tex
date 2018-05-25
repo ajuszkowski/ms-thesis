@@ -1,13 +1,13 @@
 \chapter{Memory model-aware analysis}
 \label{ch:wmm}
 
-The main idea behind the memory model-aware program analysis is that the set of all possible interleavings of the concurrent program (the \textit{anarchic semantics}) can be specified by the axiomatic constraints of the memory model that filter out executions inconsistent in particular architecture (the \textit{analytic semantics})~\cite{alglave2016syntax}.
+The main idea behind the memory model-aware program analysis is that the set of all possible executions of the concurrent program (the \textit{anarchic semantics}) can be specified by the axiomatic constraints of the memory model that filter out executions inconsistent in particular architecture (the \textit{analytic semantics})~\cite{alglave2016syntax}.
 The anarchic semantics of the program is a truly parallel semantics with no global time that describes all possible computations with all possible communications.
 However, the analytic semantics captures the program behaviours on a certain execution environment more precisely.
 %"The semantics of a program is a set of executions" https://johnwickerson.github.io/papers/memalloy.pdf
 
 
-\section{The event-based program representation}
+\section{Event-based program representation}
 \label{ch:wmm:event}
 
 The classical approach for analysing concurrent programs is to model it as the set of sequentially consistent programs, obtained by enumerating all possible interleavings.
@@ -249,6 +249,6 @@ show implied
 
 acyclic ghb as tso
 \end{lstlisting}
-\caption{The simplified x86-TSO memory model defined in the \cat{} language~\cite{herd10tutorial}}
+\caption{The simplified x86-TSO memory model in the \cat{} language~\cite{herd10tutorial}}
 \label{ex:x86-cat}
 \end{figure}

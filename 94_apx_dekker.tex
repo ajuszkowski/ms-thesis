@@ -1,8 +1,9 @@
-d\newpage
-\section{The Dekker's algorithm for mutual exclusion in C language}
+\section{Dekker's mutual exclusion algorithm in C}
 \label{apx:dekker}
 
-\begin{figure}
+%\begin{minipage}{\textwidth}
+%\vspace{-1em}
+\begin{figure}[H]
 \begin{lstlisting}[language=Java,morekeywords={memory_order_relaxed}]
 { int flag0 = 0, flag1 = 0, turn = 0; }
 
@@ -16,9 +17,8 @@ void P0() {
         if (t1 != 0) {
           flag0.store(memory_order_relaxed, b);
           t1 = turn.load(memory_order_relaxed);
-          while (t1 != 0) {
+          while (t1 != 0)
             t1 = turn.load(memory_order_relaxed);
-          }
           flag0.store(memory_order_relaxed, a);
         }
       }
@@ -35,9 +35,8 @@ void P1() {
         if (t2 != 1) {
           flag1.store(memory_order_relaxed, d);
           t2 = turn.load(memory_order_relaxed);
-          while (t2 != 1) {
+          while (t2 != 1)
             t2 = turn.load(memory_order_relaxed);
-          }
           flag1.store(memory_order_relaxed, c);
         }
       }
@@ -46,6 +45,5 @@ void P1() {
 
 exists (turn == 10)
 \end{lstlisting}
-
-%\caption{The Dekker's algorithm for mutual exclusion written in C}
 \end{figure}
+%\end{minipage}

@@ -33,7 +33,7 @@ crossref = {aho2007compilers}
   organization={IEEE Computer Society}
 }
 
-@article{mckenney2017wg21,
+@misc{mckenney2017wg21,
   title={WG21/P0868R0: Selected RCU Litmus Tests},
   author={McKenney, Paul E and Stern, Alan and Hunter, Andrew and Alglave, Jade and Maranget, Luc},
   year={2017}
@@ -75,6 +75,13 @@ crossref = {aho2007compilers}
   pages={410--425},
   year={2000},
   publisher={Springer}
+}
+
+@book{clarke1999model,
+  title={Model checking},
+  author={Clarke, Edmund M and Grumberg, Orna and Peled, Doron},
+  year={1999},
+  publisher={MIT press}
 }
 
 @article{SurveySymExec-CSUR18,
@@ -181,6 +188,20 @@ crossref = {aho2007compilers}
   year = {2017},
 }
 
+@techreport{kernel2c,
+  title={P0124R4: Linux-Kernel Memory Model},
+  author={McKenney, Paul E and Weigand, Ulrich and Parri, Andrea and Feng, Boqun},
+  institution={ISO/IEC JTC1 SC22 WG21 (C++ Language)},
+  year={2017},
+  month=9
+}
+
+@misc{memorybarriers,
+  title = {Linux kernel memory barriers},
+  author = {Howells, David and McKenney, Paul E. and Deacon, Will and Zijlstra, Peter},
+  url = {https://www.kernel.org/doc/Documentation/memory-barriers.txt},
+}
+
 @article{kokologiannakis2017effective,
   title={Effective stateless model checking for C/C++ concurrency},
   author={Kokologiannakis, Michalis and Lahav, Ori and Sagonas, Konstantinos and Vafeiadis, Viktor},
@@ -252,21 +273,37 @@ crossref = {aho2007compilers}
   organization={Springer}
 }
 
-@techreport{jtc2011sc22,
-  title={SC22/WG14. ISO/IEC 9899: 2011},
-  journal={Information technology --- Programming languages --- C},
+@techreport{c11,
+  title={ISO/IEC 9899:2011 Information technology -- Programming languages -- C},
   author={ISO/IEC},
-  address = {Geneva, Switzerland},
+  journal={International Organization for Standardization, Geneva, Switzerland},
   year={2011}
 }
 
-@techreport{iso2012iec,
-  title={IEC 14882: 2011 Information technology --- Programming languages --- C++},
-  author={ISO, ISO},
+@techreport{cpp11,
+  title={ISO/IEC 14882:2011 Information technology -- Programming languages -- C++},
+  author={ISO/IEC},
   journal={International Organization for Standardization, Geneva, Switzerland},
-  volume={27},
-  pages={59},
-  year={2012}
+  year={2011}
+}
+
+@techreport{cpp17,
+  title={IEC 14882:2017 Information technology -- Programming languages -- C++},
+  author={ISO/IEC},
+  booktitle={C17 and C++17 standard},
+  journal={International Organization for Standardization, Geneva, Switzerland},
+  year={2017}
+}
+
+@article{vafeiadis2015common,
+  title={Common compiler optimisations are invalid in the C11 memory model and what we can do about it},
+  author={Vafeiadis, Viktor and Balabonski, Thibaut and Chakraborty, Soham and Morisset, Robin and Zappa Nardelli, Francesco},
+  journal={ACM SIGPLAN Notices},
+  volume={50},
+  number={1},
+  pages={209--220},
+  year={2015},
+  publisher={ACM}
 }
 
 @inproceedings{palsberg1998essence,

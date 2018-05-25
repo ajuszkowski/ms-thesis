@@ -438,7 +438,7 @@ Software verification is considered to be a hard computational problem vulnerabl
 Concurrent software verification raises the complexity of the problem to a power determined by %by the factor defined
 all the possible interleavings of states of the system. %concurrent parts of the system.
 Moreover, the architecture of a modern shared-memory multi-core processor and optimisations performed by a compiler can cause program behaviour that is unexpected from the point of view of traditional concurrency.
-The guarantees that an execution environment can provide to a programmer are formalised in its \textit{weak memory model (WMM)}.
+The guarantees that an execution environment can provide to a programmer are formalised in its \textit{Weak Memory Model (WMM)}.
 %The formalisation of weak memory models
 Over the last decade, weak memory models were defined for multiple hardware architectures and programming languages.
 %Thus, the memory model-aware software analysis 
@@ -584,11 +584,14 @@ The result of the work is \textit{\porthos[2]}, a framework for SMT-based memory
 
 \renewcommand{\thesection}{A.\arabic{section}}
 %\titlespacing*{\section}{0pt}{-40pt}{20pt}
-\titlespacing*{\section}{0pt}{0pt}{0pt}
+%\titlespacing{command}{left spacing}{before spacing}{after spacing}[right]
+\titlespacing*{\section}{0pt}{-20pt}{5pt}
+
+%\titleformat{hcommandi}[hshapei]{hformati}{hlabeli}{hsepi}{hbefore-codei}[hafter-codei]
 \titleformat{\section}[display]
   {\normalfont\large\bfseries}% <- font for label "A.1", default \huge
   {}
-  {0ex}
+  {-10pt}
   {\thesection\quad\large}
 \newcommand{\sectionbreak}{\clearpage}
 

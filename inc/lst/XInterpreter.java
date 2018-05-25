@@ -1,4 +1,5 @@
 public interface XInterpreter {
+
   XProcessId getProcessId();
   void finish();
   XCyclicProcess getResult();
@@ -34,23 +35,4 @@ public interface XInterpreter {
   void finishNonlinearBlockDefinition();
   void processJumpStatement(JumpKind kind);
   XEntity processMethodCall(String methodName, XMemoryUnit... arguments);
-  
-  
-  // --
-  
-  enum BlockKind {
-      Sequential,
-      Branching,
-      Loop;
-  }
-  
-  enum BranchKind {
-      Then,
-      Else;
-  }
-  
-  enum JumpKind {
-      Break,
-      Continue;
-  }  
-}  
+}
