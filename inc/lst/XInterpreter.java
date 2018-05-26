@@ -2,9 +2,9 @@ public interface XInterpreter {
 
   XProcessId getProcessId();
   void finish();
-  XCyclicProcess getResult();
+  XProcess getResult();
   
-  // linear interpretation methods:
+  // emitting new events:
   XEntryEvent emitEntryEvent();
   XExitEvent emitExitEvent();
   XBarrierEvent emitBarrierEvent(XBarrierEvent.Kind kind);
@@ -26,7 +26,7 @@ public interface XInterpreter {
                                            XLocalMemoryUnit operand1, 
                                            XLocalMemoryUnit operand2);
 
-  // non-linear interpretation methods:
+  // non-linear statements interpretation:
   void startBlockDefinition(BlockKind blockKind);
   void startBlockConditionDefinition();
   void finishBlockConditionDefinition(XComputationEvent condition);
@@ -35,4 +35,5 @@ public interface XInterpreter {
   void finishNonlinearBlockDefinition();
   void processJumpStatement(JumpKind kind);
   XEntity processMethodCall(String methodName, XMemoryUnit... arguments);
+
 }

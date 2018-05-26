@@ -1,80 +1,64 @@
-\chapter{Portability analysis as an SMT~problem}
+\chapter{Portability analysis as an SMT problem}
 \label{ch:enc}
 
-
-% TODO: Add intro to the bounded reachability analysis using SAT -- ? 
-
-% TODO: other tools for bounded model-checking: 
-
-
-%TODO: the method used by Porthos is complete and efficient, but the implementation sucks. Why? 1), 2), 3). How can it be fixed? 1), 2), 3).
-
-%TODO: more about SMT-(= SAT + constraints expressed in background theories. Exapmles of theories that we use and that are implem-ted in Z3).
-
-As it has been discussed in Chapter~\ref{ch:intro}, the program may behave differently when compiled for different parallel hardware architectures.
+As it was discussed in Chapter~\ref{ch:intro}, a concurrent program may behave differently when compiled for different hardware architectures.
 This may cause the portability bugs, the behaviour that is allowed under one architecture and forbidden under another. 
-%already said:
-%Although the research of weak memory models has achieved considerable success, most works remain to be rather theoretical that practical and serve mostly as tools for better understanding the concurrent nature of programs.
-% The first tool that tackles the problem 
-%The first work that has investigated the practical approach of modelling and verification the real-world programs with respect to weak memory models was ~\cite{Porthos17a}  
-In this Chapter, we describe the general task of analysing the concurrent software portability
-%may be stated 
-as a \textit{bounded reachability} problem, which in turn can be reduced to a SMT problem~\cite{Porthos17a}.
+This Chapter provides the short introduction into the general model checking and reachability analysis problem, after which it describes of the concurrent software portability analysis stated as a \textit{bounded reachability} problem, which in turn can be reduced to an SMT problem~\cite{Porthos17b}.
 
 %TODO: sound, complete...
 
 \section{Model checking and reachability analysis}
 \label{ch:enc:mc}
 
-The model checking is the problem of verifying the system (the model) against a set of constraints (the specification)~\cite{dkw2008}.
-As the state machine model is the most widespread mathematical model of computation, most classical model checking algorithms explore the state space of a system in order to find states that violate the specification.
+The \textit{model checking} is the problem of verifying the system (the \textit{model}) against a set of constraints (the \textit{specification})~\cite{dkw2008}.
+As the state machine is the most widespread mathematical model of computation, most classical model checking algorithms explore the state space of a system in order to find states that violate the specification.
 
-The general scheme of model checking is the following. 
-The analysing system (the \textit{model}) is represented as a transition system, a directed graph with labelled nodes representing states of the system.
+The general scheme of model checking is the following.
+The analysing system is represented as a transition system, a directed graph with labelled nodes representing states of the system.
 Each state corresponds to the unique subset of atomic propositions that characterise its behavioural properties.
-Once the model has been constructed, it can be checked for compliance to the \textit{specification}.
+Once the model has been constructed, it can be checked for compliance to the specification, a set of constraints.
 
-Usually, the specification defines temporal constraints over the properties of the system.
-For instance, the specification assert may state that the property \textit{always} holds (the \textit{safety}) or the property will \textit{eventually} hold (the \textit{liveness}).
+Usually, the specification defines temporal constraints over the system properties.
+For instance, the specification can assert that the property \textit{always} holds (the \textit{safety} property) or the property will \textit{eventually} hold (the \textit{liveness} property).
 Commonly, the \textit{Linear Temporal Logic~(LTL)} or \textit{Computational Tree Logic~(CTL)} (along with their extensions) is used as a specification language due to the expressiveness and verifiability of their statements~\cite{clarke1999model}.
 
 In the described scheme, the model checking problem is reducible to the reachability analysis, an iterative process of a systematic exhaustive search in the state space.
 This approach is called \textit{Unbounded Model Checking~(UMC)}.
 However, all model checking techniques are exposed to the \textit{state explosion problem} as the size of the state space grows exponentially with respect to the number of state variables used by the system (its size).
-In case of modelling concurrent systems, this problem becomes much more considerable due to exponential number of possible interleavings of states.
-Therefore, the research in model checking over past 40 years was fighting the state explosion problem mostly by optimising search space, search strategy or basic data structures of existing algorithms.
+In case of modelling concurrent systems, this problem becomes much more serious due to the exponential number of possible interleavings of states.
+Therefore, over past 30 years the research in model checking has been fighting the state explosion problem mostly by optimising search space, search strategy or basic data structures of existing algorithms~\cite{clarke2001progress}.
 
-One of the first techniques that optimises the search space considerably is the symbolic model checking with \textit{Binary Decision Diagrams~(BDDs)}.
+One of the first techniques that optimises the search space considerably is the symbolic model checking with \textit{Binary Decision Diagrams~(BDDs)}~\cite{burch1992symbolic}.
 Instead of processing each state individually, in this approach the set of states is represented by the BDD, a data structure that allow to perform operations on large boolean formulas efficiently~\cite{clarke2012model}.
 The BDD representation can be linear of size of variables it encodes if the ordering of variables is optimal, otherwise the size of BDD is exponential.
 The problem of finding such an optimal ordering is known as NP-complete problem, which makes this approach inapplicable in some cases.
 
 The other idea is to use satisfiability solvers for symbolic exploration of state space~\cite{clarke2001bounded}.
-In this approach, the state space exploration consists of the sequence of queries to the SAT-solver, represented as boolean formulas that encode the constraints of the model and the finite path to a state in the corresponding transition system.  
+In this approach, the state space exploration consists of the sequence of queries to the SAT-solver, represented as boolean formulas that encode the constraints of the model and the finite path to a state in the corresponding transition system.
 %This approach uses an iterative process of constructing queries to the SAT-solver as a boolean formula which encodes the constraints of the model and the finite path to a state in the corresponding transition system. 
 %Due to the SAT-solver.
-This technique is called \textit{Bounded Model Checking~(BMC)} as the search process is being repeated up to the user-defined bound $k$, which may result to incomplete analysis in general case.
+This technique is called \textit{Bounded Model Checking~(BMC)} as the search process is being repeated up to the user-defined bound $k$, which may result to \textit{incomplete analysis} in general case (not all the state space has been checked).
 However, there exist numerous techniques for making BMC complete for finite-state systems~(e.g.,~\cite{shtrichman2000tuning}).
-%As well as the BMC problem, the approach used by \porthos{}
 
-%For instance, the idea of grouping states with similar properties into equivalence classes lead to the concept of traces in concurrent systems proposed by A.~Mazurkiewicz in 1986~\cite{mazurkiewicz1986trace}. 
+At present time, satisfiability solvers are behind the numerous verification and bounded model checking tools.
+Although, as most modern programming languages are typed, the SAT-formula that encodes the constraints of a program must include non-boolean constraints encoded as boolean variables, which is ineffective, therefore most software analysis and verification tools use \textit{Satisfiability Modulo Theories~(SMT)} -solvers, that integrate first-order reasoning with the background theory reasoning~\cite{kroening2008decision}.
+For example, the Integer theory includes operators `$+$', `$-$', `$\geqslant$' and others).
+Most modern SMT-solvers support integer arithmetic, real arithmetic, fixed-size bit-vectors, arrays, and other theories.
+The direction of the development of SMT-solvers is provided by the \texttt{SMT-LIB} standard~\cite{smt-lib}, which provides definition of the unified language for defining SMT-formulas, and description of most common underlying logics and theories.
+
+In general, a BMC problem aims to examine the non-reachability of the "undesirable" states of a finite-state system.
+Let $\vec{x} = (x_1, x_2, ..., x_n)$ be a vector of $n$ variables that uniquely distinguishes states of the system; let $\textit{Init}(\vec{x})$ be an \textit{initial-state predicate} that defines the set of initial states of the system; let $\textit{Trans}(\vec{x}, \pvec{x}')$ be a \textit{transition predicate} that signifies whether there the transition from state $\vec{x}$ to state $\pvec{x}'$ is valid; let $\textit{Bad}(\vec{x})$ be a \textit{bad-state predicate} that defines the set of undesirable states.
+Then, the BMC problem, stated as the reachability of the undesirable state withing $k$ steps, is formulated as following:
+$\texttt{SAT}( \textit{Init}(\vec{x_0}) \land \textit{Trans}(\vec{x}_0, \vec{x}_1) \land ... \land \textit{Trans}(\vec{x}_{k-1}, \vec{x}_k) \land \textit{Bad}(\vec{x}_k) )$.
 
 
 \section{Portability analysis as a bounded reachability problem}
 \label{ch:enc:bmc}
 
-%TODO: overapproximation. loops, Rice's thm. Within the bound, the method is complete.
-
-In general, a BMC problem aims to examine the non-reachability of the "undesirable" states of a finite-state system.
-Let $\vec{x} = (x_1, x_2, ..., x_n)$ be a vector of $n$ variables that uniquely distinguishes states of the system; let $\textit{Init}(\vec{x})$ be an \textit{initial-state predicate} that defines the set of initial states of the system; let $\textit{Trans}(\vec{x}, \pvec{x}')$ be a \textit{transition predicate} that signifies whether there the transition from state $\vec{x}$ to state $\pvec{x}'$ is valid; let $\textit{Bad}(\vec{x})$ be a \textit{bad-state predicate} that defines the set of undesirable states.
-Then, the BMC problem, stated as the reachability of the undesirable state withing $k$ steps, is formulated as following:
-%\begin{equation}
-$\texttt{SAT}( \textit{Init}(\vec{x_0}) \land \textit{Trans}(\vec{x}_0, \vec{x}_1) \land ... \land \textit{Trans}(\vec{x}_{k-1}, \vec{x}_k) \land \textit{Bad}(\vec{x}_k) )$.
-%\end{equation}
-
-The portability analysis problem may also be stated as a reachability problem, where the undesirable state is one reachable under the target~$\mathcal{M_T}$ memory model and unreachable under the source memory model~$\mathcal{M_S}$.
+A portability analysis problem may be stated as a reachability problem, where the undesirable state is one reachable under the target~$\mathcal{M_T}$ memory model and unreachable under the source memory model~$\mathcal{M_S}$.
 %However, unlikely a BMC problem, the portability analysis does not require to call the SMT solver repeatedly, since (imperative) programs may be converted as acyclic state graph (by reducing the loops, see Section~\ref{ch:impl:proc:x-transf}) and the $Trans$ predicate may be stated only for the final state of a program.
-Consider the function $\textit{cons}_{\mathcal{M}}(P)$ calculates the set of executions of program $P$ consistent under the memory model $\mathcal{M}$. Then, the program $P$ is called portable from the source architecture (memory model) $\mathcal{M_S}$ to the target architecture $\mathcal{M_T}$ if all executions consistent under $\mathcal{M_T}$ are consistent under $\mathcal{M_S}$~\cite{Porthos17a}:
+Consider the function $\textit{cons}_{\mathcal{M}}(P)$ which calculates the set of executions of the program $P$ that are consistent under the memory model $\mathcal{M}$.
+The program $P$ is called portable from the source architecture (memory model) $\mathcal{M_S}$ to the target architecture $\mathcal{M_T}$ if all executions consistent under $\mathcal{M_T}$ are consistent under $\mathcal{M_S}$~\cite{Porthos17a}:
 
 \begin{definition}[Portability]
 Let $\mathcal{M_S}$, $\mathcal{M_T}$ be two weak memory models.
@@ -92,29 +76,27 @@ If the formula is satisfiable, there exist a portability bug.
 \subsection{Encoding for the control-flow} %Encoding the control-flow constraints}
 \label{ch:enc:bmc:cf}
 
-The control-flow of a program is represented by the \textit{control-flow graph}, a directed acyclic connected graph with a single source and multiple sink nodes. %TODO: footnote why multiple sinks
-%The edges of 
-%In a control-flow graph, there are two types of edges (transitions): \textit{primary transitions} that denote unconditional jumps or if-true-transitions (pictured with solid lines), and \textit{alternative transitions} that denote if-false-transitions (pictured with dotted lines).
-Each control-flow edge contains the label that denotes the \textit{guard}, a predicate determining the transition.
-The empty guard (a \textit{true} predicate) is denoted as $\epsilon$.
-A guard depends on the data-flow of the program, it represents a memory unit or a computational expression that is liable to the weak memory model relaxations.
+The control-flow of a program can be represented by the \textit{control-flow graph}, a directed acyclic connected graph with a single source and one or multiple sink nodes.
+Each control-flow edge contains the label that denotes the transition predicate called \textit{guard}.
+The empty guard (a \textit{true} predicate) is denoted as `$\epsilon$'.
+A guard represents a variable or a computational expression over local variables.
+As a guard depends on the data-flow of the program, it is liable to the weak memory model relaxations.
 The branching expressions that support more than two outgoing control-flow edges may be useful for describing non-deterministic transition systems, where the guards are not necessarily mutually exclusive.
-However, as the C language supports only binary logic (\textit{if-then-else} branching), \porthos[2] builds only two possible outcomes of evaluating a guard (\textit{primary} and \textit{alternative} transition), see Section~\ref{ch:impl:model:xgraph:edges} for details.
-%Each node on graph can have either one successor (primary) or two successors (both primary and alternative); only computation events can serve as a branching point).
-%However, each merge node can have any positive number of predecessors, where each edge may be either primary or alternative.
+However, as the C language supports only binary logic (\textit{if-then-else} branching), \porthos[2] builds only two possible outcomes of evaluating a computation (the \textit{primary} and \textit{alternative} transitions), see Section~\ref{ch:impl:model:xgraph} for details.
 
 While working on \porthos[2], we have applied some modifications to the encoding scheme for the control-flow.
 These changes were motivated by the need to process an arbitrary control-flow produced by conditional and unconditional jumps of the C language.
 For that, we compile the \textit{Abstract Syntax Tree~(AST)} of the parsed C-code to the plain event-flow graph.
 The new encoding is to be smaller than the old one used in \porthos{} since it does not produce new variables for each high-level statement of the input language.
-%The \tool{PORTHOS} tool encodes the \textit{instructions}, which have recursive nature, in a recursive manner. This means, it adds synthetic composite instructions for both linear (sequential) and non-linear (branching) instructions. 
 
-For instance, \porthos[1] used the encoding scheme where the control-flow of the sequential instruction $i_1 = i_2; i_3$ was encoded as
+For instance, \porthos[1] uses the encoding scheme where the control-flow of the sequential instruction $i_1 = i_2; i_3$ is encoded recursively as %a separate boolean variable
 $\phi_{CF}(i_2;i_3) \defeq (cf_{i_1} \Leftrightarrow (cf_{i_2} \land cf_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)$,
-and control-flow of the branching instruction $i_1 = (c\,?\,i_2\!:\!i_3)$ was encoded as
-$\phi_{CF}(c\,?\,i_2\!:\!i_3) \defeq (\textit{cf}_{i_1} \Leftrightarrow (\textit{cf}_{i_2} \lor \textit{cf}_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)$
-(here we used the notation of C-like ternary operator `\texttt{x?y:z}' for defining the conditional expression `$\texttt{if}\;x\;\texttt{then}\;y\;\texttt{else}\;z$').
-In contrast, the new encoding scheme implemented in \porthos[2] firstly compiles the recursive high-level code into the linear low-level event-based representation, that is then encoded into an SMT-formula. The encoding of branching nodes depends on the \textit{guards}, the value of conditional variable on the branching state, which in turn is encoded as data-flow constraint (see Section~\ref{ch:enc:bmc:df}).
+and the control-flow of the branching instruction $i_1 = (c\,?\,i_2\!:\!i_3)$ was encoded recursively as
+$\phi_{CF}(c\,?\,i_2\!:\!i_3) \defeq (\textit{cf}_{i_1} \Leftrightarrow (\textit{cf}_{i_2} \lor \textit{cf}_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)$.
+%$\phi_{CF}(c\,?\,i_2\!:\!i_3)
+%(here we used the notation of C-like ternary operator `\texttt{x?y:z}' for defining the conditional expression `$\texttt{if}\;x\;\texttt{then}\;y\;\texttt{else}\;z$').
+In contrast, the new encoding scheme implemented in \porthos[2] firstly compiles the recursive high-level instructions into the linear low-level event-flow graph, which is then encoded into an SMT-formula.
+A guard in the event-flow graph is a value of conditional variable on the branching event, which is encoded as a data-flow constraint (see Section~\ref{ch:enc:bmc:df}).
 In general, the new encoding scheme follows the one proposed in~\cite[Chapter 5.1.2]{heljanko2008unfoldings} for encoding Petri-nets.
 
 
@@ -179,7 +161,7 @@ In general, the new encoding scheme follows the one proposed in~\cite[Chapter 5.
         \label{encode:cf:merge}
     \end{subfigure}
     %
-    \caption{Possible mutual arrangements of events in a control-flow graph} %Linear and non-linear cases of a control-flow graph}
+    \caption{Possible mutual arrangements of events in an event-flow graph} %Linear and non-linear cases of a control-flow graph}
     \label{encode:cf}
 \end{minipage}
 \end{figure}
@@ -187,7 +169,8 @@ In general, the new encoding scheme follows the one proposed in~\cite[Chapter 5.
 Let $\fx:\,\mathbb{E}\,\rightarrow\,\{0,1\}$ be the predicate that signifies the fact that the event has been e\textbf{x}ecuted (and, consequently, has changed the state of the system).
 %Let $\fv:\,\mathbb{C}\,\rightarrow\,\mathbb{R}$ be the function that returns the value of the computation event (evaluates it) that will be computed once the event is executed (strictly speaking, it returns the \textit{set} of values determined by the \rf-relation; see Section~\ref{ch:wmm:model:relations} for details on relations).
 %We distinguish the function ${\fv_g\;:\;\mathbb{C}_g\;\rightarrow\;\{0,1\}}$ that evaluates the guard computation event. In the result formula, all symbols $\fx(e_i)$ and $\fv(e_i)$ are encoded as boolean variables.
-Consider the possible mutual arrangements of nodes in a control-flow graph presented in Figure~\ref{encode:cf}.
+Consider the possible mutual arrangements of nodes in an event-flow graph presented in Figure~\ref{encode:cf}.
+For these cases, we propose the encoding scheme that uniquely encodes each node of graph and at the same time allows to encode partially executed program:
 
 \begin{align}
 \phi_{CF_{seq}} \defeq \quad & \fx(e_{i+1}) \Rightarrow \fx(e_i) \label{enc:cf:seq} \\
@@ -200,19 +183,16 @@ Consider the possible mutual arrangements of nodes in a control-flow graph prese
 \phi_{CF_{mer}} \defeq \quad & \fx(e_k) \Rightarrow (\bigvee\limits_{e_p \in \ \texttt{pred}(e_k)}^{} \fx(e_p)) \label{enc:cf:merge}
 \end{align}
 
-For these cases, we propose the encoding scheme that uniquely encodes each node of graph and at the same time allows to encode partially executed program.
-%TODO: say about epsilon on (c) picture
 Equation~\ref{enc:cf:seq} shows the encoding for the sequential control-flow represented in Figure~\ref{encode:cf:seq} and reflects the fact that the event $e_2$ can be executed iff the event $e_1$ has been executed.
 Equation~\ref{enc:cf:br} shows the encoding for the branching control-flow depicted in Figure~\ref{encode:cf:br}, that considers both transitions and guards.
 Also, adding negations of pairwise conjunctions over all successors of the branching node, the encoding forbids the execution of two branches simultaneously.
 Equation~\ref{enc:cf:merge} shows the encoding for the control-flow of a merge-point represented in Figure~\ref{encode:cf:merge}: the event $e_k$ is executed if either of its predecessors has been executed, regardless the type of the transition.
 Note that the sequential control-flow is a special case of branching with the only transition guard $\epsilon$ (that is encoded as \texttt{true}).
-%TODO: maybe add the overall formula \phi_{CF} ?
 
-For sake of correctness of the encoding, we require all branches to have at least one event.
-Thus, for branching statements that do not have any events in one of the branches (such a branch represents a conditional jump forward), we add the synthetic \textit{nop-event} as it is shown in Figure~\ref{encode:branching:nop}.
+For sake of correctness and simplicity of the encoding, we require all branches to have at least one event.
+Thus, for branching statements that do not have any events in one of the branches (such branch represents a conditional jump forward), we add a synthetic \textit{nop-event} as it is shown in Figure~\ref{encode:branching:nop}.
 
-\begin{figure}%[!h]
+\begin{figure}[t]%[!h]
     \centering
     \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
         \node[c] at (0,0) (1a) {$e_1$};
@@ -237,18 +217,7 @@ Thus, for branching statements that do not have any events in one of the branche
     \label{encode:branching:nop}
 \end{figure}
 
-As an example of the control-flow encoding, consider the event-flow graph in Figure~\ref{fig:graph-example}, which has two branching points and one merge point with three incoming transitions.
-To illustrate the correctness of the encoding, consider the path $e_1 \rightarrow e_2 \rightarrow e_4$.
-This means, in the formula $\phi_{CF}$, the variables $\fx(e_1)$, $\fx(e_2)$ and $\fx(e_4)$ will have the value $1$, and the variable $\fx(e_3)$ will be assigned to $0$.
-It is easy to check that the $\phi_{CF}$ is satisfiable by the chosen SMT-model (considering the guards $g_{1,2}$ and $g_{2,4}$ that define this path to be evaluated to $1$).
-
-Note that the generalised encoding scheme does not require the branching transitions to be mutually-exclusive (for instance, consider two branching transitions from the event $e_2$, both labelled by non-epsilon guards $g_{2,3}$ and $g_{2,4}$).
-Next, consider the path $e_1 \rightarrow e_3 \rightarrow e_4$, which is not allowed by the control-flow graph.
-The corresponding model $\fx(e_1)=1$, $\fx(e_2)=0$, $\fx(e_3)=1$ and $\fx(e_4)=1$ does not satisfy the formula $\phi_{CF}$.
-The proposed encoding for the control-flow works also for encoding the partial graph.
-For example, the SMT-model $\fx(e_1)=1$, $\fx(e_2)=1$, $\fx(e_3)=0$ and $\fx(e_4)=0$ encodes the path $e_1 \rightarrow e_2$, satisfies $\phi_{CF}$.
-
-\begin{figure}
+\begin{figure}[t]
 \begin{minipage}{.4\textwidth}
 \centering
 \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
@@ -289,21 +258,31 @@ For example, the SMT-model $\fx(e_1)=1$, $\fx(e_2)=1$, $\fx(e_3)=0$ and $\fx(e_4
 \label{fig:graph-example}
 \end{figure}
 
+%this paragraph should go after the Figure{fig:graph-example} so that the fig is on the top of the same page 
+As an example of the control-flow encoding, consider the event-flow graph in Figure~\ref{fig:graph-example}, which has two branching points and one merge point with three incoming transitions.
+To illustrate the correctness of the encoding, consider the path $e_1 \rightarrow e_2 \rightarrow e_4$.
+This means, in the formula $\phi_{CF}$, the SMT-variables $\fx(e_1)$, $\fx(e_2)$ and $\fx(e_4)$ should be assigned to  $1$, and the variable $\fx(e_3)$ should be assigned to $0$.
+%It is easy to check that the $\phi_{CF}$ is satisfiable by the chosen SMT-model (considering the guards $g_{1,2}$ and $g_{2,4}$ that define this path to be evaluated to $1$).
+
+Note that the generalised encoding scheme does not require the branching transitions to be mutually-exclusive (for instance, consider two branching transitions from the event $e_2$, both labelled by non-epsilon guards $g_{2,3}$ and $g_{2,4}$).
+Next, consider the path $e_1 \rightarrow e_3 \rightarrow e_4$, which is not allowed by the control-flow graph.
+The corresponding model $\fx(e_1)=1$, $\fx(e_2)=0$, $\fx(e_3)=1$ and $\fx(e_4)=1$ does not satisfy the formula $\phi_{CF}$.
+The proposed encoding for the control-flow works also for encoding the partial graph.
+For example, the assignment $\fx(e_1)=1$, $\fx(e_2)=1$, $\fx(e_3)=0$ and $\fx(e_4)=0$, which encodes the path $e_1 \rightarrow e_2$, satisfies $\phi_{CF}$.
 
 \subsection{Encoding for the data-flow}
 \label{ch:enc:bmc:df}
 
 To encode the data-flow constraints, we use the \textit{Static Single-Assignment~(SSA) form} in order to be able to capture an arbitrary data-flow into a single SMT-formula.
 The SSA form requires each variable to be assigned only once within entire program.
-In contrast, \porthos{} used the \textit{Dynamic Single-Assignment~(DSA)} form, that requires indices to be unique within a branch.
+In contrast, \porthos{} used the \textit{Dynamic Single-Assignment~(DSA)} form, that requires indices to be unique only within a control-flow branch.
 Although the number of variable references (each of which is encoded as unique SMT-variable) on average is logarithmically less in the case of the DSA form than the SSA form, the result SMT-formula still needs to be complemented by same number of equality assertions when encoding the data-flow of merge points~\cite{Porthos17a}.
 
 Following~\cite{Porthos17b}, the indexed references of variables are computed in accordance with the following rules:
 (1)~any access to a shared variable (both read and write) increments its SSA-index;
 (2)~only writes to a local variable increment its SSA-index (reads preserve indices);
 (3)~no access to a constant variable or computed (evaluated) expression changes their SSA-index.
-These rules determine the following encoding of load, store and computation events within single thread:
-%TODO: maybe add the overall formula \phi_{DF} ?
+These rules determine the following encoding of load, store and computation events within a single thread:
 %
 \begin{align}
     \phi_{DF_{e = \texttt{load}(r \leftarrow l)}}  \defeq \ & [\fx(e) \Rightarrow (r_{i+1} = l_{i+1})] \label{enc:df:load} \\
@@ -340,28 +319,25 @@ The SSA-map is computed iteratively while traversing the event-flow graph in top
     \label{algorithm:ssa-map}
 \end{algorithm}
 
-The time of described algorithm is linear of the size of event-flow graph since it performs only one graph traverse.
-%Notwithstanding the overhead of storing (or, equivalently, computing with %TODO: are you sure that 'with'?
-%linear time) the predecessors of each node in order to be able to convert the program into an SSA form, the time of such a transformation reduced %TODO: How much ????
-%comparing to the algorithm implemented in \porthos, which recomputed SSA-indices recursively for each instruction. %TODO: PROOF OR REMOVE !  Maybe, some words of copying, merging SSA maps ?
+The time of described algorithm is linear of the event-flow graph size as the algorithm performs only a single graph traverse.
 
-As it has been described before, the \rf-relation links data-flow between events %TODO: another word?
-of data-flow stored in equivalence assertions over the SSA-variables. 
+As it has been described before, the \rf-relation links data-flow between events.
+%of data-flow stored in equivalence assertions over the SSA-variables. 
 %The encoding of the \rf-relation, which links the SSA-variables to the original variables, 
-The encoding of this linkage left untouched as it is implemented in \porthos: for each pair of events $e_1$ and $e_2$ linked by the \rf-relation, we add the following constraint:
+The encoding of this linkage has been left untouched as it is implemented in \porthos[1]: %for each pair of events $e_1$ and $e_2$ linked by the \rf-relation, we add the following constraint:
 %
 \begin{align}
 \phi_{DF_{mem}}(e_1, e_2) \defeq \ & [\texttt{rf}(e_1, e_2) \Rightarrow (l_i = l_j)]
 \end{align}
 
-where the variable of location $l$ is mapped to the SSA-variable $l_i$ for event $e_1$, and to the SSA-variable $l_j$ for event $e_2$; and the predicate $\texttt{rf}(e_1, e_2)$ is encoded as a boolean variable, which itself equals $true$ if $e_2$ reads the shared variable that was written in $e_1$.
+where the variable of location $l$ is mapped to the SSA-variable $l_i$ for event $e_1$, and to the SSA-variable $l_j$ for event $e_2$; and the predicate $\texttt{rf}(e_1, e_2)$ is encoded as a boolean variable, which itself equals $\textit{true}$ if $e_1 \relarrow{rf} e_2$ (i.e., if $e_2$ reads the shared variable that was written in $e_1$).
 
 
-\subsection{Encoding for the memory model} %Encoding the memory model constraints}
+\subsection{Encoding for the memory model}
 \label{ch:enc:bmc:wmm}
 
-The basic scheme for encoding the memory model is proposed in~\cite{Porthos17a}.
-The encoding consists of two parts: encoding the \textit{derived relations} and encoding the memory model \textit{assertions}.
+The basic scheme for encoding the memory model was proposed in~\cite{Porthos17a}.
+The encoding consists of two parts: encoding of the \textit{derived relations} and encoding of the memory model \textit{assertions}.
 
 In the SMT-formula, a relation $x \relarrow{r} y$ is represented by a boolean variable $r(x, y)$ that indicates whether the relation holds.
 Derived relations are encoded by fresh boolean variables according to the following rules~\cite{Porthos17b}:

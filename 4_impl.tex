@@ -114,38 +114,11 @@ is left beyond current thesis.
 %(for instance, the function \texttt{pthread\_create} of the library \texttt{pthread.h} that starts the new thread of the function it received as the first argument).
 %TODO: inter: user specifies the repository with code, functions that intended to work in parallel and runs. 
 
+
 %TODO: say sth about 100500 litmus-tests for kernel
 
-%TODO: ATTENTION HERE TO THE PICTURE!!!!!!!!!!!!!!!!!!!!!!!!
-\begin{figure}[H]
-  \centering
-  %draft=true
-  \includegraphics[height=.83\textheight,keepaspectratio]{img/my/draw.io/general_arch-no_numbering.png} %{img/my/draw.io/general_arch.png}
-  \caption{The general architecture of \porthos[2]}
-  \label{fig:arch}
-\end{figure}
 
-\section{Architecture}
-\label{ch:impl:arch}
-
-The general architecture scheme of \porthos[2] is presented in Figure~\ref{fig:arch}.
-%The rectangles in the picture denote processing units (marked with gear sign with a unique number of the component), and labels of the arrows describe the internal representation carried out during the transformation.
-
-The program takes as input the program to be analysed and one (the reachability analysis mode) or two (the portability analysis mode) memory models.
-However, instead of parsing memory models from the \cat{} file, the tool may operate with pre-defined memory models (\texttt{SC}, \texttt{TSO}, \texttt{PSO}, \texttt{RMO}, \texttt{ALPHA}, \texttt{POWER}, \texttt{ARM}; this feature is inherited from \porthos[1]).
-The parsed program syntax tree is then converted (Section~\ref{ch:impl:proc:y-constr}) to a program AST called \ytree{}%
-%
-\footnote{In order to avoid confusion between different internal representations, we prefix the names of elements of each internal representation with a letter. For instance, we picked the letter `Y' to denote the AST code representation as drawing of this letter resembles the tree branching; with letter `X' we prefix elements of the event-flow graph as the events are to be e\textbf{x}ecuted; and with letter `W' we prefix elements of the \textbf{w}eak memory model AST.}%
-%
-(Section~\ref{ch:impl:model:ytree}), which then is being preprocessed at the pre-compilation stage (Section~\ref{ch:impl:proc:x-pre-compiler}) in order to collect information necessary for the compilation.
-The \ytree{} then is being compiled (Section~\ref{ch:impl:proc:x-compiler}) to an \xgraph{} representation (Section~\ref{ch:impl:model:xgraph}).
-The compiled \xgraph{} then is being converted to an acyclic form (Section~\ref{ch:impl:proc:x-unroll}) in order to be encoded into a \zformula{} (Section~\ref{ch:impl:model:zformula}).
-Apart from that, the memory-model constructor (Section~\ref{ch:impl:proc:w-constr}) constructs the abstract syntax tree of derived relations of the weak memory model \wmodel{} (Section~\ref{ch:impl:model:wmodel}).
-%on the basis of the \xgraph{} in order to build the weak memory model \wmodel{} (Section~\ref{ch:impl:model:wmodel}).
-Thereafter, \wmodel{} and acyclic \xgraph{} are encoded (Section~\ref{ch:impl:proc:z-encoder}) to a \zformula{} representation (a wrapper over an SMT-formula), which then is translated to an SMT-formula (Section~\ref{ch:impl:proc:smt-converter}), which then is solved by the SMT solver (Section~\ref{ch:impl:proc:smt-solver}).
-
-
-\subsection{Program input}
+\section{Program input}
 \label{ch:impl:input}
 %(for instance, the original input language of \porthos{} tool, two variants of syntax of a litmus test used by \tool{herd}, an assembly language for any supported architecture).
 
@@ -259,6 +232,34 @@ The litmus-specific syntax for variables initialisation was used only for declar
 Current version of \porthos[2] does not recognise C processor directives (it ignores them), however, in future it can be extended to support them.
 
 
+\section{Architecture}
+\label{ch:impl:arch}
+
+The general architecture scheme of \porthos[2] is presented in Figure~\ref{fig:arch}.
+%The rectangles in the picture denote processing units (marked with gear sign with a unique number of the component), and labels of the arrows describe the internal representation carried out during the transformation.
+
+%TODO: ATTENTION HERE TO THE PICTURE!!!!!!!!!!!!!!!!!!!!!!!!
+\begin{figure}[H]
+  \centering
+  \includegraphics[height=.95\textheight,keepaspectratio]{img/my/draw.io/general_arch-no_numbering.png}
+  \caption{The general architecture of \porthos[2]}
+  \label{fig:arch}
+\end{figure}
+
+The program takes as input the program to be analysed and one (the reachability analysis mode) or two (the portability analysis mode) memory models.
+However, instead of parsing memory models from the \cat{} file, the tool may operate with pre-defined memory models (\texttt{SC}, \texttt{TSO}, \texttt{PSO}, \texttt{RMO}, \texttt{ALPHA}, \texttt{POWER}, \texttt{ARM}; this feature is inherited from \porthos[1]).
+The parsed program syntax tree is then converted (Section~\ref{ch:impl:proc:y-constr}) to a program AST called \ytree{}%
+%
+\footnote{In order to avoid confusion between different internal representations, we prefix the names of elements of each internal representation with a letter. For instance, we picked the letter `Y' to denote the AST code representation as drawing of this letter resembles the tree branching; with letter `X' we prefix elements of the event-flow graph as the events are to be e\textbf{x}ecuted; and with letter `W' we prefix elements of the \textbf{w}eak memory model AST.}%
+%
+(Section~\ref{ch:impl:model:ytree}), which then is being preprocessed at the pre-compilation stage (Section~\ref{ch:impl:proc:x-pre-compiler}) in order to collect information necessary for the compilation.
+The \ytree{} then is being compiled (Section~\ref{ch:impl:proc:x-compiler}) to an \xgraph{} representation (Section~\ref{ch:impl:model:xgraph}).
+The compiled \xgraph{} then is being converted to an acyclic form (Section~\ref{ch:impl:proc:x-unroll}) in order to be encoded into a \zformula{} (Section~\ref{ch:impl:model:zformula}).
+Apart from that, the memory-model constructor (Section~\ref{ch:impl:proc:w-constr}) constructs the abstract syntax tree of derived relations of the weak memory model \wmodel{} (Section~\ref{ch:impl:model:wmodel}).
+%on the basis of the \xgraph{} in order to build the weak memory model \wmodel{} (Section~\ref{ch:impl:model:wmodel}).
+Thereafter, \wmodel{} and acyclic \xgraph{} are encoded (Section~\ref{ch:impl:proc:z-encoder}) to a \zformula{} representation (a wrapper over an SMT-formula), which then is translated to an SMT-formula (Section~\ref{ch:impl:proc:smt-converter}), which then is solved by the SMT solver (Section~\ref{ch:impl:proc:smt-solver}).
+
+
 \subsection{Internal representations}
 \label{ch:impl:model}
 
@@ -369,7 +370,7 @@ The nodes of the graph are events, and the edges are basic relations: the contro
 Hereinafter, we denote the \xgraph{} with only control-flow edges as \xgraph[CF], the \xgraph{} with only data-flow edges as \xgraph[CF].
 The complete \xgraph{} is $\xgraph[CF+DF] = \xgraph[CF] \; \cup \; \xgraph[DF]$.
 The UML diagram on Figure~\ref{fig:class-diagrams:XEntity-interfaces} represents the hierarchy of main interfaces of the X-abstraction level.
-Internally, the graph is represented by an adjacency matrix (to be exact, by multiple adjacency matrices that store edges of different kinds, see more details in Section~\ref{ch:impl:model:xgraph:edges}).
+Internally, the graph is represented by an adjacency matrix (to be exact, by multiple adjacency matrices that store edges of different kinds, see more details in Section~\ref{ch:impl:model:xgraph}).
 
 \begin{figure}[t]%[!b]%[H]
   \centering
@@ -816,7 +817,7 @@ The first event of each process must be the \texttt{XEntryEvent} and the last ev
 \paragraph{Memory manager}
 \label{ch:impl:proc:x-compiler:mem}
 
-The \xgraph{} abstract machine model disposes infinitely many memory units, both local and shared (see Section~\ref{ch:impl:model:xgraph:mem}).
+The \xgraph{} abstract machine model disposes infinitely many memory units, both local and shared (see Section~\ref{ch:impl:model:xgraph}).
 The X-compiler accesses all memory units via the \texttt{XMemoryManager}, which by the end of pre-compilation stage is already initialised (has registered all shared memory units).
 However, the memory manager is a stateful component of the compiler as it offers the methods for declaring and removing local memory units dynamically at the compilation time.
 
@@ -860,8 +861,7 @@ For instance, the \texttt{XKernelInvocationHook} intercepts the call \lstinline{
 
 \begin{figure}[!h]
 \begin{lstlisting}
-class XKernelInvocationHook
-       extends XInvocationHookBase 
+class XKernelInvocationHook extends XInvocationHookBase 
        implements XInvocationHook {
  ...
  @Override
@@ -870,20 +870,24 @@ class XKernelInvocationHook
      case "WRITE_ONCE": {
        return new XInvocationHookAction((receiver, arguments) -> {
          if (arguments.length != 2 || receiver != null) {
-             return null;  // do not intercept
+           return null;  // do not intercept
          }
+
          XMemoryUnit destUnit = arguments[0];
          if (!(destUnit instanceof XSharedLvalueMemoryUnit)) {
            throw new XMethodInvocationError(methodName, 
                "arg 1: not a shared l-value memory unit: " + destUnit);
          }
-         XSharedLvalueMemoryUnit dest = (XSharedLvalueMemoryUnit) destUnit;
+         XSharedLvalueMemoryUnit dest = 
+               (XSharedLvalueMemoryUnit) destUnit;
+
          XMemoryUnit srcUnit = arguments[1];
          if (!(srcUnit instanceof XLocalMemoryUnit)) {
            throw new XMethodInvocationError(methodName, 
                "arg 2: not a local memory unit: " + srcUnit);
          }
          XLocalMemoryUnit src = (XLocalMemoryUnit) srcUnit;
+
          return program.emitMemoryEvent(dest, src);
      });
    }
@@ -906,9 +910,13 @@ class XKernelInvocationHook
 \paragraph{Interpreter}
 \label{ch:impl:proc:x-compiler:compilation}
 
+%TODO: say that program is the set of processes , but the implements the same interface !!! it's not clear here.
+
+%TODO: !!! Say that interpreter does not know anyth about Y, all its interface methods are <sth> -> <X>. The only part that know about Y is Y2Xvisitor
+
 %In this paragraph we discuss only the implementation of the process interpreter \texttt{XProcessInterpreter}.
 %This interpreter is used to build the branched event-flow graph with all kinds of jumps, memory operations and fences.
-The X-program interpreter is invoked by the \texttt{Y2XConverterVisitor} which walks down the recursive syntax tree \ytree{}.
+The X-program interpreter is invoked by the \texttt{Y2XConverterVisitor} which walks down the \ytree{} recursively.
 The calls to the X-program interpreter are dispatched to currently maintained X-process interpreter.
 To be able to properly recognise nested statements of the \ytree{}, the X-process interpreter needs to have stacks.
 On any semantic error, the X-interpreter throws an \texttt{XInterpretationError}.
@@ -922,22 +930,23 @@ These methods construct an event object (as events contain the \texttt{XEventInf
 Note that the methods \texttt{createComputationEvent} do not emit a computation event but only create one.
 This is performed as optimisation that removes unused computations from the model (otherwise, for instance, the assignment 
 `\texttt{x = 1 * (2 + 3)}' would be compiled to two consequent events `\texttt{eval(2 + 3); write(register <- eval(1 * eval(2 + 3)));}' instead of a single event `\texttt{write(register <- eval(1 * eval(2 + 3)));}').
-If the computation event was not used at all (for example, in the following C code: `\texttt{foo(); 1; bar();}' the execution event `\texttt{eval(1)}' is skipped by the model), it is also removed from the event-graph (see justification in Section~\ref{ch:impl:model:xgraph:evt}).
+If the computation event was not used at all (for example, in the following C code: `\texttt{foo(); 1; bar();}' the execution event `\texttt{eval(1)}' is skipped by the model), it is also removed from the event-graph (see justification in Section~\ref{ch:impl:model:xgraph}).
 The second group of X-interpreter methods consists of the methods for defining non-linear statements (branchings and loops).
 These methods change the state of the interpreter and set up additional non-linear control-flow edges.
 %`\texttt{register = 1 * (location + 2)}' would be compiled to three consequent events `\texttt{load(temp\_reg\_1 <- location); eval(temp\_reg\_1 + 2); write(register <- 1 * (temp\_reg\_1 + 2));}',
 
 
-As a high-level instruction (Y-level) may be compiled into a sequence of low-level instructions (for example, a computation that involves shared variables should firstly load them into the local memory and then process the computation event over local-only memory), the interpreter must maintain the \textit{stack of contexts} and remember the \textit{previous event} to be able to correctly process nested non-linear statements of C language.
+As a high-level (Y-level) instruction may be compiled into a sequence of low-level instructions (for example, a computation that involves shared variables should firstly load them into the local memory and then process the computation event over local-only memory), the interpreter must maintain the \textit{stack of contexts} and remember the \textit{previous event} to be able to correctly process nested non-linear statements of C language.
 The context is a data structure that carries the \textit{state} and some additional information in the case of processing non-linear statements (e.g., conditional event, first and last then- and else-branch events for binding, etc.).
 Once the new event has been emitted, the interpreter sets up control-flow edges w.r.t. state of the context on the top of the stack (the context stack is always non empty: the bottom context is a linear one).
 The context state is an enumeration of the following values:
-\begin{itemize}
+
+\begin{itemize}[noitemsep,topsep=0pt]
 \item \texttt{WaitingAdditionalCommand}: the interpreter is in the state of defining the complex (non-linear) statement and is not able to process any new event (will throw an exception if any) until the state is not changed;
 \item \texttt{WaitingFirstConditionEvent}: the first next emitted event will be accepted as the first event of the condition evaluation (later, the loop edges will be set to this event);
 \item \texttt{WaitingLastConditionEvent}: the next event must be of type \texttt{XComputationEvent}; it will be saved as the conditional branching event;
 \item \texttt{WaitingFirstSubBlockEvent}: the first next emitted event will be accepted as the first event of the branching statement (later the interpreter will set up jumps to that event);
-\item \texttt{WaitingNextLinearEvent}: the standard interpreter state for processing next linear event, and
+\item \texttt{WaitingNextLinearEvent}: the default interpreter state for processing next linear event, and
 \item \texttt{Idle}: the interpreter does not set up the edge from the previous event to the new event.
 \end{itemize}
 
@@ -952,9 +961,47 @@ The almost-ready-context becomes a ready-context (i.e., it moves to the queue \t
 Before processing a newly emitted event, the interpreter checks whether the queue \texttt{readyContexts} is not empty.
 If so, it iterates over all ready-contexts and sets up control-flow edges considering that the newly emitted event is an exit-event" of the non-linear context (e.g., for a branching context the interpreter adds primary edges from condition-event to the first-true-branch-event and from the last-true-branch-event to the exit-event, the same is done with alternative edges for the false-branch).
 
+As an example of usage the interpreter, consider the code of the \texttt{Y2XConverterVisitor} for processing \texttt{if-then-else} statement of the \ytree{} in Figure~\ref{TODO}.
+
+\begin{figure}
+%TODO!!! refactor the code, move program.tryEvaluateComputation() to Y2Xvisitor or Helper
+\begin{lstlisting}
+public class Ytree2XgraphConverterVisitor implements YtreeVisitor<XEntity> {
+  ...
+
+  @Override
+  public XEvent visit(YBranchingStatement node) {
+    program.startBlockDefinition(XInterpreter.BlockKind.Branching);
+
+    program.startBlockConditionDefinition();
+    XComputationEvent condition = program.tryEvaluateComputation(node.getCondition().accept(this));
+    program.finishBlockConditionDefinition(condition);
+
+    program.startBlockBranchDefinition(XInterpreter.BranchKind.Then);
+    node.getThenBranch().accept(this);
+    program.finishBlockBranchDefinition();
+
+    YStatement elseBranch = node.getElseBranch();
+    program.startBlockBranchDefinition(XInterpreter.BranchKind.Else);
+    if (elseBranch != null) {
+      elseBranch.accept(this);
+    }
+    else {
+      program.emitNopEvent(); // needed for encoding
+    }
+    program.finishBlockBranchDefinition();
+
+    program.finishNonlinearBlockDefinition();
+
+    return null; //statements return null
+    }
+}
+\end{lstlisting}
+\end{figure}
+
 %The \texttt{almostReadyContexts} queue is necessary for not adding erroneous edges on 
 
-For the sake of simplicity of the interpreter, jump events (no-computation events) are present in the flow-graph, however they can be removed from it with rebinding ingoing and outgoing edges.
+For the sake of simplicity of the interpretation and encoding, jump events (no-computation events) are present in the flow-graph, however they can be removed from it with rebinding ingoing and outgoing edges.
 
 
 %algorithm for interpreting
@@ -976,7 +1023,8 @@ Instead, we use the \texttt{LocationService} discussed in Section~\ref{ch:impl:m
 %
 .
 The meaning of a bound was changed in order to increase predictability of the size of the result SMT-formula.
-Not that recursive function calls create unconditional jumps back in the event-flow graph, which will also be recognised as a loop and be affected by the unrolling algorithm.
+Note that recursive function calls create unconditional back-jumps in the event-flow graph, which will also be recognised as a loop and be affected by the unrolling algorithm.
+The discussion on how to set up the \po-relations in the event-flow graph with recursive function calls can be found in~\cite{musketeer2014recursion}.
 
 Considering the new meaning of the unrolling bound, the graph unrolling may be \textit{complete} (the loop has been executed a whole number of times) or \textit{incomplete} (the unrolling bound has triggered on not-the-last event of the loop), which can be modelled by two types of the sink events.
 The user may need this information for understanding how the \porthos[2] interprets the cyclic program.
@@ -1071,7 +1119,7 @@ The methods \texttt{hashCode} and \texttt{equals} consider the reference-ID as t
 \label{ch:impl:proc:x-df}
 
 Once the graph is unrolled, it can be augmented by data-flow edges.
-As it was discussed in Paragraph~\ref{ch:impl:model:xgraph:edges}, the data-flow edges can represent either \rf{}- or \co{}-relation.
+As it was discussed in Section~\ref{ch:impl:model:xgraph}, the data-flow edges can represent either \rf{}- or \co{}-relation.
 The \rf{}-edges join each write event to all read events that access the same location; the \co{}-edges join write events to the same location.
 
 %TODO: why in old implementation we encode the negation of "co" ? same for "rf" above

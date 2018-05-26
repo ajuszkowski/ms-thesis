@@ -16,7 +16,7 @@ Although these models are easy to build and analyse, the number of all possible 
 
 One way to fight the combinatorial explosion is to exclude the global time from the model and treat executions from one equivalence class together in a non-deterministic fashion.
 For instance, such an equivalence class can be the set of computations performed by a processor locally that do not affect the global state.
-This idea is used in the \textit{event-based} model, that represents the program as a directed graph of events (the \textit{event-flow graph})~\cite{alglave2010shared}.
+This idea is used in the \textit{event-based} model, that represents the program as a directed graph of events (the \textit{event-flow graph})~\cite{alglave2010shared,alglave2014herding}.
 The vertices of such a graph represent \textit{events} (see Section~\ref{ch:wmm:model:events}), and edges represent basic relations (see Section~\ref{ch:wmm:model:relations}).
 The graph represents the set of executions (sequences of events; see Section~\ref{ch:wmm:model:executions}) defined by the non-deterministic guesses of certain relations on some states.
 
@@ -29,16 +29,11 @@ There are three main types of sources of non-determinism in concurrent programs~
 
 The event-based program model is able to emulate effectively the second and the third types of sources of non-determinism, while the first one can be coped by standard static analysis methods~\cite{landi1992undecidability,SurveySymExec-CSUR18}.
 
-%- The semantics of the event-flow graph is given:  "alglave: Don’t sit on the fence A static analysis approach to automatic fence insertion" page 8 or 9
-%"To build the aeg , we define a semantics of goto-programs in terms of abstract events, ..."
-% TODO: OR from here: http://www.cprover.org/etaps/esop.pdf "Software Verification for Weak Memory via Program Transformation"
-
 
 \subsection{Events}
 \label{ch:wmm:model:events}
 
-%TODO: EVENT -- ATOMIC?
-An event is a fact of executing the low-level primitive operation such as memory access, threads synchronisation, computation, etc.
+An \textit{event} is a fact of executing the low-level primitive atomic operation such as memory access, threads synchronisation, computation over the local-memory, control-flow jump, etc.
 
 A \textit{memory event} $e_m \in \mathbb{E}$ represents the fact of access to the memory.
 Only memory events change the state of an abstract machine executing the code, since it is completely determined by values stored in its memory.
@@ -56,10 +51,10 @@ A \textit{computation event} $e_c \in \mathbb{C} \subseteq \mathbb{E}$, represen
 An example of computation event may be the event $e_c = r_1 \leftarrow add(r_2, 1)$ that writes the sum of values stored in register $r_2$ and constant $1$ (which is modelled as a register as well) to the register $r_1$.
 For modelling branching statements, we define the set $\mathbb{C}_{g}~\subseteq~\mathbb{C}$ of \textit{guard} computation events (also called as \textit{branching events}), that are evaluated to a boolean value.
 
-The synchronisation instructions (fences) cause the \textit{barrier events}, that do not perform any computation or memory value transfer, instead, they add new relations to the program model that restrict the set of allowed behaviours.
-Functionally, a fence may be a synchronisation barrier or a instruction of flushing the local memory caches, etc.
+Synchronisation instructions (fences) cause \textit{barrier events}, which do not perform any computation or memory value transfer, instead, they the set of program behaviours by adding barrier relations to the program model.
+Functionally, a fence may be a synchronisation barrier or a instruction for flushing memory caches into the main memory, etc.
+For instance, the \texttt{mfence} instruction of the x86 assembly flushes the store buffers of the thread, and thus does not allow the \rf-relation (see Section~\ref{ch:wmm:model:relations}) to point to 
 
-% TODO: more fences: "On Power and ARM (see Sec. 6), we distinguish between control fence (which we write cfence), lightweight fence (lwfence) and full fence (ffence). On x86, implementing TSO, there is only one fence, called mfence." (herding cats, p. 14)
 
 \subsection{Relations}
 \label{ch:wmm:model:relations}
@@ -70,8 +65,6 @@ The relation~$r\,\subseteq~\mathbb{E}~\times~\mathbb{E}$ is a set of pairs of ev
 
 \vspace{1em}
 The basic relations are the following~\cite{alglave2010shared}:
-%TODO: say that po and rf are  defined from the candidate execution:
-%TODO: say that 
 \begin{itemize}
     \item The \textit{control-flow} of a program is defined by the \textit{program-order} relation \po~$\subseteq~\mathbb{E}~\times~\mathbb{E}$, which represents the total order of events of same process.
     For instance, if the instruction $i_1$ generates the event $e_1$ and the instruction $i_2$ follows $i_1$ and generates the event $e_2$, then $e_1 \relarrow{po} e_2$.
@@ -87,7 +80,7 @@ The basic relations are the following~\cite{alglave2010shared}:
     In contrast to the \tool{herd} tool, \porthos[2] does not use hierarchy of scopes (depicted as the scope tree); instead, it uses simple labels that indicate which process has produced certain event.
 \end{itemize}
 
-%TODO: add ppo = characteristics of memory model. "Architectures are instances of our model. An architecture is a triple of functions (ppo, fences, prop), which specifies the preserved program order ppo, the fences fences and the propagation order prop." (herding cats, p.13)
+%TO-DO: add ppo = characteristics of memory model. "Architectures are instances of our model. An architecture is a triple of functions (ppo, fences, prop), which specifies the preserved program order ppo, the fences fences and the propagation order prop." (herding cats, p.13)
 
 Below we enumerate some derived relations~\cite{alglave2010shared}:
 
@@ -107,7 +100,7 @@ Below we enumerate some derived relations~\cite{alglave2010shared}:
     $w \relarrow{fre} r ~\triangleq~ (w \relarrow{fr} r \land \texttt{proc}(w) = \texttt{proc}(r))$, \\
     $w \relarrow{fri} r ~\triangleq~ (w \relarrow{fr} r \land \texttt{proc}(w) \neq \texttt{proc}(r))$;
     
-    %TODO: say that po-relation is *static*
+    %TO-DO: say that po-relation is *static*
     \item the \texttt{po-loc} relation that is the \po-relation over events that access to the same shared variable: \\
     $m_1 \relarrow{po-loc} m_2 ~\triangleq~ (m_1 \relarrow{po} m_2 \land \texttt{loc}(m_1) = \texttt{loc}(m_2))$; and
 
@@ -117,28 +110,19 @@ Below we enumerate some derived relations~\cite{alglave2010shared}:
 
 \end{itemize}
 
-%todo: some words here?
-
 
 \subsection{Executions}
 \label{ch:wmm:model:executions}
 
 The semantics of a concurrent program is represented as the set of allowed executions.
-The \textit{execution} is a path in the event-flow graph defined by \po- and \rf-relations and set of final writes to a given memory location that is valid under certain memory model~\cite{alglave2014herding}.
+An \textit{execution} is a path in the event-flow graph defined by \po- and \rf-relations and set of final writes to a given memory location that is valid under certain memory model~\cite{alglave2014herding}.
 It can be interpreted as a sequence of guesses which event is to be executed next.
-The \textit{candidate execution} is an execution that is not yet constrained by a memory model.
-
-%TODO: cite this paper elsewhere
-%As it was shown in~\cite{wickerson2017automatically}, it is enough for memory models to constrain the executions independently instead of constraining the program at a whole.
+A \textit{candidate execution} is an execution that is not yet constrained by a memory model.
 
 %An \textit{execution} (trace, run) of a program is an ordered set of events defined by \po- and \rf-relations and set of final writes to a given memory location that is valid under certain memory model~\cite{alglave2014herding}.
-%The order of events in particular execution is denoted as `$\rightarrow$', an empty execution is denoted as $\emptyset$.
-%associated with the instructions of the program
-%An execution is considered to be \textit{valid} if the memory events follow a single global timeline, i.e., can be embedded in a single partial order allowed by the memory model restrictions~\cite{alglave2010shared}.
-%An execution is uniquely defined by the set $\mathbb{X}$ of events have been executed in each thread (the \textit{control-flow} of a program), and the relations $\texttt{rf}$ and $\texttt{co}$~\cite{alglave2010shared}.
 Figure~\ref{simple_wmm_x86_pic} illustrates four possible candidate executions for the litmus test Example~\ref{simple_wmm_x86} (the pictures are generated by the \tool{herd7} tool, version~7.47).
 Since there are no conditional jumps, the \po-relation is defined and we do not need to guess it.
-Since each thread performs single write followed by a single read, the \co-relation is also defined (it relates the initial write event with the write event to the same location).
+Since each thread performs a single write followed by a single read, the \co-relation is also defined (it relates the initial write event with the write event to the same location).
 
 \begin{figure}[!htb]
 \centering
@@ -184,14 +168,11 @@ However, the execution shown in Figure~\ref{simple_wmm_x86_pic:sub3} is still co
 \label{ch:wmm:cat}
 
 Weak memory models are defined via \cat{} language~\cite{alglave2016syntax}.
-This is a domain specific language for describing consistency properties of concurrent programs.
-The language combines expressive power of a functional language (it is inspired by OCaml and adopts its types, first-class functions, pattern matching and other features) with types, operations and assertions that are specific for operating with relations and executions.
-%represents the functional language extended by the theory of  allows to axiomatically define derived relations, architecture-specific fences, and constraints over relations.
-In \cat{}, new relations can be defined via the keyword \texttt{let} and the following operators over relations~\cite{alglave2016syntax}. % 3.1.6 Relations between events
+It is a domain specific language for describing consistency properties of concurrent programs.
+The language combines expressive power of a functional language (being inspired by OCaml, it adopts the OCaml types, first-class functions, pattern matching and some other features) with concepts of memory models (sets of events, relations, operations and assertions over relations).
+In \cat{}, new relations can be defined via the keyword \texttt{let} and the following operators over relations~\cite{alglave2016syntax}.
 
-%TODO: this is binary relations. ADD UNARY RELS!
-
-Below we enumerate pre-defined operators over relations and sets of events:
+Below we enumerate pre-defined operations over relations and sets of events:
 
 \begin{enumerate}
   \item \textit{Unary operations}:
@@ -212,43 +193,21 @@ Below we enumerate pre-defined operators over relations and sets of events:
 \end{enumerate}
 
 For instance, the \fr-relation is defined as a sequence of inverted \rf-relation and \co-relation: $\texttt{fr} = (\invrel{rf};\texttt{co})$.
-As an example of memory model definition in \cat{} language, Figure~\ref{ex:x86-cat} presents the simplified x86-TSO model~\cite{herd10tutorial}.
-This memory model asserts  acyclicity of the communication relation (the union of \rf-, \fr- and \co- relations), \texttt{po-loc} -relation, \texttt{mfence}-relation and some other derived relations~\cite{owens2009better}.
+As an example of memory model definition in \cat{} language, Figure~\ref{ex:x86-cat} presents the excerpt from the x86-TSO memory model~\cite{herd10tutorial}.
+This memory model specification asserts  acyclicity of the communication relation (the union of \rf-, \fr- and \co- relations), \texttt{po-loc} -relation, \texttt{mfence}-relation and some other derived relations~\cite{owens2009better}.
 
-
-\begin{figure}[h]
+\begin{figure}[H]
 \begin{lstlisting}
-"X86 TSO"
-include "x86fences.cat"
-include "filters.cat"
-include "cos.cat"
-
-(* Uniproc check *)
-let com = rf | fr | co
-acyclic po-loc | com
-
-(* Atomic *)
-empty rmw & (fre;coe)
-
-(* Global happens-before *)
-#ppo
+...
 let po_ghb = WW(po) | RM(po)
+let implied = PA(poWR) | WR(po)
+let GHB = mfence | implied | po_ghb | rfe | fr | co
+let com = rf | fr | co
 
-#mfence
-include "x86fences.cat"
-
-#implied barriers
-let poWR = WR(po)
-let i1 = MA(poWR)
-let i2 = AM(poWR)
-let implied = i1 | i2
-
-let com = rfe | fr | co
-let ghb = mfence | implied | po_ghb | com
-show implied
-
-acyclic ghb as tso
+empty atom & (fre;coe)
+acyclic po-loc | com
+acyclic GHB
 \end{lstlisting}
-\caption{The simplified x86-TSO memory model in the \cat{} language~\cite{herd10tutorial}}
+\caption{Excerpt from the x86-TSO memory model in the \cat{} language}
 \label{ex:x86-cat}
 \end{figure}

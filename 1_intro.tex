@@ -2,7 +2,6 @@
 \label{ch:intro}
 
 %TODO: rename mousquetaires: http://www.cprover.org/wmm/musketeer/ !!! (+reference this project: "Don’t sit on the fence".pdf in alglave/ )
-% TODO: see how musketeer deals with recursive calls: http://www.cprover.org/wmm/musketeer/rec.pdf
 
 \section{Problem statement}
 \label{ch:intro:problem}
@@ -17,39 +16,66 @@ Traditionally, studies related to concurrent programming focus on more fundament
 Unfortunately, when it comes to real-world concurrent programs, the algorithmic level of abstraction is not enough for guaranteeing their correctness.
 The reasons of this fact lie in the code optimisations that both compiler and hardware perform in order to increase performance of the system~\cite{adve1996shared}.
 
-As an example, consider a shared memory concurrent system that executes two parallel processes as it is described in Figure~\ref{simple_wmm_x86} (such little examples that illustrate specific behaviour of a concurrent execution environment are called \textit{litmus tests}).
-The process~\texttt{P0} writes the value~\texttt{1} to the shared variable~\texttt{x} and reads a value of the shared variable~\texttt{y}, and the process~\texttt{P1} writes the~\texttt{y} and reads the~\texttt{x}.
-Considering all interleavings of the processes, one could expect the final state to be one of the following:
-\begin{itemize}[noitemsep,topsep=0pt]
-\item \texttt{(0:EAX=0,\,1:EBX=1)},
-\item \texttt{(0:EAX=1,\,1:EBX=0)},
-\item \texttt{(0:EAX=1,\,1:EBX=1)}.
-\end{itemize}
-%TODO!!!!!!!!!!!!!!!!!!! cite "mcKenney - Memory Barriers a Hardware View for Software Hackers.pdf" -- a table for multiple architectures
-
-%As the program specifies the write to~\texttt{x} to precede the read of~\texttt{y} in process~\texttt{P0}, one could expect the final state `\texttt{(0:EAX=0~/\textbackslash~1:EAX=0)}' to be unreachable.
-However, on the x86 architecture the state `\texttt{(0:EAX=0,\,1:EAX=0)}' is also reachable as the processors may cache the write to shared memory into their local write buffers, so that the write does not immediately become visible by processes running on other cores.
-This behaviour is known as \textit{Store Buffering~(SB)}.
+As an example, consider two x86 assembly programs in Figure~\ref{simple_wmm_x86} (such little code examples that explain specific behaviour of the concurrent execution environment are called \textit{litmus tests}).
+Two programs are the same, except the right-hand program uses the synchronisation instruction \texttt{MFENCE} after the store to the shared memory.
+In both programs, the process~\texttt{P0} writes the value~\texttt{1} to the shared variable~\texttt{x} and reads a value of the shared variable~\texttt{y}, and the process~\texttt{P1} writes to the~\texttt{y} and reads the~\texttt{x}.
 
 \begin{figure}[t]
 \centering
 \ttfamily
-\begin{tabular}{ |l|l| }
+\begin{subfigure}[b]{.4\textwidth}
+\begin{tabular}[b]{ |l|l| }
 \hline
-\multicolumn{2}{|l|}{ \{ x=0; y=0; \}} \tabularnewline \hline
-P0 & P1 \\ \hline
+\multicolumn{2}{|c|}{ \{ x=0; y=0; \}} \\ \hline
+\multicolumn{1}{|c|}{P0} & \multicolumn{1}{c|}{P1} \\ \hline
 MOV [x],1 & MOV [y],1 \\
 MOV EAX,[y] & MOV EBX,[x] \\
+& \\
 \hline
-%\multicolumn{2}{|l|}{locations [x;y;]} \tabularnewline
-\multicolumn{2}{|l|}{exists (0:EAX=0,~1:EBX=0)} \tabularnewline
+\multicolumn{2}{|l|}{exists (0:EAX=0,\,1:EBX=0)} \tabularnewline
 \hline
-\multicolumn{2}{|l|}{x86: allow} \tabularnewline
+\multicolumn{2}{|l|}{x86-TSO: allowed} \tabularnewline
 \hline
 \end{tabular}
-\caption{Store buffering: A litmus test illustrating the write-read reordering allowed by the x86-TSO memory model}
+\caption{Without synchronisation}
+\label{simple_wmm_x86:nosync}
+\end{subfigure}
+\hfill
+%
+\begin{subfigure}[b]{.4\textwidth}
+\begin{tabular}{ |l|l| }
+\hline
+\multicolumn{2}{|c|}{ \{ x=0; y=0; \}} \\ \hline
+\multicolumn{1}{|c|}{P0} & \multicolumn{1}{c|}{P1} \\ \hline
+MOV [x],1 & MOV [y],1 \\
+MFENCE & MFENCE \\
+MOV EAX,[y] & MOV EBX,[x] \\
+\hline
+\multicolumn{2}{|l|}{exists (0:EAX=0,\,1:EBX=0)} \tabularnewline
+\hline
+\multicolumn{2}{|l|}{x86-TSO: forbidden} \tabularnewline
+\hline
+\end{tabular}
+\caption{With synchronisation}
+\label{simple_wmm_x86:sync}
+\end{subfigure}
+%
+\caption{Store buffering~(SB): A litmus test illustrating the write-read reordering allowed by the x86-TSO memory model}
 \label{simple_wmm_x86}
 \end{figure}
+
+Taking into account all possible interleavings of the read and write instructions, both litmus tests allow the following final states:
+\begin{itemize}[noitemsep,topsep=0pt]
+\item \texttt{(0:EAX=0,~1:EBX=1)},
+\item \texttt{(0:EAX=1,~1:EBX=0)},
+\item \texttt{(0:EAX=1,~1:EBX=1)}.
+\end{itemize}
+%As the program specifies the write to~\texttt{x} to precede the read of~\texttt{y} in process~\texttt{P0}, one could expect the final state `\texttt{(0:EAX=0~/\textbackslash~1:EAX=0)}' to be unreachable.
+However, in the left-hand (non-synchronised) litmus test, the state `\texttt{(0:EAX=0,~1:EAX=0)}' is also allowed on the x86 architecture as its processors may cache the writes to the shared memory into their local \textit{store buffers} so that the updated value does not immediately become visible by processes running on other cores.
+This behaviour is known as \textit{Store Buffering~(SB)}.
+For preventing such a behaviour, the x86 architecture offers the synchronisation instruction \texttt{MFENCE} that flushes the store buffer of the process.
+In Figure~\ref{simple_wmm_x86:sync}, this instruction is inserted for both processes after the store instructions, thus once it is executed in one process, the other process will read the updated value of this shared memory location.
+The work~\cite{mckenney2010memory} gives a comprehensive review of common hardware architectures from the perspective of the structure of their caches and write buffers, that determine the effect of memory operations, and memory barriers they provide.
 
 %In the example, the write `\texttt{MOV~[x],1}' performed by process \texttt{P0} stores value~\texttt{1} to the shared variable~\texttt{[x]} into the write buffer of process~\texttt{P0}.
 %Meanwhile, the write cache of the process \texttt{P1} may not have an updated version of the variable~\texttt{[x]}, neither the main memory, so that the read `\texttt{MOV~EBX,[x]}' performed in the process~\texttt{P1} may read the initial value~\texttt{0} even if this variable has been already updated in the other process.
@@ -80,9 +106,9 @@ Originally, the operational semantics was defined for the SC model, however ther
 
 The SC model is considered to be a \textit{strong memory model} in the sense that it provides firm guarantees regarding the ordering and effect of memory operations.
 %However, execution environments that provide weakened guarantees (\textit{relaxations} such as memory operations reordering, write buffering, etc.)
-Weakened guarantees (such as memory operations reordering, write buffering, etc.) are called \textit{relaxations} of the memory model.
+Weakening of the guarantees (such as memory operations reordering, write buffering, etc.) is called \textit{relaxation} of the memory model.
 The relaxations of the SC model lead to \textit{Weak Memory Models~(WMMs)} that specify how processes interact through the shared memory, when a write becomes visible to processes running on other cores, and what value a read operation can get.
-Thus, WMMs serve as set of guarantees made by designers of an execution environment to programmers on which behaviours of their concurrent code they can rely on.
+Thus, WMMs serve as a set of guarantees made by designers of an execution environment to programmers on which behaviours of their concurrent code they can rely on.
 
 
 \section{Related work}
@@ -96,8 +122,6 @@ In addition to developing the theoretical basis, researchers work on extracting 
 Over the last decade, memory models have been defined for most mainstream multiprocessor architectures, such as x86-TSO and Sparc-TSO (for \textit{Total Store Order}) model for x86 and Sparc architectures~\cite{owens2009better}, much more relaxed memory model for Power and ARM architectures~\cite{alglave2009semantics,sarkar2011understanding, alglave2014herding}, etc. %, or Alpha architecture~\cite{alphaWMM}~, and others.
 There are projects for validating hardware architectures wrt. a memory model as well, e.g.,~\cite{lustig2014pipecheck,lustig2016coatcheck}.
 
-%TODO: litmus test synthesis 
-%1) http://research.nvidia.com/sites/default/files/pubs/2017-04_Automated-Synthesis-of//ASPLOS_2017_Memory_Model_Verification.pdf
 
 Most modern high-level programming languages rely on relaxed memory models as well.
 Thus, the memory model for Java is based on the \textit{happens-before} principle~\cite{lamport1978time} and was introduced in J2SE 5.0 in 2004~\cite{manson2005java}.
@@ -117,7 +141,8 @@ This project has also an influence on the C language: the revision P0124R4 of th
 
 
 Furthermore, there exists a wide range of tools that perform memory model-aware analysis.
-\begin{itemize}[noitemsep,topsep=0pt]
+
+\begin{itemize}[noitemsep,topsep=0pt,leftmargin=\parindent]
 
 \item A state-of-the-art tool is \tool{diy} (\textit{do it yourself}), developed by researchers from INRIA institute, France and University of Cambridge, UK.
 The \tool{diy}%
@@ -131,42 +156,46 @@ the litmus tests generators \tool{diy}, \tool{diycross} and \tool{diyone},
 the litmus test concrete executor \tool{litmus} that runs tests on a physical machine and collects its behaviours,
 and the weak memory model simulator \tool{herd} that implements reachability analysis for exploring states reachable under the specified~WMM.
 
-\item There exist tools that perform the weak memory model-aware program verification and model checking.
+\item Some tools that perform the weak memory model-aware program verification and model checking.
 The notable examples are
 %the tool \tool{mmchecker} for model-checking the C\# code~\cite{huynh2006memory}
-the stateless model checkers \tool{RCMC}~\cite{kokologiannakis2017effective}, \tool{CHESS}~\cite{musuvathi2008fair} and \tool{Nidhugg}~\cite{abdulla2017stateless},
-the tool \tool{Trencher} for checking programs against the TSO memory model~\cite{bouajjani2013checking}, 
-the tool \porthos{} for portability analysis~\cite{Porthos17a},
+the stateless model checkers \tool{RCMC}~\cite{kokologiannakis2017effective}, \tool{CHESS}~\cite{musuvathi2008fair}, \tool{Nidhugg}~\cite{abdulla2017stateless}, \tool{Trencher}~\cite{bouajjani2013checking}, and others. 
 
 \item Some tools tackle the problem of automated synthesis of the synchronisation primitives, such as
 the automatic fence insertion tool \tool{musketeer}~\cite{alglave2014don}, and
 the automatic verification and fence inference tool \tool{blender}~\cite{kuperstein2011partial}.
 
+\item Along with synthesis of synchronisation primitives, some tools were designed to perform the automatic synthesis of litmus tests for the weak memory model, for example \tool{litmustestgen} by the NVidia Research~\cite{lustig2017automated}.
+
+\item The framework \tool{Alloy}~\cite{wickerson2017automatically} can be used for understanding WMMs; it can automatically generate conformance tests between two memory models, distinguish two WMMs, and check monotonicity and compiler mappings of a program.
+
 \item Some other tools perform static instrumentation of concurrent C programs and encode the WMM into the program representation so that it can be model-checked by standard tools.
-The examples are
-%TODO: cite the 'wmm-general/Thread-Modular Static Analysis for Relaxed Memory Models.pdf'
-the instrumenting compiler \tool{goto-cc} which is a part of \tool{CBMC} model checker~\cite{kroening2014cbmc},
-the tool that performs the sequentialisation of concurrent programs~\cite{alglave2013software},
-the tool \tool{Weak2SC} for producing program descriptions which can be fed into standard model checking tools (such as \tool{SPIN}~\cite{holzmann1997model} or \tool{NuSMV}~\cite{cimatti2000nusmv}) for performing memory model-aware analysis~\cite{travkin2016verification}.
+The examples are:
+\begin{itemize}[noitemsep,topsep=0pt]
+\item the instrumenting compiler \tool{goto-cc} which is a part of \tool{CBMC} model checker~\cite{kroening2014cbmc},
+\item the tool that performs the sequentialisation of concurrent programs~\cite{alglave2013software},
+\item the tool \tool{Weak2SC} generates weak memory model descriptions of the program, which can be fed into standard model checking tools (such as \tool{SPIN}~\cite{holzmann1997model} or \tool{NuSMV}~\cite{cimatti2000nusmv}) for performing memory model-aware analysis~\cite{travkin2016verification}.
+\end{itemize}
+
 \end{itemize}
 
 %Although weak memory studies is rather young research area, there exist frameworks and tools for exploring WMMs and examining simple programs with respect to them.
 
-All the tools listed above consider only a single memory model, however, in real life we face serious engineering problems involving necessity to model more than one execution environment.
-One of these problems is the \textit{portability} of the program from one hardware architecture to another.
-A program written in a high-level language is then compiled for different hardware.
-Even if all the compiler optimisations were disabled (which is rare case nowadays), the behaviour of two compiled versions of the same program may differ due to differences between hardware memory models.
+All the tools listed above consider only a single memory model, however, in real life we face serious engineering problems involving more than one execution environment.
+One of these problems is the \textit{portability analysis} of the program from one hardware architecture to another.
+A program written in a high-level language is compiled for different hardware architectures.
+Even if all the compiler optimisations were disabled (which is a rare case nowadays), the behaviour of two compiled versions of the same program may differ due to differences between hardware memory models.
 As the result, a program compiled under the platform $\mathcal{T}$ can reach states that are unreachable on the platform $\mathcal{S}$, which is a \textit{portability bug} from the source platform $\mathcal{S}$ to the target platform $\mathcal{T}$~\cite{Porthos17a}.
 
 The very first tool that performs the WMM-aware portability analysis is \porthos{}%
 %
-\footnote{The \porthos{} project web site: \url{http://github.com/hernanponcedeleon/Dat3M}} %
+\footnote{The \porthos{} project web site: \url{http://github.com/hernanponcedeleon/PORTHOS}} %
 %
-introduced in April~2017~\cite{Porthos17b}.
+introduced in April~2017~\cite{Porthos17a}.
 This tool reduces described problem to a bounded reachability problem, which can be solved via an SMT solver.
 This approach allows to capture symbolically the semantics of analysing program and both weak memory models into a single SMT-formula, augmented by the reachability assertion.
 As most modern SMT solvers are efficient enough to be able to operate the state space of size millions of variables bounded by millions of constraints~(\cite{malik2009boolean}), the used method can be applicable in solving the real-world problems.
-% TODO: search space size: https://courses.cs.washington.edu/courses/csep573/11wi/lectures/ashish-satsolvers.pdf slide 
+% about SAT: https://courses.cs.washington.edu/courses/csep573/11wi/lectures/ashish-satsolvers.pdf
 
 %In the work~\cite{Porthos17b}, the SMT-based approach was defined for analysing the portability of a program from one hardware architechture to another, which is defined as ``an execution that is consistent with the target but inconsistent with the source memory model". Although encoding the control-flow and the data-flow of a program into an SMT-formula seems to be a tril problem of symbolic execution, encoding of the weak memory model is more tedious. The reason is that some relations of WMMs are defined as mutually-recursive and need to be linearised in order to be encoded into an equivalent logical formula.
 

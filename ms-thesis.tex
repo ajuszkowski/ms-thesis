@@ -16,7 +16,7 @@
 \usepackage[T1]{fontenc}
 \usepackage[english]{babel}
 
-\usepackage{fancyvrb}%fancy verbatim
+\usepackage{fancyvrb} %fancy verbatim
 %\makeatletter
 %\newcommand{\verbatimfont}[1]{\renewcommand{\verbatim@font}{\ttfamily\scriptsize#1}}
 %\makeatother
@@ -129,9 +129,7 @@ Porthos\ifthenelse%
 
 \usepackage{outlines} %for nested itemize lists
 
-% Longtable provides a tabular environment that can span multiple
-% pages. This is used in the example abbreviations file.
-\usepackage{longtable}
+\usepackage{longtable} %for ab-bre-via-tions
 
 % The titlesec package can be used to alter the look of the titles
 % of sections, chapters, and so on. This example uses the ``medium''
@@ -488,7 +486,7 @@ The result of the work is \textit{\porthos[2]}, a framework for SMT-based memory
 \newline
 \DATE
 \vskip 5mm
-\noindent Artem Yushkovskiy
+\noindent \AUTHOR
 
 
 % ------------------------------------------------------------------
@@ -496,7 +494,37 @@ The result of the work is \textit{\porthos[2]}, a framework for SMT-based memory
 % (which is not often for masters theses), then the pages will still
 % start correctly on the right-hand side.
 \cleardoublepage
-\input{abbreviations}
+
+\addcontentsline{toc}{chapter}{Abbreviations}
+\chapter*{Abbreviations}
+% The longtable environment should break the table properly to multiple pages, if needed
+\noindent
+\begin{longtable}{@{}p{0.25\textwidth}p{0.7\textwidth}@{}}
+AST & Abstract Syntax Tree \\
+BDD & Binary Decision Diagrams \\
+BNF & Backus-Naur form \\
+BMC & Bounded Model Checking \\
+CF  & Control-Flow \\
+CPU & Central Processor Unit \\
+CTL & Computational Tree Logic \\
+DF  & Data-Flow \\
+DFS & Deep-First Search \\
+DSA & Dynamic Single-Assignment form \\
+DTO & Data-Transfer Object \\
+LTL & Linear Temporal Logic \\
+NP  & Non-deterministic Polynomial time \\
+OOP & Object-Oriented Programming \\
+SB  & Store Buffering \\
+SC  & Sequential Consistency \\
+SAT & Satisfiability problem \\
+SMP & Symmetric Multiprocessor architecture \\
+SMT & Satisfiability Modulo Theories problem \\
+SSA & Static Single-Assignment form \\
+UMC & Unbounded Model Checking \\
+UML & Unified Modeling Language \\
+WMM & Weak Memory Model \\
+\end{longtable}
+
 
 % Table of contents
 % ------------------------------------------------------------------
@@ -557,13 +585,12 @@ The result of the work is \textit{\porthos[2]}, a framework for SMT-based memory
 % Edit the content in these files, rename them as necessary.
 % ------------------------------------------------------------------
 
-%TODO: List of figures!!! + tables
 \input{1_intro.tex}
 \input{2_wmm.tex}
 \input{3_encod.tex}
 \input{4_impl.tex}
 \input{5_eval.tex}
-\input{99_summary.tex}
+\input{90_summary.tex}
 
 % Fix numbering of bibliography section
 \cleardoublepage
@@ -586,13 +613,14 @@ The result of the work is \textit{\porthos[2]}, a framework for SMT-based memory
 %\titlespacing*{\section}{0pt}{-40pt}{20pt}
 %\titlespacing{command}{left spacing}{before spacing}{after spacing}[right]
 \titlespacing*{\section}{0pt}{-20pt}{5pt}
-
+%
 %\titleformat{hcommandi}[hshapei]{hformati}{hlabeli}{hsepi}{hbefore-codei}[hafter-codei]
 \titleformat{\section}[display]
   {\normalfont\large\bfseries}% <- font for label "A.1", default \huge
   {}
   {-10pt}
   {\thesection\quad\large}
+%
 \newcommand{\sectionbreak}{\clearpage}
 
 \cleardoublepage\makeatletter\@openrightfalse\makeatother
@@ -602,11 +630,9 @@ The result of the work is \textit{\porthos[2]}, a framework for SMT-based memory
 \fancyhead[R]{\footnotesize\itshape{APPENDICES}}
 \appendixpage
 
-%TODO: the sketch of actual supported grammar !
-%\input{98_apx_grammar.tex} 
-\input{97_apx_trees.tex}
-\input{95_apx_interpreter.tex}
-\input{94_apx_dekker.tex}
+\input{91_apx_trees.tex}
+\input{92_apx_interpreter.tex}
+\input{93_apx_dekker.tex}
 
 % End of document!
 % ------------------------------------------------------------------
