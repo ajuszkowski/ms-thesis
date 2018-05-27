@@ -9,7 +9,7 @@
 \label{ch:eval:show:compil}
 
 %As an example of the compilation and unrolling processes, consider the simple
-%As a simple example of the compilation process discussed in Section~\ref{ch:impl:proc:x-compiler:compilation}, 
+%As a simple example of the compilation process discussed in Section~\ref{ch:impl:proc:x-compiler}, 
 Consider two equivalent functions in C (left) and the \porthos[1] input language (right) represented in Figure~\ref{ex:test-both-cf}. %(in the C language on the left-hand side, the \porthos[1] input language on the right-hand side).
 %The functions are state-equivalent (represent the same state machine) and 
 The functions does not compute any useful value, however they contain three nested \texttt{while}-loops and thus can serve as an illustration of the differences in the program compilation and unrolling between \porthos[1] and \porthos[2].
@@ -244,7 +244,7 @@ Therefore, the new unrolling scheme has made the analysis complete but at the sa
 
 Note that the time spent by \porthos[2] for the interpretation and unrolling stages remains to be negligible comparing to the full encoding time.
 Therefore, we conclude that the new architecture implies no performance overhead comparing to the previous version of the tool.
-The time spent by the SMT solver while considering the SMT formula encoded by \porthos[2] was 0.039 sec, and in case of \porthos[1] the time was 1.291 sec.
+The time spent by the SMT-solver while considering the SMT-formula encoded by \porthos[2] was 0.039 sec, and in case of \porthos[1] the time was 1.291 sec.
 The number of events in the event-flow graph of \porthos[2] is 82 events (among them 59 memory events), and the number of events encoded by \porthos[1] is 95 (among them 51 memory events).
 Even though the number of memory events processed by \porthos[1] was less, the time of solving the result SMT-formula was significantly more.
 
@@ -268,7 +268,7 @@ Even though the number of memory events processed by \porthos[1] was less, the t
 
 %TODO: say how much the \textit{immutable data structures} helped (as it was discussed in Chapter~\ref{ch:impl}).
 
-%<TODO: compare numbers of clauses of SMT formulas>
+%<TODO: compare numbers of clauses of SMT-formulas>
 
 <TODO: profile both programs, say sth about memory usage!> 
 
@@ -331,7 +331,7 @@ As the portability analysis requires compiling the program under two memory mode
 %The revised design of \porthos{} tool includes the following new features:
 Apart from redesigning the tool architecture and extending the input language, we added support for basic constructions used in \textit{Kernel litmus tests}~\cite{alglave2018frightening}.
 Although, current version of \porthos[2] only supports some basic macros of the Linux kernel (such as \texttt{READ\_ONCE} and \texttt{WRITE\_ONCE} for atomic load and store with relaxed memory ordering) as the support for kernel-specific memory barriers goes out of the scope of current thesis.
-Note that, comparing to the \porthos[1], adding support for new functions in \porthos[2] does not require changing the input language grammar, this is carried by invocation hooking mechanism described in Section~\ref{ch:impl:proc:x-compiler:hooking}.
+Note that, comparing to the \porthos[1], adding support for new functions in \porthos[2] does not require changing the input language grammar, this is carried by invocation hooking mechanism described in Section~\ref{ch:impl:proc:x-compiler}.
 
 As an example, consider the SB litmus test for the Linux kernel (which is similar to the one presented in Figure~\ref{simple_wmm_x86}):
 \begin{lstlisting}

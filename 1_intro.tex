@@ -60,7 +60,7 @@ MOV EAX,[y] & MOV EBX,[x] \\
 \label{simple_wmm_x86:sync}
 \end{subfigure}
 %
-\caption{Store buffering~(SB): A litmus test illustrating the write-read reordering allowed by the x86-TSO memory model}
+\caption{Store buffering~(SB): A litmus test illustrating the write-read reordering allowed by the \texttt{x86-TSO} memory model}
 \label{simple_wmm_x86}
 \end{figure}
 
@@ -116,10 +116,10 @@ Thus, WMMs serve as a set of guarantees made by designers of an execution enviro
 
 Research on weak memory models firstly aims to \textit{formalise} an approach of understanding programs with respect to weak memory models, which is \textit{systematic}, \textit{sound} and \textit{complete}.
 One of the most well-known frameworks for weak memory model-aware analysis was formalised by J. Alglave in~2010~\cite{alglave2010shared}.
-It is the event-based non-deterministic model without global time (see Section~\ref{ch:wmm:event} for details).
+It is the event-based non-deterministic model without global time (see Section~\ref{ch:wmm:model} for details).
 
 In addition to developing the theoretical basis, researchers work on extracting the memory models for hardware architectures from existing implementations or from the specifications, which are written in natural language and thus suffer from ambiguities and incompleteness.
-Over the last decade, memory models have been defined for most mainstream multiprocessor architectures, such as x86-TSO and Sparc-TSO (for \textit{Total Store Order}) model for x86 and Sparc architectures~\cite{owens2009better}, much more relaxed memory model for Power and ARM architectures~\cite{alglave2009semantics,sarkar2011understanding, alglave2014herding}, etc. %, or Alpha architecture~\cite{alphaWMM}~, and others.
+Over the last decade, memory models have been defined for most mainstream multiprocessor architectures, such as \texttt{x86-TSO} and \texttt{Sparc-TSO} (for \textit{Total Store Order}) model for x86 and Sparc architectures~\cite{owens2009better}, much more relaxed memory model for Power and ARM architectures~\cite{alglave2009semantics,sarkar2011understanding, alglave2014herding}, etc. %, or Alpha architecture~\cite{alphaWMM}~, and others.
 There are projects for validating hardware architectures wrt. a memory model as well, e.g.,~\cite{lustig2014pipecheck,lustig2016coatcheck}.
 
 
@@ -192,9 +192,9 @@ The very first tool that performs the WMM-aware portability analysis is \porthos
 \footnote{The \porthos{} project web site: \url{http://github.com/hernanponcedeleon/PORTHOS}} %
 %
 introduced in April~2017~\cite{Porthos17a}.
-This tool reduces described problem to a bounded reachability problem, which can be solved via an SMT solver.
+This tool reduces described problem to a bounded reachability problem, which can be solved via an SMT-solver (see Section~\ref{ch:enc:bmc}).
 This approach allows to capture symbolically the semantics of analysing program and both weak memory models into a single SMT-formula, augmented by the reachability assertion.
-As most modern SMT solvers are efficient enough to be able to operate the state space of size millions of variables bounded by millions of constraints~(\cite{malik2009boolean}), the used method can be applicable in solving the real-world problems.
+As most modern SMT-solvers are efficient enough to be able to operate the state space of size millions of variables bounded by millions of constraints~(\cite{malik2009boolean}), the used method can be applicable in solving the real-world problems.
 % about SAT: https://courses.cs.washington.edu/courses/csep573/11wi/lectures/ashish-satsolvers.pdf
 
 %In the work~\cite{Porthos17b}, the SMT-based approach was defined for analysing the portability of a program from one hardware architechture to another, which is defined as ``an execution that is consistent with the target but inconsistent with the source memory model". Although encoding the control-flow and the data-flow of a program into an SMT-formula seems to be a tril problem of symbolic execution, encoding of the weak memory model is more tedious. The reason is that some relations of WMMs are defined as mutually-recursive and need to be linearised in order to be encoded into an equivalent logical formula.

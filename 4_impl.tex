@@ -8,39 +8,24 @@ Yet far from all the C language is supported (which, considering its complexity 
 \footnote{To ensure this, one merely has to look at existing C compiler implementations, for instance, the open-source \tool{gcc} compiler, which uses the C parser written in more than 18.5 thousand lines of code (see \url{https://github.com/gcc-mirror/gcc/blob/master/gcc/c/c-parser.c})}%
 %
 ), we consider the accomplished work as a step towards it.
-%This applies not only to instances that simply constitute the syntactic sugar of C language (such as the \texttt{switch} statement or the prefix increment operator \texttt{++i}), but also to its fundamental concepts and features (such as pointer arithmetic or structures).
-%However, the architecture of current version of \porthos{} does not allow to ... as it is ....
-% Although and optimisation of the tool so that it is able to process real C programs in perspective.
-
-%In current Chapter we discuss the new architecture of \porthos[2].
-
-% function invocations/calls: inlining with binding
-% contexts: for now, no ctxs
-% comparing to cprover (https://www.cprover.org/cbmc/doc/manual.pdf, page 45, absatz about 'goto') where "the loop is unwound a given number of times" , we SHOULD have 2 modes of unrolling: 1) number of times, and 2) number of high-level instructions executed
-% TODO(code): (https://www.cprover.org/cbmc/doc/manual.pdf, page 45) "The break and continue statements are replaced by equivalent goto statements as described in the ANSI-C standard."
-
-% TODO: arrays: cprover manual page 48
 
 
-%\section{The architecture of \porthos{}}
 \section{General principles}
 \label{ch:impl:principles}
 
-The previous version of \porthos{} did not distinguish the event-based program model from the high-level AST, they both were encoded into a single SMT-formula (see classes of package `\texttt{dartagnan.program}' of \porthos[1]).
-%For 
-Moreover, the syntax tree was implemented as a mutable data structure, which is being modified at all stages of the program (for instance, see the methods `\texttt{dartagnan.program.Program.compile(...)}' of \porthos{} that recursively compute some properties of the AST and change its state).
-We are inclined to consider this architecture as one that is fast to develop, but hard to maintain (since it is difficult to guarantee the correctness of the program) and extend (since adding the support for a new high-level instruction requires changing multiple components of the program, from parser to encoder).
-%Moreover, we encounter serious problems when we need to add support for control-flow jumps (as \texttt{continue}, \texttt{break}, \texttt{goto} in C).
+The \porthos[1] does not distinguish the event-based program model from the high-level AST, and they both are encoded into a single SMT-formula (see classes of package `\texttt{dartagnan.program}' of \porthos[1]).
+Moreover, the syntax tree is implemented in \porthos[1] as a mutable data structure, which is being modified at all stages of the program (for instance, see the methods `\texttt{dartagnan.program.Program.compile(...)}' of \porthos[1] that recursively compute some properties of the AST and change its state).
+We are inclined to consider the old architecture to be fast to develop, but difficult to maintain (since it is difficult to guarantee the correctness of the program) and extend (since adding the support for a new high-level instruction requires changing multiple components of the program, from parser to encoder).
 
-Therefore, while working on the new design of \porthos[2], we decided to clearly separate the high-level intermediate code representation (an AST structure) from the low-level event-based representation (an event-flow graph).
+Therefore, while working on the new design of \porthos[2], we clearly separated the high-level intermediate code representation (the AST structure) from the low-level event-based representation (the event-flow graph).
 Such a modular architecture will allow to support multiple input languages%
 %
-\footnote{Apart from the C language, \porthos[2] must be able to analyse litmus tests in different assembly languages and, as a compatibility mode, the input language of \porthos[1].} %
+\footnote{Apart from the C language, \porthos[2] should be able to analyse litmus tests in different assembly languages and, as a compatibility mode, the input language of \porthos[1].} %
 %
 by parsing them and converting parsed syntax trees to a simplified AST.
 
-All internal representations used by \porthos[2] must be immutable, so that it is possible to guarantee the correctness of the program by controlling its invariants.
-The immutability in \porthos[2] is implemented via \texttt{final} fields that are assigned by the immutable-object values (either a primitive type, or another immutable object, or an immutable collection provided by the library Guava by Google%
+All data-transfer objects~(DTOs) used by \porthos[2] must be immutable, so that it is possible to guarantee the correctness of the program by controlling preservation of its invariants.
+The immutability in \porthos[2] is implemented via \texttt{final} fields that are assigned by the immutable-object values (either a primitive type, or another user-defined immutable object, or an immutable collection provided by the library Guava by Google%
 %
 \footnote{The Guava project repository: \url{https://github.com/google/guava/}}%
 %
@@ -53,7 +38,7 @@ The following list summarises the main rules we followed during the development 
 \begin{enumerate}[nolistsep]
   \item \textit{Robustness:}
     \begin{enumerate}[label*=\arabic*.]
-      \item preservation the completeness of analysis,
+      \item completeness of the analysis,
       \item modular architecture: each module can be tested independently,
       \item usage of software design patterns where necessary, and
       \item usage of immutable data structures for all DTOs.
@@ -80,57 +65,38 @@ As a robust and transparent tool, \porthos[2] must adhere to the strategy of abo
 One of the transparency principles is following the clear code style.
 This mainly means the clear and informative naming of classes, functions and fields.
 It also implies the unified ordering of methods in classes, minimised size of methods code, clear tabulation, etc.
-%The modular architecture of \porthos[2] allow each its module to be tested independently.
-%Usage of immutable data structures for all DTOs helps 
-%immut: preservation of invariants
-%The transparency, efficiency and extensibility are the necessary criteria of any good tool.
 
-As its predecessor, \porthos[2] uses the open-source SMT solver \tool{Z3}%
+As its predecessor, \porthos[2] uses the open-source SMT-solver \tool{Z3}%
 %
 \footnote{The \tool{Z3} project repository: \url{https://github.com/Z3Prover/z3}} %
 %
-by Microsoft Research~\cite{de2008z3}. However, unlike its predecessor, \porthos[2] has an additional abstraction level, \zformula{} (see Section~\ref{ch:impl:model:zformula}), that allows the use any other SMT solver.
+by Microsoft Research~\cite{de2008z3}. However, unlike its predecessor, \porthos[2] has an additional abstraction level, \zformula{} (see Section~\ref{ch:impl:model:zformula}), that allows the use any other SMT-solver.
 
-%We have decided to implement \porthos[2] in \textit{Java}
-As its predecessor, \porthos[2] is written in \textit{Java},
-%The programming language choice for \porthos[2] was also made in favour of \textit{java},
-firstly, in order to be able to reuse some parts and concepts of \porthos{} also written in Java, and secondly, because the authors find the concepts of Object-Oriented Programming~(OOP) in Java suitable for modelling languages.
-Although Java does not show the best results in performance benchmarks (for example, compared to C++~\cite{hundt2011loop}), the performance cornerstone of \porthos[2] (as well as any other SMT-based code analyser) is the phase of solving the SMT-formula, which is left to the third-party SMT solver invoked by \porthos[2] via a Java API.
+As its predecessor, \porthos[2] is written in \textit{Java}, firstly, in order to be able to reuse some parts and concepts of \porthos{} also written in Java, and secondly, because the authors find the concepts of Object-Oriented Programming~(OOP) inherent in Java suitable for modelling the programming languages.
+Although Java does not show the best results in performance benchmarks (for example, compared to C++~\cite{hundt2011loop}), the performance cornerstone of \porthos[2] (as well as any other SMT-based code analyser) is the phase of solving the SMT-formula, which is left to the third-party SMT-solver invoked by \porthos[2] via a Java API.
 However, considering the perspective of using \porthos[2] as a static analyser for real-world programs, the memory optimisation problem must also be taken into account during both encoding and solving stages.
-It is worth noting that, for the reasons of simplicity, \porthos[2] is not a concurrent program, however, we believe that, due to its modular architecture, it can be easily parallelised on the level of program modules.
+It is worth noting that, for the reasons of simplicity, \porthos[2] is not a concurrent program, however, we believe that due to its modular architecture it can be easily parallelised on the level of program modules.
 
-Currently, \porthos[2] can operate only in the intra-procedural analysis mode, assuming that each function defined in the input file is being executed in a separate thread.
-%TODO: describe more intra- and inter-procedural!
-However, the redesigned architecture of \porthos[2] can be easily extended to support the inter-procedural (cross-procedure) analysis that inlines function calls and binds variable contexts.
-%TODO : check in the implementation , THAT WE HAVE NOT IMPLEMENTED THIS FEATURE!!
-Thus, instead of analysing a single source code file, the user can analyse the whole code project.
-In this mode, the functions to be executed in parallel should be specified by the user.
-Also, the tool may be extended to detect the concurrent parts of the code automatically at the pre-compilation stage.
+Currently, \porthos[2] can operate only in the intra-procedural analysis mode (not supporting invocations of the user-defined functions), assuming that each function defined in the input file is being executed in a separate thread.
+However, the redesigned architecture of \porthos[2] can be easily extended to support the inter-procedural (cross-function) analysis by inlining user-defined functions calls and binding variable contexts.
+In this mode, instead of analysing a single source code file, the tool can process the whole code project, where the functions to be executed in parallel are specified separately by the user.
+Also, the tool can be extended to detect the concurrent parts of the code automatically at the pre-compilation stage.
 For that, the pre-compiler should recognise functions that commence a new process (such as \texttt{pthread\_create} from \texttt{pthread.h}) and resolve the argument that points to the thread function.
-This functionality %implies an additional stage of the pre-compilation and 
-is left beyond current thesis.
-%resolve the semantics of function invocations and remember the functions 
-%function that commence new process or thread 
-%(for instance, the function \texttt{pthread\_create} of the library \texttt{pthread.h} that starts the new thread of the function it received as the first argument).
-%TODO: inter: user specifies the repository with code, functions that intended to work in parallel and runs. 
-
-
-%TODO: say sth about 100500 litmus-tests for kernel
+This functionality is left beyond current thesis.
 
 
 \section{Program input}
 \label{ch:impl:input}
-%(for instance, the original input language of \porthos{} tool, two variants of syntax of a litmus test used by \tool{herd}, an assembly language for any supported architecture).
 
-Both \porthos{} and \porthos[2] use the \tool{ANTLR} parser generator%
+Both \porthos[1] and \porthos[2] use the \tool{ANTLR} parser generator%
 %
 \footnote{The \tool{ANTLR} project repository: \url{https://github.com/antlr/antlr4}}%
 %
-~\cite{parr2013definitive}, a powerful language processing tool.
+~\cite{parr2013definitive} for creating the input-language parsers.
 The \tool{ANTLR} takes as input the user-defined grammar of the target language in a BNF-like form and produces the LL(*)-parser and optionally some auxiliary classes (such as listeners and visitors for the syntax tree).
 Although this parser may not be as efficient as a hand-written language-optimised parser, it reduces the overhead of implementing the parser significantly.
 Among other advantages \tool{ANTLR}, it has a rather large collection of officially supported grammars.
-Nonetheless, the intuitive syntax for defining grammars and numerous of tools for debugging grammars make the \tool{ANTLR} an attractive instrument for solving the parsing problem.
+Nonetheless, the intuitive syntax for defining grammars and numerous of tools for debugging grammars make the \tool{ANTLR} an attractive instrument for processing languages.
 
 \begin{figure}[t]%[!h]%[!hb]
 \centering
@@ -146,7 +112,7 @@ Nonetheless, the intuitive syntax for defining grammars and numerous of tools fo
 <program>
       :      <initialisation>   <thread>+   <assertion>
       ;
-<thread>   
+<thread>
       :      thread   <thread-id>   <instruction>
       ;
 <instruction>
@@ -160,70 +126,58 @@ Nonetheless, the intuitive syntax for defining grammars and numerous of tools fo
       :      <register>   `[*<*]-'   <expression>
       |      <register>   `[*<*]:-'   <location>
       |      <location>   `:='   <register>
-      |      <register>   `='   <location>   `.'   `load'      `('   <atomic>   `)'
+      |      <register>   `='   <location>   `.'   `load'    `('   <atomic>   `)'
       |      <location>   `='   <register>   `.'   `store'   `('   <atomic>   `)'
       |      (`mfence'   |   `sync'   |   `lwsync'   |   `isync')
       ;
 <bool-expr>
       :      `true'
       |      `false'
-      |      <expression>   (`and'      |      `or')   <expression>
+      |      <expression>   (`and'   |   `or')   <expression>
       |      <expression>   (`=='   |   `!='   |   `>'   |   `>='   |   `[*<*]'   |   `[*>*]=')   <expression>
       ;
-<expression>   
+<expression>
       :      [0-9]
       |      <register>
       |      <expression>   (`*'   |   `+'   |   `-'   |   `/'   |   `%')   <expression>
       ;
 \end{lstlisting}
-\caption{The sketch of the input language grammar used by \oldporthos}
+\caption{Sketch of the input language grammar used by \oldporthos{}}
 \label{fig:in_grammar_pts}
 \end{figure}
 
 Figure~\ref{fig:in_grammar_pts} represents the grammar sketch in BNF syntax of the input language used by \porthos[1].
-%(the full \tool{ANTLR} grammar is available at Appendix~\ref{apx:grammar}).
-%TODO! Reformulate this.
-The input language parser used by \porthos{} suffered from several disadvantages.
-Firstly, it contained the parser code inlined directly into the grammar, so that the grammar would serve as a template for the parser code (which is called semantic actions).
+The input language parser used by \oldporthos{} suffers from several disadvantages.
+Firstly, it contains the parser code inlined directly into the grammar, so that the grammar serves as a template for the parser code (which is called semantic actions in \tool{ANTLR}).
 Such a combining of two expressive languages makes the code hardly understandable and, therefore, poorly maintainable.
 In \porthos[2], we clearly separated the parser (generated from the grammar file `\textit{<grammar>.g4}') from converting the \tool{ANTLR} syntax tree to the AST, that is one for all languages of an input program.
 
-Secondly, \porthos{} resolved the semantics of operations syntactically (it was defined in the \tool{ANTLR} grammar), whereas it should be resolved by a separate module operating on the AST level%
+Secondly, \porthos{} resolves the semantics of operations syntactically (it was defined in the \tool{ANTLR} grammar), whereas it should be resolved by a separate module operating on the AST level%
 %
+%TODO: check or remove this
 %\footnote{Most modern languages (including C++) allow the function overloading, thus requiring the type information to be available for the function resolution algorithm (see Section~\ref{ch:impl:proc:x-pre-compiler}).}%
 %
 , so that it does not require to change grammar for encoding the semantics of a new function. %adding support for a new function.
 %\footnote{for instance, given two functions `\lstinline{foo(int a)}' and `\lstinline{foo(char a)}' compiled by a C++ compiler, the code `\lstinline{int a = '1'; foo(a);}' will invoke the first method rather than the second one.}.%
-As the reader may have noticed from the grammar sketch in Figure~\ref{fig:in_grammar_pts}, the memory operations of different kinds vary syntactically as well.
-For example, the assignment of local computation to a register uses the symbol `\lstinline{<-}', the atomic non-relaxed load operation denoted as `\lstinline{<:-}', atomic non-relaxed store operation denoted as `\lstinline{:=}', and the semantics of relaxed \lstinline{load} and \lstinline{store} are resolved syntactically by matching the function name.
-Moreover, only the operator `\lstinline{<-}' could have an expression as the source of data, which means that expressions could be assigned only to registers.
-% (thus, the variable \lstinline{r} was recognised as a local variable as well).
+As the reader might have noticed from the grammar sketch in Figure~\ref{fig:in_grammar_pts}, different kinds of memory operations of of the \oldporthos{} input language vary syntactically as well.
+For example, the assignment of a local computation to a register uses the symbol `\lstinline{<-}', the atomic non-relaxed load operation is denoted by \lstinline{<:-}', atomic non-relaxed store operation is denoted by `\lstinline{:=}', and the semantics of relaxed \lstinline{load} and \lstinline{store} is resolved syntactically by matching the function name and arguments.
+Moreover, only the operator `\lstinline{<-}' accepts an expression as the source of data, which means that expressions could be assigned only to registers.
 In \porthos[2], the semantics of the data-flow operation is determined according to the types of operands, that are determined during the pre-compilation stage (see Section~\ref{ch:impl:proc:x-pre-compiler}).
-The semantics of the functions also is being resolved during the pre-compilation stage via the \textit{invocation hooking} mechanism (see Section~\ref{ch:impl:proc:x-compiler}).
+The semantics of the functions also being resolved during the compilation stage via the \textit{invocation hooking} mechanism (see Section~\ref{ch:impl:proc:x-compiler}).
 
-Thirdly, the grammar used by \porthos{} allowed only a restricted set of operations.
-For example, it accepted the computation expressions only over local variables.
-Thus, in the assignment expression `\lstinline{r <- (x + 1);}', the variable \lstinline{x} was parsed as a local variable even though it can be used as a shared variable in other parts of the program.
+Thirdly, the grammar used by \oldporthos{} accepts only a restricted set of operations.
+For example, the computation expressions can use only local variables.
+Thus, in the assignment expression `\lstinline{r <- (x + 1);}', the variable \lstinline{x} will be parsed as a local variable even though it can be used as a shared variable in other parts of the program, which may lead to the inconsistency of analysis.
 In \porthos[2], all shared variables involved into a computation expression are tentatively copied to temporary local variables.
-%Moreover, expressions could be assigned only to local variables only via the assignment operator `\lstinline{<-}' (thus, the variable \lstinline{r} was recognised as a local variable as well).
-%, which might lead to inconsistency of the result SMT-formula if the same variable name was used both as a register and as a location, for instance, the in code `\lstinline{x := reg1; reg2 <- (x + 1);}', the first statement interprets the variable \lstinline{x} as a location, while the grammar of second statement requires it to be a register.
 
-Fourthly, \porthos[1] supported only integer constants and expressions.
-%Also, only integers were processed by the input language parser of \porthos{}.
-In \porthos[2], we extended support for primitive types supported by the \tool{Z3} solver (this apply to 32-bit integers encoded as \texttt{Int}s of \tool{Z3}, floats encoded as \texttt{Real}s, enumerations encoded as \texttt{Scalar}s).
-%TODO : constant arrays? https://rise4fun.com/\tool{Z3}/tutorial/guide
+Fourthly, \porthos[1] supports only integer constants and expressions.
+In \porthos[2], we extended support for primitive types supported by the \tool{Z3} solver (32-bit integers are encoded as \texttt{Int}s of \tool{Z3}, floats are encoded as \texttt{Real}s).
 Although the \tool{Z3} supports the array theory (characterised by the select-store axioms~\cite{de2011z3}), the complexity of pointer analysis for the arrays of non-constant size moves the full support of arrays and pointers out of the scope of current thesis.
-%Thus, adding support for more advanced structures as pointers, arrays, function definitions and calls was one of the purposes of revising the tool architecture.
 
-Finally, the grammar used by \porthos{} had the following minor drawbacks. %A minor drawback of 
-The operators were implemented as non-associative (expressions of the form `\lstinline{1 + 2 * 3}' could not be parsed).
-Comparing to C statements, that must end with the semicolon punctuator `\lstinline{;}', statements defined in the grammar of \porthos[1] use the semicolon as a separator between statements (the final statement must not end with semicolon).
-The litmus-specific syntax for variables initialisation was used only for declaring the shared variables (all of them were initialised with default value \lstinline{0}), however, this syntax should be used as an initial assignment of both shared and local variables with arbitrary values.
-%initialise them with a value different from the default \lstinline{0} or to initialise a local variable.
-%did not allow to assign an arbitrary value to a variable (the default value \lstinline{0} was used).
-
-%Also, \porthos{} supports only the litmus-specific syntax for the variables initialisation, however, it allows only initialisation of the shared variable and only by default value \lstinline{0}.
-%\porthos[2] supports arbitrary declaration to be performed in initialisation statement.
+Finally, the grammar used by \porthos{} has the following minor drawbacks. %A minor drawback of 
+The operators are non-associative (expressions of the form `\lstinline{1 + 2 * 3}' can not be parsed).
+Comparing to C statements, which must end with the semicolon punctuator `\lstinline{;}', statements defined in the grammar of \porthos[1] use the semicolon as a separator between statements (the final statement must not end with semicolon).
+The litmus test-specific syntax for variables initialisation is used only for declaring the shared variables (all of them are initialised with default value \lstinline{0}), however, this syntax should be used as an initial assignment of both shared and local variables with arbitrary values.
 
 \porthos[2] uses the C language grammar of proposed in the C11 standard~\cite{c11}, that was extended by litmus test-specific syntax such as initialisation and final-state assertion statements (the original \tool{ANTLR} grammar can be found in the official repository containing the collection of \tool{ANTLR v4} grammars%
 %
@@ -235,17 +189,21 @@ Current version of \porthos[2] does not recognise C processor directives (it ign
 \section{Architecture}
 \label{ch:impl:arch}
 
-The general architecture scheme of \porthos[2] is presented in Figure~\ref{fig:arch}.
-%The rectangles in the picture denote processing units (marked with gear sign with a unique number of the component), and labels of the arrows describe the internal representation carried out during the transformation.
-
-%TODO: ATTENTION HERE TO THE PICTURE!!!!!!!!!!!!!!!!!!!!!!!!
-\begin{figure}[H]
+\begin{figure}%[H]
   \centering
-  \includegraphics[height=.95\textheight,keepaspectratio]{img/my/draw.io/general_arch-no_numbering.png}
+  \includegraphics[height=.98\textheight,keepaspectratio]{img/my/draw.io/general_arch-no_numbering.png}
   \caption{The general architecture of \porthos[2]}
   \label{fig:arch}
 \end{figure}
 
+The general processing scheme of old tool \porthos[1] is the following.
+The input program is parsed to the AST, where leaves are the events.
+The instructions of the AST are then encoded into the $\phi_{CF}$ (see Section~\ref{ch:enc:bmc:cf}) and the events are processed by the single function (`\texttt{dartagnan.wmm.Domain.encode}') that loops over all events, checks their properties (the kind of event, the operands of the memory event, the type of the barrier event, etc.) and adds corresponding relations assertions to the formula.
+Encoding all the relations (the \textit{program domain encoding}) in a single function is error-prone and hardly manageable.
+Moreover, this function does not consider the memory model, therefore the result formula can contain relations that are not constrained by the memory model specified by the user and thus are redundant (for instance, the \texttt{TSO} memory model does not contain \texttt{POWER}-specific relations \texttt{ii}, \texttt{ic}, \texttt{ci}, etc., that are always encoded regardless the memory model).
+In \porthos[2], we moved the encoding logic into a separate module \ref{ch:impl:proc:z-encoder} that accepts the input program and the user-defined memory model, therefore does not add constraints over unused relations to the result SMT-formula.
+
+The high-level architecture of \porthos[2] is presented in Figure~\ref{fig:arch}.
 The program takes as input the program to be analysed and one (the reachability analysis mode) or two (the portability analysis mode) memory models.
 However, instead of parsing memory models from the \cat{} file, the tool may operate with pre-defined memory models (\texttt{SC}, \texttt{TSO}, \texttt{PSO}, \texttt{RMO}, \texttt{ALPHA}, \texttt{POWER}, \texttt{ARM}; this feature is inherited from \porthos[1]).
 The parsed program syntax tree is then converted (Section~\ref{ch:impl:proc:y-constr}) to a program AST called \ytree{}%
@@ -257,61 +215,47 @@ The \ytree{} then is being compiled (Section~\ref{ch:impl:proc:x-compiler}) to a
 The compiled \xgraph{} then is being converted to an acyclic form (Section~\ref{ch:impl:proc:x-unroll}) in order to be encoded into a \zformula{} (Section~\ref{ch:impl:model:zformula}).
 Apart from that, the memory-model constructor (Section~\ref{ch:impl:proc:w-constr}) constructs the abstract syntax tree of derived relations of the weak memory model \wmodel{} (Section~\ref{ch:impl:model:wmodel}).
 %on the basis of the \xgraph{} in order to build the weak memory model \wmodel{} (Section~\ref{ch:impl:model:wmodel}).
-Thereafter, \wmodel{} and acyclic \xgraph{} are encoded (Section~\ref{ch:impl:proc:z-encoder}) to a \zformula{} representation (a wrapper over an SMT-formula), which then is translated to an SMT-formula (Section~\ref{ch:impl:proc:smt-converter}), which then is solved by the SMT solver (Section~\ref{ch:impl:proc:smt-solver}).
+Thereafter, \wmodel{} and acyclic \xgraph{} are encoded (Section~\ref{ch:impl:proc:z-encoder}) to a \zformula{} representation (a wrapper over an SMT-formula), which then is translated to an SMT-formula (Section~\ref{ch:impl:proc:smt-converter}), which then is solved by the SMT-solver (Section~\ref{ch:impl:proc:smt-solver}).
 
 
 \subsection{Internal representations}
 \label{ch:impl:model}
 
-%Internal representations used in \porthos[1] 
-
-%As it has already been mentioned, all internal representations used by \porthos[2] are immutable.
-For keeping the architecture transparent, we build all abstraction levels with interfaces, even if some of them does not add any new functionality.% (as java does not support multiple inheritance for classes (only for interfaces), we 
+For keeping the architecture transparent, we build all abstraction levels with interfaces, even if some of them does not add any new functionality.
 
 \subsubsection{Y-tree}
 \label{ch:impl:model:ytree}
 
-The first internal representation used by \porthos[2] is the \textit{\ytree{}}, which represents a high-level recursively%
+The first internal representation used by \porthos[2] is the \textit{\ytree{}}, which represents an untyped high-level recursively defined AST%
 %
-\footnote{Hereinafter we use the term \textit{recursive} data structure (sometimes called \textit{inductive}) to refer a complex data type which can contain elements that contain other elements of the same type.
-For example, an unary expression contains references to the operator and the child expression of the same type.} %
+\footnote{Hereinafter we use the term \textit{recursive} data structure (also called \textit{inductive} data structure) to refer a complex data type that can contain elements of the same type.} %
 %
-defined AST.
-The Apendix~\ref{apx:trees} presents the file tree of the main classes that constitute the \ytree{} hierarchy (as the inheritance tree might be obvious for the C-like AST, we confine ourselves to presenting the classes file tree only, which we tend to retain clearly structured).
+. The Apendix~\ref{apx:trees} presents the file tree of the main classes that constitute the \ytree{} hierarchy (as the inheritance tree might be obvious for the C-like AST, we confine ourselves to presenting the classes file tree only, which we tend to retain clearly structured).
 
-%\columnratio{0.7}%\begin{paracol}{2}
-%\switchcolumn%\VerbatimInput{inc/lst/Ytree-tree.out}%\end{paracol}
 The abstract syntax tree, \ytree{}, is an abstraction level suitable for compiling the program to a low-level representation (in the case of processing low-level assembly code, it may be directly converted to the \xgraph{} representation).
 In terms of \porthos[1], the \ytree{} is the level of \textit{instructions}.
-%In contrast to \ytree{} representation, the \tool{ANTLR} syntax tree follows the same structure as the grammar, which is a superset of the real (meaningful) grammar of the C language.
 %However, it lacks some concepts of the language (for example, the syntax of indexer access corresponds the grammar rule "\lstinline{postfixExpression '[' expression ']'}" for an arbitrary postfix %, that is converted to the \texttt{YIndexerExpression}).
 However some details of the syntax might have been abstracted away (for instance, array operations may be emulated by functions invocations, see~\cite[Chapter 5]{gries2012science}), we find this level of abstraction suitable enough for modelling a high-level language.
 
-Each \ytree{} element implements the interface \texttt{YEntity} and carries the \texttt{OriginLocation} %
-%\textbf{(TODO: Rename CodeLocation->OriginLocation in the code!)} %TODO <--
-instance that contains information about the coordinates of the input text that has generated the \ytree{} element.
+Each \ytree{} element implements the interface \texttt{YEntity} and carries the \texttt{Origin} (original code coordinates) instance that contains information about the coordinates of the input text that has generated the \ytree{} element.
+The origin can be translated to the code citation by the \texttt{CitationService}.
 
 Following the C11 standard~\cite{c11}, we distinguish a \textit{statement} (\textit{"an~action to be performed"}) from an \textit{expression} (\textit{"a sequence of operators and operands that specifies computation of a value, or that designates an object or a function, or that generates side effects, or that performs a combination thereof"}).
-
 All \ytree{} expressions implement the \texttt{YExpression} interface.
-On the \ytree{} level, the pointer arithmetic is modelled by the integer number \textit{pointer level} of an expression (although in fact this is the property of a type not of an expression, the y-tree is an untyped syntax tree, therefore the elements \ytree{} should carry this property).
-We distinguish the subset of expressions that imply no side-effects, they implement the interface \texttt{YAtom} and can be global or local (which is defined also syntactically).
-Each \ytree{} expression carries the original code coordinates, that can be resolved to text by the service \texttt{LocationService}. %todo: rename from CodeCitationService + create 3 instances for each of level. Or keep it for Y->text, and store references to the original Y-object by X-objects
-
-%\textbf{(TODO:THIS SHOULD BE IN PRE-PROCESSING)} %TODO <--
+Although the pointer arithmetic is not fully supported by \porthos[2], the \ytree{} contains information about the \textit{pointer level} of an expression (which is modelled as an integer number). 
+We distinguish the subset of expressions that imply no side-effects, they implement the interface \texttt{YAtom} and can be global or local (which is determined syntactically).
 
 \vspace{1em}
 The \ytree{} expressions are the following:
 
 \begin{itemize}%[nolistsep]
-  \item \texttt{YBinaryExpression} that model the C binary operator (\textit{relative} operator that compares two expressions of any type, \textit{logical} that processes two boolean expressions, and \textit{numerical} that processes two numerical expressions);
-  %\textbf{TODO: rename 'integer'->'numerical' in code} %TODO <--
+  \item \texttt{YBinaryExpression} that model the C binary operator (\textit{relative} operator that compares two expressions of any type, \textit{logical} that processes two boolean expressions, and \textit{numerical} that processes two integer or real expressions);
 
   \item \texttt{YUnaryExpression} that model the C unary expression (logical negation, numeric prefix and postfix increment and decrement, bitwise complement);
 
-  \item \texttt{YMemberAccessExpression} that has an arbitrary expression of type \texttt{YExpression} as its base expression (it will be resolved during the compilation stage);%TODO: pre-compilation??
+  \item \texttt{YMemberAccessExpression} that has an arbitrary expression of type \texttt{YExpression} as its base expression (it will be resolved during the compilation stage, see Section~\ref{ch:impl:proc:x-compiler});
 
-  \item \texttt{YIndexerExpression} and \texttt{YInvocationExpression} that as arbitrary expression as its base or arguments (strictly speaking, the indexer expression is an unary-function invocation, but as the SMT solver we use supports the constant-array theory, we can maintain the array type);
+  \item \texttt{YIndexerExpression} and \texttt{YInvocationExpression} that as arbitrary expression as its base or arguments (strictly speaking, the indexer expression is an unary-function invocation, but as the SMT-solver we use supports the constant-array theory, we can maintain the array type);
 
   \item \texttt{YAssignmentExpression} that assigns an \texttt{YExpression} to an \texttt{YAtom};
 
@@ -331,7 +275,7 @@ Similarly to expressions, all \ytree{} statements implement the \texttt{YStateme
 \begin{itemize}%[nolistsep]
   \item \texttt{YBranchingStatement} representing the \texttt{if-then-else} statement;
   
-  \item \texttt{YLoopStatement} representing both \texttt{while}- and \texttt{for}- loops;%TODO:RENAME YWhileLoopStatement->YLoopStatement in code!!!)}
+  \item \texttt{YLoopStatement} representing both \texttt{while}- and \texttt{for}- loops;
   
   \item \texttt{YJumpStatement} representing unconditional jump (\texttt{goto}-jump to a label and loop-jumps \texttt{break} and \texttt{continue});
   
@@ -342,19 +286,16 @@ Similarly to expressions, all \ytree{} statements implement the \texttt{YStateme
   \item \texttt{YVariableDeclarationStatement} containing the information about the variable type during the variable declaration.
 \end{itemize}
 
-On the \texttt{Y}-level of abstraction, we define the \texttt{YType} as a \textit{reference} for the type (since the \ytree{} is not typed, all expressions do not have type, however, the \texttt{YType} is used for storing the information on declaration, including the type itself, type modifiers and qualifiers).
+On the \texttt{Y}-level of abstraction, we define the \texttt{YType} as a \textit{reference} for the type (since the \ytree{} is not typed, the \texttt{YType} is used for storing the type information on variables or types declarations).
+It consists type modifiers and qualifiers, that will be converted to the X-type by the \texttt{Y2XTypeConverter} during the pre-compilation stage (see Section~\ref{ch:impl:proc:x-pre-compiler}).
 
 According to the C standard, \textit{"any statement may be preceded by a prefix that declares an identifier as a label name"}.
 The \ytree{} statements of follow this rule, however they these labels are symbolic, and they need to be resolved at the pre-compilation stage.
 Apart from the set of statements listed before, we define the \texttt{YFunctionDefinition} and its inheritor a litmus-specific declaration \texttt{YProcessDefinition}
-%\textbf{(TODO: rename YProcessStatement->YProcessDefinition)} %TODO <--
 used in intra-procedural analysis mode.
-%TODO: rename YMethodSignature -> YFunctionSignature
-The function definition contains the \texttt{YCompoundStatement} body and the \texttt{YMethodSignature} signature, which is used in the function resolution during the compilation stage. %TODO: pre-compilation?
-The other litmus-specific statements are \texttt{YPreludeDefinition}
-%\textbf{(TODO: rename YPreludeStatement -> YPreludeDefinition)} %TODO <--
-that carries the list of \texttt{YStatement} initial writes, and \texttt{YPostludeDefinition} 
-%\textbf{(TODO: rename YPostludeStatement -> YPostludeDefinition)} %TODO <--
+The function definition contains the \texttt{YCompoundStatement} body and the \texttt{YMethodSignature} signature (method name and types of formal parameters), which is used in the function resolution during the pre-compilation stage.
+The other litmus-specific statements are \texttt{YPreludeStatement}
+that carries the list of \texttt{YStatement} initial writes, and \texttt{YPostludeStatement} 
 that carries the \texttt{YExpression} binary expression to be asserted by the litmus test.
 
 The syntax tree that contains set of definitions (e.g., litmus-initialisations, function definitions, litmus-asserts) is modelled by the class \texttt{YSyntaxTree}.
@@ -364,8 +305,7 @@ The syntax tree that contains set of definitions (e.g., litmus-initialisations, 
 \label{ch:impl:model:xgraph}
 
 The \ytree{} is compiled into the low-level event-based program representation called \textit{\xgraph{}}.
-The mathematical structure of event-flow graph was discussed in Section~\ref{ch:wmm:event}.
-%In general, \xgraph{} follows the structure described there, however it is constructed in several stages.
+The mathematical structure of event-flow graph was discussed in Section~\ref{ch:wmm:model}.
 The nodes of the graph are events, and the edges are basic relations: the control-flow relation \po{} and the data-flow relations \co{} and \rf{}.
 Hereinafter, we denote the \xgraph{} with only control-flow edges as \xgraph[CF], the \xgraph{} with only data-flow edges as \xgraph[CF].
 The complete \xgraph{} is $\xgraph[CF+DF] = \xgraph[CF] \; \cup \; \xgraph[DF]$.
@@ -382,21 +322,21 @@ Internally, the graph is represented by an adjacency matrix (to be exact, by mul
 All elements of \xgraph{} implement the interface \texttt{XEntity}.
 There are two main kinds of X-entity: \textit{events} that implement the \texttt{XEvent} interface, and \textit{memory-units} that implement the \texttt{XMemoryUnit} interface.
 
-Following the litmus tests format, we distinguish three types of \xgraph{}: one for a process, one for a litmus-initialisation block and one for the assertion statement.
-However, all three types of the \xgraph{} are modelled by the same graph structure \texttt{XProcess} with certain restrictions complied by the corresponding type of X-interpreter that constructs the graph. %TODO: rename to XThread ?
+Following the format of litmus tests, we distinguish three types of \xgraph{}: one for the parallel processes, one for the litmus-initialisation block and one for the assertion statement.
+However, all three types of the \xgraph{} are modelled by the same graph structure \texttt{XProcess} with certain restrictions complied by the corresponding type of X-interpreter that constructs the graph.
 This simplifies drastically the processing of different types of code blocks as they all are modelled by the same data structure.
 The examples of restrictions on X-graphs are the following: the initialisation block can not have branchings, fence events; the process cannot have assertion events; the assertion block can not have shared-memory events or fence events.
-We discuss the interpretation of different types of statements in more detail in Section~\ref{ch:impl:proc:x-compiler:compilation}.
+We discuss the interpretation of different types of statements in more detail in Section~\ref{ch:impl:proc:x-compiler}.
+
 
 \paragraph{Memory units}
 \label{ch:impl:model:xgraph:mem}
 
-The \textit{memory unit} is a memory cell of an abstract machine executing the code.
-This machine has an infinite number of arbitrary-sized \textit{registers} (local memory units) and \textit{locations} (shared memory units).
-Local memory units inherit the \texttt{XProcessLocalElement} interface, that stores the ID of the owning process.
+An \textit{X-memory unit} is a memory cell of an abstract machine executing the code (that represents the \xgraph{}).
+The abstract machine has infinite number of arbitrary-sized \textit{registers} (local memory units) and \textit{locations} (shared memory units).
+Local memory units extend the \texttt{XProcessLocalElement} interface, that stores the ID of the owning process.
 Figure~\ref{fig:class-diagrams:XMemoryUnit} represents inheritance hierarchy of memory units.
 
-%TODO!!! Remove watermark from the pictures!
 \begin{figure}[t]%[!b]%[H]
   \centering
   \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{img/my/class-diagrams/XMemoryUnit-m.png}
@@ -410,31 +350,28 @@ As r-values cannot change their value, they can be seen as the value itself (the
 Each memory unit has an \texttt{XType} associated with it.
 The X-type is a symbolic representation of the C primitive type%
 %
-\footnote{Here we should note that \porthos[2] can eventually evolve to be able to analyse programs written in an OOP language (for instance, in C++). In this case, the \texttt{XType} will have more complex structure than a simple enumeration, which it has when we need to emulate only primitive types of C language. See more detailed discussion on input language type system in Section~\ref{ch:impl:proc:x-pre-compiler:type}.} %TODO!!!!! Check that XType is really a simple enumeration
+\footnote{Here we should note that \porthos[2] can eventually evolve to be able to analyse programs written in an OOP language (for instance, in C++). In this case, the \texttt{XType} will have more complex structure than a simple enumeration, which it has when we need to emulate only primitive types of C language. See more detailed discussion on input language type system in Section~\ref{ch:impl:proc:x-pre-compiler}.} %TODO!!!!! Check that XType is really a simple enumeration
 %
-that is easily convertible to an SMT-type (modelled as \texttt{ZType}). %TODO: add the class ZType
+that is easily convertible to an SMT-type (modelled by \texttt{ZType}). %TODO: add the class ZType
 All X-memory units carry the boolean flag that indicates whether it has been resolved correctly by the X-memory manager.
 
 The memory units are created and stored by the \texttt{XMemoryManager}, which provides interface for accessing memory units during compilation stage.
-For more detailed description of memory management see Section~\ref{ch:impl:proc:x-compiler:mem}.
-
+For more detailed description of memory management see Section~\ref{ch:impl:proc:x-compiler}.
 
 
 \paragraph{Events}
 \label{ch:impl:model:xgraph:evt}
 
-An event (\texttt{XEvent}) represents the fact of executing the primitive operation, which is independent from other events.
-Each event is specified by the process generated them and a unique event label.
-This information is stored by events in the immutable structure \texttt{XEventInfo}.
-Also, each event carries the reference to the Y-instruction that has generated it.
+An \textit{X-event} represents the fact of executing the primitive operation, which is independent from other events.
+Each X-event implements the \texttt{XEvent} interface and is carries the information about the process generated them and a unique event label, which is modelled by an immutable structure \texttt{XEventInfo}.
+Each event should carry the reference to the Y-instruction that has generated it (this information can be useful for the unrolling discussed in Section~\ref{ch:impl:proc:x-unroll}, however currently each X-event contains the reference to the original code location, similarly to Y-instructions discussed above).
 
 The following interfaces model basic kinds of events (see Figure~\ref{fig:class-diagrams:XEntity-interfaces}):
-%\begin{itemize}[noitemsep]
+
 \begin{outline}
   \1 \texttt{XMemoryEvent} \\
   The memory event defines the transfer of the value from one memory unit to another.
   There are four types of memory events (the arrow denotes the direction of the data-flow):
-  %\begin{itemize}[noitemsep]
   \2 \texttt{XRegisterMemoryEvent}: \\
     $(\texttt{XLocalLvalueMemoryUnit}) \leftarrow (\texttt{XLocalMemoryUnit})$,
   \2 \texttt{XLoadMemoryEvent}: \\
@@ -444,16 +381,12 @@ The following interfaces model basic kinds of events (see Figure~\ref{fig:class-
   \2 \texttt{XInitialWriteEvent}: \\
     $(\texttt{XLvalueMemoryUnit}) \leftarrow (\texttt{XRvalueMemoryUnit})$.
 
-  %\end{itemize}%TODO incompleted enumeration
-  %TODO: either say st about getLoc(), getReg(), or remove them from code
+  %TO-DO: either say st about getLoc(), getReg(), or remove them from code
   
   \1 \texttt{XComputationEvent} \\
-  %TODO: say sth about how we not produce thousands of comput events
     We distinguish two types of computation events:
-      %\begin{itemize}[noitemsep]
       \2 \texttt{XUnaryComputationEvent} that encodes bit negation and no-operation; and 
       \2 \texttt{XBinaryComputationEvent} that encodes numeric operations (such as addition, multiplication, etc.), bit vector operations (such as bit-and, bit-xor, etc.), relative operations (such as greater-then comparison, equality comparison, etc.), and logical operations (such as conjunction and disjunction). 
-      %\end{itemize}
     \newline
     The computation event class implements both \texttt{XEvent} and \texttt{XMemoryUnit}.
     This is a model-level optimisation, which is possible because a computation event performs computation over local-only memory and does not change value of any memory unit.
@@ -461,51 +394,45 @@ The following interfaces model basic kinds of events (see Figure~\ref{fig:class-
     For analysing large expressions this optimisation is sensible because it considers the whole expression as a single computation event, encoded therefore as a single SMT-variable.
     \newline
     Note, for the purpose of simplifying the X abstraction level, computation events may have been modelled as invocations of bodiless functions (for instance, the operation `\lstinline{x + y}' may be modelled as the invocation of the function `\lstinline{+}' with the arguments \lstinline{x} and \lstinline{y}).
-    However, current version of \porthos[2] maintains the \texttt{XComputationEvent} as the operators are supported by the SMT solver.
-    
+    However, current version of \porthos[2] maintains the \texttt{XComputationEvent} as the operators are supported by the SMT-solver.
+
   \1 \texttt{XControlFlowEvent} \\
     The control-flow event indicates a non-linear jump in the code. We distinguish two kinds of control-flow events: 
     \2 \texttt{XJumpEvent} that performs no computation and no data operation, it can be safely removed from the model as an optimisation; and
     \2 \texttt{XMethodCallEvent} that models the function call with the \texttt{fastcall} calling convention (passing arguments in registers).
-    %TODO: check the diagrams if the XMCE really inherits XLMU
     The function call also implements the \texttt{XLocalMemoryUnit} since it represents the computed value returned by the function call.
-    If the function has been resolved, the actual arguments are bind to the formal parameters (treated as temporary local memory units), the called \texttt{XMethodCallEvent} is pushed onto the call stack, and the execution jumps to the function body.
-    The call stack is bounded by the user-defined parameter; once the stack is full, the interpretation continues without jumping to the body of the invoked function (such cases are properly logged). %TODO: call-stack: user-defined parameter
-    Each \texttt{return} statement creates the assignment of the function call event on the top of call stack.
-    Note, this approach works for any kind of recursion, which is unrolled up the user-defined boundary as well as explicit loops.
+    Currently, \porthos[2] only supports invocations of the method calls registered in its knowledge base (see invocation hooking mechanism described in Section~\ref{ch:impl:proc:x-compiler}).
+    For interpreting known function invocations, \porthos[2] must perform three steps: bind actual arguments to the formal parameters (treated as temporary local memory units), push the called \texttt{XMethodCallEvent} onto the call stack, and the perform the control-flow jump to the function body.
+    The call stack must be bounded by the user-defined parameter; once the stack is full, the interpretation should continue without jumping to the body of the invoked function (such cases must be properly logged).
+    Each \texttt{return} statement must create the assignment of the function call event that is on the top of call stack.
+    Note, this approach will work for recursion as well, and the recursive calls together with loops must be unrolled up the user-defined boundary (see Section~\ref{ch:impl:proc:x-unroll}).
     \\
-    %According to the Rice's theorem~\cite{rice1953classes}, in general case there always will be functions unresolved within an analysis launch.
-    If the function has not been resolved, it can be safely assumed to be a no-operation function.
+    If the function has not been resolved, it can be safely assumed to be a no-operation function (with proper logging).
     In other words, we suppose that the knowledge base of \porthos[2] is complete and the tool can resolve all memory-operation functions and fence instructions.
-    Although this can affect the completeness of the analysis, it is safe to make such an assumption as the user can check the log file and manually analyse the semantics of an unresolved call and it to the knowledge base if necessary.
+    Although this can affect the completeness of the analysis, it is safe to make such an assumption as the user can check the log file and manually analyse the semantics of an unresolved call and add it to the knowledge base if necessary.
 
   \1 \texttt{XFenceEvent} \\
     The fences are implemented as an enumeration \texttt{XBarrierEvent}.
     Current implementation of \porthos[2] supports all fences supported by \porthos{}: 
-    \texttt{mfence}, %TODO: what about lfence and sfence from the x86fences.cat ?
-    \texttt{sync}, \texttt{optsync}, \texttt{lwsync}, \texttt{optlwsync}, \texttt{ish}, \texttt{isb}, and \texttt{isync}.%TODO: description of each!
+    \texttt{mfence}, \texttt{sync}, \texttt{optsync}, \texttt{lwsync}, \texttt{optlwsync}, \texttt{ish}, \texttt{isb}, and \texttt{isync}.
     
   \1 \texttt{XFakeEvent} \\
     The fake events are the auxiliary elements of \xgraph{}.
-    %\begin{itemize}[noitemsep]
     \2 \texttt{XEntryEvent}, the per-process unique source event in the event-flow graph,
     \2 \texttt{XExitEvent}, the process sink event,
     \2 \texttt{XNopEvent}, the no-operation event (a jump to the next event), used for correct encoding in case when the control-flow branch does not have any event (see Figure~\ref{encode:branching:nop}), and
     \2 \texttt{XAssertionEvent}, the reachability assertion made at the postlude statement of the program.
-    An assertion is modelled as an event for the purpose of encoding the postlude statement as a separate process that is compatible with the encoder.
-   % \end{itemize}
-%\end{itemize}
-\end{outline}
+    An assertion is modelled as an event for the purpose of encoding the postlude statement as a separate process that is compatible with the Z-encoder.
 
-%TODO: say about IDs from old code
+\end{outline}
 
 
 \paragraph{Edges}
 \label{ch:impl:model:xgraph:edges}
-As the graph is represented by an adjacency matrix, its edges are stored in (immutable) hash-maps.
+As the graph is represented by an adjacency matrix, its edges are stored in immutable hash-maps.
 We distinguish the following kinds of edges:
 
-\begin{outline}%[noitemsep]
+\begin{outline}
   \1 the \textit{control-flow edges}:
     \2 the \textit{primary edges}, that denote both $\epsilon$-labelled transitions (in case of linear sequence of events) and conditional transition that evaluates the conditional event (the source of the transition) to the \textit{true}, and
     \2 the \textit{alternative edges}, that denote conditional transitions for which the conditional event (the source) was evaluated to the \textit{false}; and
@@ -517,7 +444,7 @@ We distinguish the following kinds of edges:
 
 \paragraph{Graph invariants}
 \label{ch:impl:model:xgraph:invariants}
-Once being constructed, the graph must conform the following requirements (see also Section~\ref{ch:enc:bmc:cf}):
+Once being constructed, the graph must conform the following requirements (see also Section~\ref{ch:wmm:model:events}):
 
 \begin{enumerate}[noitemsep]
 \item the graph must have a single source with no ingoing edges, and two sinks of different kinds without outgoing edges,
@@ -563,10 +490,10 @@ For the sake of transparency, each element of a \wmodel{} contains the origin lo
 
 %TODO: not implemented at all !
 
-The \textit{\zformula{}} representation is a wrapper for an SMT-formula used as an additional abstraction level used to increase the transparency of the architecture, simplify the debugging process and ease the support of different SMT solvers.
+The \textit{\zformula{}} representation is a wrapper for an SMT-formula used as an additional abstraction level used to increase the transparency of the architecture, simplify the debugging process and ease the support of different SMT-solvers.
 As all other internal representations, the \zformula{} is implemented as an immutable data structure.
 
-The Z-abstraction level models the the logical formulas (definitions and assertions) that are put on the assertion stack of the SMT solver.
+The Z-abstraction level models the the logical formulas (definitions and assertions) that are put on the assertion stack of the SMT-solver.
 Generally, a \zformula{} represents the S-expression-based syntax of the SMT-LIB language~\cite{smt-lib}. % the semantics of SMT-LIB formulas defined in~\cite[Chapter 5]{smt-lib}.
 Currently, the \zformula{} supports definitions and assertions over \textit{variables} and binary and unary \textit{expressions}.
 However, in future it may be extended to support \textit{function symbols} and \textit{binders} (existential and universal quantification, pattern matching and functional type construction).
@@ -914,6 +841,8 @@ class XKernelInvocationHook extends XInvocationHookBase
 
 %TODO: !!! Say that interpreter does not know anyth about Y, all its interface methods are <sth> -> <X>. The only part that know about Y is Y2Xvisitor
 
+  %TODO: say sth about how we not produce thousands of comput events
+
 %In this paragraph we discuss only the implementation of the process interpreter \texttt{XProcessInterpreter}.
 %This interpreter is used to build the branched event-flow graph with all kinds of jumps, memory operations and fences.
 The X-program interpreter is invoked by the \texttt{Y2XConverterVisitor} which walks down the \ytree{} recursively.
@@ -1129,8 +1058,9 @@ The \rf{}-edges join each write event to all read events that access the same lo
 \subsubsection{Z-formula encoder}
 \label{ch:impl:proc:z-encoder}
 
-The \zformula{} encoder transforms the program and the memory models to a single SMT-like representation.
-It follows the encoding scheme described in Chapter~\ref{ch:enc}.
+The \zformula{} encoder accepts as input the program and the input memory models.
+It visits the recursive memory model AST and each its derived relation definition (recall the `\texttt{let}' keyword of the \cat{} language) it transforms to the set of SMT-clauses, generated on the basis of the program events with respect to the encoding scheme described in Chapter~\ref{ch:enc}.
+%todo: currenlty not implemented, just converted to the old
 %TODO: say more!
 
 \subsubsection{SMT-formula converter}
@@ -1140,10 +1070,10 @@ As the \zformula{} follows the SMT-LIB standard, its translation to an SMT-formu
 The translation is performed by the stateless visitor \texttt{Z2SmtTranslator}.
 
 
-\subsubsection{SMT solver}
+\subsubsection{SMT-solver}
 \label{ch:impl:proc:smt-solver}
 %TODO: check that we have ALL references in pre-word in this chapter
-As it has been mentioned in Section~\ref{ch:impl:principles}, \porthos[2] uses the third-party SMT solver \tool{Z3}, which offers the Java API for constructing requests to the Z3 solver and interpreting its responses.
+As it has been mentioned in Section~\ref{ch:impl:principles}, \porthos[2] uses the third-party SMT-solver \tool{Z3}, which offers the Java API for constructing requests to the Z3 solver and interpreting its responses.
 
 
 \subsection{Program output}

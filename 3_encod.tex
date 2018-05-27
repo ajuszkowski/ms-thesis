@@ -275,7 +275,7 @@ For example, the assignment $\fx(e_1)=1$, $\fx(e_2)=1$, $\fx(e_3)=0$ and $\fx(e_
 
 To encode the data-flow constraints, we use the \textit{Static Single-Assignment~(SSA) form} in order to be able to capture an arbitrary data-flow into a single SMT-formula.
 The SSA form requires each variable to be assigned only once within entire program.
-In contrast, \porthos{} used the \textit{Dynamic Single-Assignment~(DSA)} form, that requires indices to be unique only within a control-flow branch.
+In contrast, \porthos[1] uses the \textit{Dynamic Single-Assignment~(DSA)} form, that requires indices to be unique only within a control-flow branch.
 Although the number of variable references (each of which is encoded as unique SMT-variable) on average is logarithmically less in the case of the DSA form than the SSA form, the result SMT-formula still needs to be complemented by same number of equality assertions when encoding the data-flow of merge points~\cite{Porthos17a}.
 
 Following~\cite{Porthos17b}, the indexed references of variables are computed in accordance with the following rules:
