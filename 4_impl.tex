@@ -407,6 +407,7 @@ The following interfaces model basic kinds of events (see Figure~\ref{fig:class-
     The call stack must be bounded by the user-defined parameter; once the stack is full, the interpretation should continue without jumping to the body of the invoked function (such cases must be properly logged).
     Each \texttt{return} statement must create the assignment of the function call event that is on the top of call stack.
     Note, this approach will work for recursion as well, and the recursive calls together with loops must be unrolled up the user-defined boundary (see Section~\ref{ch:impl:proc:x-unroll}).
+    The discussion on how to set up the \po-relations in the event-flow graph with recursive function calls can be found in~\cite{musketeer2014recursion}.
     \\
     If the function has not been resolved, it can be safely assumed to be a no-operation function (with proper logging).
     In other words, we suppose that the knowledge base of \porthos[2] is complete and the tool can resolve all memory-operation functions and fence instructions.
@@ -778,25 +779,23 @@ As an example of usage the interpreter, consider the code of the \texttt{Y2XConv
 \label{ch:impl:proc:x-unroll}
 
 In order to be encoded into an SMT-formula, the compiled graph needs to be acyclic~\cite{Porthos17b}.
-To convert it to an acyclic form, we perform the \textit{unrolling} (sometimes called \textit{unwinding}) transfomation: each cycle is unrolled up to the user-defined bound $k$.
-Comparing to \porthos[1], we have changed the meaning of the bound: instead of executing all cycles at most $k$ times, the \porthos[2] interprets the bound as the maximum number of events in the trace of the unrolled graph%
+For that, we perform the \textit{unrolling} (also called \textit{unwinding}) transformation: all cycles are unrolled so that the result number of events in a trace of the \xgraph{} does not exceed the user-defined bound $k$%
 %
 \footnote{The original specification of \porthos[2] stated that the unrolling bound $k$ must be interpreted as the maximum number of instruction in the original code (technically, the number of expressions in the ANTLR syntax tree).
 Nonetheless, current implementation of the \xgraph{} unroller counts the X-level events as it is much simpler to implement (the questions about how to count complex expressions that involve multiple shared variables and method invocations are left open for the future versions of \porthos[2]).
 For now, the information about the element of the ANTLR tree that corresponds to the X-event or Y-tree element is being lost during the transformations.
-Instead, we use the \texttt{LocationService} discussed in Section~\ref{ch:impl:model:ytree} that in perspective may be extended for providing this information along with the text citation of the original code.}
+Instead, we use the \texttt{CitationService} discussed in Section~\ref{ch:impl:model:ytree} that in perspective may be extended for providing this information along with the text citation of the original code.}
 %
 .
+This definition of the unrolling bound differs from one used by \porthos[1], where each cycle was executed $k$ times.
 The meaning of a bound was changed in order to increase predictability of the size of the result SMT-formula.
-Note that recursive function calls create unconditional back-jumps in the event-flow graph, which will also be recognised as a loop and be affected by the unrolling algorithm.
-The discussion on how to set up the \po-relations in the event-flow graph with recursive function calls can be found in~\cite{musketeer2014recursion}.
+Note that recursive function calls create unconditional back-jumps in the event-flow graph, which can also be recognised as a loop and be affected by the unrolling algorithm (however, currently not supported).
 
-Considering the new meaning of the unrolling bound, the graph unrolling may be \textit{complete} (the loop has been executed a whole number of times) or \textit{incomplete} (the unrolling bound has triggered on not-the-last event of the loop), which can be modelled by two types of the sink events.
+Considering the new meaning of the unrolling bound, the execution in the unrolled graph can be \textit{completed} (the loop has been executed a whole number of times) or \textit{uncompleted} (the unrolling bound has triggered on not-the-last event of the loop), which can be modelled by two types of the sink events.
 The user may need this information for understanding how the \porthos[2] interprets the cyclic program.
 However, current implementation loses this information by having only one sink event.
-Figure~\ref{fig:loop-unroll} illustrates the unrolling for the left-hand side cyclic control-flow graph (the square node $S_{+}$ denotes the complete sink node, and the $S_{-}$ denotes the incomplete sink).
+Figure~\ref{fig:loop-unroll} illustrates the unrolling for the left-hand side cyclic control-flow graph (the square node $S_{+}$ denotes the sink node for completed executions, and the $S_{-}$ denotes the sink for uncompleted executions).
 
-%TODO: draw (and implement) diff types of exit nodes
 \begin{figure}[t]
 \centering
 \resizebox{\linewidth}{!}{
@@ -866,18 +865,14 @@ Figure~\ref{fig:loop-unroll} illustrates the unrolling for the left-hand side cy
 \label{fig:loop-unroll}
 \end{figure}
 
-The unrolling procedure is performed by the \texttt{XFlowGraphUnroller}. %, which extends the \texttt{FlowGraphDfsTraverser}
-For unrolling the flow-graph, we perform the \textit{Deep-First Search (DFS)} while counting the Y-level instructions (for the unrolling bound) and keeping track of the depth stack (for detecting back edges needed for determining the type of sink node).
-Also, during the unrolling each next event increments the \textit{unrolling depth counter} (the \textit{event reference-ID}) -- the integer that is stored by the \texttt{XEvent} thus making it \textit{an event reference} on non-zero values.
-Each \texttt{XEvent} has the method `\texttt{XEvent asNodeRef(int refId)}' that clones the event-receiver with new value of reference-ID.
+The unrolling procedure is performed by the \texttt{XFlowGraphUnroller}.
+For unrolling the flow-graph, we perform the \textit{Deep-First Search~(DFS)} while counting the X-events (for the unrolling bound) and keeping track of the depth stack (for detecting back edges needed for determining the type of sink node).
+Back-edges are determined via the depth stack (each next event is pushed onto the stack; if the new event is present in the stack, the last processed edge is a back-edge).
+Also, during the unrolling each next event increments the \textit{unrolling depth counter} (the \textit{event reference-ID}) -- the integer stored by the \texttt{XEvent} thus making it an \textit{event reference} on non-zero values (only events of a non-unrolled graph can have the zero-valued reference-ID).
+As an X-event is immutable, it has the method `\texttt{XEvent asNodeRef(int refId)}' that clones it with new value of reference-ID.
 The methods \texttt{hashCode} and \texttt{equals} consider the reference-ID as the uniqueness field for all events except sink and source events (considering the usage of \texttt{HashMap} and Guava's \texttt{ImmutableMap} for storing events, proper setting of the hash-code methods is a crucial programming task).
 
-
-%TODO!!!!!!!!!!! other schemes!\textsl{}
 %During the work on \porthos[2], we have tested several different schemes of loop unrolling.
-
-
-%- After we acquired the event-based representation, we can perform some modifications/simplifications/optimisations on it (separately, allowing user to manage them)
 
 
 \subsubsection{X-graph data-flow constructor}
@@ -886,6 +881,7 @@ The methods \texttt{hashCode} and \texttt{equals} consider the reference-ID as t
 Once the graph is unrolled, it can be augmented by data-flow edges.
 As it was discussed in Section~\ref{ch:impl:model:xgraph}, the data-flow edges can represent either \rf{}- or \co{}-relation.
 The \rf{}-edges join each write event to all read events that access the same location; the \co{}-edges join write events to the same location.
+Currently, \porthos[2] does not yet construct the \xgraph[DF] component of the full \xgraph{}, instead, it uses the function `\texttt{dartagnan.wmm.Domain.encode}' of \porthos[1] to encode data-flow relations and derived relations of the \xgraph[CF].
 
 %TODO: why in old implementation we encode the negation of "co" ? same for "rf" above
 %\url{https://github.com/hernanponcedeleon/Dat3M/blob/80341bec26021d41cf79eddc943e7cbe6f49322f/dartagnan/src/dartagnan/wmm/Domain.java#L204} >
@@ -894,51 +890,27 @@ The \rf{}-edges join each write event to all read events that access the same lo
 \subsubsection{Z-formula encoder}
 \label{ch:impl:proc:z-encoder}
 
-The \zformula{} encoder accepts as input the program and the input memory models.
+The \zformula{} encoder accepts as input the unrolled X-graph and the input memory models.
 It visits the recursive memory model AST and each its derived relation definition (recall the `\texttt{let}' keyword of the \cat{} language) it transforms to the set of SMT-clauses, generated on the basis of the program events with respect to the encoding scheme described in Chapter~\ref{ch:enc}.
-%todo: currenlty not implemented, just converted to the old
-%TODO: say more!
-
-\subsubsection{SMT-formula converter}
-\label{ch:impl:proc:smt-converter}
-
-As the \zformula{} follows the SMT-LIB standard, its translation to an SMT-formula constitutes almost one-to-one mapping.
-The translation is performed by the stateless visitor \texttt{Z2SmtTranslator}.
+As the \zformula{} representation is not yet implemented, the \zformula{} encoder encodes the \xgraph{} and \wmodel{} directly into the SMT-formula via Java API of the Z3 solver (the program domain encoding is currently a part of the \zformula{} encoder until the full \xgraph[CF+DF] is implemented).
 
 
-\subsubsection{SMT-solver}
-\label{ch:impl:proc:smt-solver}
-%TODO: check that we have ALL references in pre-word in this chapter
-As it has been mentioned in Section~\ref{ch:impl:principles}, \porthos[2] uses the third-party SMT-solver \tool{Z3}, which offers the Java API for constructing requests to the Z3 solver and interpreting its responses.
+%\subsubsection{SMT-formula converter}
+%\label{ch:impl:proc:smt-converter}
+%
+%As the \zformula{} follows the SMT-LIB standard, its translation to an SMT-formula constitutes almost one-to-one mapping.
+%The translation should be performed by the stateless visitor \texttt{Z2SmtTranslator}.
+%
+%
+%\subsubsection{SMT-solver}
+%\label{ch:impl:proc:smt-solver}
+%As it has been mentioned in Section~\ref{ch:impl:principles}, \porthos[2] uses the third-party SMT-solver \tool{Z3}, which offers the Java API for constructing requests to the Z3 solver and interpreting its responses.
 
 
 \subsection{Program output}
 \label{ch:impl:out}
 
-The result of execution of \porthos[2] is the verdict modelled by the class \texttt{AppVerdict}.
+The result of execution of \porthos[2] is the \textit{verdict} modelled by the class \texttt{AppVerdict}.
 This is a structure that contains the result of analysis and auxiliary information such as collected errors and time of execution (separately for each stage of computing).
 The app verdict may be rendered to any format convenient for the user.
 
-
-%\subsection{Auxiliary components}
-%\label{ch:impl:aux}
-%
-%\subsubsection{Watchdog timer}
-%\label{ch:impl:aux:watchdog}
-%
-%%<not implemented>
-%
-%todo
-%
-%\subsubsection{Logger}
-%\label{ch:impl:aux:logger}
-%
-%%<not implemented>
-%
-%todo
-
-
-%todo: some words on necessity of contexts and lack of them. How would we implement them
-
-
-%TODO: \section{Optimisations} 
