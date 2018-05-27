@@ -1,0 +1,44 @@
+\section{Example of the invocation hook for intercepting the Linux kernel-specific functions}
+\label{apx:hook}
+
+\begin{figure}[H]
+\begin{lstlisting}
+class XKernelInvocationHook extends XInvocationHookBase 
+       implements XInvocationHook {
+ ...
+ @Override
+ public XInvocationHookAction intercept(String functionName) {
+   switch (functionName) {
+     case "WRITE_ONCE": {
+       return new XInvocationHookAction((receiver, arguments) -> {
+         if (arguments.length != 2 || receiver != null) {
+           return null;  // do not intercept
+         }
+
+         XMemoryUnit destUnit = arguments[0];
+         if (!(destUnit instanceof XSharedLvalueMemoryUnit)) {
+           throw new XMethodInvocationError(methodName, 
+               "arg 1: not a shared l-value memory unit: " + destUnit);
+         }
+         XSharedLvalueMemoryUnit dest = 
+               (XSharedLvalueMemoryUnit) destUnit;
+
+         XMemoryUnit srcUnit = arguments[1];
+         if (!(srcUnit instanceof XLocalMemoryUnit)) {
+           throw new XMethodInvocationError(methodName, 
+               "arg 2: not a local memory unit: " + srcUnit);
+         }
+         XLocalMemoryUnit src = (XLocalMemoryUnit) srcUnit;
+
+         return program.emitMemoryEvent(dest, src);
+     });
+   }
+   case "READ_ONCE": {
+     ...
+   }
+ }
+}
+\end{lstlisting}
+%\caption{Example of the invocation hook for intercepting the Linux kernel-specific functions}
+%\label{code-invoc-hook}
+\end{figure}

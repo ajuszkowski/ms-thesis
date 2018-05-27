@@ -1,0 +1,39 @@
+\section{Excerpt from the Y-to-X converter for interpreting branching statements}
+\label{apx:y2x}
+
+\begin{figure}[H]
+%TODO!!! refactor the code, move program.tryEvaluateComputation() to Y2Xvisitor or Helper
+\begin{lstlisting}
+public class Y2XConverterVisitor implements YtreeVisitor<XEntity> {
+  ...
+
+  @Override
+  public XEvent visit(YBranchingStatement node) {
+    program.startBlockDefinition(XInterpreter.BlockKind.Branching);
+
+    program.startBlockConditionDefinition();
+    XEntity conditionEntity = node.getCondition().accept(this);
+    XComputationEvent condition = tryEvaluateComputation(conditionEntity);
+    program.finishBlockConditionDefinition(condition);
+
+    program.startBlockBranchDefinition(XInterpreter.BranchKind.Then);
+    node.getThenBranch().accept(this);
+    program.finishBlockBranchDefinition();
+
+    YStatement elseBranch = node.getElseBranch();
+    program.startBlockBranchDefinition(XInterpreter.BranchKind.Else);
+    if (elseBranch != null) {
+      elseBranch.accept(this);
+    }
+    else {
+      program.emitNopEvent(); // needed for encoding
+    }
+    program.finishBlockBranchDefinition();
+
+    program.finishNonlinearBlockDefinition();
+
+    return null; //statements return null
+    }
+}
+\end{lstlisting}
+\end{figure}

@@ -24,7 +24,7 @@ The key aspects of the architectural design and implementations are the followin
   
   \item Secondly, \porthos[1] determined the \textit{kind of a variable} (shared or local) syntactically, depending on the operator of the function that uses this variable.
   This strongly restricts the syntax of the input language, therefore, for processing programs in C, \porthos[2] has an additional pre-compilation phase that traverses AST of the program and collects information of all variables accessed in the program (see Section~\ref{ch:impl:proc:x-pre-compiler}).
-  Currently, \porthos[2] considers a variable to be shared if it was declared as a pointer, or its address is accessed at least once by the code of any process, or it was declared as a parameter of the function that defines a process, or it was exported by \texttt{extern} or other keyword.
+  Currently, \porthos[2] considers a variable to be shared if it was declared as a pointer, or its address is accessed at least once by the code of any process, or it was declared as a parameter of the function that defines a process, or it was exported by \texttt{extern} keyword or an exporting function.
   %This approach gives flexibility in detecting shared variables 
   %  As this approach does not work for rich languages such as C   
   %as \porthos[2] determines the \textit{kind (shared or local) of each variable} on the pre-compilation phase, the shared variables can be accessed in arbitrary code location (comparing to \porthos[1] which determines the type of a variable syntactically, depending on the operator of function that uses the variable).
@@ -106,8 +106,9 @@ Due to the \zformula{} abstraction layer, new SMT-solvers may be easily added (t
 
 \item <parallelised>
 
-\item <C processor directives >
-
+\item <C processor directives + typedef > 
 <TODO: a short summary here>
+
+\item <contexts for local mem units in mem manager>
 
 \end{itemize}
