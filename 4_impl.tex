@@ -152,12 +152,12 @@ Firstly, it contains the parser code inlined directly into the grammar, so that 
 Such a combining of two expressive languages makes the code hardly understandable and, therefore, poorly maintainable.
 In \porthos[2], we clearly separated the parser (generated from the grammar file `\textit{<grammar>.g4}') from converting the \tool{ANTLR} syntax tree to the AST, that is one for all languages of an input program.
 
-Secondly, \porthos{} resolves the semantics of operations syntactically (it was defined in the \tool{ANTLR} grammar), whereas it should be resolved by a separate module operating on the AST level%
+Secondly, \porthos{} resolves the semantics of operations syntactically (it was defined in the \tool{ANTLR} grammar), whereas it should be resolved by a separate module operating on the AST level, %
 %
 %TODO: check or remove this
 %\footnote{Most modern languages (including C++) allow the function overloading, thus requiring the type information to be available for the function resolution algorithm (see Section~\ref{ch:impl:proc:x-pre-compiler}).}%
 %
-, so that it does not require to change grammar for encoding the semantics of a new function. %adding support for a new function.
+so that it does not require to change the grammar for encoding the semantics of a new function. %adding support for a new function.
 %\footnote{for instance, given two functions `\lstinline{foo(int a)}' and `\lstinline{foo(char a)}' compiled by a C++ compiler, the code `\lstinline{int a = '1'; foo(a);}' will invoke the first method rather than the second one.}.%
 As the reader might have noticed from the grammar sketch in Figure~\ref{fig:in_grammar_pts}, different kinds of memory operations of of the \oldporthos{} input language vary syntactically as well.
 For example, the assignment of a local computation to a register uses the symbol `\lstinline{<-}', the atomic non-relaxed load operation is denoted by \lstinline{<:-}', atomic non-relaxed store operation is denoted by `\lstinline{:=}', and the semantics of relaxed \lstinline{load} and \lstinline{store} is resolved syntactically by matching the function name and arguments.
@@ -201,7 +201,7 @@ The input program is parsed to the AST, where leaves are the events.
 The instructions of the AST are then encoded into the $\phi_{CF}$ (see Section~\ref{ch:enc:bmc:cf}) and the events are processed by the single function (`\texttt{dartagnan.wmm.Domain.encode}') that loops over all events, checks their properties (the kind of event, the operands of the memory event, the type of the barrier event, etc.) and adds corresponding relations assertions to the formula.
 Encoding all the relations (the \textit{program domain encoding}) in a single function is error-prone and hardly manageable.
 Moreover, this function does not consider the memory model, therefore the result formula can contain relations that are not constrained by the memory model specified by the user and thus are redundant (for instance, the \texttt{TSO} memory model does not contain \texttt{POWER}-specific relations \texttt{ii}, \texttt{ic}, \texttt{ci}, etc., that are always encoded regardless the memory model).
-In \porthos[2], we moved the encoding logic into a separate module \ref{ch:impl:proc:z-encoder} that accepts the input program and the user-defined memory model, therefore does not add constraints over unused relations to the result SMT-formula.
+In \porthos[2], we moved the encoding logic into a separate module (see Section~\ref{ch:impl:proc:z-encoder}) that accepts the input program and the user-defined memory model, therefore does not add constraints over unused relations to the result SMT-formula.
 
 The high-level architecture of \porthos[2] is presented in Figure~\ref{fig:arch}.
 The program takes as input the program to be analysed and one (the reachability analysis mode) or two (the portability analysis mode) memory models.
@@ -215,7 +215,8 @@ The \ytree{} then is being compiled (Section~\ref{ch:impl:proc:x-compiler}) to a
 The compiled \xgraph{} then is being converted to an acyclic form (Section~\ref{ch:impl:proc:x-unroll}) in order to be encoded into a \zformula{} (Section~\ref{ch:impl:model:zformula}).
 Apart from that, the memory-model constructor (Section~\ref{ch:impl:proc:w-constr}) constructs the abstract syntax tree of derived relations of the weak memory model \wmodel{} (Section~\ref{ch:impl:model:wmodel}).
 %on the basis of the \xgraph{} in order to build the weak memory model \wmodel{} (Section~\ref{ch:impl:model:wmodel}).
-Thereafter, \wmodel{} and acyclic \xgraph{} are encoded (Section~\ref{ch:impl:proc:z-encoder}) to a \zformula{} representation (a wrapper over an SMT-formula), which then is translated to an SMT-formula (Section~\ref{ch:impl:proc:smt-converter}), which then is solved by the SMT-solver (Section~\ref{ch:impl:proc:smt-solver}).
+Thereafter, \wmodel{} and acyclic \xgraph{} are encoded (Section~\ref{ch:impl:proc:z-encoder}) to a \zformula{} representation (a wrapper over an SMT-formula), which then is translated to an SMT-formula, which then is solved by the SMT-solver.
+Although this general architecture is defined for 
 
 
 \subsection{Internal representations}
@@ -309,7 +310,11 @@ The mathematical structure of event-flow graph was discussed in Section~\ref{ch:
 The nodes of the graph are events, and the edges are basic relations: the control-flow relation \po{} and the data-flow relations \co{} and \rf{}.
 Hereinafter, we denote the \xgraph{} with only control-flow edges as \xgraph[CF], the \xgraph{} with only data-flow edges as \xgraph[CF].
 The complete \xgraph{} is $\xgraph[CF+DF] = \xgraph[CF] \; \cup \; \xgraph[DF]$.
-The UML diagram on Figure~\ref{fig:class-diagrams:XEntity-interfaces} represents the hierarchy of main interfaces of the X-abstraction level.
+The UML diagram in Figure~\ref{fig:class-diagrams:XEntity-interfaces} represents the class hierarchy%
+%
+\footnote{Hereinafter all class diagrams are generated by IntelliJ IDEA Ultimate.}%
+%
+of main interfaces of the X-abstraction level.
 The \textit{full} list of classes that constitute the \xgraph{} hierarchy can be found in Appendix~\ref{apx:trees}.
 Internally, the graph is represented by an adjacency matrix (to be exact, by multiple adjacency matrices that store edges of different kinds, see more details in Section~\ref{ch:impl:model:xgraph}).
 
@@ -346,7 +351,7 @@ Figure~\ref{fig:class-diagrams:XMemoryUnit} represents inheritance hierarchy of 
 \end{figure}
 
 Following the terminology of the C standard, we distinguish the \textit{r-value} and \textit{l-value} memory units (unlike r-values, the l-values may be assigned a new value).
-As r-values cannot change their value, they can be seen as the value itself (therefore the \texttt{XComputationEvent} is modelled as an local r-value memory unit, see more detailed discussion further in current Section).
+As r-values cannot change their value, they can be seen as the value itself (therefore the \texttt{XComputationEvent} is modelled as an local r-value memory unit, see more detailed discussion further in the current Section).
 
 Each memory unit has an \texttt{XType} associated with it.
 The X-type is a symbolic representation of the C primitive type%
@@ -669,7 +674,7 @@ It is a complex processing unit; Figure~\ref{fig:compiler} illustrates the relat
   \label{fig:compiler}
 \end{figure}
 
-The main class representing the X-compiler is \texttt{Y2XConverter}. %TODO: draw it on Figure.
+The main class representing the X-compiler is \texttt{Y2XConverter}. %TODO: draw it in Figure.
 It receives as input the \ytree{}, the memory model kind and user settings (for instance, the interpreter mode defining the set of invocation hooks enabled during the analysis run).
 The \texttt{Y2XConverter} creates an instance of the stateless visitor \texttt{Y2XConverterVisitor} that traverses the \ytree{} while invoking the stateful interpreter \texttt{XInterpreter}.
 The \texttt{XInterpreter} carries the \xgraph{}-builder and provides \textit{action} methods for changing its state and thus the filling in the builder.
@@ -868,7 +873,7 @@ Figure~\ref{fig:loop-unroll} illustrates the unrolling for the left-hand side cy
 The unrolling procedure is performed by the \texttt{XFlowGraphUnroller}.
 For unrolling the flow-graph, we perform the \textit{Deep-First Search~(DFS)} while counting the X-events (for the unrolling bound) and keeping track of the depth stack (for detecting back edges needed for determining the type of sink node).
 Back-edges are determined via the depth stack (each next event is pushed onto the stack; if the new event is present in the stack, the last processed edge is a back-edge).
-Also, during the unrolling each next event increments the \textit{unrolling depth counter} (the \textit{event reference-ID}) -- the integer stored by the \texttt{XEvent} thus making it an \textit{event reference} on non-zero values (only events of a non-unrolled graph can have the zero-valued reference-ID).
+Also, during the unrolling each next event increments the \textit{unrolling depth counter} -- the non-zero integer \textit{event reference-ID} stored by each X-event (only events of a non-unrolled graph can have the zero-valued reference-ID)
 As an X-event is immutable, it has the method `\texttt{XEvent asNodeRef(int refId)}' that clones it with new value of reference-ID.
 The methods \texttt{hashCode} and \texttt{equals} consider the reference-ID as the uniqueness field for all events except sink and source events (considering the usage of \texttt{HashMap} and Guava's \texttt{ImmutableMap} for storing events, proper setting of the hash-code methods is a crucial programming task).
 

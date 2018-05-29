@@ -9,54 +9,44 @@ During the work on this thesis, we solved the following engineering and scientif
 
 \begin{enumerate}[label=\arabic*.] %[label=\Roman*.]
 \item
-Firstly, we studied existing weak memory model-aware analysis frameworks and tools to gather deep understanding of the problem (Sections~\ref{ch:intro:related} and~\ref{ch:enc:mc} and Chapter~\ref{ch:wmm}).
+We have studied existing weak memory model-aware analysis approaches, tools and frameworks to gather deep understanding of the problem (Sections~\ref{ch:intro:related} and~\ref{ch:enc:mc} and Chapter~\ref{ch:wmm}).
 
 \item
-Then, we explored existing implementation of the portability analysis tool \textit{\porthos{}} and designed the new tool \textit{\porthos[2]} that accepts higher subset of the C language as input, has modular architecture and disposes the extensible knowledge base of the domain-specific functions.
+Then, we explored existing implementation of the portability analysis tool \textit{\porthos{}} and designed the new tool \textit{\porthos[2]} that accepts as input the larger subset of the C language and supports its fundamental concepts by design, has modular architecture and disposes the extensible knowledge base of the domain-specific functions.
 The key aspects of the architectural design and implementations are the following:
-%explored the existing implementation of the proof-of-concept tool \porthos[1] redesigned the new architecture of \porthos[2] with consider
-
 
   \begin{enumerate}[leftmargin=\parindent,label=\alph*.]
-  \item The first stumbling block in the input language extension was the \porthos[1] input language parser, which performs the full semantic analysis of the program.
-  Although this works for a small subset of the C language, the rich and expressive language such as C requires several stages of analysis before the compilation stage.
-  For handling that, we implemented the processing units that operate on the \textit{pre-compilation} stage discussed in Section~\ref{ch:impl:proc:x-pre-compiler}.
-  
-  \item Secondly, \porthos[1] determined the \textit{kind of a variable} (shared or local) syntactically, depending on the operator of the function that uses this variable.
-  This strongly restricts the syntax of the input language, therefore, for processing programs in C, \porthos[2] has an additional pre-compilation phase that traverses AST of the program and collects information of all variables accessed in the program (see Section~\ref{ch:impl:proc:x-pre-compiler}).
-  Currently, \porthos[2] considers a variable to be shared if it was declared as a pointer, or its address is accessed at least once by the code of any process, or it was declared as a parameter of the function that defines a process, or it was exported by \texttt{extern} keyword or an exporting function.
-  %This approach gives flexibility in detecting shared variables 
-  %  As this approach does not work for rich languages such as C   
-  %as \porthos[2] determines the \textit{kind (shared or local) of each variable} on the pre-compilation phase, the shared variables can be accessed in arbitrary code location (comparing to \porthos[1] which determines the type of a variable syntactically, depending on the operator of function that uses the variable).
-  
-  \item In addition, \porthos[2] supports some \textit{new syntactic constructions} of the C language: \texttt{break} and \texttt{continue} jumps, function invocations, multiple-variable declarations (as `\lstinline{int a, b=2, z;}'), arbitrary expressions (corresponding to the C standard), and others (see Section~\ref{ch:impl:input}).
+  \item The first stumbling block in extension of the input language was the \porthos[1] program input parser, which performs the full semantic analysis of the program.
+  Although it works for a small subset of the C language, the rich and expressive language such as C requires several stages of analysis before the compilation stage.
+  To handle this, we implemented the processing units that analyse the AST of the program on the \textit{pre-compilation} stage (see Section~\ref{ch:impl:proc:x-pre-compiler}).
 
-  \item As the C language supports unconditional \texttt{goto}-jumps that can produce an arbitrary control-flow graph, which cannot be supported solely with the program AST, therefore we needed to compile the AST to the low-level hardware-agnostic program representation \xgraph{}.
+  As an example, the \textit{variable kind analysis} (shared or local) is performed by \porthos[1] syntactically, depending on the operator or the function that uses the variable.
+  In contrast, \porthos[2] traverses the program AST and collects information of all variables accessed in the program during the pre-compilation stage (see Section~\ref{ch:impl:proc:x-pre-compiler}).
+  Currently, \porthos[2] considers a variable to be shared if it was declared as a pointer, or its address is accessed at least once by the code of any process, or it was declared as a parameter of the function that defines a process, or it was exported by \texttt{extern} keyword or an exporting function.
+
+  \item In addition, \porthos[2] supports \textit{new syntactic constructions} of the C language: \texttt{break} and \texttt{continue} jumps, function invocations, multiple-variable declarations (as `\lstinline{int a, b=2, z;}'), arbitrary expressions allowed by the C11 standard~\cite{c11}, and some others (see Section~\ref{ch:impl:input}).
+
+  \item As the C language supports unconditional \texttt{goto}-jumps, the control-flow graph can have an arbitrary structure, which can not be modelled solely by the program AST, therefore \porthos[2] compiles the AST to the low-level hardware-agnostic program representation \xgraph{}.
   For that, we implemented the \textit{full C interpreter} discussed in Section~\ref{ch:impl:proc:x-compiler}.
   
   \item Originally, the control-flow instructions were encoded directly into the SMT-formula~\cite{Porthos17a}.
-  In contrast, \porthos[2] encodes the low-level \xgraph{} representation, which can have arbitrary graph structure.
-  For encoding the \xgraph{} into the SMT-formula, we apply the \textit{new control-flow encoding scheme} that in general follows the one proposed in~\cite[Chapter 5.1.2]{heljanko2008unfoldings} (see Section~\ref{ch:enc:bmc:cf}).
+  In contrast, \porthos[2] encodes the low-level \xgraph{} representation in accordance with the \textit{new control-flow encoding scheme} that in general follows the one proposed in~\cite[Chapter 5.1.2]{heljanko2008unfoldings} (see Section~\ref{ch:enc:bmc:cf}).
   As the new encoding scheme does not add new variables to every control-flow instruction, the number of variables in the result SMT-formula is expected to be smaller.
   
+  \item Since \porthos[2] compiles the program AST to the \xgraph{} before encoding it into the SMT-formula, we decided to change the \textit{unrolling algorithm} from unwinding all loops $k$ times (where $k$ is the user-specified unrolling bound) to the DFS-based algorithm that explores \textit{all possible executions} that the program can produce within $k$ steps (see discussion on the unrolling in Sections~\ref{ch:impl:proc:x-unroll} and~\ref{ch:eval:show:compil}).
+  Although the new unrolling algorithm produces considerably more executions than the old one and thus requires more time for analysis, \porthos[2] uses the new unrolling algorithm by default as it is complete (finds all possible executions).
+
   \item For ease of adding support for new domain-specific functions (for example, the Kernel-specific atomic write function \texttt{atomic\_store}), we implemented the \textit{invocation hooking}, a flexible mechanism for intercepting the compilation process without changing the interpreter.
   The invocation hooking mechanism serves as a knowledge base for the program domain, that is to be filled and extended in future.
   Invocation hooks are defined in Java and thus are flexible, though their extension and modification requires some knowledge of the internals of the tool.
-  We illustrate this mechanism with the basic support for Linux kernel litmus tests.
-  
-  \item Since the new tool compiles the program AST to the \xgraph{} before encoding it into the SMT-formula, we decided to change the \textit{unrolling algorithm} from the simple unrolling all loops $k$ times (where $k$ is the user-specified unrolling bound) to the DFS-based algorithm that explores all possible states that the program can reach within $k$ steps (see discussion on the unrolling in Sections~\ref{ch:impl:proc:x-unroll} and~\ref{ch:eval:show:compil}).
-  Although the new algorithm produces considerably more events than the old one and thus takes more time for analysis,  \porthos[2] uses the new algorithm by default as it is complete (finds \textit{all} possible executions).
+  We illustrate this mechanism with the basic support for Linux kernel litmus tests (see Sections~\ref{ch:impl:proc:x-compiler} and~\ref{ch:eval:perf:feat}).
 
   \end{enumerate}
   
 \item 
-As the tests show, the overhead of the new architecture is negligible, therefore we consider the applied architectural changes as acceptable.
+As the tests show, the \textit{performance overhead} of the new architecture is negligible (see Section~\ref{ch:eval:perf}), therefore we consider the applied architectural changes as acceptable.
 
 \end{enumerate}
-
-Thus, the new tool \porthos[2] with the extensible program domain knowledge base can be considered as a generalised framework for SMT-based memory model-aware analysis, which can not only perform the reachability and portability analysis, but serve as a basis for other kinds of static analysis of concurrent programs.
-
-%enumerate goals (from Task specification) in past tense + justification
 
 
 \section{Limitations and directions for future work}
@@ -66,7 +56,6 @@ Current implementation of \porthos[2] has the following limitations, that might 
 \begin{itemize}[leftmargin=\parindent]
 \item One of the major limitation of \porthos[2] as a software verification tool is its sensitivity to the \textit{combinatorial explosion} of the state space.
 %that performs complete analysis
-%TODO: show it in table , reference here the table
 As it was shown in Section~\ref{ch:eval:perf}, the number of events of the unrolled program grow rapidly as the user increases the unrolling bound.
 One possible way to reduce the number of the program states might be applying some traditional techniques that target the state explosion problem (such as concrete execution as a part of concolic execution~\cite{majumdar2007hybrid} before the unrolling stage).
 However, this must be done carefully and with taking into account the analysing weak memory model, because otherwise it can lead to the loss of states and thus to incorrect analysis results.
@@ -104,13 +93,20 @@ Thus, in order to increase the stability of \porthos[2], we need to cover its co
 \item One might want to compare the performance of \porthos[2] in cases of usage the different SMT-solvers.
 Due to the \zformula{} abstraction layer, new SMT-solvers may be easily added (the general way to support multiple SMT-solvers is to convert the \zformula{} to an SMT-LIB formula~\cite{smt-lib}, that can be passed as input to the SMT-solver run as an external process).
 
-\item <parallelised>
+%\item <parallelised>
 
-\item <C processor directives + typedef > 
-<TODO: a short summary here>
+%\item <C processor directives + typedef > 
+%<TODO: a short summary here>
 
-\item <contexts for local mem units in mem manager>
+%\item <contexts for local mem units in mem manager>
 
-\item <as an optimisation, maybe use more comprehensive unrolling algo as in Aho>
+%\item <as an optimisation, maybe use more comprehensive unrolling algo as in Aho>
+
+%\item In order to be able to assess the A user might want to know
+
+%\item optionally: urnolling algo; 
 
 \end{itemize}
+
+
+The new tool \porthos[2] with the extensible program domain knowledge base can be considered as a generalised framework for SMT-based memory model-aware analysis, which can not only perform the reachability and portability analysis, but also serve as a basis for other kinds of static analysis of concurrent programs.

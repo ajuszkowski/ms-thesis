@@ -1,0 +1,112 @@
+\section{Sample output of \porthos[2] in the portability analysis mode}
+\label{apx:output}
+
+\begin{figure}[H]
+\centering
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+$ java PorthosC --reachability --input benchmarks/C11/Dekker.c \
+      --bound 27 --target TSO  -v
+0.318: Interpretation...
+0.475: Unrolling...
+0.607: Program encoding...
+0.777: Program domain encoding...
+37.917: Memory model encoding...
+40.768: Solving...
+{
+  "result": "NonReachable",
+  "options": {
+    "inputProgramFile": {
+      "path": "benchmarks/litmus_C11/Dekker.c"
+    },
+    "sourceModel": "TSO",
+    "unrollingBound": 27
+  },
+  "timerMain": {
+    "elapsedTimeSec": 41.146
+  },
+  "timers": {
+    "Interpretation": {
+      "elapsedTimeSec": 0.146
+    },
+    "ProgramDomainEncoding": {
+      "elapsedTimeSec": 37.14
+    },
+    "Solving": {
+      "elapsedTimeSec": 0.377
+    },
+    "Unrolling": {
+      "elapsedTimeSec": 0.07
+    },
+    "MemoryModelEncoding": {
+      "elapsedTimeSec": 2.851
+    },
+    "ProgramEncoding": {
+      "elapsedTimeSec": 0.169
+    }
+  },
+  "countEntities": {
+    "XBarrierEvent": 0,
+    "_XEdgePrimary": 48,
+    "_XEdgeAlternative": 8,
+    "XLocalMemoryEvent": 12,
+    "XSharedMemoryEvent": 17,
+    "XComputationEvent": 8,
+    "XEvent": 40,
+    "XMemoryEvent": 29
+  },
+  "countEntitiesUnrolled": {
+    "XBarrierEvent": 0,
+    "_XEdgePrimary": 334,
+    "_XEdgeAlternative": 66,
+    "XLocalMemoryEvent": 86,
+    "XSharedMemoryEvent": 107,
+    "XComputationEvent": 72,
+    "XEvent": 268,
+    "XMemoryEvent": 193
+  },
+  "errors": []
+}
+\end{lstlisting}
+\end{figure}
+%
+%\begin{lstlisting}
+%$ java PorthosC --portability --input benchmarks/C11/Dekker.c \
+%      --bound 27 --source TSO --target SC --state
+%0.359: Interpretation...
+%0.364: Unrolling...
+%0.590: Unrolling...
+%0.623: Program encoding...
+%0.847: Program domain encoding...
+%#=193 (107)
+%#=193 (107)
+%66.541: Memory model encoding...
+%72.321: Solving...
+%{
+%  "result": "StatePortable",
+%  "iterations": 0,
+%  "mainTimer": {
+%    "elapsedTimeSec": 73.02
+%  },
+%  "timers": {
+%    "ProgramEncoding": {
+%      "elapsedTimeSec": 0.223
+%    },
+%    "MemoryModelEncoding": {
+%      "elapsedTimeSec": 5.779
+%    },
+%    "Interpretation": {
+%      "elapsedTimeSec": 0.248
+%    },
+%    "Solving": {
+%      "elapsedTimeSec": 0.699
+%    },
+%    "ProgramDomainEncoding": {
+%      "elapsedTimeSec": 65.693
+%    },
+%    "Unrolling": {
+%      "elapsedTimeSec": 0.022
+%    }
+%  },
+%  "errors": []
+%}
+%\end{lstlisting}
