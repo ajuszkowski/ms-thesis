@@ -1,119 +1,153 @@
-\section{Sample output of \porthos[2] in the portability analysis mode}
+\section{Sample of the verbose output of \porthos[2] in the portability analysis mode}
 \label{apx:output}
 \setlength{\columnsep}{1.5cm}
 %\setlength{\columnseprule}{0.2pt}
-
+%TODO: Interface! 'java PorthosC'
 \begin{multicols*}{2}
-%\begin{figure}[H]
 \centering
 \begin{lstlisting}[basicstyle=\footnotesize\ttfamily]
 $ java PorthosC --reachability \ 
     --input benchmarks/Dekker.c \
     --bound 27 --target TSO -v
-0.318: Interpretation...
-0.475: Unrolling...
-0.607: Program encoding...
-0.777: Program domain encoding...
-37.917: Memory model encoding...
-40.768: Solving...
+0.400: Interpretation...
+0.632: Unrolling...
+0.805: Program encoding...
+1.019: Program domain encoding...
+36.945: Memory model encoding...
+40.281: Solving...
 {
   "result": "NonReachable",
   "options": {
     "inputProgramFile": {
-      "path": "benchmarks/Dekker.c"
+      "path": "benchmarks/litmus_C11/Dekker.c"
     },
     "sourceModel": "TSO",
     "unrollingBound": 27
   },
   "timerMain": {
-    "elapsedTimeSec": 41.146
+    "elapsedTimeSec": 40.679
   },
   "timers": {
     "Interpretation": {
-      "elapsedTimeSec": 0.146
+      "elapsedTimeSec": 0.222
     },
     "ProgramDomainEncoding": {
-      "elapsedTimeSec": 37.14
+      "elapsedTimeSec": 35.925
     },
     "Solving": {
-      "elapsedTimeSec": 0.377
+      "elapsedTimeSec": 0.397
     },
     "Unrolling": {
-      "elapsedTimeSec": 0.07
+      "elapsedTimeSec": 0.088
     },
     "MemoryModelEncoding": {
-      "elapsedTimeSec": 2.851
+      "elapsedTimeSec": 3.335
     },
     "ProgramEncoding": {
-      "elapsedTimeSec": 0.169
+      "elapsedTimeSec": 0.214
     }
   },
-  "countEntities": {
-    "XBarrierEvent": 0,
-    "_XEdgePrimary": 48,
-    "_XEdgeAlternative": 8,
-    "XLocalMemoryEvent": 12,
-    "XSharedMemoryEvent": 17,
-    "XComputationEvent": 8,
-    "XEvent": 40,
-    "XMemoryEvent": 29
+  "processStatistics": {
+    "_Prelude_": {
+      "XBarrierEvent": 0,
+      "XNopEvent": 0,
+      "_XEdgePrimary": 4,
+      "_XEdgeAlternative": 0,
+      "XLocalMemoryEvent": 0,
+      "XSharedMemoryEvent": 3,
+      "XControlFlowEvent": 0,
+      "XComputationEvent": 0,
+      "XEvent": 4,
+      "XMemoryEvent": 3
+    },
+    "_Postlude_": {
+      "XBarrierEvent": 0,
+      "XNopEvent": 0,
+      "_XEdgePrimary": 3,
+      "_XEdgeAlternative": 0,
+      "XLocalMemoryEvent": 0,
+      "XSharedMemoryEvent": 1,
+      "XControlFlowEvent": 0,
+      "XComputationEvent": 1,
+      "XEvent": 3,
+      "XMemoryEvent": 1
+    },
+    "t0": {
+      "XBarrierEvent": 0,
+      "XNopEvent": 0,
+      "_XEdgePrimary": 22,
+      "_XEdgeAlternative": 4,
+      "XLocalMemoryEvent": 6,
+      "XSharedMemoryEvent": 7,
+      "XControlFlowEvent": 0,
+      "XComputationEvent": 8,
+      "XEvent": 22,
+      "XMemoryEvent": 13
+    },
+    "t1": {
+      "XBarrierEvent": 0,
+      "XNopEvent": 0,
+      "_XEdgePrimary": 22,
+      "_XEdgeAlternative": 4,
+      "XLocalMemoryEvent": 6,
+      "XSharedMemoryEvent": 7,
+      "XControlFlowEvent": 0,
+      "XComputationEvent": 8,
+      "XEvent": 22,
+      "XMemoryEvent": 13
+    }
   },
-  "countEntitiesUnrolled": {
-    "XBarrierEvent": 0,
-    "_XEdgePrimary": 334,
-    "_XEdgeAlternative": 66,
-    "XLocalMemoryEvent": 86,
-    "XSharedMemoryEvent": 107,
-    "XComputationEvent": 72,
-    "XEvent": 268,
-    "XMemoryEvent": 193
+  "processStatisticsUnrolled": {
+    "_Prelude_": {
+      "XBarrierEvent": 0,
+      "XNopEvent": 0,
+      "_XEdgePrimary": 4,
+      "_XEdgeAlternative": 0,
+      "XLocalMemoryEvent": 0,
+      "XSharedMemoryEvent": 3,
+      "XControlFlowEvent": 0,
+      "XComputationEvent": 0,
+      "XEvent": 4,
+      "XMemoryEvent": 3
+    },
+    "_Postlude_": {
+      "XBarrierEvent": 0,
+      "XNopEvent": 0,
+      "_XEdgePrimary": 3,
+      "_XEdgeAlternative": 0,
+      "XLocalMemoryEvent": 0,
+      "XSharedMemoryEvent": 1,
+      "XControlFlowEvent": 0,
+      "XComputationEvent": 1,
+      "XEvent": 3,
+      "XMemoryEvent": 1
+    },
+    "t0": {
+      "XBarrierEvent": 0,
+      "XNopEvent": 0,
+      "_XEdgePrimary": 165,
+      "_XEdgeAlternative": 33,
+      "XLocalMemoryEvent": 43,
+      "XSharedMemoryEvent": 52,
+      "XControlFlowEvent": 0,
+      "XComputationEvent": 46,
+      "XEvent": 165,
+      "XMemoryEvent": 95
+    },
+    "t1": {
+      "XBarrierEvent": 0,
+      "XNopEvent": 0,
+      "_XEdgePrimary": 165,
+      "_XEdgeAlternative": 33,
+      "XLocalMemoryEvent": 43,
+      "XSharedMemoryEvent": 52,
+      "XControlFlowEvent": 0,
+      "XComputationEvent": 46,
+      "XEvent": 165,
+      "XMemoryEvent": 95
+    }
   },
   "errors": []
 }
 \end{lstlisting}
-%\end{figure}
 \end{multicols*}
-
-
-%
-%\begin{lstlisting}
-%$ java PorthosC --portability --input benchmarks/C11/Dekker.c \
-%      --bound 27 --source TSO --target SC --state
-%0.359: Interpretation...
-%0.364: Unrolling...
-%0.590: Unrolling...
-%0.623: Program encoding...
-%0.847: Program domain encoding...
-%#=193 (107)
-%#=193 (107)
-%66.541: Memory model encoding...
-%72.321: Solving...
-%{
-%  "result": "StatePortable",
-%  "iterations": 0,
-%  "mainTimer": {
-%    "elapsedTimeSec": 73.02
-%  },
-%  "timers": {
-%    "ProgramEncoding": {
-%      "elapsedTimeSec": 0.223
-%    },
-%    "MemoryModelEncoding": {
-%      "elapsedTimeSec": 5.779
-%    },
-%    "Interpretation": {
-%      "elapsedTimeSec": 0.248
-%    },
-%    "Solving": {
-%      "elapsedTimeSec": 0.699
-%    },
-%    "ProgramDomainEncoding": {
-%      "elapsedTimeSec": 65.693
-%    },
-%    "Unrolling": {
-%      "elapsedTimeSec": 0.022
-%    }
-%  },
-%  "errors": []
-%}
-%\end{lstlisting}

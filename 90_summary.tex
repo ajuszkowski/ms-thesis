@@ -36,6 +36,8 @@ The key aspects of the architectural design and implementations are the followin
   As the new encoding scheme does not add new variables to every control-flow instruction, the number of variables in the result SMT-formula is expected to be smaller.
   
   \item Since \porthos[2] compiles the program AST to the \xgraph{} before encoding it into the SMT-formula, we decided to change the \textit{unrolling algorithm} from unwinding all loops $k$ times (where $k$ is the user-specified unrolling bound) to the DFS-based algorithm that explores \textit{all possible executions} that the program can produce within $k$ steps (see discussion on the unrolling in Sections~\ref{ch:impl:proc:x-unroll} and~\ref{ch:eval:show:compil}).
+  On the other hand, it is shown in Section~\ref{ch:eval:show:unrol} that the implementation of the new unrolling algorithm does not produce exponentially many dummy \texttt{nop}-events as the implementation of the old unrolling algorithm does.
+  Another benefit of the new unrolling scheme is that it is much more configurable (i.e., the number of events grows gradually as the unrolling bound is being increased, see Figure~\ref{dep:events}). \\
   Although the new unrolling algorithm produces considerably more executions than the old one and thus requires more time for analysis, \porthos[2] uses the new unrolling algorithm by default as it is complete (finds all possible executions).
 
   \item For ease of adding support for new domain-specific functions (for example, the Kernel-specific atomic write function \texttt{atomic\_store}), we implemented the \textit{invocation hooking}, a flexible mechanism for intercepting the compilation process without changing the interpreter.
@@ -67,7 +69,7 @@ Nonetheless, the small-size litmus test-like programs (containing hundreds of ev
 
 %\item As its predecessor, \porthos[2] does not propose any heuristic for finding the optimal unrolling bound.
 
-\item For justifying the correctness of the verification that bases on the result of the input program unrolling, one might want to be aware whether an execution in the unrolled event-flow graph has run the loop a whole number or it was interrupted on non-last event of the loop.
+\item For justifying the correctness of the verification that bases on the result of the input program unrolling (via the new unrolling scheme discussed in Section~\ref{ch:impl:proc:x-unroll}), one might want to be aware whether the execution in the unrolled event-flow graph has run the loop a whole number or it was interrupted on non-last event of the loop.
 This can be modelled with two kinds of sink events (completed and uncompleted) of the event-flow graph as it was discussed in Sections~\ref{ch:enc:bmc:cf} and~\ref{ch:impl:proc:x-unroll}.
 
 \item \textit{Extending the knowledge base} of domain-specific functions to model synchronisation primitives (the compiler mapping) can be considered as the main future research direction.
