@@ -9,6 +9,8 @@ public interface XInterpreter {
   XExitEvent emitExitEvent();
   XBarrierEvent emitBarrierEvent(XBarrierEvent.Kind kind);
   XJumpEvent emitJumpEvent();
+  XJumpEvent emitJumpEvent(String label);
+  void markNextEventLabel(String label);
   XNopEvent emitNopEvent();
   XAssertionEvent emitAssertionEvent(XBinaryComputationEvent assertion);
   

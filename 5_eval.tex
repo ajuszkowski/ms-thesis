@@ -1,6 +1,7 @@
 \chapter{Evaluation}
 \label{ch:eval}
 
+
 \section{Comparison with \porthos[1]}
 \label{ch:eval:show}
 
@@ -101,7 +102,7 @@ The labels of events in the left-hand side picture (produced by \porthos[2]) are
 \label{ch:eval:show:unrol}
 
 The unrolling algorithm used by \porthos[1] (right-hand side picture) unrolls \textit{all} loops $k$ times (where $k$ is the unrolling bound), and the unrolling algorithm of \porthos[2] unrolls loops so that not more than $k$ events are executed.
-As it is illustrated by the picture, the new algorithm produces a better set of program executions (for example, the unrolled graph of \porthos[1] does not contain executions of the inner loops more than $k=2$ times, which makes the old unrolling algorithm not complete).
+As it is illustrated by the picture, the new algorithm produces a better set of program executions (for example, the unrolled graph of \porthos[1] does not contain executions of the inner loops more than $k=2$ times in a raw, which makes the old unrolling algorithm not complete).
 As the new unrolling algorithm is based on the DFS algorithm, it discovers \textit{all} possible paths, therefore the result graph contains \textit{all} possible executions and thus the program analysis performed on this graph can be complete up to bound~$k$.
 
 Note that the unrolled graph produced by \porthos[2] does not necessarily become a tree after removing the sink node.
@@ -276,6 +277,79 @@ As the portability analysis requires compiling the program under two memory mode
 \subsection{New features}
 \label{ch:eval:perf:feat}
 
+Current section demonstrates some new features of \porthos[2], which is hard or impossible to implement on the top of its predecessor \porthos[1] (see detailed discussion in Chapter~\ref{ch:impl}).
+
+
+\subsection{Interpretation of a code with an arbitrary control-flow}
+
+The following example in Figure~\ref{ex:cfg-arbitrary} illustrates the interpretation of the program that contains \textit{continue}, \textit{break} and two \texttt{goto} instructions (both forward and backward), that can produce an arbitrary control-flow graph.
+As an addition, the example illustrates the interpretation of complex expressions that involve shared variables (such as the condition of the \texttt{while}-loop in the function \texttt{thread\_0}).
+Note that the \texttt{entry event} of the loop is not necessarily the guard computation event.
+In the case when a computation event involves shared variables, all of them need to be copied to a register before the computation event is emitted.
+The first event that performs such a copy becomes an entry event of the \texttt{while}-loop, which the loop back edge and all \texttt{continue}-jumps point to.
+
+%Note also that if the \texttt{backward} \texttt{goto}-edges (to the already processed event) can be set up at the moment of emitting the jump event, the \texttt{forward} \texttt{goto}-edges can be set up later on
+
+\begin{figure}[!h]
+\begin{lstlisting}
+{
+  int x = 1, *y;
+}
+
+void thread_0(int &x, int &y) {
+  L0: x = 0;
+  int r;
+  while (x * (5 + 4 / 2) % 3 == 1) {
+    if (x != 0) {
+      goto L0; //backward jump
+    }
+    if (y > 6) {
+      continue;
+    }
+    else if (++y > 7) {
+      r = r + 10;
+      break;
+    }
+    else {
+      goto L1; //forward jump
+    }
+    r = 11;
+  }
+  y = x + 1;
+  L1: x = r;
+}
+
+void thread_1() {
+  while (true) {
+    if (x > 7)
+      break;
+  }
+  y = x;
+}
+
+exists (y == x + 1 && thread_0:r > 21)
+
+\end{lstlisting}
+\caption{Example of interpretation of a code with an arbitrary control-flow}
+\label{ex:cfg-arbitrary}
+\end{figure}
+
+The four flow-graphs for the code in Figure~\ref{ex:cfg-arbitrary} are shown in Figure~\ref{ex:cfg-arbitrary:pic}.
+There are two small linear flow-graphs for \textit{prelude} (litmus-specific variables initialisation and shared variables declaration) and \textit{postlude} (assertion) definitions.
+As the initialisation statement assigns value only to one shared variable, its flow-graph has only a single event (although variable declarations change the state of the interpreter while compilation, they do not produce events).
+The postlude has shared variables involved into the assertion, therefore they need to be copied into local registers beforehand.
+Note how the unconditional jump instructions \texttt{goto}, \texttt{continue} and \texttt{break} are compiled in the event-flow graph for processes \texttt{thread\_0} and \texttt{thread\_1}.
+
+
+\begin{figure}[!h]
+\includegraphics[width=\textwidth,keepaspectratio]{img/my/graphs/cfg-arbitrary/collage.jpg}
+\caption{Control-flow components of the event-flow graphs for the code in Figure~\ref{ex:cfg-arbitrary}}
+\label{ex:cfg-arbitrary:pic}
+\end{figure}
+
+
+\subsection{Extensible compiler mapping}
+
 %The revised design of \porthos{} tool includes the following new features:
 Apart from redesigning the tool architecture and extending the input language, we added support for basic constructions used in \textit{Kernel litmus tests}~\cite{alglave2018frightening}.
 Although, current version of \porthos[2] only supports some basic macros of the Linux kernel (such as \texttt{READ\_ONCE} and \texttt{WRITE\_ONCE} for atomic load and store with relaxed memory ordering) as the support for kernel-specific memory barriers goes out of the scope of current thesis.
@@ -300,5 +374,5 @@ P1(volatile int* y, volatile int* x) {
 exists(x == 0 && y == 0)
 \end{lstlisting}
 
-If verifying this litmus test by \porthos[2] in the state reachability mode, the test passes for TSO memory model and fails for SC model.
+When verifying this litmus test by \porthos[2] in the state reachability mode, the test passes for TSO memory model and fails for SC model.
 

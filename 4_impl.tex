@@ -196,11 +196,14 @@ Current version of \porthos[2] does not recognise C processor directives (it ign
   \label{fig:arch}
 \end{figure}
 
-The general processing scheme of old tool \porthos[1] is the following.
+The general processing scheme of the old tool \porthos[1] is the following.
 The input program is parsed to the AST, where leaves are the events.
-The instructions of the AST are then encoded into the $\phi_{CF}$ (see Section~\ref{ch:enc:bmc:cf}) and the events are processed by the single function (`\texttt{dartagnan.wmm.Domain.encode}') that loops over all events, checks their properties (the kind of event, the operands of the memory event, the type of the barrier event, etc.) and adds corresponding relations assertions to the formula.
-Encoding all the relations (the \textit{program domain encoding}) in a single function is error-prone and hardly manageable.
-Moreover, this function does not consider the memory model, therefore the result formula can contain relations that are not constrained by the memory model specified by the user and thus are redundant (for instance, the \texttt{TSO} memory model does not contain \texttt{POWER}-specific relations \texttt{ii}, \texttt{ic}, \texttt{ci}, etc., that are always encoded regardless the memory model).
+%The instructions of the AST are encoded into the $\phi_{CF}$ (see Section~\ref{ch:enc:bmc:cf})
+The control-flow of the program is encoded into an SMT-formula as it was discussed in Section~\ref{ch:enc:bmc:cf}, and the data-flow (\po{}- and \rf{}- relations) and some derived relations are encoded by the single function (`\texttt{dartagnan.wmm.Domain.encode}') that loops over all events, checks their properties (the kind of event, the operands of the memory event, the control-flow properties such as condition level, etc.) and adds the assertions of corresponding relations to the formula.
+Encoding all the relations (the \textit{program domain encoding}) in a single large function is an error-prone and hardly manageable approach.
+Moreover, the events, that constitute the elements of a composite data structure, carry the information about it (such as the condition level, which is the property of the control-flow graph), while it should be carried by the data structure itself.
+%This approach is highly extensible
+In addition, the program domain encoding function does not consider the memory model, therefore the result formula can contain relations that are not constrained by the memory model specified by the user and thus are redundant (for instance, the \texttt{TSO} memory model does not contain \texttt{POWER}-specific relations \texttt{ii}, \texttt{ic}, \texttt{ci}, etc., that are always encoded regardless the memory model).
 In \porthos[2], we moved the encoding logic into a separate module (see Section~\ref{ch:impl:proc:z-encoder}) that accepts the input program and the user-defined memory model, therefore does not add constraints over unused relations to the result SMT-formula.
 
 The high-level architecture of \porthos[2] is presented in Figure~\ref{fig:arch}.
@@ -215,8 +218,13 @@ The \ytree{} then is being compiled (Section~\ref{ch:impl:proc:x-compiler}) to a
 The compiled \xgraph{} then is being converted to an acyclic form (Section~\ref{ch:impl:proc:x-unroll}) in order to be encoded into a \zformula{} (Section~\ref{ch:impl:model:zformula}).
 Apart from that, the memory-model constructor (Section~\ref{ch:impl:proc:w-constr}) constructs the abstract syntax tree of derived relations of the weak memory model \wmodel{} (Section~\ref{ch:impl:model:wmodel}).
 %on the basis of the \xgraph{} in order to build the weak memory model \wmodel{} (Section~\ref{ch:impl:model:wmodel}).
-Thereafter, \wmodel{} and acyclic \xgraph{} are encoded (Section~\ref{ch:impl:proc:z-encoder}) to a \zformula{} representation (a wrapper over an SMT-formula), which then is translated to an SMT-formula, which then is solved by the SMT-solver.
-Although this general architecture is defined for 
+Thereafter, \wmodel{} and acyclic \xgraph{} are encoded (Section~\ref{ch:impl:proc:z-encoder}) to a \zformula{} representation (a wrapper over an SMT-formula), which then is translated to an SMT-formula, which then is solved by the SMT-solver (note, current implementation of \porthos[2] excludes the \zformula{} as at the moment it is enough for \porthos[2] to use only a single SMT-solver).
+
+%Although the general architecture is designed to separate clearly the internal representations used by the program, we have not yet implemented several modules listed before.
+%For instance, the \xgraph{} is constructed only partially, i.e., only the control-flow graph \xgraph[CF] is built during the program compilation.
+%After this, the graph is unrolled and encoded directly into an SMT-formula, avoiding the \zformula{} abstraction layer as temporarily unnecessary.
+%The data-flow analysis is performed on the stage of SMT-encoding with usage of the SSA-map (see Section~\ref{ch:enc:bmc:df}).
+%Thus, the current implementation of \porthos[2] implies the \xgraphU[CF] to be passed to the program domain encoder of the old code base, which was discussed above.
 
 
 \subsection{Internal representations}
@@ -292,11 +300,11 @@ It consists type modifiers and qualifiers, that will be converted to the X-type 
 
 According to the C standard, \textit{"any statement may be preceded by a prefix that declares an identifier as a label name"}.
 The \ytree{} statements of follow this rule, however they these labels are symbolic, and they need to be resolved at the pre-compilation stage.
-Apart from the set of statements listed before, we define the \texttt{YFunctionDefinition} and its inheritor a litmus-specific declaration \texttt{YProcessDefinition}
+Apart from the set of statements listed before, we define the \texttt{YFunctionDefinition} and its inheritor a litmus-specific definition \texttt{YProcessDefinition}
 used in intra-procedural analysis mode.
 The function definition contains the \texttt{YCompoundStatement} body and the \texttt{YMethodSignature} signature (method name and types of formal parameters), which is used in the function resolution during the pre-compilation stage.
-The other litmus-specific statements are \texttt{YPreludeStatement}
-that carries the list of \texttt{YStatement} initial writes, and \texttt{YPostludeStatement} 
+The other litmus-specific definitions are \texttt{YPreludeDefinition}
+that carries the list of \texttt{YStatement} initial writes, and \texttt{YPostludeDefinition} 
 that carries the \texttt{YExpression} binary expression to be asserted by the litmus test.
 
 The syntax tree that contains set of definitions (e.g., litmus-initialisations, function definitions, litmus-asserts) is modelled by the class \texttt{YSyntaxTree}.
@@ -447,6 +455,8 @@ We distinguish the following kinds of edges:
     \2 the \co{}-relation edges, and 
     \2 the \rf{}-relation edges.
 \end{outline}
+
+%TODO: check this %Note, as it was above, the data-flow componen \xgraph[DF] of the event-flow graph is not yet constructed
 
 
 \paragraph{Graph invariants}
@@ -619,7 +629,7 @@ The precompiler traverses the \ytree{} and collects information necessary for it
 
 The label resolution is necessary for establishing links to labelled statements.
 In C, labelled statements are declared via the colon-syntax `\texttt{<label>\;:\;<statement>}', and the labels are referenced by the jump-statement `\texttt{goto\;<label>}'.
-The label resolution algorithm traverses the \ytree{} and collects all declared labels into a map that points a label to the labelled statement.
+The label resolution algorithm traverses the \ytree{} and collects all declared labels into a map \texttt{JumpsResolver} that points a label to the labelled statement.
 This information is used during compilation to set up unconditional jumps.
 
 
@@ -674,7 +684,7 @@ It is a complex processing unit; Figure~\ref{fig:compiler} illustrates the relat
   \label{fig:compiler}
 \end{figure}
 
-The main class representing the X-compiler is \texttt{Y2XConverter}. %TODO: draw it in Figure.
+The main class representing the X-compiler is \texttt{Y2XConverter}.
 It receives as input the \ytree{}, the memory model kind and user settings (for instance, the interpreter mode defining the set of invocation hooks enabled during the analysis run).
 The \texttt{Y2XConverter} creates an instance of the stateless visitor \texttt{Y2XConverterVisitor} that traverses the \ytree{} while invoking the stateful interpreter \texttt{XInterpreter}.
 The \texttt{XInterpreter} carries the \xgraph{}-builder and provides \textit{action} methods for changing its state and thus the filling in the builder.
@@ -717,7 +727,13 @@ Since C language allows usage of variables that have the same name to be declare
 \paragraph{Invocation hooking manager}
 %\label{ch:impl:proc:x-compiler:hooking}
 
-The invocation hooking module serves as a knowledge base that stores the semantics of functions.
+The invocation hooking module serves as a compiler knowledge base that stores the semantics of high-level functions in terms of low-level event-flow graph elements.
+%Invocation hooks should be used for describing the 
+For example, the C11 sequentially consistent load operation `\lstinline{l.store(memory_order_seq_cst, r)}' whould be compiled for the \texttt{x86} architecture as the write instruction `\lstinline{MOV l, r}' followed by the fence instruction `\lstinline{MFENCE}', whether for the \texttt{POWER} architecture this code would be compiled as the `\lstinline{hwsync}' followed by the store instruction.
+This is called the \textit{compiler mapping}.
+While the \xgraph{} is the abstract (hardware-agnostic) low-level program representation, the compiler mapping is the only component of the compiler that produces differences between two versions of the same program compiled for different architectures.
+ 
+The function invocation mechanism works as follows.
 Once the X-compiler meets the function invocation, it calls the \texttt{XHookManager}, which tries to match the function signature (in the case of program in C language -- only the function name) across all signatures it stores.
 If the signature matches, the hook manager intercepts the function call and interprets the hook action instead of invoking the function directly.
 The hook manager enables only invocation hooks that are compliant with the language of the input program.
@@ -886,7 +902,7 @@ The methods \texttt{hashCode} and \texttt{equals} consider the reference-ID as t
 Once the graph is unrolled, it can be augmented by data-flow edges.
 As it was discussed in Section~\ref{ch:impl:model:xgraph}, the data-flow edges can represent either \rf{}- or \co{}-relation.
 The \rf{}-edges join each write event to all read events that access the same location; the \co{}-edges join write events to the same location.
-Currently, \porthos[2] does not yet construct the \xgraph[DF] component of the full \xgraph{}, instead, it uses the function `\texttt{dartagnan.wmm.Domain.encode}' of \porthos[1] to encode data-flow relations and derived relations of the \xgraph[CF].
+%TODO: check if this is true %Currently, \porthos[2] does not yet construct the \xgraph[DF] component of the full \xgraph{}, instead, it uses the function `\texttt{dartagnan.wmm.Domain.encode}' of \porthos[1] to encode data-flow relations and derived relations of the \xgraph[CF].
 
 %TODO: why in old implementation we encode the negation of "co" ? same for "rf" above
 %\url{https://github.com/hernanponcedeleon/Dat3M/blob/80341bec26021d41cf79eddc943e7cbe6f49322f/dartagnan/src/dartagnan/wmm/Domain.java#L204} >

@@ -1,11 +1,15 @@
 \section{Sample output of \porthos[2] in the portability analysis mode}
 \label{apx:output}
+\setlength{\columnsep}{1.5cm}
+%\setlength{\columnseprule}{0.2pt}
 
-\begin{figure}[H]
+\begin{multicols*}{2}
+%\begin{figure}[H]
 \centering
-\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
-$ java PorthosC --reachability --input benchmarks/C11/Dekker.c \
-      --bound 27 --target TSO  -v
+\begin{lstlisting}[basicstyle=\footnotesize\ttfamily]
+$ java PorthosC --reachability \ 
+    --input benchmarks/Dekker.c \
+    --bound 27 --target TSO -v
 0.318: Interpretation...
 0.475: Unrolling...
 0.607: Program encoding...
@@ -16,7 +20,7 @@ $ java PorthosC --reachability --input benchmarks/C11/Dekker.c \
   "result": "NonReachable",
   "options": {
     "inputProgramFile": {
-      "path": "benchmarks/litmus_C11/Dekker.c"
+      "path": "benchmarks/Dekker.c"
     },
     "sourceModel": "TSO",
     "unrollingBound": 27
@@ -67,7 +71,10 @@ $ java PorthosC --reachability --input benchmarks/C11/Dekker.c \
   "errors": []
 }
 \end{lstlisting}
-\end{figure}
+%\end{figure}
+\end{multicols*}
+
+
 %
 %\begin{lstlisting}
 %$ java PorthosC --portability --input benchmarks/C11/Dekker.c \

@@ -7,6 +7,8 @@
 
 During the work on this thesis, we solved the following engineering and scientific tasks:
 
+%TODO: written a generic hardware-agnostic extensible non-optimising compiler
+
 \begin{enumerate}[label=\arabic*.] %[label=\Roman*.]
 \item
 We have studied existing weak memory model-aware analysis approaches, tools and frameworks to gather deep understanding of the problem (Sections~\ref{ch:intro:related} and~\ref{ch:enc:mc} and Chapter~\ref{ch:wmm}).
@@ -57,7 +59,7 @@ Current implementation of \porthos[2] has the following limitations, that might 
 \item One of the major limitation of \porthos[2] as a software verification tool is its sensitivity to the \textit{combinatorial explosion} of the state space.
 %that performs complete analysis
 As it was shown in Section~\ref{ch:eval:perf}, the number of events of the unrolled program grow rapidly as the user increases the unrolling bound.
-One possible way to reduce the number of the program states might be applying some traditional techniques that target the state explosion problem (such as concrete execution as a part of concolic execution~\cite{majumdar2007hybrid} before the unrolling stage).
+One possible way to reduce the number of the program states might be applying some traditional techniques that target the state explosion problem (such as concrete execution as a part of \textit{concolic execution}~\cite{majumdar2007hybrid} before the unrolling stage).
 However, this must be done carefully and with taking into account the analysing weak memory model, because otherwise it can lead to the loss of states and thus to incorrect analysis results.
 Nonetheless, the small-size litmus test-like programs (containing hundreds of events after the unrolling) remain to be handleable by \porthos[2] within reasonable time.
 % cannot be applied to our problem \textit{before} the weak memory model is considered, 
@@ -65,12 +67,15 @@ Nonetheless, the small-size litmus test-like programs (containing hundreds of ev
 
 %\item As its predecessor, \porthos[2] does not propose any heuristic for finding the optimal unrolling bound.
 
-\item \textit{Extending the knowledge base} of domain-specific functions to model synchronisation primitives can be considered as the main future research direction.
+\item For justifying the correctness of the verification that bases on the result of the input program unrolling, one might want to be aware whether an execution in the unrolled event-flow graph has run the loop a whole number or it was interrupted on non-last event of the loop.
+This can be modelled with two kinds of sink events (completed and uncompleted) of the event-flow graph as it was discussed in Sections~\ref{ch:enc:bmc:cf} and~\ref{ch:impl:proc:x-unroll}.
+
+\item \textit{Extending the knowledge base} of domain-specific functions to model synchronisation primitives (the compiler mapping) can be considered as the main future research direction.
 Thus, to be able to process most Linux kernel litmus tests, \porthos[2] needs to know the semantics of the barrier and memory operation functions that are specific for the Linux kernel in order to be able to compile them into the \xgraph{} and later encode them into the SMT-formula.
 Due to modular architecture of \porthos[2], the extension of the knowledge base can be done by modifying solely the invocation hooking mechanism.
 Note that the flip side of the flexibility of invocation hooks is their complexity: being written in Java, in addition they require from the user some knowledge of general architecture of the tool, the interface methods provided by the interpreter, the class hierarchy of the \xgraph{} elements, etc.
 
-\item Secondly, the wide range of existing litmus tests may require \porthos[2] to \textit{extend the support for input languages}.
+\item The wide range of existing litmus tests may require \porthos[2] to \textit{support new input languages}.
 The first candidates for being supported are the LISA language (Litmus Instruction Set Architecture)~\cite{alglave2016syntax} and assembly languages of most common architectures (x86, POWER, Alpha, etc.).
 Note that the programs in low-level languages can be easily compiled to the \xgraph{} representation by existing compiler architecture since low-level assembly-like languages can be considered as the subset of the C language, that restricts the set of non-linear control-flow instructions to the conditional and unconditional jumps (which are supported by the current \xgraph{} compiler of \porthos[2]).
 %Note that adding support for low-level languages requires adding the new \xgraph{} compiler that will compile the low-level syntax tree (with non-conditional jumps as the only )
@@ -91,7 +96,7 @@ Although the current \porthos[2] interpreter infrastructure is not configured to
 Thus, in order to increase the stability of \porthos[2], we need to cover its code by unit- and functional tests.
 
 \item One might want to compare the performance of \porthos[2] in cases of usage the different SMT-solvers.
-Due to the \zformula{} abstraction layer, new SMT-solvers may be easily added (the general way to support multiple SMT-solvers is to convert the \zformula{} to an SMT-LIB formula~\cite{smt-lib}, that can be passed as input to the SMT-solver run as an external process).
+For that, the \zformula{} abstraction layer will be useful as new SMT-solvers can be easily added (the general way to support multiple SMT-solvers is to convert the \zformula{} to an SMT-LIB formula~\cite{smt-lib}, that can be passed as input to the SMT-solver run as an external process).
 
 %\item <parallelised>
 
