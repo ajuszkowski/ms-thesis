@@ -8,6 +8,7 @@ Yet far from all the C language is supported (which, considering its complexity 
 \footnote{To ensure this, one merely has to look at existing C compiler implementations, for instance, the open-source \tool{gcc} compiler, which uses the C parser written in more than 18.5 thousand lines of code (see \url{https://github.com/gcc-mirror/gcc/blob/master/gcc/c/c-parser.c})}%
 %
 ), we consider the accomplished work as a step towards it.
+The repository for \porthos[2] project is \url{https://github.com/ajuszkowski/PorthosC}.
 
 
 \section{General principles}
@@ -66,22 +67,21 @@ One of the transparency principles is following the clear code style.
 This mainly means the clear and informative naming of classes, functions and fields.
 It also implies the unified ordering of methods in classes, minimised size of methods code, clear tabulation, etc.
 
-As its predecessor, \porthos[2] uses the open-source SMT-solver \tool{Z3}%
-%
-\footnote{The \tool{Z3} project repository: \url{https://github.com/Z3Prover/z3}} %
-%
-by Microsoft Research~\cite{de2008z3}. However, unlike its predecessor, \porthos[2] has an additional abstraction level, \zformula{} (see Section~\ref{ch:impl:model:zformula}), that allows the use any other SMT-solver.
-
 As its predecessor, \porthos[2] is written in \textit{Java}, firstly, in order to be able to reuse some parts and concepts of \porthos{} also written in Java, and secondly, because the authors find the concepts of Object-Oriented Programming~(OOP) inherent in Java suitable for modelling the programming languages.
-Although Java does not show the best results in performance benchmarks (for example, compared to C++~\cite{hundt2011loop}), the performance cornerstone of \porthos[2] (as well as any other SMT-based code analyser) is the phase of solving the SMT-formula, which is left to the third-party SMT-solver invoked by \porthos[2] via a Java API.
+Although Java does not show the best results in performance benchmarks (for example, compared to C++~\cite{hundt2011loop}), the performance cornerstone of \porthos[2] (as well as any other SMT-based code analyser) is the phase of solving the SMT-formula, which is left to the third-party SMT-solver \tool{Z3}%
+%
+\footnote{The \tool{Z3} project repository: \url{https://github.com/Z3Prover/z3}} % 
+by Microsoft Research~\cite{de2008z3}, which is invoked by \porthos[2] via a Java API.
+%
+%However, unlike its predecessor, \porthos[2] has an additional abstraction level, \zformula{} (see Section~\ref{ch:impl:model:zformula}), that allows the use any other SMT-solver.
 However, considering the perspective of using \porthos[2] as a static analyser for real-world programs, the memory optimisation problem must also be taken into account during both encoding and solving stages.
-It is worth noting that, for the reasons of simplicity, \porthos[2] is not a concurrent program, however, we believe that due to its modular architecture it can be easily parallelised on the level of program modules.
+For the reasons of simplicity, \porthos[2] is not a concurrent program, however, we believe that due to its modular architecture it can be easily parallelised on the level of program modules if necessary.
 
 Currently, \porthos[2] can operate only in the intra-procedural analysis mode (not supporting invocations of the user-defined functions), assuming that each function defined in the input file is being executed in a separate thread.
 However, the redesigned architecture of \porthos[2] can be easily extended to support the inter-procedural (cross-function) analysis by inlining user-defined functions calls and binding variable contexts.
 In this mode, instead of analysing a single source code file, the tool can process the whole code project, where the functions to be executed in parallel are specified separately by the user.
 Also, the tool can be extended to detect the concurrent parts of the code automatically at the pre-compilation stage.
-For that, the pre-compiler should recognise functions that commence a new process (such as \texttt{pthread\_create} from \texttt{pthread.h}) and resolve the argument that points to the thread function.
+For that, the pre-compiler should recognise functions that commence a new process (such as \lstinline{pthread\_create} from \texttt{pthread.h}) and resolve the argument that points to the thread function.
 This functionality is left beyond current thesis.
 
 
@@ -160,7 +160,7 @@ Secondly, \porthos{} resolves the semantics of operations syntactically (it was 
 so that it does not require to change the grammar for encoding the semantics of a new function. %adding support for a new function.
 %\footnote{for instance, given two functions `\lstinline{foo(int a)}' and `\lstinline{foo(char a)}' compiled by a C++ compiler, the code `\lstinline{int a = '1'; foo(a);}' will invoke the first method rather than the second one.}.%
 As the reader might have noticed from the grammar sketch in Figure~\ref{fig:in_grammar_pts}, different kinds of memory operations of of the \oldporthos{} input language vary syntactically as well.
-For example, the assignment of a local computation to a register uses the symbol `\lstinline{<-}', the atomic non-relaxed load operation is denoted by \lstinline{<:-}', atomic non-relaxed store operation is denoted by `\lstinline{:=}', and the semantics of relaxed \lstinline{load} and \lstinline{store} is resolved syntactically by matching the function name and arguments.
+For example, the assignment of a local computation to a register uses the symbol `\lstinline{<-}', the atomic non-relaxed load operation is denoted by `\lstinline{<:-}', atomic non-relaxed store operation is denoted by `\lstinline{:=}', and the semantics of relaxed \lstinline{load} and \lstinline{store} is resolved syntactically by matching the function name and arguments.
 Moreover, only the operator `\lstinline{<-}' accepts an expression as the source of data, which means that expressions could be assigned only to registers.
 In \porthos[2], the semantics of the data-flow operation is determined according to the types of operands, that are determined during the pre-compilation stage (see Section~\ref{ch:impl:proc:x-pre-compiler}).
 The semantics of the functions also being resolved during the compilation stage via the \textit{invocation hooking} mechanism (see Section~\ref{ch:impl:proc:x-compiler}).
@@ -203,12 +203,12 @@ The control-flow of the program is encoded into an SMT-formula as it was discuss
 Encoding all the relations (the \textit{program domain encoding}) in a single large function is an error-prone and hardly manageable approach.
 Moreover, the events, that constitute the elements of a composite data structure, carry the information about it (such as the condition level, which is the property of the control-flow graph), while it should be carried by the data structure itself.
 %This approach is highly extensible
-In addition, the program domain encoding function does not consider the memory model, therefore the result formula can contain relations that are not constrained by the memory model specified by the user and thus are redundant (for instance, the \texttt{TSO} memory model does not contain \texttt{POWER}-specific relations \texttt{ii}, \texttt{ic}, \texttt{ci}, etc., that are always encoded regardless the memory model).
+In addition, the program domain encoding function does not consider the memory model, therefore the result formula can contain relations that are not constrained by the memory model specified by the user and thus are redundant (for instance, the TSO memory model does not contain Power-specific relations \texttt{ii}, \texttt{ic}, \texttt{ci}, etc., that are always encoded regardless the memory model).
 In \porthos[2], we moved the encoding logic into a separate module (see Section~\ref{ch:impl:proc:z-encoder}) that accepts the input program and the user-defined memory model, therefore does not add constraints over unused relations to the result SMT-formula.
 
 The high-level architecture of \porthos[2] is presented in Figure~\ref{fig:arch}.
 The program takes as input the program to be analysed and one (the reachability analysis mode) or two (the portability analysis mode) memory models.
-However, instead of parsing memory models from the \cat{} file, the tool may operate with pre-defined memory models (\texttt{SC}, \texttt{TSO}, \texttt{PSO}, \texttt{RMO}, \texttt{ALPHA}, \texttt{POWER}, \texttt{ARM}; this feature is inherited from \porthos[1]).
+However, instead of parsing memory models from the \cat{} file, the tool may operate with pre-defined memory models (SC, TSO, PSO, RMO, Alpha, Power, ARM; this feature is inherited from \porthos[1]).
 The parsed program syntax tree is then converted (Section~\ref{ch:impl:proc:y-constr}) to a program AST called \ytree{}%
 %
 \footnote{In order to avoid confusion between different internal representations, we prefix the names of elements of each internal representation with a letter. For instance, we picked the letter `Y' to denote the AST code representation as drawing of this letter resembles the tree branching; with letter `X' we prefix elements of the event-flow graph as the events are to be e\textbf{x}ecuted; and with letter `W' we prefix elements of the \textbf{w}eak memory model AST.}%
@@ -628,7 +628,7 @@ The precompiler traverses the \ytree{} and collects information necessary for it
 %TODO: <not implemented yet>
 
 The label resolution is necessary for establishing links to labelled statements.
-In C, labelled statements are declared via the colon-syntax `\texttt{<label>\;:\;<statement>}', and the labels are referenced by the jump-statement `\texttt{goto\;<label>}'.
+In C, labelled statements are declared via the colon-syntax `\lstinline{<label>\;:\;<statement>}', and the labels are referenced by the jump-statement `\lstinline{goto\;<label>}'.
 The label resolution algorithm traverses the \ytree{} and collects all declared labels into a map \texttt{JumpsResolver} that points a label to the labelled statement.
 This information is used during compilation to set up unconditional jumps.
 
@@ -666,7 +666,7 @@ The following types of variables are detected as \textit{global variables}:
 \item a variable was declared as a pointer;
 \item a variable whose address was accessed by any process;
 \item a variable declared as a parameter of the process function; and
-\item a variable exported by the \texttt{extern} keyword (in the kernel-analysis mode, the functions \texttt{EXPORT\_SYMBOL} and \texttt{EXPORT\_SYMBOL\_GPL} also export symbols for dynamic linking~\cite{argawal16kernel}).
+\item a variable exported by the \texttt{extern} keyword (in the kernel-analysis mode, the functions \lstinline{EXPORT_SYMBOL} and \lstinline{EXPORT_SYMBOL_GPL} also export symbols for dynamic linking~\cite{argawal16kernel}).
 \end{itemize}
 
 
@@ -713,7 +713,7 @@ However, the memory manager is a stateful component of the compiler as it offers
 
 The interface methods exposed by the \texttt{XMemoryManager} are presented in Figure~\ref{fig:mem-manager}.
 At each time of the compilation process, the \texttt{XMemoryManager} can resolve the memory unit by its name.
-Following the C standard, local memory units have higher priority over global ones (the method \texttt{getDeclaredUnitOrNull} returns the first memory unit found, either a global one or a local one, or null if no memory units with requested name have been registered).
+Following the C standard, local memory units have higher priority over global ones (the method \lstinline{getDeclaredUnitOrNull} returns the first memory unit found, either a global one or a local one, or null if no memory units with requested name have been registered).
 Since C language allows usage of variables that have the same name to be declared in nested contexts, the \texttt{XMemoryManager} should carry the stack of block contexts for local variables (which is not currently implemented).
 
 \begin{figure}[h]
@@ -729,7 +729,7 @@ Since C language allows usage of variables that have the same name to be declare
 
 The invocation hooking module serves as a compiler knowledge base that stores the semantics of high-level functions in terms of low-level event-flow graph elements.
 %Invocation hooks should be used for describing the 
-For example, the C11 sequentially consistent load operation `\lstinline{l.store(memory_order_seq_cst, r)}' whould be compiled for the \texttt{x86} architecture as the write instruction `\lstinline{MOV l, r}' followed by the fence instruction `\lstinline{MFENCE}', whether for the \texttt{POWER} architecture this code would be compiled as the `\lstinline{hwsync}' followed by the store instruction.
+For example, the C11 sequentially consistent load operation `\lstinline{l.store(memory_order_seq_cst, r)}' whould be compiled for the \texttt{x86} architecture as the write instruction `\lstinline{MOV l, r}' followed by the fence instruction `\lstinline{MFENCE}', whether for the Power architecture this code would be compiled as the `\lstinline{hwsync}' followed by the store instruction.
 This is called the \textit{compiler mapping}.
 While the \xgraph{} is the abstract (hardware-agnostic) low-level program representation, the compiler mapping is the only component of the compiler that produces differences between two versions of the same program compiled for different architectures.
  
@@ -744,7 +744,8 @@ The hook action is invoked with actual arguments and returns an arbitrary \textt
 Current version of \porthos[2] contains two invocation hooks, the \texttt{XLegacyInvocationHook} for intercepting the compatibility-mode functions of the \porthos[2] input language, and \texttt{XKernelInvocationHook} for describing the Linux kernel-specific functions.
 The same mechanism (with minor modifications) can be used for processing assembly language calls.
 An invocation hook can model any type of operations (memory, fence, computational, etc.).
-For instance, the \texttt{XKernelInvocationHook} intercepts the invocation \lstinline{`WRITE_ONCE(dst_shared, src_local)'} and replaces it with the hook action shown in Appendix~\ref{apx:hook} (as the functions \texttt{READ\_ONCE}, \texttt{WRITE\_ONCE}, and \texttt{ACCESS\_ONCE} may be modelled as volatile \texttt{memory\_order\_relaxed} accesses~\cite{kernel2c}, this invocation hook simply emits a memory event without emitting any synchronisation events).
+For instance, the \texttt{XKernelInvocationHook} intercepts the invocation \lstinline{`WRITE_ONCE(dst_shared, src_local)'} and replaces it with the hook action shown in Appendix~\ref{apx:hook} (as the functions \lstinline{READ_ONCE}, \lstinline{WRITE_ONCE}, and \lstinline{ACCESS_ONCE} may be modelled as volatile \lstinline{memory_order_relaxed} accesses~\cite{kernel2c}, this invocation hook simply emits a memory event without emitting any synchronisation events).
+For instance, the \texttt{XKernelInvocationHook} intercepts the invocation \lstinline{`WRITE_ONCE(dst_shared, src_local)'} and replaces it with the hook action shown in Appendix~\ref{apx:hook} (as the functions \lstinline{READ_ONCE}, \lstinline{WRITE_ONCE}, and \lstinline{ACCESS_ONCE} may be modelled as volatile \lstinline{memory_order_relaxed} accesses~\cite{kernel2c}, this invocation hook simply emits a memory event without emitting any synchronisation events).
 
 
 \paragraph{Interpreter}
@@ -761,10 +762,10 @@ Note the clear modular independence of the X-interpreter: it knows nothing about
 All interface methods of the X-interpreter can be divided into two groups.
 The first group constitute methods that emit events.
 These methods construct an event object (as events contain the \texttt{XEventInfo} structure that stores information about the owning process, all events must be created by the process constructor, i.e. X-interpreter) and change the state of interpreter considering the newly created event.
-Note that the methods \texttt{createComputationEvent} do not emit a computation event but only create one.
+Note that the methods \lstinline{createComputationEvent} do not emit a computation event but only create one.
 This is an optimisation that removes unused computations from the model
-(otherwise, for instance, the assignment `\texttt{x = 1 * (2 + 3)}' would be compiled into two consequent events `\texttt{eval(2 + 3); write(register <- eval(1 * eval(2 + 3)));}' instead of a single event `\texttt{write(register <- eval(1 * eval(2 + 3)));}').
-Note, if the computation event has not been used at all (for example, in the following C code: `\texttt{foo(); 1; bar();}' the execution event `\texttt{eval(1)}' is skipped by the model), it is also removed from the event-graph (see justification in Section~\ref{ch:impl:model:xgraph}).
+(otherwise, for instance, the assignment `\lstinline{x = 1 * (2 + 3)}' would be compiled into two consequent events `\lstinline{eval(2 + 3); write(register <- eval(1 * eval(2 + 3)));}' instead of a single event `\lstinline{write(register <- eval(1 * eval(2 + 3)));}').
+Note, if the computation event has not been used at all (for example, in the following C code: `\lstinline{foo(); 1; bar();}' the execution event `\lstinline{eval(1)}' is skipped by the model), it is also removed from the event-graph (see justification in Section~\ref{ch:impl:model:xgraph}).
 The second group of X-interpreter methods consists of the methods for defining non-linear statements (branchings and loops).
 These methods change the state of the interpreter and set up additional non-linear control-flow edges.
 
@@ -890,8 +891,8 @@ The unrolling procedure is performed by the \texttt{XFlowGraphUnroller}.
 For unrolling the flow-graph, we perform the \textit{Deep-First Search~(DFS)} while counting the X-events (for the unrolling bound) and keeping track of the depth stack (for detecting back edges needed for determining the type of sink node).
 Back-edges are determined via the depth stack (each next event is pushed onto the stack; if the new event is present in the stack, the last processed edge is a back-edge).
 Also, during the unrolling each next event increments the \textit{unrolling depth counter} -- the non-zero integer \textit{event reference-ID} stored by each X-event (only events of a non-unrolled graph can have the zero-valued reference-ID)
-As an X-event is immutable, it has the method `\texttt{XEvent asNodeRef(int refId)}' that clones it with new value of reference-ID.
-The methods \texttt{hashCode} and \texttt{equals} consider the reference-ID as the uniqueness field for all events except sink and source events (considering the usage of \texttt{HashMap} and Guava's \texttt{ImmutableMap} for storing events, proper setting of the hash-code methods is a crucial programming task).
+As an X-event is immutable, it has the method `\lstinline{XEvent asNodeRef(int refId)}' that clones it with new value of reference-ID.
+The methods \lstinline{hashCode} and \texttt{equals} consider the reference-ID as the uniqueness field for all events except sink and source events (considering the usage of \texttt{HashMap} and Guava's \texttt{ImmutableMap} for storing events, proper setting of the hash-code methods is a crucial programming task).
 
 %During the work on \porthos[2], we have tested several different schemes of loop unrolling.
 

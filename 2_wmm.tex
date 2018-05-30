@@ -44,7 +44,7 @@ A memory event is specified by its direction with respect to the shared variable
 %\texttt{load} for read the value of a shared-memory location, or \texttt{store} for write, or neither of them if both locations are local
 
 The set of memory events $\mathbb{M}$ is divided into write events $\mathbb{W}$ (that write values to shared-memory locations) and read events $\mathbb{R}$ (that read values stored in shared-memory locations).
-We add a restriction that each memory event uses at most one shared location, so that the write instruction $i = write(l_1, l_2)$, that encodes the write from the shared location $l_2$ to the shared location $l_1$, is represented as two consequent events $e_1~=~\texttt{load}(r_1~\leftarrow~l_2); \ e_2~=~\texttt{store}(l_1~\leftarrow~r_1)$.
+We add a restriction that each memory event uses at most one shared location, so that the write instruction $i = write(l_1, l_2)$, that encodes the write from the shared location $l_2$ to the shared location $l_1$, is represented as two consequent events $e_1\,=\,{\texttt{load}(r_1\,\leftarrow\,l_2)}; \ e_2\,=\,{\texttt{store}(l_1\,\leftarrow\,r_1)}$.
 Also, it is important to separate the set of initial write events $\mathbb{IW}~\subseteq~\mathbb{W}$ that perform initialisation of program variables.
 
 A \textit{computation event} $e_c \in \mathbb{C} \subseteq \mathbb{E}$, represents a low-level assembly computation operation performed solely on local-memory arguments.
@@ -129,28 +129,28 @@ Since each thread performs a single write followed by a single read, the \co-rel
 \begin{subfigure}[t]{.28\textwidth}
   \centering
   \includegraphics[width=1.2\linewidth]{img/my/sb-example/SB-dot.png}
-  \caption{Final state: \texttt{(0:EAX=1,~1:EAX=1)}}
+  \caption{Final state: \texttt{(P0:EAX=1,~P1:EAX=1)}}
   \label{simple_wmm_x86_pic:sub1}
 \end{subfigure}
 \hfill
 \begin{subfigure}[t]{.23\textwidth}
   \centering
   \includegraphics[width=.9\linewidth]{img/my/sb-example/SB-dot-2.png}
-  \caption{Final state: \texttt{(0:EAX=1,~1:EAX=0)}}
+  \caption{Final state: \texttt{(P0:EAX=1,~P1:EAX=0)}}
   \label{simple_wmm_x86_pic:sub2}
 \end{subfigure}
 \hfill
 \begin{subfigure}[t]{.23\textwidth}
   \centering
   \includegraphics[width=.9\linewidth]{img/my/sb-example/SB-dot-3.png}
-  \caption{Final state: \texttt{(0:EAX=1,~1:EAX=1)}}
+  \caption{Final state: \texttt{(P0:EAX=1,~P1:EAX=1)}}
   \label{simple_wmm_x86_pic:sub3}
 \end{subfigure}
 \hfill
 \begin{subfigure}[t]{.23\textwidth}
   \centering
   \includegraphics[width=.9\linewidth]{img/my/sb-example/SB-dot-4.png}
-  \caption{Final state: \texttt{(0:EAX=0,~1:EAX=0)}}
+  \caption{Final state: \texttt{(P0:EAX=0,~P1:EAX=0)}}
   \label{simple_wmm_x86_pic:sub4}
 \end{subfigure}
 \hfill
@@ -159,7 +159,7 @@ Since each thread performs a single write followed by a single read, the \co-rel
 \end{figure}
 
 Thus, there are only four possible executions defined by the choice of \rf-relation.
-The candidate executions pictured in Figures~\ref{simple_wmm_x86_pic:sub1}--\ref{simple_wmm_x86_pic:sub3} are consistent both under strong memory model SC and under relaxed memory models \texttt{x86-TSO}, \texttt{POWER}, \texttt{ARM}, and some others.
+The candidate executions pictured in Figures~\ref{simple_wmm_x86_pic:sub1}--\ref{simple_wmm_x86_pic:sub3} are consistent both under strong memory model SC and under relaxed memory models x86-TSO, Power, ARM, and some others.
 However, the execution shown in Figure~\ref{simple_wmm_x86_pic:sub3} is still consistent under relaxed-memory architectures, but it becomes inconsistent under SC architecture as it forbids cycles over~$\fr\cup\po$.
 %However, the Power memory model allows such cycles, therefore %TODO: include load buffering example, see presentation pdf
 
@@ -193,7 +193,7 @@ Below we enumerate pre-defined operations over relations and sets of events:
 \end{enumerate}
 
 For instance, the \fr-relation is defined as a sequence of inverted \rf-relation and \co-relation: $\texttt{fr} = (\invrel{rf};\texttt{co})$.
-As an example of memory model definition in \cat{} language, Figure~\ref{ex:x86-cat} presents the excerpt from the \texttt{x86-TSO} memory model~\cite{herd10tutorial}.
+As an example of memory model definition in \cat{} language, Figure~\ref{ex:x86-cat} presents the excerpt from the x86-TSO memory model~\cite{herd10tutorial}.
 This memory model specification asserts  acyclicity of the communication relation (the union of \rf-, \fr- and \co- relations), \texttt{po-loc} -relation, \texttt{mfence}-relation and some other derived relations~\cite{owens2009better}.
 
 \begin{figure}[H]
@@ -208,6 +208,6 @@ empty atom & (fre;coe)
 acyclic po-loc | com
 acyclic GHB
 \end{lstlisting}
-\caption{Excerpt from the \texttt{x86-TSO} memory model in the \cat{} language}
+\caption{Excerpt from the x86-TSO memory model in the \cat{} language}
 \label{ex:x86-cat}
 \end{figure}

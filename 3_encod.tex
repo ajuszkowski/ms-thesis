@@ -41,10 +41,10 @@ This technique is called \textit{Bounded Model Checking~(BMC)} as the search pro
 However, there exist numerous techniques for making BMC complete for finite-state systems~(e.g.,~\cite{shtrichman2000tuning}).
 
 At present time, satisfiability solvers are behind the numerous verification and bounded model checking tools.
-Although, as most modern programming languages are typed, the SAT-formula that encodes the constraints of a program must include non-boolean constraints encoded as boolean variables, which is ineffective, therefore most software analysis and verification tools use \textit{Satisfiability Modulo Theories~(SMT)} -solvers, that integrate first-order reasoning with the background theory reasoning~\cite{kroening2008decision}.
+Although, as most modern programming languages are typed, a SAT-formula that encodes the constraints of a program must include non-boolean constraints encoded as boolean variables, which is ineffective, therefore most software analysis and verification tools use \textit{Satisfiability Modulo Theories~(SMT)} solvers, that integrate first-order reasoning with the background theory reasoning~\cite{kroening2008decision}.
 For example, the Integer theory includes operators `$+$', `$-$', `$\geqslant$' and others).
 Most modern SMT-solvers support integer arithmetic, real arithmetic, fixed-size bit-vectors, arrays, and other theories.
-The direction of the development of SMT-solvers is provided by the \texttt{SMT-LIB} standard~\cite{smt-lib}, which provides definition of the unified language for defining SMT-formulas, and description of most common underlying logics and theories.
+The direction of the development of SMT-solvers is provided by the \textit{SMT-LIB standard}~\cite{smt-lib}, which provides definition of the unified language for defining SMT-formulas, and description of most common underlying logics and theories.
 
 In general, a BMC problem aims to examine the non-reachability of the "undesirable" states of a finite-state system.
 Let $\vec{x} = (x_1, x_2, ..., x_n)$ be a vector of $n$ variables that uniquely distinguishes states of the system; let $\textit{Init}(\vec{x})$ be an \textit{initial-state predicate} that defines the set of initial states of the system; let $\textit{Trans}(\vec{x}, \pvec{x}')$ be a \textit{transition predicate} that signifies whether there the transition from state $\vec{x}$ to state $\pvec{x}'$ is valid; let $\textit{Bad}(\vec{x})$ be a \textit{bad-state predicate} that defines the set of undesirable states.

@@ -78,7 +78,7 @@ Due to modular architecture of \porthos[2], the extension of the knowledge base 
 Note that the flip side of the flexibility of invocation hooks is their complexity: being written in Java, in addition they require from the user some knowledge of general architecture of the tool, the interface methods provided by the interpreter, the class hierarchy of the \xgraph{} elements, etc.
 
 \item The wide range of existing litmus tests may require \porthos[2] to \textit{support new input languages}.
-The first candidates for being supported are the LISA language (Litmus Instruction Set Architecture)~\cite{alglave2016syntax} and assembly languages of most common architectures (x86, POWER, Alpha, etc.).
+The first candidates for being supported are the LISA language (Litmus Instruction Set Architecture)~\cite{alglave2016syntax} and assembly languages of most common architectures (x86, Power, Alpha, etc.).
 Note that the programs in low-level languages can be easily compiled to the \xgraph{} representation by existing compiler architecture since low-level assembly-like languages can be considered as the subset of the C language, that restricts the set of non-linear control-flow instructions to the conditional and unconditional jumps (which are supported by the current \xgraph{} compiler of \porthos[2]).
 %Note that adding support for low-level languages requires adding the new \xgraph{} compiler that will compile the low-level syntax tree (with non-conditional jumps as the only )
 

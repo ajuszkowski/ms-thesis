@@ -17,7 +17,7 @@ Unfortunately, when it comes to real-world concurrent programs, the algorithmic 
 The reasons of this fact lie in the code optimisations that both compiler and hardware perform in order to increase performance of the system~\cite{adve1996shared}.
 
 As an example, consider two x86 assembly programs in Figure~\ref{simple_wmm_x86} (such little code examples that explain specific behaviour of the concurrent execution environment are called \textit{litmus tests}).
-Two programs are the same, except the right-hand program uses the synchronisation instruction \texttt{MFENCE} after the store to the shared memory.
+Two programs are the same, except the right-hand side program uses the synchronisation instruction \texttt{MFENCE} after the store to the shared memory.
 In both programs, the process~\texttt{P0} writes the value~\texttt{1} to the shared variable~\texttt{x} and reads a value of the shared variable~\texttt{y}, and the process~\texttt{P1} writes to the~\texttt{y} and reads the~\texttt{x}.
 
 \begin{figure}[t]
@@ -32,7 +32,7 @@ MOV [x],1 & MOV [y],1 \\
 MOV EAX,[y] & MOV EBX,[x] \\
 & \\
 \hline
-\multicolumn{2}{|l|}{exists (0:EAX=0,\,1:EBX=0)} \tabularnewline
+\multicolumn{2}{|l|}{exists (P0:EAX=0,\,P1:EBX=0)} \tabularnewline
 \hline
 \multicolumn{2}{|l|}{x86-TSO: allowed} \tabularnewline
 \hline
@@ -51,7 +51,7 @@ MOV [x],1 & MOV [y],1 \\
 MFENCE & MFENCE \\
 MOV EAX,[y] & MOV EBX,[x] \\
 \hline
-\multicolumn{2}{|l|}{exists (0:EAX=0,\,1:EBX=0)} \tabularnewline
+\multicolumn{2}{|l|}{exists (P0:EAX=0,\,P1:EBX=0)} \tabularnewline
 \hline
 \multicolumn{2}{|l|}{x86-TSO: forbidden} \tabularnewline
 \hline
@@ -60,18 +60,18 @@ MOV EAX,[y] & MOV EBX,[x] \\
 \label{simple_wmm_x86:sync}
 \end{subfigure}
 %
-\caption{Store buffering~(SB): A litmus test illustrating the write-read reordering allowed by the \texttt{x86-TSO} memory model}
+\caption{Store buffering~(SB): A litmus test illustrating the write-read reordering allowed by the x86-TSO memory model}
 \label{simple_wmm_x86}
 \end{figure}
 
 Taking into account all possible interleavings of the read and write instructions, both litmus tests allow the following final states:
 \begin{itemize}[noitemsep,topsep=0pt]
-\item \texttt{(0:EAX=0,~1:EBX=1)},
-\item \texttt{(0:EAX=1,~1:EBX=0)},
-\item \texttt{(0:EAX=1,~1:EBX=1)}.
+\item \texttt{(P0:EAX=0,~P1:EBX=1)},
+\item \texttt{(P0:EAX=1,~P1:EBX=0)},
+\item \texttt{(P0:EAX=1,~P1:EBX=1)}.
 \end{itemize}
-%As the program specifies the write to~\texttt{x} to precede the read of~\texttt{y} in process~\texttt{P0}, one could expect the final state `\texttt{(0:EAX=0~/\textbackslash~1:EAX=0)}' to be unreachable.
-However, in the left-hand (non-synchronised) litmus test, the state `\texttt{(0:EAX=0,~1:EAX=0)}' is also allowed on the x86 architecture as its processors may cache the writes to the shared memory into their local \textit{store buffers} so that the updated value does not immediately become visible by processes running on other cores.
+%As the program specifies the write to~\texttt{x} to precede the read of~\texttt{y} in process~\texttt{P0}, one could expect the final state `\texttt{(P0:EAX=0~/\textbackslash~P1:EAX=0)}' to be unreachable.
+However, the non-synchronised litmus test in Figure~\ref{simple_wmm_x86:nosync} allows the state `\texttt{(P0:EAX=0,~P1:EAX=0)}' on the x86 architecture as x86 processors may cache the writes to the shared memory into their local \textit{store buffers} so that the updated value does not immediately become visible by processes running on other cores.
 This behaviour is known as \textit{Store Buffering~(SB)}.
 For preventing such a behaviour, the x86 architecture offers the synchronisation instruction \texttt{MFENCE} that flushes the store buffer of the process.
 In Figure~\ref{simple_wmm_x86:sync}, this instruction is inserted for both processes after the store instructions, thus once it is executed in one process, the other process will read the updated value of this shared memory location.
@@ -119,7 +119,7 @@ One of the most well-known frameworks for weak memory model-aware analysis was f
 It is the event-based non-deterministic model without global time (see Section~\ref{ch:wmm:model} for details).
 
 In addition to developing the theoretical basis, researchers work on extracting the memory models for hardware architectures from existing implementations or from the specifications, which are written in natural language and thus suffer from ambiguities and incompleteness.
-Over the last decade, memory models have been defined for most mainstream multiprocessor architectures, such as \texttt{x86-TSO} and \texttt{Sparc-TSO} (for \textit{Total Store Order}) model for x86 and Sparc architectures~\cite{owens2009better}, much more relaxed memory model for Power and ARM architectures~\cite{alglave2009semantics,sarkar2011understanding, alglave2014herding}, etc. %, or Alpha architecture~\cite{alphaWMM}~, and others.
+Over the last decade, memory models have been defined for most mainstream multiprocessor architectures, such as x86-TSO and Sparc-TSO (for \textit{Total Store Order}) model for x86 and Sparc architectures~\cite{owens2009better}, much more relaxed memory model for Power and ARM architectures~\cite{alglave2009semantics,sarkar2011understanding, alglave2014herding}, etc. %, or Alpha architecture~\cite{alphaWMM}~, and others.
 There are projects for validating hardware architectures wrt. a memory model as well, e.g.,~\cite{lustig2014pipecheck,lustig2016coatcheck}.
 
 
