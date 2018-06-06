@@ -1,0 +1,309 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{common-thesis}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+
+\usepackage{fancyvrb} %fancy verbatim
+%\makeatletter
+%\newcommand{\verbatimfont}[1]{\renewcommand{\verbatim@font}{\ttfamily\scriptsize#1}}
+%\makeatother
+% redefine \VerbatimInput
+\RecustomVerbatimCommand{\VerbatimInput}{VerbatimInput}{fontsize=\scriptsize}
+
+\usepackage{pmboxdraw}
+\usepackage{newunicodechar}
+\newunicodechar{└}{\textSFii}
+\newunicodechar{├}{\textSFviii}
+\newunicodechar{─}{\textSFx}
+
+
+\usepackage{wrapfig} %for text wrap around figures
+\usepackage{paracol}%2 columns
+
+\usepackage[section]{placeins}
+
+\usepackage{mathtools}
+\usepackage{appendix}
+
+
+\usepackage{mfirstuc}%title case
+
+%\usepackage[final]{pdfpages}
+\usepackage[export]{adjustbox} % loads also graphicx
+
+%\newcommand{\pvec}[1]{\vec{#1}\mkern2mu\vphantom{#1}} %for primed vectors, see https://tex.stackexchange.com/a/120034
+\newcommand{\pvec}[1]{\vec{#1}\,}
+
+% Font selection
+%\usepackage{palatino}
+%\usepackage[sc]{mathpazo}
+\usepackage{kpfonts}
+%\usepackage{tgpagella}
+%\usepackage{garamond}
+%\usepackage{lmodern}
+
+% Verbatim provides a standard teletype environment that renderes
+% the text exactly as written in the tex file. Useful for code
+% snippets (although you can also use the listings package to get
+% automatic code formatting).
+\usepackage{verbatim}
+\usepackage{enumitem} % for nolistsep in enumeration
+\usepackage{multicol} % for using multiple columns in listings
+
+\usepackage{listings}
+\usepackage{inc/listingset}
+
+\renewcommand{\labelitemii}{$\circ$}
+
+\lstset{ 
+    columns=[l]fullflexible,
+    keepspaces=true,
+    basicstyle=\ttfamily\small,
+    %numbers=left,
+    tabsize=2,
+    captionpos=b,
+    escapeinside={[*}{*]},
+}
+\newcommand{\tool}[1]{#1}%{\texttt{#1}}
+
+\newcommand*{\fx}{\ensuremath{\mathbf{x}}}%x}}}
+\newcommand*{\fv}{\ensuremath{\mathbf{v}}} %v}}}
+
+\newcommand{\porthos}[1][]{%\texttt{%
+Porthos\ifthenelse%
+{\equal{#1}{}}%if
+{}%then
+{\ifthenelse{\equal{#1}{1}}%else-if
+{\,v1}%then
+{%else
+\ifthenelse{\equal{#1}{2}}%else-if
+{C}%then
+{#1}%else
+}}}%}
+\newcommand{\oldporthos}{\porthos[1]}
+\newcommand{\rf}{\ensuremath{\,\texttt{rf}\,}}
+\newcommand{\fr}{\ensuremath{\,\texttt{fr}\,}}
+\newcommand{\po}{\ensuremath{\,\texttt{po}\,}}
+\newcommand{\co}{\ensuremath{\,\texttt{co}\,}}
+\newcommand{\com}{\ensuremath{\,\texttt{po}\,}}
+\newcommand{\sr}{\ensuremath{\,\texttt{sr}\,}}
+\newcommand{\cat}{CAT}
+\newcommand{\relarrow}[1]{\ensuremath{\overset{\texttt{#1}}{\rightarrow}}}
+\newcommand{\invrel}[1]{\ensuremath{\texttt{#1}^{\texttt{-1}}}}%{\ensuremath{\texttt{#1}\!\!\mathbin{\char`\^}\!\!\texttt{-1}}} %inversion or a relation in math mode: r^-1
+\newcommand{\relminus}{\!\smallsetminus\!}
+
+\newcommand{\defeq}{\ensuremath{=}}%\coloneqq}}%\Leftrightarrow}}%\triangleq}}
+%\newcommand*{\defeq}{\mathrel{\vcenter{\baselineskip0.5ex \lineskiplimit0pt\hbox{\scriptsize.}\hbox{\scriptsize.}}}=}
+
+\newcommand{\ytree}{\ensuremath{\text{Y-tree}}}
+\newcommand{\wmodel}{\ensuremath{\text{W-model}}}%\texttt{W\text{-}model}}}
+\newcommand{\zformula}{\ensuremath{\text{Z-formula}}}
+\newcommand{\xgraph}[1][]{\ensuremath{\text{X-graph}
+\ifthenelse%
+{\equal{#1}{}}%if
+{}%then
+{_{\text{\tiny{#1}}}}%else
+}}
+\newcommand{\xgraphU}[1][]{\ensuremath{\text{X-graph}%\texttt{X\text{-}graph%unrolled x-graph
+\ifthenelse%
+{\equal{#1}{}}%if
+{}%then
+{_{\text{\tiny{#1}}}^{\text{\tiny{U}}}}%else
+}}
+
+\sloppy %forbid page overfull with texttt words
+
+\usepackage{outlines} %for nested itemize lists
+
+\usepackage{longtable} %for ab-bre-via-tions
+
+% The titlesec package can be used to alter the look of the titles
+% of sections, chapters, and so on. This example uses the ``medium''
+% package option which sets the titles to a medium size, making them
+% a bit smaller than what is the default. You can fine-tune the
+% title fonts and sizes by using the package options. See the package
+% documentation.
+%\usepackage[medium]{titlesec}
+\usepackage[medium,raggedright]{titlesec}
+%\usepackage{pxfonts} %for listings
+
+\usepackage[position=b]{subcaption}
+\captionsetup[subfigure]{font=scriptsize,justification=centering}
+\usepackage{graphicx}
+
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+\usetikzlibrary{calc}
+\usetikzlibrary{arrows}
+\usetikzlibrary{decorations.pathmorphing,decorations.markings}
+\usetikzlibrary{shapes}
+\usetikzlibrary{patterns}
+\usetikzlibrary{automata}
+
+\tikzset{initial text={}}
+
+\tikzset{font=\scriptsize}
+%\tikzset{%
+%  zeroarrow/.style = {-stealth,dashed},
+%  onearrow/.style = {-stealth,solid},
+%  c/.style = {circle,draw,solid,
+%    minimum width=3cm,
+%    minimum height=3cm,
+%    },
+%  r/.style = {rectangle,draw,solid,minimum width=2em,
+%    minimum height=2em}
+%}
+\tikzset{
+c/.style={
+  circle,solid,
+  inner sep=0pt,
+  %text width=1mm,
+  minimum width=7mm,
+  align=center,
+  draw=black,
+  fill=white
+  }
+}
+
+\usepackage{amsthm}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\renewcommand{\algorithmicrequire}[1]{\textbf{Input:} {#1}\\}
+\renewcommand{\algorithmicensure}[1]{\textbf{Output:} {#1}}
+\renewcommand{\algorithmicforall}{\textbf{for each}}
+\newcommand{\Break}{\State\algorithmicbreak}
+
+% Microtype for better typography
+\usepackage[stretch=30,protrusion=true,final,expansion,tracking=true,kerning,spacing]{microtype}
+
+% SI units. See table in 2lorem.tex for example
+\usepackage{siunitx}
+\sisetup{
+    alsoload=binary
+}
+
+\usepackage{booktabs}
+
+\selectlanguage{english}
+
+% Multiple figures inside one figure. See figure in 1lipsum.tex for example
+%\usepackage{subfig}
+
+% Inconsolata monospace font for verbatim environment
+\usepackage{inconsolata}
+
+% For rotating figures
+\usepackage{rotating}
+
+\usepackage{hyphenat} % for using \nohyphens
+
+% Prevent orphan and widow rows
+\widowpenalty=10000
+\clubpenalty=10000
+
+
+% Graphics are required for including PDF files into the document
+\RequirePackage{graphicx}
+% The url package provides commands for formatting URLs
+\RequirePackage{url}
+% Multirow allows table cells to span multiple rows
+\RequirePackage{multirow}
+% The tabularx environment is an extension of tabular that allows 
+% paragraph-type column widths to be calculated automatically 
+\RequirePackage{tabularx}
+
+% Improvements for mathematical formatting
+\RequirePackage{amsmath}
+
+% The lastpage package provides a label that can be used to get the 
+% page number of the last page
+\RequirePackage{lastpage}
+
+% The etoolbox command provides some advanced commands 
+\RequirePackage{etoolbox}
+
+% The array package fixes some things in the default LaTeX arrays and 
+% tabulars. This package is required by many other packages. 
+\RequirePackage{array}
+% The ifthen package provides conditional evaluation of statements
+\RequirePackage{ifthen}
+% Textpos can be used to position text absolutely (at an absolute 
+% position in the page, instead of a relative position)
+\RequirePackage[absolute]{textpos}
+
+
+% A shortcut command for using ifthenelse when you don't need the
+% else clause.
+\newcommand{\ifthen}[2]{\ifthenelse{#1}{#2}{}}
+
+
+% By default, only up to 3rd level headers are numbered (e.g. 1.2.2.)
+% Specify which headers are numbered
+\setcounter{secnumdepth}{4} 
+% Specify which headers are put in the TOC
+\setcounter{tocdepth}{3} 
+
+
+
+
+% Document setup
+% ------------------------------------------------------------------
+
+% The following command we instruct LaTeX to not 
+% complain about underfull hboxes in the bibliography:
+\apptocmd{\thebibliography}{\hbadness 10000\relax}{}{}
+% Alternatively, we can force the bibliography to be raggedright 
+% (not justified), this often works as well:
+% \apptocmd{\thebibliography}{\raggedright}{}{}
+
+% The standard teletype font makes URLs look a bit too big. These commands
+% here make the URLs a bit smaller, so that they look better in text. 
+\makeatletter
+\def\url@smallurlstyle{%
+  \@ifundefined{selectfont}{\def\UrlFont{\sf}}{\def\UrlFont{\small\ttfamily}}}
+\makeatother
+%% Now actually use the newly defined style.
+\urlstyle{smallurl}
+
+
+
+
+
+
+
+
+
+\newcommand{\startcoverpage}{\pagenumbering{arabic}}
+\newcommand{\startfirstchapter}{}
+% The number of pages is counted based on the labels.
+% The lastpage package calculates the position of the LastPage label.
+% A plain label may not work if last pages contain floats that are placed 
+% after text.
+\newcommand{\PAGES}{\pageref{LastPage}}
+
+
+
+
+
+
+% Add headings to pages (the chapter title is shown)
+%\pagestyle{headings}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0.5pt}
+\fancyhf{}
+\rhead{\footnotesize\itshape{\leftmark}}
+\cfoot{\thepage}
+
+\interfootnotelinepenalty=10000
+
+
+\definecolor{dkblue}{rgb}{0,0.1,0.4}
+
+\titleformat{\paragraph}[runin]{\normalfont\normalsize\bfseries}{}{0em}{}[.]%[:]
+\titlespacing*{\paragraph}{0em}{1em}{1em} % {left}{before}{after}[right]

@@ -1,55 +1,15 @@
-% ==================================================================
-% This template has been used and modified by
-% Sanna Suoranta, Pekka Kanerva, Lauri Karppinen, Linda Staffans,
-% Laura Takkinen, Jukka Larja, Samuli Sorvakko, 
-% and numerous unknown authors.
-% ------------------------------------------------------------------
-% 9.2.2011 Tuukka Haapasalo made a near-complete rewrite of the
-% package, cleaning up stuff and updating the layout to the
-% new Aalto specifications, and adding a standard thesis layout
-% example.
-% ------------------------------------------------------------------
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{aalto-thesis}[2011/02/25 v1.1 Aalto Thesis style]
+\ProvidesPackage{lib/aalto-thesis}[2011/02/25 v1.1 Aalto Thesis style]
 
-\selectlanguage{english}
+\usepackage{lib/common-thesis}
 
-% Graphics are required for including PDF files into the document
-\RequirePackage{graphicx}
-% The url package provides commands for formatting URLs
-\RequirePackage{url}
-% Multirow allows table cells to span multiple rows
-\RequirePackage{multirow}
-% The tabularx environment is an extension of tabular that allows 
-% paragraph-type column widths to be calculated automatically 
-\RequirePackage{tabularx}
+% Separate multiple citations with space instead of comma
+% E.g. "[1] [2] [3]" instead of "[1], [2], [3]"
+%\renewcommand\multicitedelim{\space}
+%separate them by semicolon
+%\renewcommand*{\multicitedelim}{\setunit{; }}
 
-% Improvements for mathematical formatting
-\RequirePackage{amsmath}
 
-% The lastpage package provides a label that can be used to get the 
-% page number of the last page
-\RequirePackage{lastpage}
-
-% The etoolbox command provides some advanced commands 
-\RequirePackage{etoolbox}
-
-% The array package fixes some things in the default LaTeX arrays and 
-% tabulars. This package is required by many other packages. 
-\RequirePackage{array}
-% The ifthen package provides conditional evaluation of statements
-\RequirePackage{ifthen}
-% Textpos can be used to position text absolutely (at an absolute 
-% position in the page, instead of a relative position)
-\RequirePackage[absolute]{textpos}
-
-\newcommand{\startcoverpage}{\pagenumbering{arabic}}
-\newcommand{\startfirstchapter}{}
-% The number of pages is counted based on the labels.
-% The lastpage package calculates the position of the LastPage label.
-% A plain label may not work if last pages contain floats that are placed 
-% after text.
-\newcommand{\PAGES}{\pageref{LastPage}}
 
 
 % From Samwise, edited by JLarja. Fixme can be used to wrote something that should be fixed later. 
@@ -89,15 +49,6 @@
 }
 \ProcessOptions
 
-% A shortcut command for using ifthenelse when you don't need the
-% else clause.
-\newcommand{\ifthen}[2]{\ifthenelse{#1}{#2}{}}
-
-% By default, only up to 3rd level headers are numbered (e.g. 1.2.2.)
-% Specify which headers are numbered
-\setcounter{secnumdepth}{4} 
-% Specify which headers are put in the TOC
-\setcounter{tocdepth}{3} 
 
 % These set the units of the textpos positioning parameters. 
 % Now they are set to be multiples of centimeters.
@@ -299,25 +250,45 @@
 \null\newpage
 }
 
+% Use biber instead of bibtex as it supports UTF-8 among other things
+\usepackage[backend=biber,
+%maxnames=5,
+%style=numeric-verb,
+style=alphabetic,%-verb,%style=alphabetic
+minalphanames=3,
+maxalphanames=3,
+maxbibnames=5, minbibnames=5, %for 'et al'
+%sortcites=true,
+%sorting=none
+%see options: http://texdoc.net/texmf-dist/doc/latex/biblatex/biblatex.pdf
+%sorting=anyvt,%Sort by alphabetic label, name, year, volume, title,
+sorting=anyvt,%Sort by alphabetic label, name, year, title,
+%sorting=ydnt,%Sort by year (descending), name, title 
+%sorting=ynt, %Sort by year, name, title. 
+%sorting=nyt, %Sort by name, year, title. %see https://tex.stackexchange.com/a/51439
+]{biblatex}
+% A catch-all filter for all items which are not assigned to a dedicated sub-bibliography:
+%\defbibfilter{other}{
+%  not type=article
+%  and
+%  not type=book
+%  and
+%  not type=collection
+%}
+%make the plus sign in bibliography references as superscript:
+\renewcommand*{\labelalphaothers}{\textsuperscript{+}}
 
-% Document setup
-% ------------------------------------------------------------------
+
+% Separate multiple citations with space instead of comma
+% E.g. "[1] [2] [3]" instead of "[1], [2], [3]"
+%\renewcommand\multicitedelim{\space}
+%separate them by semicolon
+%\renewcommand*{\multicitedelim}{\setunit{; }}
 
 
-% The following command we instruct LaTeX to not 
-% complain about underfull hboxes in the bibliography:
-\apptocmd{\thebibliography}{\hbadness 10000\relax}{}{}
-% Alternatively, we can force the bibliography to be raggedright 
-% (not justified), this often works as well:
-% \apptocmd{\thebibliography}{\raggedright}{}{}
+% Nicer looking caption for figures, tables, etc.
+\usepackage[labelfont={bf},textfont={it},justification={raggedright},singlelinecheck={false}]{caption}
 
-
-% The standard teletype font makes URLs look a bit too big. These commands
-% here make the URLs a bit smaller, so that they look better in text. 
-\makeatletter
-\def\url@smallurlstyle{%
-  \@ifundefined{selectfont}{\def\UrlFont{\sf}}{\def\UrlFont{\small\ttfamily}}}
-\makeatother
-%% Now actually use the newly defined style.
-\urlstyle{smallurl}
+% Multiple figures inside one figure. See figure in 1lipsum.tex for example
+%\usepackage{subfig}
 
