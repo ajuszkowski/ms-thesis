@@ -53,7 +53,7 @@ For modelling branching statements, we define the set $\mathbb{C}_{g}~\subseteq~
 
 Synchronisation instructions (fences) cause \textit{barrier events}, which do not perform any computation or memory value transfer, instead, they the set of program behaviours by adding barrier relations to the program model.
 Functionally, a fence may be a synchronisation barrier or a instruction for flushing memory caches into the main memory, etc.
-For instance, the \texttt{mfence} instruction of the x86 assembly flushes the store buffers of the thread, and thus does not allow the \rf-relation (see Section~\ref{ch:wmm:model:relations}) to point to 
+For instance, the \texttt{mfence} instruction of the x86 assembly flushes the store buffers of the thread, and thus does not allow the \rf-relation to hold (see Section~\ref{ch:wmm:model:relations}).
 
 
 \subsection{Relations}

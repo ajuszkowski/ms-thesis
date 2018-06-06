@@ -13,7 +13,6 @@ public interface XInterpreter {
   void markNextEventLabel(String label);
   XNopEvent emitNopEvent();
   XAssertionEvent emitAssertionEvent(XBinaryComputationEvent assertion);
-  
   XLocalMemoryEvent emitMemoryEvent(XLocalLvalueMemoryUnit destination,
                                     XLocalMemoryUnit source);
   XSharedMemoryEvent emitMemoryEvent(XLocalLvalueMemoryUnit destination,
@@ -21,7 +20,6 @@ public interface XInterpreter {
   XSharedMemoryEvent emitMemoryEvent(XSharedLvalueMemoryUnit destination,
                                      XLocalMemoryUnit source);
 
-  // create computation event without processing it:
   XComputationEvent createComputationEvent(XUnaryOperator operator,
                                            XLocalMemoryUnit operand);
   XComputationEvent createComputationEvent(XBinaryOperator operator,
@@ -37,5 +35,4 @@ public interface XInterpreter {
   void finishNonlinearBlockDefinition();
   void processJumpStatement(JumpKind kind);
   XEntity processMethodCall(String methodName, XMemoryUnit... arguments);
-
 }

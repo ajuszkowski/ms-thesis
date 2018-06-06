@@ -41,8 +41,8 @@ The following list summarises the main rules we followed during the development 
     \begin{enumerate}[label*=\arabic*.]
       \item completeness of the analysis,
       \item modular architecture: each module can be tested independently,
-      \item usage of software design patterns where necessary, and
-      \item usage of immutable data structures for all DTOs.
+      \item use of software design patterns where necessary, and
+      \item use of immutable data structures for all DTOs.
     \end{enumerate}
   \item \textit{Transparency:}
     \begin{enumerate}[label*=\arabic*.]
@@ -714,7 +714,7 @@ However, the memory manager is a stateful component of the compiler as it offers
 The interface methods exposed by the \texttt{XMemoryManager} are presented in Figure~\ref{fig:mem-manager}.
 At each time of the compilation process, the \texttt{XMemoryManager} can resolve the memory unit by its name.
 Following the C standard, local memory units have higher priority over global ones (the method \lstinline{getDeclaredUnitOrNull} returns the first memory unit found, either a global one or a local one, or null if no memory units with requested name have been registered).
-Since C language allows usage of variables that have the same name to be declared in nested contexts, the \texttt{XMemoryManager} should carry the stack of block contexts for local variables (which is not currently implemented).
+Since C language allows use of variables that have the same name to be declared in nested contexts, the \texttt{XMemoryManager} should carry the stack of block contexts for local variables (which is not currently implemented).
 
 \begin{figure}[h]
 \centering
@@ -794,7 +794,7 @@ The almost-ready-context becomes a ready-context (i.e., it moves to the queue \t
 Before processing a newly emitted event, the interpreter checks whether the queue \texttt{readyContexts} is not empty.
 If so, it iterates over all ready-contexts and sets up control-flow edges considering that the newly emitted event is an exit-event" of the non-linear context (e.g., for a branching context the interpreter adds primary edges from condition-event to the first-true-branch-event and from the last-true-branch-event to the exit-event, the same is done with alternative edges for the false-branch).
 For the sake of simplicity of the interpretation and encoding, jump events (no-computation events) are present in the flow-graph, however they can be removed from it with rebinding ingoing and outgoing edges.
-As an example of usage the interpreter, consider the code of the \texttt{Y2XConverterVisitor} for processing \texttt{if-then-else} statement of the \ytree{} in Appendix~\ref{apx:y2x}.
+As an example of usage of the interpreter, consider the code of the \texttt{Y2XConverterVisitor} for processing \texttt{if-then-else} statement of the \ytree{} in Appendix~\ref{apx:y2x}.
 
 
 \subsubsection{X-graph unroller}
@@ -892,7 +892,7 @@ For unrolling the flow-graph, we perform the \textit{Deep-First Search~(DFS)} wh
 Back-edges are determined via the depth stack (each next event is pushed onto the stack; if the new event is present in the stack, the last processed edge is a back-edge).
 Also, during the unrolling each next event increments the \textit{unrolling depth counter} -- the non-zero integer \textit{event reference-ID} stored by each X-event (only events of a non-unrolled graph can have the zero-valued reference-ID)
 As an X-event is immutable, it has the method `\lstinline{XEvent asNodeRef(int refId)}' that clones it with new value of reference-ID.
-The methods \lstinline{hashCode} and \texttt{equals} consider the reference-ID as the uniqueness field for all events except sink and source events (considering the usage of \texttt{HashMap} and Guava's \texttt{ImmutableMap} for storing events, proper setting of the hash-code methods is a crucial programming task).
+The methods \lstinline{hashCode} and \texttt{equals} consider the reference-ID as the uniqueness field for all events except sink and source events (considering the use of \texttt{HashMap} and Guava's \texttt{ImmutableMap} for storing events, proper setting of the hash-code methods is a crucial programming task).
 
 %During the work on \porthos[2], we have tested several different schemes of loop unrolling.
 
