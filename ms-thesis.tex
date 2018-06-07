@@ -248,36 +248,12 @@ Saint Petersburg, Russia
 % start correctly on the right-hand side.
 \cleardoublepage
 
-\addcontentsline{toc}{chapter}{Abbreviations}
-\chapter*{Abbreviations}
-% The longtable environment should break the table properly to multiple pages, if needed
-\noindent
-\begin{longtable}{@{}p{0.25\textwidth}p{0.7\textwidth}@{}}
-API & Application Programming Interface \\
-AST & Abstract Syntax Tree \\
-BDD & Binary Decision Diagrams \\
-BNF & Backus-Naur form \\
-BMC & Bounded Model Checking \\
-CF  & Control-Flow \\
-CPU & Central Processor Unit \\
-CTL & Computational Tree Logic \\
-DF  & Data-Flow \\
-DFS & Deep-First Search \\
-DSA & Dynamic Single-Assignment form \\
-DTO & Data-Transfer Object \\
-LTL & Linear Temporal Logic \\
-NP  & Non-deterministic Polynomial time \\
-OOP & Object-Oriented Programming \\
-SB  & Store Buffering \\
-SC  & Sequential Consistency \\
-SAT & Satisfiability problem \\
-SMP & Symmetric Multiprocessor architecture \\
-SMT & Satisfiability Modulo Theories problem \\
-SSA & Static Single-Assignment form \\
-UMC & Unbounded Model Checking \\
-UML & Unified Modeling Language \\
-WMM & Weak Memory Model \\
-\end{longtable}
+
+\ifdefined\IsAalto
+  \addcontentsline{toc}{chapter}{Abbreviations}
+  \input{50_abbreviations}
+\else
+\fi
 
 
 % Table of contents
@@ -302,6 +278,8 @@ WMM & Weak Memory Model \\
 % You only need a list of figures for your thesis if you have very
 % many figures. If you do, uncomment the following two lines.
 \cleardoublepage
+%\phantomsection
+\addcontentsline{toc}{chapter}{\listfigurename}
 \listoffigures
 
 % The following label is used for counting the prelude pages %https://latex.org/forum/viewtopic.php?t=21520 :
@@ -331,9 +309,19 @@ WMM & Weak Memory Model \\
 \input{5_eval.tex}
 \input{90_summary.tex}
 
+
+\ifdefined\IsAalto
+\else
+  \cleardoublepage
+  \phantomsection
+  \addcontentsline{toc}{chapter}{Abbreviations}
+  \input{50_abbreviations}
+\fi
+
 % Fix numbering of bibliography section
 \cleardoublepage
 \phantomsection
+
 
 \addcontentsline{toc}{chapter}{\bibname}
 
