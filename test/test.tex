@@ -1,5 +1,4 @@
 
-
 \documentclass[12pt,a4paper,oneside,pdftex]{report}
 
 
@@ -29,6 +28,19 @@ c/.style={
 
 
 \begin{document}
+
+Hello
+
+\section{Kakashka}
+blub
+
+%pdflatex -output-directory=out "\def\IsAalto{yes} \input{test.tex}" 
+%pdflatex -output-directory=out "\input{test.tex}" 
+\ifdefined\IsAalto
+  def
+\else
+  non-def
+\fi
 
 \begin{figure}
 \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]

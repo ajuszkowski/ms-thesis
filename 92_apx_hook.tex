@@ -2,6 +2,8 @@
 \label{apx:hook}
 
 \begin{figure}[H]
+\resizebox*{!}{\dimexpr\textheight-2\baselineskip\relax}
+%
 \begin{lstlisting}
 class XKernelInvocationHook extends XInvocationHookBase 
        implements XInvocationHook {
@@ -39,6 +41,5 @@ class XKernelInvocationHook extends XInvocationHookBase
  }
 }
 \end{lstlisting}
-%\caption{Example of the invocation hook for intercepting the Linux kernel-specific functions}
-%\label{code-invoc-hook}
+%
 \end{figure}

@@ -5,7 +5,7 @@
 
 \section{Solved tasks and contributions}
 
-During the work on this thesis, we solved the following engineering and scientific tasks:
+During the work on this thesis, we solved the following research and engineering problems:
 
 %TODO: written a generic hardware-agnostic extensible non-optimising compiler
 
@@ -17,12 +17,12 @@ We have studied existing weak memory model-aware analysis approaches, tools and 
 Then, we explored existing implementation of the portability analysis tool \textit{\porthos{}} and designed the new tool \textit{\porthos[2]} that accepts as input the larger subset of the C language and supports its fundamental concepts by design, has modular architecture and disposes the extensible knowledge base of the domain-specific functions.
 The key aspects of the architectural design and implementations are the following:
 
-  \begin{enumerate}[leftmargin=\parindent,label=\alph*.]
+  \begin{enumerate}[label=\alph*.]
   \item The first stumbling block in extension of the input language was the \porthos[1] program input parser, which performs the full semantic analysis of the program.
   Although it works for a small subset of the C language, the rich and expressive language such as C requires several stages of analysis before the compilation stage.
   To handle this, we implemented the processing units that analyse the AST of the program on the \textit{pre-compilation} stage (see Section~\ref{ch:impl:proc:x-pre-compiler}).
 
-  As an example, the \textit{variable kind analysis} (shared or local) is performed by \porthos[1] syntactically, depending on the operator or the function that uses the variable.
+  As an example, the \textit{variable kind analysis} (determining whether they are shared or local) is performed by \porthos[1] syntactically, depending on the operator or the function that uses the variable.
   In contrast, \porthos[2] traverses the program AST and collects information of all variables accessed in the program during the pre-compilation stage (see Section~\ref{ch:impl:proc:x-pre-compiler}).
   Currently, \porthos[2] considers a variable to be shared if it was declared as a pointer, or its address is accessed at least once by the code of any process, or it was declared as a parameter of the function that defines a process, or it was exported by \texttt{extern} keyword or an exporting function.
 
@@ -114,6 +114,12 @@ For that, the \zformula{} abstraction layer will be useful as new SMT-solvers ca
 %\item optionally: urnolling algo; 
 
 \end{itemize}
+
+
+\ifdefined\IsAalto
+\else
+  \vspace*{1em}
+\fi
 
 
 The new tool \porthos[2] with the extensible program domain knowledge base can be considered as a generalised framework for SMT-based memory model-aware analysis, which can not only perform the reachability and portability analysis, but also serve as a basis for other kinds of static analysis of concurrent programs.

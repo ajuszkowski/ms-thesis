@@ -341,7 +341,7 @@ The encoding consists of two parts: encoding of the \textit{derived relations} a
 
 In the SMT-formula, a relation $x \relarrow{r} y$ is represented by a boolean variable $r(x, y)$ that indicates whether the relation holds.
 Derived relations are encoded by fresh boolean variables according to the following rules~\cite{Porthos17b}:
-\begin{itemize}[noitemsep,topsep=0pt]
+\begin{itemize}[noitemsep,topsep=0pt,label={}]
 \item $r_1 \cup r_2(e_1, e_2) \defeq r_1(e_1, e_2) \lor r_2(e_1, e_2)$;
 \item $r_1 \cap r_2(e_1, e_2) \defeq r_1(e_1, e_2) \land r_2(e_1, e_2)$;
 \item $r_1 \relminus r_2(e_1, e_2) \defeq r_1(e_1, e_2) \land \neg r_2(e_1, e_2)$;

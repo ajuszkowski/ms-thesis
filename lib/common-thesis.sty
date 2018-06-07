@@ -36,13 +36,6 @@
 %\newcommand{\pvec}[1]{\vec{#1}\mkern2mu\vphantom{#1}} %for primed vectors, see https://tex.stackexchange.com/a/120034
 \newcommand{\pvec}[1]{\vec{#1}\,}
 
-% Font selection
-%\usepackage{palatino}
-%\usepackage[sc]{mathpazo}
-\usepackage{kpfonts}
-%\usepackage{tgpagella}
-%\usepackage{garamond}
-%\usepackage{lmodern}
 
 % Verbatim provides a standard teletype environment that renderes
 % the text exactly as written in the tex file. Useful for code
@@ -94,7 +87,9 @@ Porthos\ifthenelse%
 \newcommand{\invrel}[1]{\ensuremath{\texttt{#1}^{\texttt{-1}}}}%{\ensuremath{\texttt{#1}\!\!\mathbin{\char`\^}\!\!\texttt{-1}}} %inversion or a relation in math mode: r^-1
 \newcommand{\relminus}{\!\smallsetminus\!}
 
-\newcommand{\defeq}{\ensuremath{=}}%\coloneqq}}%\Leftrightarrow}}%\triangleq}}
+\usepackage{amssymb}%for mathbb, ,etc.
+\renewcommand{\triangleq}{\ensuremath{=}}%\coloneqq}}%\Leftrightarrow}}%\triangleq}}
+\newcommand{\defeq}{\triangleq}
 %\newcommand*{\defeq}{\mathrel{\vcenter{\baselineskip0.5ex \lineskiplimit0pt\hbox{\scriptsize.}\hbox{\scriptsize.}}}=}
 
 \newcommand{\ytree}{\ensuremath{\text{Y-tree}}}
@@ -119,14 +114,6 @@ Porthos\ifthenelse%
 
 \usepackage{longtable} %for ab-bre-via-tions
 
-% The titlesec package can be used to alter the look of the titles
-% of sections, chapters, and so on. This example uses the ``medium''
-% package option which sets the titles to a medium size, making them
-% a bit smaller than what is the default. You can fine-tune the
-% title fonts and sizes by using the package options. See the package
-% documentation.
-%\usepackage[medium]{titlesec}
-\usepackage[medium,raggedright]{titlesec}
 %\usepackage{pxfonts} %for listings
 
 \usepackage[position=b]{subcaption}
@@ -194,8 +181,6 @@ c/.style={
 % Multiple figures inside one figure. See figure in 1lipsum.tex for example
 %\usepackage{subfig}
 
-% Inconsolata monospace font for verbatim environment
-\usepackage{inconsolata}
 
 % For rotating figures
 \usepackage{rotating}
@@ -206,7 +191,6 @@ c/.style={
 \widowpenalty=10000
 \clubpenalty=10000
 
-
 % Graphics are required for including PDF files into the document
 \RequirePackage{graphicx}
 % The url package provides commands for formatting URLs
@@ -216,6 +200,8 @@ c/.style={
 % The tabularx environment is an extension of tabular that allows 
 % paragraph-type column widths to be calculated automatically 
 \RequirePackage{tabularx}
+
+\RequirePackage[pdftex]{hyperref}
 
 % Improvements for mathematical formatting
 \RequirePackage{amsmath}
@@ -242,9 +228,7 @@ c/.style={
 \newcommand{\ifthen}[2]{\ifthenelse{#1}{#2}{}}
 
 
-% By default, only up to 3rd level headers are numbered (e.g. 1.2.2.)
-% Specify which headers are numbered
-\setcounter{secnumdepth}{4} 
+
 % Specify which headers are put in the TOC
 \setcounter{tocdepth}{3} 
 
@@ -271,15 +255,8 @@ c/.style={
 \urlstyle{smallurl}
 
 
-
-
-
-
-
-
-
 \newcommand{\startcoverpage}{\pagenumbering{arabic}}
-\newcommand{\startfirstchapter}{}
+\newcommand{\startfirstchapter}{\pagenumbering{arabic}}
 % The number of pages is counted based on the labels.
 % The lastpage package calculates the position of the LastPage label.
 % A plain label may not work if last pages contain floats that are placed 
@@ -291,19 +268,9 @@ c/.style={
 
 
 
-% Add headings to pages (the chapter title is shown)
-%\pagestyle{headings}
-\usepackage{fancyhdr}
-\pagestyle{fancy}
-\renewcommand{\headrulewidth}{0.5pt}
-\fancyhf{}
-\rhead{\footnotesize\itshape{\leftmark}}
-\cfoot{\thepage}
-
 \interfootnotelinepenalty=10000
 
 
 \definecolor{dkblue}{rgb}{0,0.1,0.4}
 
-\titleformat{\paragraph}[runin]{\normalfont\normalsize\bfseries}{}{0em}{}[.]%[:]
-\titlespacing*{\paragraph}{0em}{1em}{1em} % {left}{before}{after}[right]
+

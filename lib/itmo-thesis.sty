@@ -3,29 +3,40 @@
 
 \usepackage{lib/common-thesis}
 
+\usepackage{indentfirst}
+
 % Nicer looking caption for figures, tables, etc.
 \usepackage{caption}%[labelfont={bf},textfont={it},justification={raggedright},singlelinecheck={false}]{caption}
 
 \usepackage[backend=biber]{biblatex}
 
+\setcounter{secnumdepth}{3}
 
 %TODO: include separate pdf-documents for titul lists + annotations + reviews
 \newcommand{\coverpage}[1]{}
 
 %TODO: abstract
 \newcommand{\thesisabstract}[2]{
+\chapter*{Abstract}
 #2
 }
 
 
+% Шрифты, xelatex
+\usepackage{newtxtext} %Times New Roman % Нормоконтроллеры хотят именно его
+%\newfontfamily{\cyrillicfonttt}{FreeMono}
+\usepackage{amssymb}%for mathbb, ,etc.
+% Inconsolata monospace font for verbatim environment
+\usepackage{inconsolata}
+
 % Оформление библиографии и подрисуночных записей через точку
-\makeatletter
-\renewcommand*{\@biblabel}[1]{\hfill#1.}
-\renewcommand*\l@section{\@dottedtocline{1}{1em}{1em}}
-\renewcommand{\thefigure}{\thesection.\arabic{figure}} % Формат рисунка секция.номер
-\renewcommand{\thetable}{\thesection.\arabic{table}} % Формат таблицы секция.номер
-\def\redeflsection{\def\l@section{\@dottedtocline{1}{0em}{10em}}}
-\makeatother
+%\makeatletter
+%\renewcommand*{\@biblabel}[1]{\hfill#1.}
+%\renewcommand*\l@section{\@dottedtocline{1}{1em}{1em}}
+\renewcommand{\thefigure}{\arabic{figure}} % Формат рисунка секция.номер
+\renewcommand{\thetable}{\arabic{table}} % Формат таблицы секция.номер
+%\def\redeflsection{\def\l@section{\@dottedtocline{1}{0em}{10em}}}
+%\makeatother
 
 \renewcommand{\baselinestretch}{1.4} % Полуторный межстрочный интервал
 \parindent 1.25cm % Абзацный отступ
@@ -36,7 +47,7 @@
 
 % Отступы у страниц
 \usepackage{geometry}
-\geometry{left=3cm}
+\geometry{left=2.5cm}
 \geometry{right=1cm}
 \geometry{top=2cm}
 \geometry{bottom=2cm}
@@ -45,12 +56,13 @@
 \usepackage{enumitem}
 \setlist[enumerate,itemize]{leftmargin=12.7mm} % Отступы в списках
 
-\makeatletter
-\AddEnumerateCounter{\asbuk}{\@asbuk}{м)}
-\makeatother
+%\makeatletter
+%\AddEnumerateCounter{\asbuk}{\@asbuk}{м)}
+%\makeatother
 \setlist{nolistsep} % Нет отступов между пунктами списка
-\renewcommand{\labelitemi}{--} % Маркет списка —
-\renewcommand{\labelenumi}{\asbuk{enumi})} % Список второго уровня
+\renewcommand{\labelitemi}{--} % Маркер списка 1
+\renewcommand{\labelitemii}{-} % Маркер списка 2
+\renewcommand{\labelenumi}{\alph{enumi})} % Список второго уровня
 \renewcommand{\labelenumii}{\arabic{enumii})} % Список третьего уровня
 
 \usepackage{textcase}
@@ -77,10 +89,30 @@
 	\chead{\thepage}
 }
 
-% Формат подрисуночных надписей
+
+
+% Формат подрисуночных записей
+\usepackage{chngcntr}
+%\counterwithin{figure}{chapter} %TODO:  одна цифра
+\counterwithout{figure}{chapter}
 \RequirePackage{caption}
 \DeclareCaptionLabelSeparator{defffis}{ — } %
 % Разделитель
 \captionsetup[figure]{justification=centering, labelsep=defffis, format=plain} % Подпись рисунка по центру
 \captionsetup[table]{justification=raggedright, labelsep=defffis, format=plain, singlelinecheck=false} % Подпись таблицы слева
 %\addto\captionsrussian{\renewcommand{\figurename}{Рисунок}} % Имя фигуры
+
+% Оформление заголовков
+\usepackage[compact,explicit]{titlesec}
+\titleformat{\chapter}[block]{}{}{12.5mm}{\bfseries\centering{\thechapter\quad\MakeTextUppercase{#1}}\vspace{1.5em}}
+\titleformat{\section}[block]{\vspace{1em}}{}{12.5mm}{\bfseries\centering{\thesection\quad#1\vspace{1em}}}
+
+\titleformat{name=\chapter,numberless}[block]{}{}{12.5mm}{\bfseries\centering{\MakeTextUppercase{#1}}\vspace{1.5em}}
+\titleformat{name=\section,numberless}[block]{\vspace{1em}}{}{12.5mm}{\bfseries\centering{\quad#1\vspace{1em}}}
+
+\titleformat{\subsection}[block]{\vspace{1em}\normalsize}{}{12.5mm}{\bfseries\centering{\thesubsection\quad#1\vspace{1em}}}
+\titleformat{\subsubsection}[block]{\vspace{1em}\normalsize}{}{12.5mm}{\bfseries\centering{\thesubsubsection\quad#1\vspace{1em}}}
+\titleformat{\paragraph}[runin]{\normalfont\normalsize}{}{0mm}{\hspace{\parindent}\bfseries#1.}
+%\titlespacing*{\paragraph}{0em}{1em}{0.5em} % {left}{before}{after}[right]
+
+

@@ -100,6 +100,7 @@ Nonetheless, the intuitive syntax for defining grammars and numerous of tools fo
 
 \begin{figure}[t]%[!h]%[!hb]
 \centering
+\begin{minipage}[t]{.6\textwidth}%for preventing overfull
 %basicstyle=\ttfamily\tiny,
 \begin{lstlisting}[basicstyle=\rmfamily\scriptsize,%
   %alsoletter={:,|,;,(,)},
@@ -142,6 +143,7 @@ Nonetheless, the intuitive syntax for defining grammars and numerous of tools fo
       |      <expression>   (`*'   |   `+'   |   `-'   |   `/'   |   `%')   <expression>
       ;
 \end{lstlisting}
+\end{minipage}
 \caption{Sketch of the input language grammar used by \oldporthos{}}
 \label{fig:in_grammar_pts}
 \end{figure}
@@ -718,7 +720,9 @@ Since C language allows use of variables that have the same name to be declared 
 
 \begin{figure}[h]
 \centering
+\begin{minipage}[t]{.9\textwidth}%for preventing overfull
 \lstinputlisting[language=java]{inc/lst/XMemoryManager.java}
+\end{minipage}
 \caption{X-memory manager public interface}
 \label{fig:mem-manager}
 \end{figure}

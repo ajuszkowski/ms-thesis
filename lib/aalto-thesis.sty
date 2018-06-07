@@ -11,6 +11,27 @@
 
 
 
+% The titlesec package can be used to alter the look of the titles
+% of sections, chapters, and so on. This example uses the ``medium''
+% package option which sets the titles to a medium size, making them
+% a bit smaller than what is the default. You can fine-tune the
+% title fonts and sizes by using the package options. See the package
+% documentation.
+%\usepackage[medium]{titlesec}
+\usepackage[medium,raggedright]{titlesec}
+
+\titleformat{\paragraph}[runin]{\normalfont\normalsize\bfseries}{}{0em}{}[.]%[:]
+\titlespacing*{\paragraph}{0em}{1em}{1em} % {left}{before}{after}[right]
+
+% Font selection
+%\usepackage{palatino}
+%\usepackage[sc]{mathpazo}
+\usepackage{kpfonts}
+%\usepackage{tgpagella}
+%\usepackage{garamond}
+%\usepackage{lmodern}
+% Inconsolata monospace font for verbatim environment
+\usepackage{inconsolata}
 
 % From Samwise, edited by JLarja. Fixme can be used to wrote something that should be fixed later. 
 % It is better than just writing something to comments, since it is shown in the output file. If 
@@ -292,3 +313,15 @@ sorting=anyvt,%Sort by alphabetic label, name, year, title,
 % Multiple figures inside one figure. See figure in 1lipsum.tex for example
 %\usepackage{subfig}
 
+% By default, only up to 3rd level headers are numbered (e.g. 1.2.2.)
+% Specify which headers are numbered
+\setcounter{secnumdepth}{4} 
+
+% Add headings to pages (the chapter title is shown)
+%\pagestyle{headings}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0.5pt}
+\fancyhf{}
+\rhead{\footnotesize\itshape{\leftmark}}
+\cfoot{\thepage}
