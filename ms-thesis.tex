@@ -354,31 +354,40 @@ WMM & Weak Memory Model \\
 
 %
 %\titleformat{hcommandi}[hshapei]{hformati}{hlabeli}{hsepi}{hbefore-codei}[hafter-codei]
-\newcommand{\sectionbreak}{\clearpage}
+
+
+%{
+
+\newcommand{\sectionbreak}{\cleardoublepage}
 \renewcommand{\thesection}{A.\arabic{section}}
 
-\let\cleardoublepage\clearpage
-
-\cleardoublepage%\makeatletter\@openrightfalse\makeatother
+\cleardoublepage\makeatletter\@openrightfalse\makeatother
 
 \phantomsection
 \appendix
 \addcontentsline{toc}{chapter}{Appendices}
+
+%\titlespacing*{command}{left}{beforesep}{aftersep}[right]
 \ifdefined\IsAalto
-  \titlespacing*{\section}{0pt}{-20pt}{5pt}
-  \titleformat{\section}[display]{\normalfont\large\bfseries}{}{10pt}{\thesection\quad\large}
+  \titleformat{\section}[display]{\normalfont\large\bfseries}{}{0pt}{\thesection\quad\large}
+  \titlespacing{\section}{0pt}{-20pt}{5pt}
   \fancyhead[R]{\footnotesize\itshape{APPENDICES}}
 \else
+  \titlespacing{\section}{0pt}{-20pt}{-5pt}
   \titleformat{\section}[display]{\normalfont\large\bfseries}{}{0pt}{\vspace{-2em}\thesection\quad\large#1}
 \fi
 \appendixpage
 
-\input{91_apx_trees.tex}
-\input{92_apx_hook.tex}
-\input{93_apx_y2xconverter.tex}
-\input{94_apx_interpreter.tex}
-\input{95_apx_dekker.tex}
-\input{96_apx_output.tex}
+
+\input{91_apx_trees}
+\input{92_apx_hook}
+\input{93_apx_y2xconverter}
+\let\cleardoublepage\clearpage
+\input{94_apx_interpreter}
+\let\cleardoublepage\clearpage
+\input{95_apx_dekker}
+\input{96_apx_output}
+
 
 % End of document!
 % ------------------------------------------------------------------

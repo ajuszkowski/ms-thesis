@@ -8,10 +8,10 @@
 %\FigureHereHeight{
 \begin{multicols*}{2}
 \centering
-\begin{lstlisting}[basicstyle=\footnotesize\ttfamily]
-$ java PorthosC --reachability \ 
+\begin{lstlisting}[basicstyle=\footnotesize\ttfamily,language=Java]
+[* \textbf{\texttt{\$ java PorthosC --reachability \ 
     --input benchmarks/Dekker.c \
-    --bound 27 --target TSO -v
+    --bound 27 --target TSO -v}} *]
 0.400: Interpretation...
 0.632: Unrolling...
 0.805: Program encoding...
@@ -22,7 +22,7 @@ $ java PorthosC --reachability \
   "result": "NonReachable",
   "options": {
     "inputProgramFile": {
-      "path": "benchmarks/litmus_C11/Dekker.c"
+      "path": "benchmarks/Dekker.c"
     },
     "sourceModel": "TSO",
     "unrollingBound": 27

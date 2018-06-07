@@ -2,11 +2,11 @@
 \label{apx:y2x}
 
 %TODO!!! refactor the code, move program.tryEvaluateComputation() to Y2Xvisitor or Helper
-%\FigureHereHeight{
-\begin{lstlisting}
+\begin{figure}[H]
+%
+\begin{lstlisting}[language=Java]
 public class Y2XConverterVisitor implements YtreeVisitor<XEntity> {
   ...
-
   @Override
   public XEvent visit(YBranchingStatement node) {
     program.startBlockDefinition(XInterpreter.BlockKind.Branching);
@@ -36,4 +36,7 @@ public class Y2XConverterVisitor implements YtreeVisitor<XEntity> {
     }
 }
 \end{lstlisting}
-%}
+%
+\end{figure}
+
+\nopagebreak[4]
