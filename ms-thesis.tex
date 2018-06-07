@@ -164,6 +164,22 @@
 % Place all formatting commands and such before this line.
 % ------------------------------------------------------------------
 \begin{document}
+
+\def\firstToLow#1{\expandafter\firstToLowA#1!!}
+\def\firstToLowA#1#2!!{\MakeLowercase{#1}#2}
+\def\striplastDot#1{\striplastDota{#1}#1\end .\end\eend}
+\def\striplastDota#1#2.\end#3\eend{\ifx\end#3\end#1\else#2\fi}
+
+\renewcommand{\footnote}[1]{%
+\ifdefined\IsAalto%
+\footnote{#1}%
+\else%
+\ (\striplastDot{\firstToLow{#1}})%
+\fi%
+}
+
+
+
 % This command adds a PDF bookmark to the cover page
 \pdfbookmark[0]{Cover}{bookmark.0.cover}
 

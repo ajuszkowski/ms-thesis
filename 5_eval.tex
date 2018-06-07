@@ -156,9 +156,7 @@ For performing tests, \porthos[2] was slightly modified in the branch \textit{ay
 \footnote{The modifications were pushed into the \porthos[1] repository \url{github.com/hernanponcedeleon/Dat3M}} %
 %
 for printing detailed timing information and statistics about number of events (commit f8a6c97f) and writing this information in strict \textit{json} format so that it can be easily processed later by a script that analyses and prints the results (commit 48ba7161).
-The version of \porthos[2] used for the tests is actual up to commit 01dde6b1 of the \porthos[2] repository%
-\footnote{\porthos[2] repository: \url{https://github.com/ajuszkowski/PorthosC}}. %
-%
+The version of \porthos[2] used for the tests is actual up to commit 01dde6b1 of the \porthos[2] GitHub repository.
 Both \porthos[1] and \porthos[2] are run in the state reachability mode for TSO memory model (see sample output of \porthos[2] in Appendix~\ref{apx:output}).
 
 Figure~\ref{dep:events} illustrates the dependency of overall number of events in all unrolled event-flow graphs of the thread \texttt{t0} on the unrolling bound $k$ for the \texttt{Dekker} test (the left-hand side picture illustrates the case for \porthos[2], and the right-hand side picture illustrates the case for \porthos{}).
