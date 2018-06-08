@@ -166,6 +166,11 @@
 \begin{document}
 
 
+\ifdefined\IsAalto
+\else
+    \includepdf[pages=-]{docs/titul.pdf}
+    \includepdf[pages=-]{docs/zadaniye.pdf}
+\fi
 
 % This command adds a PDF bookmark to the cover page
 \pdfbookmark[0]{Cover}{bookmark.0.cover}
