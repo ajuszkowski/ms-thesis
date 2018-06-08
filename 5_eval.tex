@@ -368,11 +368,6 @@ exists (y == x + 1 && thread_0:r > 21)
 \label{ex:cfg-arbitrary}
 \end{figure}
 
-The four flow-graphs for the code in Figure~\ref{ex:cfg-arbitrary} are shown in Figure~\ref{ex:cfg-arbitrary:pic}.
-There are two small linear flow-graphs for \textit{prelude} (litmus-specific variables initialisation and shared variables declaration) and \textit{postlude} (assertion) definitions.
-As the initialisation statement assigns value only to one shared variable, its flow-graph has only a single event (although variable declarations change the state of the interpreter while compilation, they do not produce events).
-The postlude has shared variables involved into the assertion, therefore they need to be copied into local registers beforehand.
-Note how the unconditional jump instructions \texttt{goto}, \texttt{continue} and \texttt{break} are compiled in the event-flow graph for processes \texttt{thread\_0} and \texttt{thread\_1}.
 
 \begin{figure}[!h]
 \includegraphics[width=\textwidth,keepaspectratio]{img/my/graphs/cfg-arbitrary/collage.jpg}
@@ -380,33 +375,15 @@ Note how the unconditional jump instructions \texttt{goto}, \texttt{continue} an
 \label{ex:cfg-arbitrary:pic}
 \end{figure}
 
+The four flow-graphs for the code in Figure~\ref{ex:cfg-arbitrary} are shown in Figure~\ref{ex:cfg-arbitrary:pic}.
+There are two small linear flow-graphs for \textit{prelude} (litmus-specific variables initialisation and shared variables declaration) and \textit{postlude} (assertion) definitions.
+As the initialisation statement assigns value only to one shared variable, its flow-graph has only a single event (although variable declarations change the state of the interpreter while compilation, they do not produce events).
+The postlude has shared variables involved into the assertion, therefore they need to be copied into local registers beforehand.
+Note how the unconditional jump instructions \texttt{goto}, \texttt{continue} and \texttt{break} are compiled in the event-flow graph for processes \texttt{thread\_0} and \texttt{thread\_1}.
+
+
 
 \subsection{Extensible compiler mapping}
-
-\begin{figure}%[t]
-\centering
-\begin{minipage}[t]{.49\textwidth}%for preventing overfull
-\begin{lstlisting}
-{ int x = 0; int y = 0;}
-
-P0(volatile int* y, volatile int* x) {
-  int r0;
-  WRITE_ONCE(*x,1);
-  r0 = READ_ONCE(*y);
-}
-
-P1(volatile int* y, volatile int* x) {
-  int r0;
-  WRITE_ONCE(*y,1);
-  r0 = READ_ONCE(*x);
-}
-
-exists(x == 0 && y == 0)
-\end{lstlisting}
-\end{minipage}
-\caption{SB litmus test for the Linux kernel memory model}
-\label{ex:sb:kernel}
-\end{figure}
 
 %The revised design of \porthos{} tool includes the following new features:
 Apart from redesigning the tool architecture and extending the input language, we added support for basic constructions used in \textit{Kernel litmus tests}~\cite{alglave2018frightening}.
@@ -416,3 +393,27 @@ Note that, comparing to the \porthos[1], adding support for new functions in \po
 As an example, consider the Store Buffering litmus test for the Linux kernel in Figure~\ref{ex:sb:kernel} (which is similar to the one presented in Figure~\ref{simple_wmm_x86}).
 When verifying this litmus test by \porthos[2] in the state reachability mode, the test passes for TSO memory model and fails for SC model.
 
+\begin{figure}[h]
+\centering
+\begin{minipage}[t]{.49\textwidth}%for preventing overfull
+\begin{lstlisting}
+{ int x = 0; int y = 0;}
+
+P0(volatile int& y, volatile int& x) {
+  int r0;
+  WRITE_ONCE(x,1);
+  r0 = READ_ONCE(y);
+}
+
+P1(volatile int& y, volatile int& x) {
+  int r0;
+  WRITE_ONCE(y,1);
+  r0 = READ_ONCE(x);
+}
+
+exists(x == 0 && y == 0)
+\end{lstlisting}
+\end{minipage}
+\caption{SB litmus test for the Linux kernel memory model}
+\label{ex:sb:kernel}
+\end{figure}

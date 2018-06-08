@@ -103,16 +103,21 @@
 
 % Оформление заголовков
 \usepackage[compact,explicit]{titlesec}
-\titleformat{\chapter}[block]{}{}{12.5mm}{\bfseries\centering{\thechapter\quad\MakeTextUppercase{#1}}\vspace{1em}}
-\titleformat{\section}[block]{\vspace{1em}}{}{12.5mm}{\bfseries\centering{\thesection\quad#1\vspace{1em}}}
+\titleformat{\chapter}[block]{}{}{12.5mm}{\bfseries\centering{\thechapter\quad\MakeTextUppercase{#1}}}
+\titleformat{\section}[block]{}{}{12.5mm}{\bfseries\centering{\thesection\quad#1}}
 
-\titleformat{name=\chapter,numberless}[block]{}{}{12.5mm}{\bfseries\centering{\MakeTextUppercase{#1}}\vspace{1.5em}}
-\titleformat{name=\section,numberless}[block]{\vspace{1em}}{}{12.5mm}{\bfseries\centering{\quad#1\vspace{1em}}}
+\titleformat{name=\chapter,numberless}[block]{}{}{12.5mm}{\bfseries\centering{\MakeTextUppercase{#1}}}
+\titleformat{name=\section,numberless}[block]{}{}{12.5mm}{\bfseries\centering{\quad#1}}
 
-\titleformat{\subsection}[block]{\vspace{1em}\normalsize}{}{12.5mm}{\bfseries\centering{\thesubsection\quad#1\vspace{1em}}}
-\titleformat{\subsubsection}[block]{\vspace{1em}\normalsize}{}{12.5mm}{\bfseries\centering{\thesubsubsection\quad#1\vspace{1em}}}
+\titleformat{\subsection}[block]{\normalsize}{}{12.5mm}{\bfseries\centering{\thesubsection\quad#1}}
+\titleformat{\subsubsection}[block]{\normalsize}{}{12.5mm}{\bfseries\centering{\thesubsubsection\quad#1}}
 \titleformat{\paragraph}[runin]{\normalfont\normalsize}{}{0mm}{\hspace{\parindent}\bfseries#1.}
+
 %\titlespacing*{\paragraph}{0em}{1em}{0.5em} % {left}{before}{after}[right]
+\titlespacing*{\chapter}{0em}{-\baselineskip}{2\baselineskip}
+\titlespacing*{\section}{0em}{2\baselineskip}{2\baselineskip}
+\titlespacing*{\subsection}{0em}{2\baselineskip}{2\baselineskip}
+\titlespacing*{\subsubsection}{0em}{2\baselineskip}{2\baselineskip}
 
 
 \renewcommand{\cftloftitlefont}{\hspace*{\fill}\bfseries\MakeUppercase}
