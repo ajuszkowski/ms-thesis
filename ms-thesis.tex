@@ -170,7 +170,7 @@
 \def\striplastDot#1{\striplastDota{#1}#1\end .\end\eend}
 \def\striplastDota#1#2.\end#3\eend{\ifx\end#3\end#1\else#2\fi}
 
-\renewcommand{\footnote}[1]{%
+\newcommand{\myfootnote}[1]{%
 \ifdefined\IsAalto%
 \footnote{#1}%
 \else%

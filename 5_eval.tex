@@ -153,7 +153,7 @@ For example, primary transitions of both events `\lstinline{[b <- 1, 8]}' and `\
 As another example of program liable for analysis consider the Dekker's algorithm for mutual exclusion of two processes, originally described by Dijkstra~\cite{dijkstra1962over}; the program is presented in Appendix~\ref{apx:dekker}.
 For testing \porthos[1], we used the same file in old \porthos{} input language (\texttt{dekker.pts}), which was used in evaluation tests in the original paper~\cite{Porthos17a}.
 For performing tests, \porthos[2] was slightly modified in the branch \textit{ay/test-timing}%
-\footnote{The modifications were pushed into the \porthos[1] repository \url{github.com/hernanponcedeleon/Dat3M}} %
+\myfootnote{The modifications were pushed into the \porthos[1] repository \url{github.com/hernanponcedeleon/Dat3M}} %
 %
 for printing detailed timing information and statistics about number of events (commit f8a6c97f) and writing this information in strict \textit{json} format so that it can be easily processed later by a script that analyses and prints the results (commit 48ba7161).
 The version of \porthos[2] used for the tests is actual up to commit 01dde6b1 of the \porthos[2] GitHub repository.

@@ -96,7 +96,7 @@ Although the former type of memory models may be easier to describe and interpre
 Chronologically the first memory model for a concurrent system was formulated by Leslie Lamport back in 1979~\cite{lamport1979make}.
 This memory model, called the \textit{Sequential Consistency (SC)}, allows only those executions that produce the same result as if the operations had been executed in an interleaved fashion in a single process%
 %
-\footnote{In order to prescind from the implementation details while discussing the memory models theory, we avoid the use of the software-specific term \textit{thread} and the hardware-specific term \textit{processor}.
+\myfootnote{In order to prescind from the implementation details while discussing the memory models theory, we avoid the use of the software-specific term \textit{thread} and the hardware-specific term \textit{processor}.
 Instead, we adhere the terminology of the theory of concurrency employed by Ben-Ari~\cite{ben2006principles} by naming a concurrent piece of code the \textit{process}.}. %
 %
 This means that the order of operations executed by a process is strictly defined by the program (the code) it executes.
@@ -147,7 +147,7 @@ Furthermore, there exists a wide range of tools that perform memory model-aware 
 \item A state-of-the-art tool is \tool{diy} (\textit{do it yourself}), developed by researchers from INRIA institute, France and University of Cambridge, UK.
 The \tool{diy}%
 %
-\footnote{The \tool{diy} project web site: \url{http://diy.inria.fr/}} %
+\myfootnote{The \tool{diy} project web site: \url{http://diy.inria.fr/}} %
 %
 is a software suite for designing and testing weak memory models.
 It is firstly released back in 2010, and since that time it remained to be the only tool for testing weak memory models.
@@ -189,7 +189,7 @@ As the result, a program compiled for the platform $\mathcal{T}$ can reach state
 
 The very first tool that performs the WMM-aware portability analysis is \porthos{}%
 %
-\footnote{The \porthos{} project repository: \url{http://github.com/hernanponcedeleon/Dat3M}} %
+\myfootnote{The \porthos{} project repository: \url{http://github.com/hernanponcedeleon/Dat3M}} %
 %
 introduced in April~2017~\cite{Porthos17a}.
 This tool reduces described problem to a bounded reachability problem, which can be solved via an SMT-solver (see Section~\ref{ch:enc:bmc}).
@@ -226,7 +226,7 @@ For that, in addition to supporting the C syntax (augmented by litmus-style defi
 
 As the general architecture and almost all components of \porthos{} were to be redesigned, the tool received a new name \textit{\porthos[2]}\,%
 %
-\footnote{Hereinafter with the names \textit{\porthos{}} and \textit{\porthos[1]} we refer to the tool \porthos{} of version 1, whereas the new implementation of \porthos{} is called \textit{\porthos[2]}.}. %
+\myfootnote{Hereinafter with the names \textit{\porthos{}} and \textit{\porthos[1]} we refer to the tool \porthos{} of version 1, whereas the new implementation of \porthos{} is called \textit{\porthos[2]}.}. %
 %
 Considering the enhancements of the architectural design, \porthos[2] represents a generalised framework for SMT-based memory model-aware analysis, which can not only perform the reachability and portability analysis, but serve as a basis for other kinds of static analysis of concurrent programs.
 
