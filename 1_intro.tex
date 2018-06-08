@@ -110,7 +110,10 @@ Weakening of the guarantees (such as memory operations reordering, write bufferi
 The relaxations of the SC model lead to \textit{Weak Memory Models~(WMMs)} that specify how processes interact through the shared memory, when a write becomes visible to processes running on other cores, and what value a read operation can get.
 Thus, WMMs serve as a set of guarantees made by designers of an execution environment to programmers on which behaviours of their concurrent code they can rely on.
 
-
+\ifdefined\IsAalto
+\else
+  \vspace*{1em}
+\fi
 \section{Related work}
 \label{ch:intro:related}
 
@@ -185,7 +188,7 @@ All the tools listed above consider only a single memory model, however, in real
 One of these problems is the \textit{portability analysis} of the program from one hardware architecture to another.
 A program written in a high-level language is compiled for different hardware architectures.
 Even if all the compiler optimisations were disabled (which is a rare case nowadays), the behaviour of two compiled versions of the same program may differ due to differences between hardware memory models.
-As the result, a program compiled for the platform $\mathcal{T}$ can reach states that are unreachable on the platform $\mathcal{S}$, which is a \textit{portability bug} from the source platform $\mathcal{S}$ to the target platform $\mathcal{T}$~\cite{Porthos17a}.
+As the result, a program compiled for the platform~$\mathcal{T}$ can reach states that are unreachable on the platform~$\mathcal{S}$, which is a \textit{portability bug} from the source platform~$\mathcal{S}$ to the target platform~$\mathcal{T}$~\cite{Porthos17a}.
 
 The very first tool that performs the WMM-aware portability analysis is \porthos{}%
 %

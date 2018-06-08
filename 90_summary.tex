@@ -29,7 +29,7 @@ The key aspects of the architectural design and implementations are the followin
   \item In addition, \porthos[2] supports \textit{new syntactic constructions} of the C language: \texttt{break} and \texttt{continue} jumps, function invocations, multiple-variable declarations (as `\lstinline{int a, b=2, z;}'), arbitrary expressions allowed by the C11 standard~\cite{c11}, and some others (see Section~\ref{ch:impl:input}).
 
   \item As the C language supports unconditional \texttt{goto}-jumps, the control-flow graph can have an arbitrary structure, which can not be modelled solely by the program AST, therefore \porthos[2] compiles the AST to the low-level hardware-agnostic program representation \xgraph{}.
-  For that, we implemented the \textit{full C interpreter} discussed in Section~\ref{ch:impl:proc:x-compiler}.
+  For that, we implemented the \textit{full C~interpreter} discussed in Section~\ref{ch:impl:proc:x-compiler}.
   
   \item Originally, the control-flow instructions were encoded directly into the SMT-formula~\cite{Porthos17a}.
   In contrast, \porthos[2] encodes the low-level \xgraph{} representation in accordance with the \textit{new control-flow encoding scheme} that in general follows the one proposed in~\cite[Chapter 5.1.2]{heljanko2008unfoldings} (see Section~\ref{ch:enc:bmc:cf}).
@@ -70,7 +70,7 @@ Nonetheless, the small-size litmus test-like programs (containing hundreds of ev
 %\item As its predecessor, \porthos[2] does not propose any heuristic for finding the optimal unrolling bound.
 
 \item For justifying the correctness of the verification that bases on the result of the input program unrolling (via the new unrolling scheme discussed in Section~\ref{ch:impl:proc:x-unroll}), one might want to be aware whether the execution in the unrolled event-flow graph has run the loop a whole number or it was interrupted on non-last event of the loop.
-This can be modelled with two kinds of sink events (completed and uncompleted) of the event-flow graph as it was discussed in Sections~\ref{ch:enc:bmc:cf} and~\ref{ch:impl:proc:x-unroll}.
+This can be modelled with \textit{two kinds of sink events} (completed and uncompleted) of the event-flow graph as it was discussed in Sections~\ref{ch:enc:bmc:cf} and~\ref{ch:impl:proc:x-unroll}.
 
 \item \textit{Extending the knowledge base} of domain-specific functions to model synchronisation primitives (the compiler mapping) can be considered as the main future research direction.
 Thus, to be able to process most Linux kernel litmus tests, \porthos[2] needs to know the semantics of the barrier and memory operation functions that are specific for the Linux kernel in order to be able to compile them into the \xgraph{} and later encode them into the SMT-formula.

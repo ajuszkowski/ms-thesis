@@ -630,7 +630,7 @@ The precompiler traverses the \ytree{} and collects information necessary for it
 %TODO: <not implemented yet>
 
 The label resolution is necessary for establishing links to labelled statements.
-In C, labelled statements are declared via the colon-syntax `\lstinline{<label>\;:\;<statement>}', and the labels are referenced by the jump-statement `\lstinline{goto\;<label>}'.
+In C, labelled statements are declared via the colon-syntax `\lstinline{<label> : <statement>}', and the labels are referenced by the jump-statement `\lstinline{goto <label>}'.
 The label resolution algorithm traverses the \ytree{} and collects all declared labels into a map \texttt{JumpsResolver} that points a label to the labelled statement.
 This information is used during compilation to set up unconditional jumps.
 
