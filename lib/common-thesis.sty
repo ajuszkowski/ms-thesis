@@ -32,6 +32,78 @@
 %}
 %\makeatother
 
+
+% Text options for rendering the cover page 
+% ------------------------------------------------------------------
+% These get overwritten when a language is specified
+\newcommand{\ATUNIV}{}
+\newcommand{\ATSCHOOL}{}
+\newcommand{\ATDEGREEPROG}{}
+\newcommand{\ATTITLE}{}
+\newcommand{\ATTITLENAME}{}
+\newcommand{\ATSUBTITLE}{}
+\newcommand{\ATTHESIS}{}
+\newcommand{\ATSUPERVISORNAME}{}
+\newcommand{\ATINSTRUCTORNAME}{}
+\newcommand{\ATSUPERVISOR}{}
+\newcommand{\ATINSTRUCTOR}{}
+\newcommand{\ATDATENAME}{}
+\newcommand{\ATDATE}{}
+\newcommand{\ATCITY}{}
+\newcommand{\ATABSTRACTNAME}{}
+\newcommand{\ATLOGO}{}
+\newcommand{\ATAUTHORNAME}{}
+\newcommand{\ATKEYWORDSNAME}{}
+\newcommand{\ATKEYWORDS}{}
+\newcommand{\ATPAGESNAME}{}
+\newcommand{\ATLANGUAGENAME}{}
+\newcommand{\ATLANGUAGE}{}
+\newcommand{\ATPROFSHIPNAME}{}
+\newcommand{\ATPROFCODENAME}{}
+\newcommand{\ATPROFSHIP}{}
+
+
+
+% Default language terms (in English)
+% ------------------------------------------------------------------
+% You may change these if you wish
+\newcommand{\selectterms}[1]{
+\ifthen{\equal{#1}{english}}{
+  \renewcommand{\ATTITLENAME}{Title}
+  \renewcommand{\ATTITLE}{\TITLE}
+  \renewcommand{\ATSUBTITLE}{\SUBTITLE}
+  \renewcommand{\ATTHESIS}{Master's Thesis}
+  \ifthenelse{\NUMSUPERVISORS = 1}%
+    {\renewcommand{\ATSUPERVISORNAME}{Supervisor}}%
+    {\renewcommand{\ATSUPERVISORNAME}{Supervisors}}
+  \ifthenelse{\NUMINSTRUCTORS = 1}%
+    {\renewcommand{\ATINSTRUCTORNAME}{Instructor}}%
+    {\renewcommand{\ATINSTRUCTORNAME}{Instructors}}
+  \renewcommand{\ATSUPERVISOR}{\SUPERVISOR}
+  %\renewcommand{\ATINSTRUCTOR}{\INSTRUCTOR}
+  \renewcommand{\ATDATENAME}{Date}
+  \renewcommand{\ATDATE}{\DATE}
+  \renewcommand{\ATCITY}{Espoo, Finland \& Saint Petersburg, Russia}
+  \renewcommand{\ATUNIV}{Aalto University, Department
+  of Computer Science \\ ITMO University, Faculty of Information Security and Computer Technologies}
+  \renewcommand{\ATSCHOOL}{}
+  \renewcommand{\ATDEGREEPROG}{Master's\;Programme\;in\;Computer,\;Communication\;and\;Information\;Sciences\\International double degree programme}
+  \renewcommand{\ATABSTRACTNAME}{ABSTRACT}
+  \renewcommand{\ATLOGO}{img/aalto-logo-en}
+  \renewcommand{\ATAUTHORNAME}{Author}
+  \renewcommand{\ATKEYWORDSNAME}{Keywords}
+  \renewcommand{\ATKEYWORDS}{\KEYWORDS}
+  \renewcommand{\ATPAGESNAME}{Pages}
+  \renewcommand{\ATLANGUAGENAME}{Language}
+  \renewcommand{\ATLANGUAGE}{\LANGUAGE}
+  %\renewcommand{\ATPROFSHIPNAME}{Professorship?}
+  %\renewcommand{\ATPROFCODENAME}{Code?}
+  %\renewcommand{\ATPROFSHIP}{\PROFESSORSHIP}
+}
+}
+
+
+
 \usepackage{mathtools}
 \usepackage{appendix}
 
@@ -294,5 +366,4 @@ c/.style={
 \ (\striplastDot{\firstToLow{#1}})%
 \fi%
 }
-
 

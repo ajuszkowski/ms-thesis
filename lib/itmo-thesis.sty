@@ -15,11 +15,40 @@
 %TODO: include separate pdf-documents for titul lists + annotations + reviews
 \newcommand{\coverpage}[1]{}
 
+
+% Annotation ----------------------------------------------------
+%NO ANNOTATION IN ITMO TEMPLATE
+%\usepackage[figure,table]{totalcount}
+%
+%%https://tex.stackexchange.com/a/202797 :
+%\usepackage{totcount}
+%\newtotcounter{citenum}
+%\AtEveryBibitem{\stepcounter{citenum}}
+%
+%%https://tex.stackexchange.com/a/339810 :
+%\usepackage{assoccnt}
+%\usepackage{etoolbox}
+%\newcounter{truechapters}
+%\newcounter{totalchapters}
+%\newcounter{appendixchapters}
+%\regtotcounter{truechapters}
+%\regtotcounter{totalchapters}
+%\regtotcounter{appendixchapters}
+%\DeclareAssociatedCounters{chapter}{totalchapters}
+%\DeclareAssociatedCounters{subsection}{appendixchapters}
+%\preto\appendix{%
+%  \setcounter{truechapters}{\value{chapter}} % save the number of true chapters
+%  \setcounter{appendixchapters}{0} % reset the number of chapters
+%}
 \newcommand{\thesisabstract}[2]{
 %\chapter*{Abstract}
+%\textbf{Description}: Current master's thesis contains \pageref{last-page} pages, \totalfigures{} figures, \total{citenum} citations, \total{truechapters} chapters (introduction, two theoretical chapters, implementation and evaluation chapters, and summary chapter), \total{appendixchapters} appendices, 
+%\textbf{Keywords}: \KEYWORDS
+%\textbf{Abstract}: \\
 %#2
 }
 
+% ------------------------------------------------------------------------
 
 % Шрифты, xelatex
 \usepackage{newtxtext} %Times New Roman % Нормоконтроллеры хотят именно его
