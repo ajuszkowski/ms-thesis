@@ -7,7 +7,11 @@
 *.*#
 
 # output directory, except *.pdf
-/out/*
-!/out/*.pdf
+/out/itmo/*
+!/out/itmo/*.pdf
+
+/out/aalto/*
+!/out/aalto/*.pdf
+
 /slides/out/*
 !/slides/out/*.pdf
