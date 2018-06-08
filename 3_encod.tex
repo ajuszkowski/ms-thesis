@@ -297,7 +297,10 @@ To convert the program into SSA form, for each event each variable that is decla
 The SSA-map is computed iteratively while traversing the event-flow graph in topological order as it is described in Algorithm~\ref{algorithm:ssa-map}.
 
 \begin{algorithm}
-    \caption{Algorithm for computing the SSA-indices}\label{alg:compute-ssa}
+    \ifdefined\IsAalto
+      \caption{Algorithm for computing the SSA-indices}
+    \else
+    \fi
     \algorithmicrequire{The event-flow graph $G = \langle N, E \rangle$ where $V$ is the set of nodes (events), $E$ is the set of control-flow transitions, $e_0$ is the entry node}
     \algorithmicensure{The SSA-map of the form "$\{$ event : $\{$ variable : index $\}\}$"}
     \begin{algorithmic}[1]
@@ -316,6 +319,10 @@ The SSA-map is computed iteratively while traversing the event-flow graph in top
             \EndFor
         \EndFunction
     \end{algorithmic}
+    \ifdefined\IsAalto
+    \else
+      \caption{Algorithm for computing the SSA-indices}
+    \fi
     \label{algorithm:ssa-map}
 \end{algorithm}
 

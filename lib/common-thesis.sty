@@ -209,7 +209,7 @@ c/.style={
 % paragraph-type column widths to be calculated automatically 
 \RequirePackage{tabularx}
 
-\RequirePackage[pdftex,hidelinks]{hyperref}
+\RequirePackage[pdftex,pdfa,hidelinks]{hyperref}
 
 % Improvements for mathematical formatting
 \RequirePackage{amsmath}
@@ -229,7 +229,6 @@ c/.style={
 % Textpos can be used to position text absolutely (at an absolute 
 % position in the page, instead of a relative position)
 \RequirePackage[absolute]{textpos}
-
 
 % A shortcut command for using ifthenelse when you don't need the
 % else clause.
@@ -280,5 +279,20 @@ c/.style={
 
 
 \definecolor{dkblue}{rgb}{0,0.1,0.4}
+
+
+
+\def\firstToLow#1{\expandafter\firstToLowA#1!!}
+\def\firstToLowA#1#2!!{\MakeLowercase{#1}#2}
+\def\striplastDot#1{\striplastDota{#1}#1\end .\end\eend}
+\def\striplastDota#1#2.\end#3\eend{\ifx\end#3\end#1\else#2\fi}
+
+\newcommand{\myfootnote}[1]{%
+\ifdefined\IsAalto%
+\footnote{#1}%
+\else%
+\ (\striplastDot{\firstToLow{#1}})%
+\fi%
+}
 
 

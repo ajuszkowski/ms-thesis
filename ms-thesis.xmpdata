@@ -1,0 +1,4 @@
+\Title{Automated Analysis of Weak Memory Models}
+\Author{Artem Yushkovskiy}
+\Keywords{Weak memory models, concurrent programming, software verification, portability analysis, bounded reachability analysis, SMT-encoding}
+\Publisher{Aalto University}

@@ -46,7 +46,7 @@
 
 % Отступы у страниц
 \usepackage{geometry}
-\geometry{left=2.5cm}
+\geometry{left=3cm}%\geometry{left=2.5cm}
 \geometry{right=1cm}
 \geometry{top=2cm}
 \geometry{bottom=2cm}
@@ -102,15 +102,19 @@
 %\addto\captionsrussian{\renewcommand{\figurename}{Рисунок}} % Имя фигуры
 
 % Оформление заголовков
+
+%\titlespacing{command}{left spacing}{before spacing}{after spacing}[right]
+%\titleformat{command}[shape]{format}{label}{sep}{before-code}[after-code]
+
 \usepackage[compact,explicit]{titlesec}
 \titleformat{\chapter}[block]{}{}{12.5mm}{\bfseries\centering{\thechapter\quad\MakeTextUppercase{#1}}}
-\titleformat{\section}[block]{}{}{12.5mm}{\bfseries\centering{\thesection\quad#1}}
+\titleformat{\section}[block]{}{}{12.5mm}{\hspace{\parskip}\bfseries\thesection\quad#1}
 
 \titleformat{name=\chapter,numberless}[block]{}{}{12.5mm}{\bfseries\centering{\MakeTextUppercase{#1}}}
-\titleformat{name=\section,numberless}[block]{}{}{12.5mm}{\bfseries\centering{\quad#1}}
+\titleformat{name=\section,numberless}[block]{}{}{12.5mm}{\hspace{\parskip}\bfseries\quad#1}
 
-\titleformat{\subsection}[block]{\normalsize}{}{12.5mm}{\bfseries\centering{\thesubsection\quad#1}}
-\titleformat{\subsubsection}[block]{\normalsize}{}{12.5mm}{\bfseries\centering{\thesubsubsection\quad#1}}
+\titleformat{\subsection}[block]{\normalsize}{}{12.5mm}{\hspace{\parskip}\bfseries\thesubsection\quad#1}
+\titleformat{\subsubsection}[block]{\normalsize}{}{12.5mm}{\hspace{\parskip}\bfseries\thesubsubsection\quad#1}
 \titleformat{\paragraph}[runin]{\normalfont\normalsize}{}{0mm}{\hspace{\parindent}\bfseries#1.}
 
 %\titlespacing*{\paragraph}{0em}{1em}{0.5em} % {left}{before}{after}[right]
@@ -124,5 +128,12 @@
 \renewcommand{\cftafterloftitle}{\hspace*{\fill}}
 
 
-\renewcommand{\startcoverpage}{\pagenumbering{gobble}}%no numbering
-\renewcommand{\startfirstchapter}{\pagenumbering{arabic}} %TODO: set here correct number
+\renewcommand{\startcoverpage}{\setcounter{page}{4}} % start from 4
+\renewcommand{\startfirstchapter}{}
+
+\renewenvironment{algorithm}
+{\begin{figure}
+  \textbf{Algorithm}\\}
+{\end{figure}}
+
+\DeclareFieldFormat{labelnumberwidth}{\mkbibbold{#1\adddot}}

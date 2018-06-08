@@ -82,7 +82,7 @@
 % Set the PDF title
 \hypersetup{pdftitle={\TITLE\ \SUBTITLE}}
 % Set the PDF author
-\hypersetup{pdfauthor={Artem YUSHKOVSKIY}}
+\hypersetup{pdfauthor={\AUTHOR}}
 % Set the PDF keywords
 \hypersetup{pdfkeywords={\KEYWORDS}}
 % Set the PDF subject
@@ -164,19 +164,6 @@
 % Place all formatting commands and such before this line.
 % ------------------------------------------------------------------
 \begin{document}
-
-\def\firstToLow#1{\expandafter\firstToLowA#1!!}
-\def\firstToLowA#1#2!!{\MakeLowercase{#1}#2}
-\def\striplastDot#1{\striplastDota{#1}#1\end .\end\eend}
-\def\striplastDota#1#2.\end#3\eend{\ifx\end#3\end#1\else#2\fi}
-
-\newcommand{\myfootnote}[1]{%
-\ifdefined\IsAalto%
-\footnote{#1}%
-\else%
-\ (\striplastDot{\firstToLow{#1}})%
-\fi%
-}
 
 
 
@@ -295,10 +282,24 @@ Saint Petersburg, Russia
 % many figures. If you do, uncomment the following two lines.
 \cleardoublepage
 %\phantomsection
-\addcontentsline{toc}{chapter}{\listfigurename}
-\listoffigures
 
-% The following label is used for counting the prelude pages %https://latex.org/forum/viewtopic.php?t=21520 :
+
+\ifdefined\IsAalto
+  \addcontentsline{toc}{chapter}{\listfigurename}
+  \listoffigures
+\else
+\fi
+
+
+
+
+
+% ===================================================================
+
+
+
+% The following label is used for counting the prelude pages 
+%https://latex.org/forum/viewtopic.php?t=21520 :
 %\phantomsection %does not work either
 %\newcounter{dummy}\refstepcounter{dummy}
 
@@ -330,8 +331,12 @@ Saint Petersburg, Russia
 \else
   \cleardoublepage
   \phantomsection
+  %
   \addcontentsline{toc}{chapter}{Abbreviations}
   \input{50_abbreviations}
+  %
+  \addcontentsline{toc}{chapter}{\listfigurename}
+  \listoffigures
 \fi
 
 % Fix numbering of bibliography section
@@ -347,21 +352,12 @@ Saint Petersburg, Russia
 %\printbibliography[heading=subbibliography,title={Books},type=book]%,prefixnumbers={B-}]
 %\printbibliography[heading=subbibliography,title={Collections},type=collection]%,prefixnumbers={C-}]
 
-% Appendices go here
-% ------------------------------------------------------------------
-% Fix numbering of bibliography section
-%\cleardoublepage
-
-
-%\titlespacing*{\section}{0pt}{-40pt}{20pt}
 %\titlespacing{command}{left spacing}{before spacing}{after spacing}[right]
-
-%
 %\titleformat{hcommandi}[hshapei]{hformati}{hlabeli}{hsepi}{hbefore-codei}[hafter-codei]
 
 
-%{
-
+% Appendices go here
+% ------------------------------------------------------------------
 \newcommand{\sectionbreak}{\cleardoublepage}
 \renewcommand{\thesection}{A.\arabic{section}}
 
