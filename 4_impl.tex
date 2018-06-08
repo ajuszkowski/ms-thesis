@@ -524,7 +524,7 @@ This is a behavioural pattern that separates the program logic from the object i
 The general structure of the visitor pattern is illustrated by the pseudo-java code in Figure~\ref{fig:visitor}.
 The visitor pattern performs the double-dispatching, a mechanism for decreasing the cohesion between the DTO (the visitee) and the processor class (the visitor): the visitee implements the \textit{accepting} method that gets the visitor as an argument and invokes its \textit{visiting} method with itself as an argument.
 Thus, the method call resolution is performed statically at compile-time without any overhead at run-time.
-In our implementation, the visitor (not the visitee) cares about the continuation of traversing its children.
+%In our implementation, the visitor (not the visitee) cares about the continuation of traversing its children.
 
 \begin{figure}[h]
 \centering

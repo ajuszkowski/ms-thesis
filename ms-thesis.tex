@@ -372,13 +372,14 @@ Saint Petersburg, Russia
 \addcontentsline{toc}{chapter}{Appendices}
 
 %\titlespacing*{command}{left}{beforesep}{aftersep}[right]
+%\titleformat{hcommandi}[hshapei]{hformati}{hlabeli}{hsepi}{hbeforei}[hafter i]
 \ifdefined\IsAalto
-  \titleformat{\section}[display]{\normalfont\large\bfseries}{}{0pt}{\thesection\quad\large}
+  \titleformat{\section}[display]{\normalfont\large\bfseries}{}{-20pt}{\thesection\quad\large}
   \titlespacing{\section}{0pt}{-20pt}{5pt}
   \fancyhead[R]{\footnotesize\itshape{APPENDICES}}
 \else
+  \titleformat{\section}[display]{\normalfont\large\bfseries}{}{-20pt}{\vspace{-2em}\thesection\quad\large#1}
   \titlespacing{\section}{0pt}{-20pt}{-5pt}
-  \titleformat{\section}[display]{\normalfont\large\bfseries}{}{0pt}{\vspace{-2em}\thesection\quad\large#1}
 \fi
 \appendixpage
 

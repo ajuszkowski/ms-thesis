@@ -216,7 +216,7 @@ Performance evaluation has also been performed on the example of the \texttt{Dek
 %As an example of the C program liable for the reachability and portability analysis, consider the Dekker's algorithm for mutual exclusion of two processes, originally described by Dijkstra~\cite{dijkstra1962over}; the program is presented in Appendix~\ref{apx:dekker}.
 %For testing \porthos[1], we used the same file in old \porthos{} input language (\texttt{dekker.pts}), which was used in evaluation tests in the original paper~\cite{Porthos17a}.
 For time benchmarking we ran the tools $5$ times and computed the median of the encoding time.
-Benchmarking was performed on the Linux machine 8-core Intel(R) Core(TM) i7-3632QM CPU @ 2.20GHz, Java(TM) SE Runtime Environment (build 1.8.0\_161-b12) (Java virtual machine was configured by default parameters).
+Benchmarking was performed on the Linux machine, 8 Gb RAM, 8 cores Intel(R) Core(TM) i7-3632QM CPU @ 2.20GHz, running under Java(TM) SE Runtime Environment (build 1.8.0\_161-b12) (Java virtual machine was configured by default parameters with maximum heap size 1982 Mb).
 The time was measured by the tool itself via the native Java method \texttt{System.currentTimeMillis}.
 
 \subsection{State reachability analysis}
