@@ -200,7 +200,7 @@ This opens new challenges in software verification with respect to a weak memory
 %This opens large opportunities for missing bugs that are extremely difficult to reproduce and eliminate.
 %formally described by <wmms> : guarantees even with aggressive hw and compiler optimisations
 
-Most existing tools that perform memory model-aware software analysis examine behaviours of the program against a single memory model.
+Most existing tools that perform memory model-aware software analysis tools examine behaviours of the program against a single memory model.
 %Generally, they perform static 
 %finite-state system
 The first tool that analyses the \textit{portability} of a concurrent program from one platform to another is \textit{\porthos{}}~\cite{Porthos17a} released in April~2017.
@@ -209,7 +209,7 @@ For that, it performs an SMT-based bounded reachability analysis by encoding the
 
 Although the approach has been proven to be efficient, the tool accepts as input the small C-like toy language. % and remains to have hardly extensible architecture. %proof-of-concept 
 Current thesis aims to rework \porthos{} by extending its input language, so that it is able to process real-world C programs.
-However, current implementation of \porthos{} seems to be hard to extend, which raises the need to redesign its whole architecture in order to increase the robustness, transparency, efficiency and extensibility.
+However, current implementation of \porthos{} can be considered hardly extensible, which raises the need to redesign its whole architecture in order to increase the robustness, transparency, efficiency and extensibility.
 The result of the work is \textit{\porthos[2]}, a framework for SMT-based memory model-aware analysis.
 %to redesign \porthos{} so that 
 %considers the problem of the memory model-aware program verification, especially verification the portability from one architecture to another.
