@@ -22,7 +22,15 @@
 \usepackage{wrapfig} %for text wrap around figures
 \usepackage{paracol}%2 columns
 
-\usepackage[section]{placeins}
+%%Uncomment for adding placement for subsections (https://tex.stackexchange.com/a/118667)
+%\usepackage[section]{placeins}
+%\makeatletter
+%\AtBeginDocument{%
+%  \expandafter\renewcommand\expandafter\subsection\expandafter{%
+%    \expandafter\@fb@secFB\subsection
+%  }%
+%}
+%\makeatother
 
 \usepackage{mathtools}
 \usepackage{appendix}

@@ -390,10 +390,11 @@ Apart from redesigning the tool architecture and extending the input language, w
 Although, current version of \porthos[2] only supports some basic macros of the Linux kernel (such as \lstinline{READ_ONCE} and \lstinline{WRITE_ONCE} for atomic load and store with relaxed memory ordering) as the support for kernel-specific memory barriers goes out of the scope of current thesis.
 Note that, comparing to the \porthos[1], adding support for new functions in \porthos[2] does not require changing the input language grammar, this is carried by invocation hooking mechanism described in Section~\ref{ch:impl:proc:x-compiler}.
 
+
 As an example, consider the Store Buffering litmus test for the Linux kernel in Figure~\ref{ex:sb:kernel} (which is similar to the one presented in Figure~\ref{simple_wmm_x86}).
 When verifying this litmus test by \porthos[2] in the state reachability mode, the test passes for TSO memory model and fails for SC model.
 
-\begin{figure}[h]
+\begin{figure}[!h]
 \centering
 \begin{minipage}[t]{.49\textwidth}%for preventing overfull
 \begin{lstlisting}

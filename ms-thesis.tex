@@ -369,7 +369,8 @@ Saint Petersburg, Russia
 
 \phantomsection
 \appendix
-\addcontentsline{toc}{chapter}{Appendices}
+
+
 
 %\titlespacing*{command}{left}{beforesep}{aftersep}[right]
 %\titleformat{hcommandi}[hshapei]{hformati}{hlabeli}{hsepi}{hbeforei}[hafter i]
@@ -378,11 +379,15 @@ Saint Petersburg, Russia
   \titlespacing{\section}{0pt}{-20pt}{5pt}
   \fancyhead[R]{\footnotesize\itshape{APPENDICES}}
 \else
-  \titleformat{\section}[display]{\normalfont\large\bfseries}{}{-5pt}{\vspace{-2em}\thesection\quad\large#1}
+  \titleformat{\section}[display]{\normalfont\large\bfseries}{}{-5pt}{\vspace{-2em} Appendix \thesection\quad\large#1}
   \titlespacing{\section}{0pt}{-20pt}{-5pt}
 \fi
-\appendixpage
 
+\ifdefined\IsAalto
+  \addcontentsline{toc}{chapter}{Appendices}
+  \appendixpage
+\else
+\fi
 
 \input{91_apx_trees}
 \input{92_apx_hook}
