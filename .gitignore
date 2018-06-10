@@ -8,10 +8,9 @@
 
 # output directory, except *.pdf
 /out/itmo/*
-!/out/itmo/*.pdf
-
 /out/aalto/*
-!/out/aalto/*.pdf
+!/out/**.pdf
+!/out/**.doc*
 
 /slides/out/*
 !/slides/out/*.pdf
