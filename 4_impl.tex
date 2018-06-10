@@ -668,7 +668,7 @@ The following types of variables are detected as \textit{global variables}:
 \item a variable was declared as a pointer;
 \item a variable whose address was accessed by any process;
 \item a variable declared as a parameter of the process function; and
-\item a variable exported by the \texttt{extern} keyword (in the kernel-analysis mode, the functions \lstinline{EXPORT_SYMBOL} and \lstinline{EXPORT_SYMBOL_GPL} also export symbols for dynamic linking~\cite{argawal16kernel}).
+\item a variable exported by the \texttt{extern} keyword (in the kernel-analysis mode, the functions `\lstinline{EXPORT_SYMBOL}' and `\lstinline{EXPORT_SYMBOL_GPL}' also export symbols for dynamic linking~\cite{argawal16kernel}).
 \end{itemize}
 
 
@@ -748,8 +748,7 @@ The hook action is invoked with actual arguments and returns an arbitrary \textt
 Current version of \porthos[2] contains two invocation hooks, the \texttt{XLegacyInvocationHook} for intercepting the compatibility-mode functions of the \porthos[2] input language, and \texttt{XKernelInvocationHook} for describing the Linux kernel-specific functions.
 The same mechanism (with minor modifications) can be used for processing assembly language calls.
 An invocation hook can model any type of operations (memory, fence, computational, etc.).
-For instance, the \texttt{XKernelInvocationHook} intercepts the invocation \lstinline{`WRITE_ONCE(dst_shared, src_local)'} and replaces it with the hook action shown in Appendix~\ref{apx:hook} (as the functions \lstinline{READ_ONCE}, \lstinline{WRITE_ONCE}, and \lstinline{ACCESS_ONCE} may be modelled as volatile \lstinline{memory_order_relaxed} accesses~\cite{kernel2c}, this invocation hook simply emits a memory event without emitting any synchronisation events).
-For instance, the \texttt{XKernelInvocationHook} intercepts the invocation \lstinline{`WRITE_ONCE(dst_shared, src_local)'} and replaces it with the hook action shown in Appendix~\ref{apx:hook} (as the functions \lstinline{READ_ONCE}, \lstinline{WRITE_ONCE}, and \lstinline{ACCESS_ONCE} may be modelled as volatile \lstinline{memory_order_relaxed} accesses~\cite{kernel2c}, this invocation hook simply emits a memory event without emitting any synchronisation events).
+For instance, the \texttt{XKernelInvocationHook} intercepts the invocation `\lstinline{WRITE_ONCE(dst_shared, src_local)}' and replaces it with the hook action shown in Appendix~\ref{apx:hook} (as the functions `\lstinline{READ_ONCE}', `\lstinline{WRITE_ONCE}', and `\lstinline{ACCESS_ONCE}' may be modelled as volatile `\lstinline{memory_order_relaxed}' accesses~\cite{kernel2c}, this invocation hook simply emits a memory event without emitting any synchronisation events).
 
 
 \paragraph{Interpreter}

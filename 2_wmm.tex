@@ -44,7 +44,7 @@ A memory event is specified by its direction with respect to the shared variable
 %\texttt{load} for read the value of a shared-memory location, or \texttt{store} for write, or neither of them if both locations are local
 
 The set of memory events $\mathbb{M}$ is divided into write events $\mathbb{W}$ (that write values to shared-memory locations) and read events $\mathbb{R}$ (that read values stored in shared-memory locations).
-We add a restriction that each memory event uses at most one shared location, so that the write instruction $i = write(l_1, l_2)$, that encodes the write from the shared location $l_2$ to the shared location $l_1$, is represented as two consequent events $e_1\,=\,{\texttt{load}(r_1\,\leftarrow\,l_2)}; \ e_2\,=\,{\texttt{store}(l_1\,\leftarrow\,r_1)}$.
+We add a restriction that each memory event uses at most one shared location, so that the write instruction $i = write(l_1, l_2)$, that encodes the write from the shared location $l_2$ to the shared location $l_1$, is represented as two consequent events `$e_1\,=\,{\texttt{load}(r_1\,\leftarrow\,l_2)}; \ e_2\,=\,{\texttt{store}(l_1\,\leftarrow\,r_1)}$'.
 Also, it is important to separate the set of initial write events $\mathbb{IW}~\subseteq~\mathbb{W}$ that perform initialisation of program variables.
 
 A \textit{computation event} $e_c \in \mathbb{C} \subseteq \mathbb{E}$, represents a low-level assembly computation operation performed solely on local-memory arguments.
@@ -173,6 +173,11 @@ The language combines expressive power of a functional language (being inspired 
 In \cat{}, new relations can be defined via the keyword \texttt{let} and the following operators over relations~\cite{alglave2016syntax}.
 
 Below we enumerate pre-defined operations over relations and sets of events:
+
+%in Aalto template, the first line stucks on the previous page
+\ifdefined\IsAalto
+  \vspace*{1em}
+\fi
 
 \begin{enumerate}
   \item \textit{Unary operations}:

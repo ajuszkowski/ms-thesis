@@ -4,7 +4,7 @@ TEXFILE=ms-thesis
 OUTPUT_ITMO=out/itmo
 OUTPUT_AALTO=out/aalto
 
-aalto: aalto-clean aalto-once aalto-biber aalto-once-2 aalto-once-3 aalto-convert aalto-check
+aalto: aalto-clean aalto-once aalto-biber aalto-once-2 aalto-once-3 #aalto-convert aalto-check
 	# aalto: OK
 
 aalto-clean:
