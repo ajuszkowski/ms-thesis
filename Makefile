@@ -4,7 +4,7 @@ TEXFILE=ms-thesis
 OUTPUT_ITMO=out/itmo
 OUTPUT_AALTO=out/aalto
 
-aalto: aalto-clean aalto-once aalto-biber aalto-once-2 aalto-once-3
+aalto: aalto-clean aalto-once aalto-biber aalto-once-2 aalto-once-3 aalto-convert aalto-check
 	# aalto: OK
 
 aalto-clean:
@@ -20,6 +20,14 @@ aalto-once aalto-once-2 aalto-once-3:
 aalto-biber:
 	biber $(TEXFILE) --output-directory=$(OUTPUT_AALTO) #--quiet
 	# aalto-biber: OK
+
+aalto-convert:
+	gs -dPDFA=1 -dBATCH -dNOPAUSE -sProcessColorModel=DeviceRGB -sDEVICE=pdfwrite -sPDFACompatibilityPolicy=1 -sOutputFile=$(OUTPUT_AALTO)/$(TEXFILE)-converted.pdf $(OUTPUT_AALTO)/$(TEXFILE).pdf
+	# aalto-convert: OK
+
+aalto-check:
+	pdfinfo $(OUTPUT_AALTO)/$(TEXFILE)-converted.pdf	
+	# aalto-check: OK
 
 
 itmo: itmo-clean itmo-once itmo-biber itmo-once-2 itmo-once-3
