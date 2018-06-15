@@ -6,11 +6,8 @@
 *.*~
 *.*#
 
-# output directory, except *.pdf
-/out/itmo/*
-/out/aalto/*
-!/out/**.pdf
-!/out/**.doc*
-
-/slides/out/*
-!/slides/out/*.pdf
+/out/**
+/slides/out/**
+!**.pdf
+!**.doc*
+!**.odt

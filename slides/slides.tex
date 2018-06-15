@@ -1,4 +1,4 @@
-\documentclass{beamer}
+\documentclass[aspectratio=149]{beamer}
 
 
 \usepackage[utf8]{inputenc}
@@ -6,7 +6,20 @@
 \usepackage[russian,english]{babel}
 
 
+\usepackage{outlines}
+
+\usepackage{colortbl}
+
+\definecolor{ltgrey}{rgb}{0.85,0.85,0.85}
+\definecolor{ltblue}{RGB}{101,147,245}
+\definecolor{dkblue}{rgb} {0,   0.1, 0.6}
+\definecolor{dkred} {rgb} {0.6, 0.1, 0}
+\renewcommand{\r}[1]{\ensuremath{\textcolor{dkred}{#1}}}
+\renewcommand{\b}[1]{\ensuremath{\textcolor{dkblue}{#1}}}
+
+\usepackage{xparse}
 \usepackage{tikz}
+\usetikzlibrary{tikzmark}
 \usetikzlibrary{positioning}
 \usetikzlibrary{calc}
 \usetikzlibrary{arrows}
@@ -14,8 +27,6 @@
 \usetikzlibrary{shapes}
 \usetikzlibrary{patterns}
 \usetikzlibrary{automata}
-%\usetikzlibrary{tikzmark}
-%\usetikzlibrary{calc}
 
 \tikzset{
 c/.style={
@@ -30,9 +41,14 @@ c/.style={
 }
 
 \newcommand*{\yellowemph}[1]{%
-  \tikz[baseline=(X.base)] \node[rectangle, fill=yellow, rounded corners, inner sep=0mm] (X) {#1};%
+  \tikz[baseline=(X.base)] \node[rectangle, fill=yellow, inner sep=0mm] (X) {#1};%
 }
 
+\newcommand*{\rus}[1]{%
+  %\textcolor{black}{
+  \textit{#1}
+  %}
+}
 
 \newcommand{\tool}[1]{\texttt{#1}}
 \newcommand*{\fx}{\ensuremath{\mathbf{x}}}%x}}}
@@ -57,7 +73,9 @@ c/.style={
 
 \usepackage[export]{adjustbox} % loads also graphicx
 
+%\usepackage{../inc/listingset}
 \usepackage{listings}
+\lstset{escapeinside={[*}{*]}}
 
 \usepackage{subcaption}
 \usepackage[font=scriptsize]{caption}
@@ -65,10 +83,9 @@ c/.style={
 
 \usepackage[backend=biber]{biblatex}
 \addbibresource{../bib/ms-thesis.bib}
-%\newcommand{\tikzmark}[1]{\tikz[remember picture] \node[coordinate] (#1) {#1};}
 
 \usepackage{array}
-\usepackage{xcolor}
+%\usepackage{xcolor}
 
 \usepackage{hyphenat} % for using \nohyphens
 %\usepackage{multirow} %Used for tables with merged cells
@@ -95,7 +112,7 @@ c/.style={
 %\usetheme{Berkeley}
 %\usetheme{Berlin}
 %\usetheme{Boadilla}
-%\usetheme{boxes}
+\usetheme{boxes}
 %\usetheme{CambridgeUS}
 %\usetheme{Copenhagen}
 %\usetheme{Darmstadt}
@@ -109,25 +126,32 @@ c/.style={
 %\usetheme{Madrid}\colorbox{yellow}
 %\usetheme{Malmoe}
 %\usetheme{Marburg}
-%\usetheme{Montpellier}
+%\usetheme{Montpellier} %!
 %\usetheme{PaloAlto}
 %\usetheme{Pittsburgh}
 %\usetheme{Rochester}
-\usetheme{Singapore}
+%\usetheme{Singapore}
 %\usetheme{Szeged}
 %\usetheme{Warsaw}
 
 %\beamertemplatenavigationsymbolsempty  %no navigation bar
 %\setbeamertemplate{footline}[frame number]
 %\setbeamertemplate{headline}{}
+
 \addtobeamertemplate{navigation symbols}{}{%
     \usebeamerfont{footline}%
     \usebeamercolor[fg]{footline}%
     \hspace{1em}%
-    \insertframenumber/\inserttotalframenumber
+    \insertframenumber%/\inserttotalframenumber
 }
 
-\setbeamertemplate{frametitle}[default][left]
+%\setbeamercovered{transparent}
+%\setbeamertemplate{footline}{}
+
+
+%\setbeamertemplate{page number in head/foot}[framenumber]
+
+%\setbeamertemplate{frametitle}[default][left]
       
 %\titlegraphic{\includegraphics[height=1cm,width=2cm]{logo1}}
 %\titlegraphicii{\includegraphics[height=1cm,width=2cm]{logo2}}
@@ -147,17 +171,17 @@ c/.style={
 %}
 
 
-\institute % (optional, but mostly needed)
+\institute
 {
   \inst{1}%
+  \textbf{Aalto University} (Espoo, Finland) \\
   Department of Computer Science, \\
-  School of Science, \\
-  \textbf{Aalto University} (Espoo, Finland)%
+  School of Science
   \and
   \inst{2}%
+  \textbf{ITMO University} (Saint Petersburg, Russia) \\
   Faculty of Information Security \\
-  and Computer Technologies, \\
-  \textbf{ITMO University} (Saint Petersburg, Russia)%
+  and Computer Technologies
 }
 
 \date{\scriptsize Espoo, Saint Petersburg, 2018}
@@ -185,20 +209,11 @@ c/.style={
 %  \end{frame}
 %}
 
-\usepackage{colortbl}
-
-\definecolor{ltgrey}{rgb}{0.85,0.85,0.85}
-\definecolor{dkblue}{rgb} {0,   0.1, 0.6}
-\definecolor{dkred} {rgb} {0.6, 0.1, 0}
-\renewcommand{\r}[1]{\ensuremath{\textcolor{dkred}{#1}}}
-\renewcommand{\b}[1]{\ensuremath{\textcolor{dkblue}{#1}}}
-
-
-
 
 
 % Let's get started
 \begin{document}
+%\beamertemplatenavigationsymbolsempty %remove navigation bar
 
 \begin{frame}
   \titlepage
@@ -211,71 +226,72 @@ c/.style={
 
 
 
-\section{Introduction}
+%\section{Introduction}
+%\subsection{The problem}
 
-\subsection{The problem}
 
-
-\begin{frame}{Problem statement (Цель работы)}
-To rework the proof-of-concept memory model-aware analysis tool \texttt{Porthos}~\cite{Porthos17a} by:
+\begin{frame}{Task statement \rus{(Цель работы)}}
 \begin{itemize}
-\item extending the C-like input language,
-\item revising its architecture and
-\item re-implementing the tool in order to enhance performance, extensibility, reliability and maintainability
+\item Improve the proof-of-concept memory model-aware analysis tool \texttt{Porthos}~\cite{Porthos17a} by extending support for the input language.
 \end{itemize}
 \end{frame}
 
 
-\begin{frame}{Task specification (Задачи работы)}
+\begin{frame}{Task specification \rus{(Задачи работы)}}
 \begin{itemize}
 \item Study the general framework for memory model-aware analysis of concurrent programs~\cite{alglave2010shared};
-\item Review the existing tools for memory model-aware analysis;
-\item Examine the existing architecture of \texttt{Porthos}, its strengths and weaknesses;
-\item Design a new architecture for \texttt{PorthosC} that allow to extend the input language to the (large subset of) C language, be robust, transparent, efficient and extensible.
+\item Review existing tools for memory model-aware analysis;
+%\item Examine the architecture of \texttt{Porthos}, its strengths and weaknesses;
+%\item Design a new architecture for \texttt{PorthosC} that allow to extend the input language to the (large subset of) C language, be robust, transparent, efficient and extensible.
+\item Develop a \textit{C compiler infrastructure} as a part of an abstract interpretation engine for the new tool \tool{PorthosC};
+\item Improve the SMT-encoding scheme for an \textit{arbitrary control-flow};
+\item Enhance performance, extensibility, reliability and maintainability of the tool.
 \end{itemize}
 \end{frame}
 
 
-\subsection{The background: weak memory model-aware analysis}
+%\subsection{The background: weak memory model-aware analysis}
 
-\begin{frame}{Verification of concurrent software} {Example: Write-write reordering (compiler  relaxations)}
+\begin{frame}{Verification of concurrent software} {Motivating example: Write-write reordering (compiler  relaxations)}
 %1) mckenney  http://www.rdrop.com/users/paulmck/scalability/paper/whymb.2010.06.07c.pdf
 %2) http://preshing.com/20120515/memory-reordering-caught-in-the-act/
-
 \begin{table}
 \centering
 \ttfamily
-\begin{tabular}{ |>{\color{dkblue}}c | >{\color{dkred}}c| }
+\begin{tabular}{ |>{\color{dkblue}}l | >{\color{dkred}}l| }
 \hline
 \multicolumn{2}{|c|}{ \{ x=0; y=0; \}} \tabularnewline \hline
 P & Q \\ \hline
-$p_0$ : $x \leftarrow 1$   & $q_0$: $y \leftarrow 1$   \\
-$p_1$ : $r_p \leftarrow y$ & $q_1$: $r_q \leftarrow x$ \\
+\tikzmark{p0}$p_0$: $x \leftarrow 1$   & $q_0$: $y \leftarrow 1$\tikzmark{q0} \\
+\tikzmark{p1}$p_1$: $r_p \leftarrow y$ & $q_1$: $r_q \leftarrow x$\tikzmark{q1} \\
 \hline
-\multicolumn{2}{|c|}{ exists ($r_p=0 \land r_q=0$) } \\
+\multicolumn{2}{|c|}{ exists ($\b{r_p}=0 \land \r{r_q}=0$) } \\
 \hline
 \end{tabular}
 \end{table}
 
-%\tikzmark{p1} 
-%\begin{tikzpicture}[remember picture, overlay]
-%  \path[draw=red,thick,<->]<4-> (pic cs: p0) to [] (pic cs: p1);
-%\end{tikzpicture}
-
-\hspace{-20pt}
+\onslide<2->
 \begin{minipage}{.25\textwidth}
 \small
-\onslide<2-> 
 \begin{table}
-\caption*{Sequential Consistency}
+\only<1>{\caption*{~\\~}}
+\only<2>{\caption*{Single thread\\(no concurrency)}}
+\only<3>{\caption*{Sequential Consistency\\(classical concurrency)}}
+\only<4->{\caption*{~\\~}}
+\only<4->{
+  \begin{tikzpicture}[overlay, remember picture]
+    \draw [<->,thick,red,looseness=3] ([xshift=-5pt,yshift=3pt]{pic cs:p0}) to[bend right=90] ([xshift=-5pt]{pic cs:p1});
+    \draw [<->,thick,red,looseness=3] ([xshift=8pt,yshift=3pt]{pic cs:q0}) to[bend left=90] ([xshift=5pt]{pic cs:q1});
+  \end{tikzpicture}%
+}
 %"A multiprocessor is sequentially consistent if the result of any
 %execution is the same as some sequential order, and within any
 %processor, the operations are executed in program order"
 %– Lamport, 1979
-\begin{tabular}{ >{\columncolor{ltgrey}}l >{\columncolor{ltgrey}}r}
+\begin{tabular}{ l r }
 $\b{p_0}, \b{p_1}, \r{q_0}, \r{q_1}$ & $(\b{0}; \r{1})$ \\
 $\r{q_0}, \r{q_1}, \b{p_0}, \b{p_1}$ & $(\b{1}; \r{0})$
-\onslide<3-> 
+\onslide<3->
 \\
 $\b{p_0}, \r{q_0}, \b{p_1}, \r{q_1}$ & $(\b{1}; \r{1})$ \\
 $\b{p_0}, \r{q_0}, \r{q_1}, \b{p_1}$ & $(\b{1}; \r{1})$ \\
@@ -284,18 +300,12 @@ $\r{q_0}, \b{p_0}, \r{q_1}, \b{p_1}$ & $(\b{1}; \r{1})$ \\
 \end{tabular}
 \end{table}
 \end{minipage}
-\pause
 %
-\hspace{5pt}
+\onslide<4->
 \begin{minipage}{.6\textwidth}
 \small
-\onslide<4->
-%\vspace{-1em}
 %"delay the effect of a store past any load from a different location."
-%\vspace{-11pt}
-%\vspace{-2pt}
 \begin{table}
-\caption*{Total Store Order}
 %http://events17.linuxfoundation.org/sites/events/files/slides/dbueso-elc2016-membarriers-final.pdf
 %SPARC, x86 (Intel, AMD)
 %Similar to SC, but:
@@ -303,12 +313,13 @@ $\r{q_0}, \b{p_0}, \r{q_1}, \b{p_1}$ & $(\b{1}; \r{1})$ \\
 %Relaxed Models
 % Arbitrary reorder limited only by explicit memorybarrier
 %instructions.
-\begin{tabular}{ | l r | l r | l r }
+\caption*{Total Store Order\\(e.g., x86)}
+\begin{tabular}{ | l r | l r | l r } % >{\columncolor{ltgrey}}
 $\underline{\b{p_1}}, \underline{\b{p_0}}, \r{q_0}, \r{q_1}$ & $(\b{0}; \r{1})$  &  $\b{p_0}, \b{p_1}, \underline{\r{q_1}}, \underline{\r{q_0}}$ & $(\b{0}; \r{1})$  &  $\underline{\b{p_1}}, \underline{\b{p_0}}, \underline{\r{q_1}}, \underline{\r{q_0}}$ & $(\b{0}; \r{1})$ \\
 $\r{q_0}, \r{q_1}, \underline{\b{p_1}}, \underline{\b{p_0}}$ & $(\b{1}; \r{0})$  &  $\underline{\r{q_1}}, \underline{\r{q_0}}, \b{p_0}, \b{p_1}$ & $(\b{1}; \r{0})$  &  $\underline{\r{q_1}}, \underline{\r{q_0}}, \underline{\b{p_1}}, \underline{\b{p_0}}$ & $(\b{1}; \r{0})$ \\
-$\underline{\b{p_1}}, \r{q_0}, \underline{\b{p_0}}, \r{q_1}$ & $(\b{0}; \r{1})$  &  $\b{p_0}, \underline{\r{q_1}}, \b{p_1}, \underline{\r{q_0}}$ & $(\b{0}; \r{1})$  &  $\underline{\b{p_1}}, \underline{\r{q_1}}, \underline{\b{p_0}}, \underline{\r{q_0}}$ & {\only<5>\yellowemph{$(\b{0}; \r{0})$}} \\
-$\underline{\b{p_1}}, \r{q_0}, \r{q_1}, \underline{\b{p_0}}$ & $(\b{0}; \r{1})$  &  $\b{p_0}, \underline{\r{q_1}}, \underline{\r{q_0}}, \b{p_1}$ & $(\b{1}; \r{1})$  &  $\underline{\b{p_1}}, \underline{\r{q_1}}, \underline{\r{q_0}}, \underline{\b{p_0}}$ & {\only<5>\yellowemph{$(\b{0}; \r{0})$}} \\
-$\r{q_0}, \underline{\b{p_1}}, \underline{\b{p_0}}, \r{q_1}$ & $(\b{1}; \r{1})$  &  $\underline{\r{q_1}}, \b{p_0}, \b{p_1}, \underline{\r{q_0}}$ & {\only<5>\yellowemph{$(\b{0}; \r{0})$}}  &  $\underline{\r{q_1}}, \underline{\b{p_1}}, \underline{\b{p_0}}, \underline{\r{q_0}}$ & {\only<5>\yellowemph{$(\b{0}; \r{0})$}} \\
+$\underline{\b{p_1}}, \r{q_0}, \underline{\b{p_0}}, \r{q_1}$ & $(\b{0}; \r{1})$  &  $\b{p_0}, \underline{\r{q_1}}, \b{p_1}, \underline{\r{q_0}}$ & $(\b{0}; \r{1})$  &  $\underline{\b{p_1}}, \underline{\r{q_1}}, \underline{\b{p_0}}, \underline{\r{q_0}}$ & {\only<5->\yellowemph{$(\b{0}; \r{0})$}} \\
+$\underline{\b{p_1}}, \r{q_0}, \r{q_1}, \underline{\b{p_0}}$ & $(\b{0}; \r{1})$  &  $\b{p_0}, \underline{\r{q_1}}, \underline{\r{q_0}}, \b{p_1}$ & $(\b{1}; \r{1})$  &  $\underline{\b{p_1}}, \underline{\r{q_1}}, \underline{\r{q_0}}, \underline{\b{p_0}}$ & {\only<5->\yellowemph{$(\b{0}; \r{0})$}} \\
+$\r{q_0}, \underline{\b{p_1}}, \underline{\b{p_0}}, \r{q_1}$ & $(\b{1}; \r{1})$  &  $\underline{\r{q_1}}, \b{p_0}, \b{p_1}, \underline{\r{q_0}}$ & {\only<5->\yellowemph{$(\b{0}; \r{0})$}}  &  $\underline{\r{q_1}}, \underline{\b{p_1}}, \underline{\b{p_0}}, \underline{\r{q_0}}$ & {\only<5->\yellowemph{$(\b{0}; \r{0})$}} \\
 $\r{q_0}, \underline{\b{p_1}}, \r{q_1}, \underline{\b{p_0}}$ & $(\b{1}; \r{0})$  &  $\underline{\r{q_1}}, \b{p_0}, \underline{\r{q_0}}, \b{p_1}$ & $(\b{1}; \r{0})$  &  $\underline{\r{q_1}}, \underline{\b{p_1}}, \underline{\r{q_0}}, \underline{\b{p_0}}$ & {\only<5>\yellowemph{$(\b{0}; \r{0})$}} \\
 \end{tabular}
 \end{table}
@@ -318,18 +329,18 @@ $\r{q_0}, \underline{\b{p_1}}, \r{q_1}, \underline{\b{p_0}}$ & $(\b{1}; \r{0})$ 
 
 
 
-\begin{frame}{Verification of concurrent software} {Example: Store buffering (hardware relaxations)}
+\begin{frame}{Verification of concurrent software} {Motivating example: Store buffering (hardware relaxations)}
 \begin{center}
-\scalebox{0.7}{
+\scalebox{0.75}{
 \ttfamily
-\begin{tabular}{ |>{\color{dkblue}}c | >{\color{dkred}}c| }
+\begin{tabular}{ |>{\color{dkblue}}l | >{\color{dkred}}l| }
 \hline
 \multicolumn{2}{|c|}{ \{ x=0; y=0; \}} \tabularnewline \hline
 P & Q \\ \hline
-$p_0$ : $x \leftarrow 1$   & $q_0$: $y \leftarrow 1$   \\
-$p_1$ : $r_p \leftarrow y$ & $q_1$: $r_q \leftarrow x$ \\
+$p_0$: $x \leftarrow 1$   & $q_0$: $y \leftarrow 1$\\
+$p_1$: $r_p \leftarrow y$ & $q_1$: $r_q \leftarrow x$\\
 \hline
-\multicolumn{2}{|c|}{ exists ($r_p=0 \land r_q=0$) } \\
+\multicolumn{2}{|c|}{ exists ($\b{r_p}=0 \land \r{r_q}=0$) } \\
 \hline
 \end{tabular}
 }
@@ -338,15 +349,21 @@ $p_1$ : $r_p \leftarrow y$ & $q_1$: $r_q \leftarrow x$ \\
 \begin{figure}
 \includegraphics[scale=0.37]{img/x86-arch-full.png}
 \caption{An x86-TSO abstract machine~\cite{sewell2010x86}}
-%\label{fig:x86-arch}
+\only<2->{
+    \begin{tikzpicture}[overlay]
+    \node at (0.1, 3.1) {\fcolorbox{yellow}{yellow}{
+        \includegraphics[scale=0.2]{img/table.png}} };
+    \end{tikzpicture}
+}
 \end{figure}
+
 \end{frame}
 
 
 
 
 
-\begin{frame}{The weak memory model} {Axiomatic semantics: The definition}
+\begin{frame}{Weak memory model-aware analysis} {Event-based program representation}
 
 \begin{itemize}
   \addtolength{\tabcolsep}{0pt}
@@ -384,91 +401,65 @@ $p_1$ : $r_p \leftarrow y$ & $q_1$: $r_q \leftarrow x$ \\
 
 
 
-\begin{frame}{The weak memory model} {Testing candidate executions}
+\begin{frame}{Weak memory model-aware analysis} {Testing candidate executions}
 \vspace{10pt}
-\begin{minipage}{.3\linewidth}
+\begin{minipage}{.33\linewidth}
 \hfill
 \end{minipage}
 %
-\noindent\begin{minipage}{.4\linewidth}
-\scalebox{0.7}{
+\noindent\begin{minipage}{.39\linewidth}
+\scalebox{0.65}{
 \ttfamily
-\begin{tabular}{ |>{\color{dkblue}}c | >{\color{dkred}}c| }
+\begin{tabular}{ |>{\color{dkblue}}l | >{\color{dkred}}l| }
 \hline
 \multicolumn{2}{|c|}{ \{ x=0; y=0; \}} \tabularnewline \hline
 P & Q \\ \hline
-$p_0$ : $x \leftarrow 1$   & $q_0$: $y \leftarrow 1$   \\
-$p_1$ : $r_p \leftarrow y$ & $q_1$: $r_q \leftarrow x$ \\
+$p_0$: $x \leftarrow 1$   & $q_0$: $y \leftarrow 1$\\
+$p_1$: $r_p \leftarrow y$ & $q_1$: $r_q \leftarrow x$\\
 \hline
-\multicolumn{2}{|c|}{ exists ($r_p=0 \land r_q=0$) } \\
+\multicolumn{2}{|c|}{ exists ($\b{r_p}=0 \land \r{r_q}=0$) } \\
 \hline
 \end{tabular}
 }
 \end{minipage}
 %
-\noindent\begin{minipage}{.25\linewidth}
-\end{minipage}
-\vspace{-5pt}
-\begin{figure}
-%\centering
-\includegraphics[width=\linewidth]{img/candidate.png}
-\caption{The four candidate executions allowed under x86-TSO}
-\end{figure}
-
-\end{frame}
-
-
-
-
-\begin{frame}{The weak memory model} {Testing candidate executions}
-\vspace{10pt}
-\begin{minipage}{.3\linewidth}
-\hfill
-\end{minipage}
-%
-\noindent\begin{minipage}{.4\linewidth}
-\scalebox{0.7}{
-\ttfamily
-\begin{tabular}{ |>{\color{dkblue}}c | >{\color{dkred}}c| }
-\hline
-\multicolumn{2}{|c|}{ \{ x=0; y=0; \}} \tabularnewline \hline
-P & Q \\ \hline
-$p_0$ : $x \leftarrow 1$   & $q_0$: $y \leftarrow 1$   \\
-$p_1$ : $r_p \leftarrow y$ & $q_1$: $r_q \leftarrow x$ \\
-\hline
-\multicolumn{2}{|c|}{ exists ($r_p=0 \land r_q=0$) } \\
-\hline
-\end{tabular}
-}
-\end{minipage}
-%
-\noindent\begin{minipage}{.25\linewidth}
+\noindent\begin{minipage}{.23\linewidth}
+\only<2->{
 \scriptsize
 SC model: \\
 ... \\
 \texttt{fr = (rf\^\,-1; co)} \\
 \color{red}\texttt{acyclic(fr $\cup$ po)}
+}
 \end{minipage}
 \vspace{-5pt}
+\only<1>{
+\begin{figure}
+%\centering
+\includegraphics[width=\linewidth]{img/candidate.png}
+\caption{The four candidate executions allowed under x86-TSO}
+\end{figure}
+}
+\only<2->{
 \begin{figure}
 %\centering
 \includegraphics[width=\linewidth]{img/candidate-red.png}
 \caption{The four candidate executions allowed under x86-TSO}
 \end{figure}
+}
+\only<3>{
+  \begin{tikzpicture}[overlay]
+  \node at (6.1, 4.1) {\fcolorbox{yellow}{yellow}{
+    \includegraphics[scale=0.11]{img/non-portable.png}} };
+  \end{tikzpicture}
+}
 
 \end{frame}
 
 
 
 
-
-
-
-
-
-
-
-\begin{frame}{Tools for memory model-aware analysis}
+\begin{frame}<presentation:0>{Tools for memory model-aware analysis}
 \begin{itemize}
 \item \texttt{diy} tool suite:
   \begin{itemize}
@@ -486,137 +477,191 @@ SC model: \\
 \end{frame}
 
 
-\subsection{Portability Analysis}
 
-\begin{frame}{Portability analysis} {The \texttt{Porthos} tool}
-
-\begin{itemize}
-\item Let the function $\textit{cons}_{\mathcal{M}}(P)$ calculate the set of executions of program $P$ consistent under the memory model $\mathcal{M}$.
-\end{itemize}
-
-\begin{definition}[Portability~\cite{Porthos17a}]
-Let $\mathcal{M_S}$, $\mathcal{M_T}$ be two weak memory models.
-The program $P$ is portable from $\mathcal{M_S}$ to $\mathcal{M_T}$ if 
-$\textit{cons}_{\mathcal{M_T}}(P) \subseteq \textit{cons}_{\mathcal{M_S}}(P)$
-\end{definition}
-
-\begin{itemize}
-\item Portability as an SMT-based bounded reachability problem: \\
-${\phi = \phi_{CF} \land \phi_{DF} \land \phi_{\mathcal{M_T}} \land \phi_{\lnot\mathcal{M_S}}}$
-\item $\texttt{SAT}(\phi) \implies $ the portability bug
-\end{itemize}
-
-%end{tabular}
+\begin{frame}{Portability analysis} {The \tool{Porthos} tool}
+\begin{minipage}{.49\textwidth}
+\only<1->{
+  \begin{figure}
+  \includegraphics[height=0.4\textheight,keepaspectratio]{img/the-problem.png}
+  \caption{The illustration of the portability problem~\cite{Porthos17slides}}
+  \end{figure}
+}
+\end{minipage}
+%
+\begin{minipage}{.5\textwidth}
+\only<2->{
+  \begin{itemize}
+    \begin{definition}[Portability~\cite{Porthos17a}]
+    %SAY: Let $\textit{cons}_{\mathcal{M}}(P)$ be a function that calculates the set of executions of the program $P$ that are consistent under the memory model $\mathcal{M}$
+    %Let $\mathcal{M_S}$, $\mathcal{M_T}$ be two weak memory models.
+    The program $P$ is portable from the source memory model $\mathcal{M_S}$ to the target one $\mathcal{M_T}$ if
+    $\textit{cons}_{\mathcal{M_T}}(P) \subseteq \textit{cons}_{\mathcal{M_S}}(P)$
+    \end{definition}
+    \item Portability as an SMT-based bounded reachability problem: \\
+    $\phi = $\only<3>\yellowemph{$\phi_{CF}$}$\land $\only<3>\yellowemph{$\phi_{DF}$}$\land \phi_{\mathcal{M_T}} \land \phi_{\lnot\mathcal{M_S}}$
+    \item $\texttt{SAT}(\phi) \Longrightarrow $ portability bug
+  \end{itemize}
+}
+\end{minipage}
 \end{frame}
 
 
 
-\subsection{SMT-encoding}
-
-
-%\begin{frame}{Encoding for the control-flow}% {The \texttt{Porthos v1} encoding scheme}
-%\begin{itemize}
-%\item In \texttt{Porthos}, the high-level instructions were represented in the SMT-formula by separate variables.
-%\item For example, the sequential instruction $i_1 = i_2; i_3$ was encoded as
-%$\phi_{CF}(i_2;i_3) = (cf_{i_1} \Leftrightarrow (cf_{i_2} \land cf_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)$,
-%\end{itemize}
-%\end{frame}
-
-%\begin{frame}{Encoding for the control-flow}% {The \texttt{PorthosC} encoding scheme}
-%\begin{itemize}
-%%\item The new encoding scheme of \texttt{PorthosC} follows~\cite{heljanko2008unfoldings} in general.
-%\item \texttt{Porthos v1} used another encoding scheme, where the high-level instructions were represented in the SMT-formula by separate variables:
-%$\phi_{CF}(i_2;i_3) = (cf_{i_1} \Leftrightarrow (cf_{i_2} \land cf_{i_3})) \land \phi_{CF}(i_2) \land \phi_{CF}(i_3)$.
-%\item In \texttt{PorthosC}, the high-level AST firstly is compiled into the \textit{event-flow graph} with events as nodes and relations as edges.
-%\item All edges are labelled by \textit{guards}, local-memory computations ($\epsilon$~denotes an empty guard).
-%\end{itemize}
+\begin{frame}{\tool{PorthosC}: Architecture}{Main components}
+\vspace{-30pt}
+\begin{minipage}{.49\textwidth}
+\begin{itemize}
+\item The enhanced version of \tool{Porthos}, that is able to analyse C programs, has got a new name \textit{PorthosC}.
+\end{itemize}
+\hfill
+\end{minipage}
 %
-%\begin{figure}[b]
-%  \centering
-%  \begin{minipage}{\textwidth}
-%      \begin{subfigure}[b]{0.25\textwidth}
-%        \makebox[\textwidth]{
-%        \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
-%            \node[c] (1) [] {$e_i$};
-%            \node[c] (2) [below of=1] {$e_{i+1}$};
-%            \path[->]
-%            (1) edge [] node {$\epsilon$} (2)
-%            ;
-%        \end{tikzpicture}
-%        }
-%        \caption{The sequence}
-%    \end{subfigure}
-%    ~
-%    \begin{subfigure}[b]{0.35\textwidth}
-%        \makebox[\textwidth] {
-%        \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
-%            \node[c]           (k)   [] {$e_k$};
-%            \node[c,draw=none] (iii) [below of=k] {$...$};
-%            \node[c,draw=none] (ii)  [left=0.2cm of iii] {};
-%            \node[c]           (i)   [left=0.2cm of ii] {$e_i$};
-%            \node[c,draw=none] (iv)  [right=0.2cm of iii] {};
-%            \node[c]           (v)   [right=0.2cm of iv] {$e_{i+j}$};
-%            \path[->]
-%            (k) edge [above] node {$g_{i,k}$} (i)
-%            (k) edge [] node {} (ii)
-%            (k) edge [] node {} (iii)
-%            (k) edge [] node {} (iv)
-%            (k) edge [above] node {$g_{i+j,k}$} (v)
-%            ;
-%        \end{tikzpicture}
-%        }
-%        \caption{Conditional branching}
-%    \end{subfigure}
-%    ~
-%    \begin{subfigure}[b]{0.3\textwidth}
-%        \makebox[\textwidth]{
-%        \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
-%            \node[c] (i) [] {$e_i$};
-%            \node[c,draw=none] (ii) [right=0.2cm of i] {};
-%            \node[c,draw=none] (iii) [right=0.2cm of ii] {$...$};
-%            \node[c,draw=none] (iv) [right=0.2cm of iii] {};
-%            \node[c] (v) [right=0.2cm of iv] {$e_{i+j}$};
-%            \node[c] (k) [below of=iii] {$e_k$};
-%            \path[->]
-%            (i) edge [above] node {$g_{i,k}$} (k)
-%            (ii) edge [above] node {} (k)
-%            (iii) edge [] node {} (k)
-%            (iv) edge [] node {} (k)
-%            (v) edge [] node {} (k) %sloped
-%            ;
-%        \end{tikzpicture}
-%        }
-%        \caption{Branch merging}
-%    \end{subfigure}
-%    %
-%    \caption{Possible mutual arrangements of events in a control-flow graph} %Linear and non-linear cases of a control-flow graph}
-%    \label{encode:cf}
-%\end{minipage}
-%\end{figure}
-%\end{frame}
-
-
-%\begin{frame}{Encoding for the control-flow} %{The \texttt{PorthosC} encoding scheme}
-%\begin{itemize}
-%\item Let $\fx:\,\mathbb{E}\,\rightarrow\,\{0,1\}$ be the predicate that signifies the fact that the event has been e\textbf{x}ecuted.
-%\item The control-flow of the program is encoded as following:
-%\end{itemize}
-%\vspace{-20pt}
-%\begin{align}
-%\phi_{CF_{seq}} \defeq \quad & \fx(e_{i+1}) \Rightarrow \fx(e_i) \nonumber\\
-%\phi_{CF_{br}}  \defeq \quad & [\fx(e_i) \Rightarrow \fx(e_k)] \ \land \ \cdots \ \land \ [\fx(e_{i+j}) \Rightarrow \fx(e_k)] \nonumber \nonumber\\
-%                       \land & \ [\fx(e_i) \land \fx(e_k) \Rightarrow g_{i,k}] \ \land \ \cdots \ \land \ [\fx(e_{i+j}) \land \fx(e_k) \Rightarrow g_{i+j,k}] \nonumber \\
-%                       \land & \ \cdots \nonumber \nonumber\\
-%                       \land & \ ( \bigvee_{e_l \in \ \texttt{succ}(e_m)} \ \ \bigvee_{\begin{subarray}{l}e_n \in \ \texttt{succ}(e_k) \nonumber\\
-%                               e_n \neq e_m\end{subarray}} \! \lnot [\fx(e_m) \land \fx(e_n)] \ ) \nonumber\\
-%\phi_{CF_{mer}} \defeq \quad & \fx(e_k) \Rightarrow (\bigvee\limits_{e_p \in \ \texttt{pred}(e_k)}^{} \fx(e_p)) \nonumber
-%\end{align}
-%\end{frame}
+\begin{minipage}{.5\textwidth}
+\only<1>{\begin{figure}
+  \includegraphics[height=.98\textheight,keepaspectratio]{img/arch/general_arch-no_numbering.png}
+\end{figure}}
+\only<2>{\begin{figure}
+  \includegraphics[height=.98\textheight,keepaspectratio]{img/arch/general_arch-no_numbering-labels.png}
+\end{figure}}
+\only<3>{\begin{figure}
+  \includegraphics[height=.98\textheight,keepaspectratio]{img/arch/general_arch-no_numbering-visitors.png}
+\end{figure}}
+\only<4>{\begin{figure}
+  \includegraphics[height=.98\textheight,keepaspectratio]{img/arch/general_arch-no_numbering-compiler.png}
+\end{figure}}
+\only<5>{\begin{figure}
+  \includegraphics[height=.98\textheight,keepaspectratio]{img/arch/general_arch-no_numbering-smt.png}
+\end{figure}}
+\end{minipage}
+\end{frame}
 
 
 
-\begin{frame}{Encoding for the control-flow: An example}
-%Let $\fx:\,\mathbb{E}\,\rightarrow\,\{0,1\}$ be the predicate that signifies the fact that the event has been e\textbf{x}ecuted (and, consequently, has changed the state of the system).
+\begin{frame}{\tool{PorthosC}: Architecture}{Abstract interpretation module}
+  \vspace{-40pt}
+\begin{minipage}{.4\textwidth}
+\begin{itemize}
+\item The abstract interpretation module is an essential part of the compiler of C code into the event-flow graph representation (\texttt{X-graph}).
+\end{itemize}
+\hfill
+\end{minipage}
+%
+\begin{minipage}{.5\textwidth}
+\only<1>{\begin{figure}
+  \scalebox{0.9}{\includegraphics[height=.99\paperheight]{img/compiler/X-compiler.png}}
+\end{figure}}
+\only<2>{\begin{figure}
+  \scalebox{0.9}{\includegraphics[height=.99\paperheight]{img/compiler/X-compiler-1.png}}
+\end{figure}}
+\only<3>{\begin{figure}
+  \scalebox{0.9}{\includegraphics[height=.99\paperheight]{img/compiler/X-compiler-2.png}}
+\end{figure}}
+\only<4>{\begin{figure}
+  \scalebox{0.9}{\includegraphics[height=.99\paperheight]{img/compiler/X-compiler-3.png}}
+\end{figure}}
+\only<5>{\begin{figure}
+  \scalebox{0.9}{\includegraphics[height=.99\paperheight]{img/compiler/X-compiler-4.png}}
+\end{figure}}
+\end{minipage}
+\end{frame}
+
+
+
+\begin{frame}{\tool{Porthos\,v1}: The input language}
+{
+\only<1-2>{ }
+\only<3>{Static syntactic determination of the variables kind}
+\only<4>{Lack of support for functions invocations}
+\only<5>{Lack of support for unconditional jumps}
+}
+{\noindent\centering
+\begin{minipage}{.45\textwidth}
+  \begin{figure}
+  \only<1-2>{\lstinputlisting[language=Java,basicstyle=\ttfamily\tiny,columns=fullflexible]{img/lst/input-old/example-old.c}}
+    \only<3>{\lstinputlisting[language=Java,basicstyle=\ttfamily\tiny,columns=fullflexible]{img/lst/input-old/example-old-2.c}}
+    \only<4>{\lstinputlisting[language=Java,basicstyle=\ttfamily\tiny,columns=fullflexible]{img/lst/input-old/example-old-3.c}}
+    \only<5>{\lstinputlisting[language=Java,basicstyle=\ttfamily\tiny,columns=fullflexible]{img/lst/input-old/example-old.c}}
+  \caption{A program example in the \tool{Porthos\,v1} input language}
+  \end{figure}
+\end{minipage}
+%
+\begin{minipage}{.45\textwidth}
+  \begin{figure}
+  \only<2,5>{\lstinputlisting[basicstyle=\ttfamily\Tiny,columns=fullflexible,literate={<}{{$\langle$}}1{>}{{$\rangle$}}1,escapeinside={[*}{*]}]{img/lst/input-grammar/grammar.txt}}
+  \only<3>{\lstinputlisting[basicstyle=\ttfamily\Tiny,columns=fullflexible,literate={<}{{$\langle$}}1{>}{{$\rangle$}}1,escapeinside={[*}{*]}]{img/lst/input-grammar/grammar-2.txt}}
+  \only<4>{\lstinputlisting[basicstyle=\ttfamily\Tiny,columns=fullflexible,literate={<}{{$\langle$}}1{>}{{$\rangle$}}1,escapeinside={[*}{*]}]{img/lst/input-grammar/grammar-3.txt}}
+  \vfill
+  \only<2->{\caption{A sketch of the \tool{Porthos\,v1} input language grammar}}
+  \end{figure}
+\end{minipage}
+}
+\end{frame}
+
+
+\begin{frame}[label={example-new}]{\tool{PorthosC}: The input language}
+{
+\only<1-2>{ }
+\only<3>{Pre-compilation phase for the syntactic determination of the variables kind}
+\only<4>{Support for functions invocations: The invocation hooking mechanism}
+\only<5>{Support for arbitrary control-flow jumps}
+}
+{\noindent\centering
+\begin{minipage}{.43\textwidth}
+  \begin{figure}
+  \only<1-2>{\lstinputlisting[language=Java,basicstyle=\ttfamily\tiny,columns=fullflexible]{img/lst/input-new/example-new.c}}
+    \only<3>{\lstinputlisting[language=Java,basicstyle=\ttfamily\tiny,columns=fullflexible]{img/lst/input-new/example-new-2.c}}
+    \only<4>{\lstinputlisting[language=Java,basicstyle=\ttfamily\tiny,columns=fullflexible]{img/lst/input-new/example-new-3.c}}
+    \only<5>{\lstinputlisting[language=Java,basicstyle=\ttfamily\tiny,columns=fullflexible]{img/lst/input-new/example-new-4.c}}
+  \caption{A program example in the \tool{Porthos\,v1} input language}
+  \end{figure}
+\end{minipage}
+%
+\begin{minipage}{.55\textwidth}
+%  \only<1>{\begin{itemize}
+%  \item The grammar used by \texttt{PorthosC} was taken from the C11 standard~\cite{c11}.
+%  \end{itemize}}
+%  %
+%  \only<2>{\begin{itemize}
+%    \item A variable is shared if:
+%      \begin{itemize}
+%      \item it was declared as a \textit{pointer}, or
+%      \item its \textit{address} is accessed at least once by the code of any process, or 
+%      \item it was declared as a \textit{parameter} of the function that defines a process, or 
+%      \item it was exported by the \textit{extern} keyword or an exporting function.
+%      \end{itemize}
+%    \end{itemize}
+%  }
+%  \only<3>{\begin{itemize}
+%    \item The invocation hooking mechanism serves as an extensible knowledge base for storing the semantics of functions.
+%    \end{itemize}
+%  }
+%  \only<4>{\begin{itemize}
+%    \item The labels are being collected during the pre-compilation stage,
+%    \item the jumps are being resolved during the compilation.
+%    \end{itemize}
+%  }  \scalebox{0.75}{\includegraphics[height=\textheight,keepaspectratio]{img/lst/input-new/t0-3.png}}
+%  }
+%  \only<5>{
+%    \scalebox{0.75}{\includegraphics[height=\textheight,keepaspectratio]{img/lst/input-new/t0-4.png}}
+%  }
+  \begin{figure}
+  \only<2-3>{
+    \scalebox{0.75}{\includegraphics[height=\textheight,keepaspectratio]{img/lst/input-new/t0.png}}
+  }
+  \only<4>{
+    \scalebox{0.75}{\includegraphics[height=\textheight,keepaspectratio]{img/lst/input-new/t0-4.png}}
+  }
+  \only<5>{
+    \scalebox{0.75}{\includegraphics[height=\textheight,keepaspectratio]{img/lst/input-new/t0-5.png}}
+  }
+  \only<2->{\caption{The compiled event-flow graph}}
+  \end{figure}
+\end{minipage}
+}
+\end{frame}
+
+
+\begin{frame}{\texttt{PorthosC}: The new control-flow encoding scheme}
 \begin{figure}
 \begin{minipage}{.2\textwidth}
 \centering
@@ -661,7 +706,7 @@ ${\phi = \phi_{CF} \land \phi_{DF} \land \phi_{\mathcal{M_T}} \land \phi_{\lnot\
 
 
 
-\begin{frame}{Encoding for the data-flow}
+\begin{frame}<presentation:0>{Encoding for the data-flow}
 \begin{itemize}
 \item SSA-indices are computed as following:
 \begin{itemize}
@@ -681,86 +726,8 @@ The data-flow of an event is encoded as following:
 
 
 
-
-\section{Implementation}
-
-%\begin{frame}{General principles}
-%\begin{enumerate}[nolistsep]
-%  \item \textit{Robustness:}
-%    \begin{enumerate}[label*=\arabic*.]
-%      \item preservation the completeness of analysis,
-%      \item modular architecture: each module can be tested independently,
-%      \item usage of software design patterns where necessary, and
-%      \item usage of immutable data structures for all DTOs.
-%    \end{enumerate}
-%  \item \textit{Transparency:}
-%    \begin{enumerate}[label*=\arabic*.]
-%      \item following the principles of simplicity and readability, and
-%      \item clear and informative program output.
-%    \end{enumerate}
-%  \item \textit{Efficiency:}
-%    \begin{enumerate}[label*=\arabic*.]%[leftmargin=1.5em]
-%      \item keeping the trade-off between execution time and memory usage.
-%    \end{enumerate}
-%  \item \textit{Extensibility:}
-%    \begin{enumerate}[label*=\arabic*.]%[leftmargin=1em]
-%      \item clear modular architecture.
-%    \end{enumerate}
-%\end{enumerate}
-%\end{frame}
-
-
-\subsection{The input language and general architecture}
-
-
-\begin{frame}{The input language}
-The input language parser used by \texttt{Porthos} suffered from several disadvantages:
-\begin{itemize}
-\item it contained the parser code inlined directly into the grammar (hardly maintainable);
-\item the semantics of operations and kinds of variables (global or shared) were determined syntactically (4 different types of assignment:`\texttt{=}', `\texttt{:=}', `\texttt{<-}' and `\texttt{<:-}', each for different kinds of arguments);
-\item restricted syntax for expressions.
-\item In contrast, \texttt{PorthosC} uses the full C language grammar of proposed in the C11 standard~\cite{jtc2011sc22} and the visitor that converts the ANTLR grammar to the AST (\texttt{Y-tree}).
-\end{itemize}
-
-\end{frame}
-
-
-\begin{frame}{Architecture}%{The general architecture}
-\vspace{-30pt}
-\begin{figure}
-  \centering
-  \includegraphics[height=.99\textheight,keepaspectratio]{../img/my/draw.io/general_arch-no_numbering.png} %{img/my/draw.io/general_arch.png}
-  %\caption{The general architecture of \texttt{PorthosC}}
-  %\label{fig:arch}
-\end{figure}
-\end{frame}
-
-
-
-
-\subsection{The \texttt{X-graph}: structure and construction}
-
-\begin{frame}{The \texttt{X-graph} internal representation}
-  \centering
-  \begin{figure}
-    \includegraphics[width=1.1\textwidth,keepaspectratio]{../img/my/class-diagrams/XEntity-interfaces.png}
-    \caption{The inheritance tree of main \texttt{X-graph} interfaces}
-  \end{figure}
-  
-\end{frame}
-
-
-\begin{frame}{The \texttt{X-graph} compiler}
-\begin{figure}
-  \centering
-  \scalebox{0.7}{\includegraphics[height=.99\paperheight]{../img/my/draw.io/X-compiler.png}}
-  \caption{Main components of the X-compilation processing unit}
-\end{figure}
-\end{frame}
-
-
-
-\begin{frame}{\texttt{X-graph} unrolling}
+\begin{frame}{\texttt{PorthosC}: The new DFS-based \texttt{X-graph} unrolling scheme}
+\only<1>{
 \begin{figure}[t]
 \centering
 \resizebox{.8\linewidth}{!}{
@@ -827,35 +794,101 @@ The input language parser used by \texttt{Porthos} suffered from several disadva
 }
 \caption{Example of the flow graph unrolling up to bound $k = 6$}
 \end{figure}
+}
+%
+%\only<2>{
+%\begin{figure}
+%  \scalebox{0.8}{\includegraphics[height=\textheight,keepaspectratio]{img/lst/input-new/t0_unrolled.png}}
+%  \caption{The unrolled \texttt{X-graph} of the code used on slide~\ref{example-new}}
+%\end{figure}
+%}
 \end{frame}
 
 
 
-\section{Evaluation}
-
-\begin{frame}{Evaluation}
-Much better.
-
-\alert{[to be done]}
+\begin{frame}{Evaluation}{The new unrolling scheme}
+\begin{minipage}{.23\linewidth}
+\hfill
+\end{minipage}
+%
+\noindent\begin{minipage}{.75\linewidth}
+\begin{figure}
+  \vspace{-20pt}
+  \centering
+  \scalebox{.8}{
+    \colorbox{white}{\includegraphics[height=\textheight,keepaspectratio]{img/lst/unrolled/collage.jpg}}
+  }
+\caption{Illustration of differences in unrolling schemes of \tool{PorthosC}~(left) and \tool{Porthos\,v1}~(right)}
+\end{figure}
+\end{minipage}
 \end{frame}
 
 
+\begin{frame}{Evaluation}{Overhead of the new unrolling scheme: Number of events}
+\begin{figure}[t]
+\begin{subfigure}{.47\textwidth}
+\includegraphics[width=\textwidth,keepaspectratio]{../img/my/performance/new/new-e.png}
+\caption{The graph unrolled by \tool{PorthosC}}
+\label{dep:events:new}
+\end{subfigure}
+\hfill
+%
+\begin{subfigure}{.47\textwidth}
+\includegraphics[width=\textwidth,keepaspectratio]{../img/my/performance/new/old-e.png}
+\caption{The graph unrolled by \tool{Porthos\,v1}}
+\label{dep:events:old}
+\end{subfigure}
+%
+\caption{Dependency of unrolled events number on the unrolling bound $k$}
+\label{dep:events}
+\end{figure}
+\end{frame}
 
 
-\section*{Summary}
+\begin{frame}{Evaluation}{Overhead of the new unrolling scheme: Execution time}
+\begin{figure}[t]
+\begin{subfigure}{.45\textwidth}
+\includegraphics[width=\textwidth,keepaspectratio]{../img/my/performance/new/new-t.png}
+\caption{Program domain encoding time of the graph unrolled by \tool{PorthosC}}
+\label{dep:time:new}
+\end{subfigure}
+\hfill
+%
+\begin{subfigure}{.45\textwidth}
+\includegraphics[width=\textwidth,keepaspectratio]{../img/my/performance/new/old-t.png}
+\caption{Program domain encoding time of the graph unrolled by \tool{Porthos\,v1}}
+\label{dep:time:old}
+\end{subfigure}
+%
+\caption{Dependency of program domain encoding time (in seconds) on the unrolling bound}
+\label{dep:time}
+\end{figure}
+\end{frame}
+
+%\section*{Summary}
 
 \begin{frame}{Summary}
 \begin{itemize}
-\item The general framework for memory model-aware analysis was implemented in \texttt{PorthosC};
-%\item Review existing tools for memory model-aware analysis;
-\item The input language has been extended; %TODO: how exactly?
-\item The old architecture of \texttt{Porthos} has been analysed and considered while designing the new architecture for \texttt{PorthosC};
-%\item Design a new architecture for \texttt{PorthosC} that \textit{allow to} easily support the C input language, be robust, transparent, efficient and extensible.
-\item \alert{to be done: more}
-%\item the new architecture for the tool was designed,
+\item The result of the work is the generalised framework for memory model-aware analysis \textbf{\tool{PorthosC}};
+  \begin{itemize}
+  \item The \textit{input language} has been extended to a higher subset of C language (including unconditional control-flow jumps);
+  \item The old \textit{architecture} of \texttt{Porthos} has been revised and redesigned for \texttt{PorthosC};
+  \item The \textit{new unrolling scheme} produces complete state space of the analysing program within the user-defined bound $k$, though the encoding time growth rapidly (exponentially) as the unrolling bound grows.
+  \item The \textit{invocation hooking mechanism} serves as a knowledge base for the program domain, it is to be filled and extended in future.
+  \end{itemize}
 \end{itemize}
 \end{frame}
 
+
+\begin{frame}{Directions for future work}
+\begin{itemize}
+\item Extending the \textit{knowledge base} of domain-specific functions to model synchronisation primitives;
+\item Supporting \textit{new input languages} (e.g., different assembly languages);
+\item Supporting \textit{complex data types} (s.a. arrays, pointers, structures, etc.);
+\item Adding the \textit{inter-procedural analysis mode};
+\item Handling the \textit{state explosion problem} (with standard model-checking techniques adjusted by the information about the weak memory model of the execution environment).
+\end{itemize}
+\end{frame}
 
 
 % All of the following is optional and typically not needed. 

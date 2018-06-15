@@ -1,0 +1,20 @@
+...
+
+<instr>
+  :  <atom>
+  |  `{' <instr> `}'
+  |  <instr> `;' <instr>
+  |  `while' `(' <bool-expr> `)' <instr>
+  |  `if' <bool-expr> `{' <instr> `}' <instr>
+  ;
+
+<atom> 
+  :  <reg> `[*\yellowemph{<-}*]' <expression>
+  |  <reg> `[*\yellowemph{<:-}*]' <loc>
+  |  <loc> `[*\yellowemph{:=}*]' <reg>
+  |  <reg> `[*\yellowemph{=}*]' <loc> `.' `store' `(' <atomic> `,' <reg> `)'
+  |  <reg> `[*\yellowemph{=}*]' <loc> `.' `load'  `(' <atomic> `)'
+  |  (`mfence' | `sync' | `lwsync' | `isync')
+  ;
+
+...

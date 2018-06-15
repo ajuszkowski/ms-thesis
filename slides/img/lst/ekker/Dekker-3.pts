@@ -1,0 +1,27 @@
+{ flag0, flag1, turn }
+
+thread t0 {
+  while true {
+    a <- 1;
+    b <- 0;
+    flag0.store(_rx, a);
+    f1 = flag1[*\yellowemph{.load(}*]_rx[*\yellowemph{)}*];
+    while (f1 == 1) {
+      t1 = turn[*\yellowemph{.load(}*]_rx[*\yellowemph{)}*];
+      if (t1 != 0) {
+        flag0.store(_rx, b);
+        t1 = turn[*\yellowemph{.load(}*]_rx[*\yellowemph{)}*];
+        while (t1 != 0) {
+          t1 = turn[*\yellowemph{.load(}*]_rx[*\yellowemph{)}*]
+        };
+        flag0[*\yellowemph{.store(}*]_rx, a[*\yellowemph{)}*]
+      }
+    }
+  }
+}
+
+thread t1 {
+  ...
+}
+
+exists turn=10,
