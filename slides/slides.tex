@@ -1,15 +1,15 @@
 \documentclass[aspectratio=149]{beamer}
 
+%\def\IsRus{1}
+\newcommand{\double}[2]{\ifdefined\IsRus{#2}\else{#1}\fi}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T2A]{fontenc}
 \usepackage[russian,english]{babel}
 
-
 \usepackage{outlines}
 
 \usepackage{colortbl}
-
 \definecolor{ltgrey}{rgb}{0.85,0.85,0.85}
 \definecolor{ltblue}{RGB}{101,147,245}
 \definecolor{dkblue}{rgb} {0,   0.1, 0.6}
@@ -57,19 +57,6 @@ c/.style={
 
 \usepackage{multicol}
 
-\usepackage{fancyvrb}%fancy verbatim
-%\makeatletter
-%\newcommand{\verbatimfont}[1]{\renewcommand{\verbatim@font}{\ttfamily\scriptsize#1}}
-%\makeatother
-% redefine \VerbatimInput
-\RecustomVerbatimCommand{\VerbatimInput}{VerbatimInput}{fontsize=\scriptsize}
-
-\usepackage{pmboxdraw}
-\usepackage{newunicodechar}
-\newunicodechar{└}{\textSFii}
-\newunicodechar{├}{\textSFviii}
-\newunicodechar{─}{\textSFx}
-
 
 \usepackage[export]{adjustbox} % loads also graphicx
 
@@ -83,6 +70,7 @@ c/.style={
 
 \usepackage[backend=biber]{biblatex}
 \addbibresource{../bib/ms-thesis.bib}
+\renewcommand*{\bibfont}{\scriptsize}
 
 \usepackage{array}
 %\usepackage{xcolor}
@@ -155,36 +143,48 @@ c/.style={
       
 %\titlegraphic{\includegraphics[height=1cm,width=2cm]{logo1}}
 %\titlegraphicii{\includegraphics[height=1cm,width=2cm]{logo2}}
-\title{\nohyphens{\textbf{Automated~Analysis~of~Weak~Memory~Models}}}
+\title{\double{\nohyphens{\textbf{Automated~Analysis~of~Weak~Memory~Models}}}{Автоматический~анализ~слабых~моделей памяти~параллельного~программирования}}
 
 % A subtitle is optional and this may be deleted
 %\subtitle{Optional Subtitle}
-\author{\textbf{Artem Yushkovskiy}\inst{1,2} \\ 
+\author{
+\double{
+\textbf{Artem Yushkovskiy}\inst{1,2} \\ 
 {\scriptsize MSc Candidate}
 \\ \vspace{1em}
 {\footnotesize\raggedleft Supervisors: \textbf{Assoc. Prof. Keijo Heljanko}\inst{1} \newline
 \hphantom{Supervis} \textbf{Docent Igor I. Komarov}\inst{2} }
-}%\small
-%{\footnotesize%\raggedleft%does not work
-%Supervisor 1: Assoc. Prof. Keijo Heljanko\inst{1} \newline
-%Supervisor 2: Docent Igor I. Komarov\inst{2}
-%}
-
+}
+{\textbf{Юшковский А. В.}\inst{1,2} \\ 
+{\scriptsize магистрант}
+\\ \vspace{1em}
+{\footnotesize\raggedleft Руководители: \textbf{проф. Кеийо Хельянко}\inst{1} \newline
+\hphantom{Руководители} \textbf{доц. Комаров И. И.}\inst{2} }
+}
+}
 
 \institute
 {
   \inst{1}%
-  \textbf{Aalto University} (Espoo, Finland) \\
-  Department of Computer Science, \\
-  School of Science
+  \double{\textbf{Aalto University} (Espoo, Finland) \\
+    Department of Computer Science, \\
+    School of Science
+  }
+  {\textbf{Университет Аалто} (Эспоо, Финляндия) \\
+    Факультет Информатики, Школа Наук
+  }
   \and
   \inst{2}%
-  \textbf{ITMO University} (Saint Petersburg, Russia) \\
-  Faculty of Information Security \\
-  and Computer Technologies
+  \double{\textbf{ITMO University} (Saint Petersburg, Russia) \\
+    Faculty of Information Security \\
+    and Computer Technologies
+  }
+  {\textbf{Университет ИТМО} (Санкт-Петебург, Россия) \\
+    Факультет Безопасности Информационных Технологий
+  }
 }
 
-\date{\scriptsize Espoo, Saint Petersburg, 2018}
+\date{\scriptsize \double{Espoo, Saint Petersburg\\2018}{Эспоо, Санкт Петербург\\2018}}
 % - Either use conference name or its abbreviation.
 % - Not really informative to the audience, more for people (including
 %   yourself) who are reading the slides online
@@ -219,40 +219,36 @@ c/.style={
   \titlepage
 \end{frame}
 
-%\begin{frame}{Outline}
-%  \tableofcontents
-%\end{frame}
 
-
-
-
-%\section{Introduction}
-%\subsection{The problem}
-
-
-\begin{frame}{Task statement \rus{(Цель работы)}}
+\begin{frame}{\double{Task statement}{Цель работы}}
 \begin{itemize}
-\item Improve the proof-of-concept memory model-aware analysis tool \texttt{Porthos}~\cite{Porthos17a} by extending support for the input language.
+\item \double{Improve the proof-of-concept memory model-aware analysis tool \tool{Porthos}~\cite{Porthos17a} by extending support for the input language.}
+{Усовершенствовать прототип статического анализатора кода  \tool{Porthos}~\cite{Porthos17a}, учитывающий при анализе модель памяти вычислительной среды, путем расширения поддержки входного языка.}
 \end{itemize}
 \end{frame}
 
 
-\begin{frame}{Task specification \rus{(Задачи работы)}}
+\begin{frame}{\double{Task specification}{Задачи работы}}
 \begin{itemize}
-\item Study the general framework for memory model-aware analysis of concurrent programs~\cite{alglave2010shared};
-\item Review existing tools for memory model-aware analysis;
+\item \double{Study the general framework for memory model-aware analysis of concurrent programs~\cite{alglave2010shared};}
+{Изучить существующие подходы к автоматическому проведению анализа кода параллельных программ с учетом модели памяти вычислительной среды~\cite{alglave2010shared};}
+\item \double{Review existing tools for memory model-aware analysis;}
+{Исследовать существующие инструменты анализа кода с учетом модели памяти;}
 %\item Examine the architecture of \texttt{Porthos}, its strengths and weaknesses;
 %\item Design a new architecture for \texttt{PorthosC} that allow to extend the input language to the (large subset of) C language, be robust, transparent, efficient and extensible.
-\item Develop a \textit{C compiler infrastructure} as a part of an abstract interpretation engine for the new tool \tool{PorthosC};
-\item Improve the SMT-encoding scheme for an \textit{arbitrary control-flow};
-\item Enhance performance, extensibility, reliability and maintainability of the tool.
+\item \double{Develop a \textit{C compiler infrastructure} as a part of an abstract interpretation engine for the new tool \tool{PorthosC};}
+{Разработать инфраструктуру C-компилятора как часть модуля абстрактной интерпретации нового анализатора \tool{PorthosC};}
+\item \double{Improve the SMT-encoding scheme for an \textit{arbitrary control-flow};}
+{Адаптировать схему кодирования произвольного графа потока управления в SMT-формулу;}
+\item \double{Enhance performance, extensibility, reliability and maintainability of the tool.}
+{Сохранить и улучшить функциональные характеристики анализатора (производительность, расширяемость, надежность и поддерживаемость).}
 \end{itemize}
 \end{frame}
 
 
 %\subsection{The background: weak memory model-aware analysis}
 
-\begin{frame}{Verification of concurrent software} {Motivating example: Write-write reordering (compiler  relaxations)}
+\begin{frame}{\double{Verification of concurrent software}{Верификация параллельных программ}}{\double{Motivating example: Write-write reordering (compiler  relaxations)}{Пример: Перестановка типа запись-запись (оптимизация на уровне компилятора)}}
 %1) mckenney  http://www.rdrop.com/users/paulmck/scalability/paper/whymb.2010.06.07c.pdf
 %2) http://preshing.com/20120515/memory-reordering-caught-in-the-act/
 \begin{table}
@@ -275,8 +271,8 @@ P & Q \\ \hline
 \small
 \begin{table}
 \only<1>{\caption*{~\\~}}
-\only<2>{\caption*{Single thread\\(no concurrency)}}
-\only<3>{\caption*{Sequential Consistency\\(classical concurrency)}}
+\only<2>{\double{\caption*{Single thread\\(no concurrency)}}{\caption*{Один поток\\(отсутствие параллелизма)}}}
+\only<3>{\double{\caption*{Sequential Consistency\\(classical concurrency)}}{\caption*{Последовательная Согласованность\\(классический параллелизм)}}}
 \only<4->{\caption*{~\\~}}
 \only<4->{
   \begin{tikzpicture}[overlay, remember picture]
@@ -313,7 +309,7 @@ $\r{q_0}, \b{p_0}, \r{q_1}, \b{p_1}$ & $(\b{1}; \r{1})$ \\
 %Relaxed Models
 % Arbitrary reorder limited only by explicit memorybarrier
 %instructions.
-\caption*{Total Store Order\\(e.g., x86)}
+\double{\caption*{Total Store Order\\(e.g., x86)}}{\caption*{Линейный порядок записи\\(напр., x86)}}
 \begin{tabular}{ | l r | l r | l r } % >{\columncolor{ltgrey}}
 $\underline{\b{p_1}}, \underline{\b{p_0}}, \r{q_0}, \r{q_1}$ & $(\b{0}; \r{1})$  &  $\b{p_0}, \b{p_1}, \underline{\r{q_1}}, \underline{\r{q_0}}$ & $(\b{0}; \r{1})$  &  $\underline{\b{p_1}}, \underline{\b{p_0}}, \underline{\r{q_1}}, \underline{\r{q_0}}$ & $(\b{0}; \r{1})$ \\
 $\r{q_0}, \r{q_1}, \underline{\b{p_1}}, \underline{\b{p_0}}$ & $(\b{1}; \r{0})$  &  $\underline{\r{q_1}}, \underline{\r{q_0}}, \b{p_0}, \b{p_1}$ & $(\b{1}; \r{0})$  &  $\underline{\r{q_1}}, \underline{\r{q_0}}, \underline{\b{p_1}}, \underline{\b{p_0}}$ & $(\b{1}; \r{0})$ \\
@@ -329,7 +325,7 @@ $\r{q_0}, \underline{\b{p_1}}, \r{q_1}, \underline{\b{p_0}}$ & $(\b{1}; \r{0})$ 
 
 
 
-\begin{frame}{Verification of concurrent software} {Motivating example: Store buffering (hardware relaxations)}
+\begin{frame}{\double{Verification of concurrent software}{Верификация параллельных программ}} {\double{Motivating example: Store buffering (hardware relaxations)}{Пример: Буферизация записи (оптимизация на уровне процессора)}}
 \begin{center}
 \scalebox{0.75}{
 \ttfamily
@@ -348,7 +344,7 @@ $p_1$: $r_p \leftarrow y$ & $q_1$: $r_q \leftarrow x$\\
 
 \begin{figure}
 \includegraphics[scale=0.37]{img/x86-arch-full.png}
-\caption{An x86-TSO abstract machine~\cite{sewell2010x86}}
+\double{\caption{An x86-TSO abstract machine~\cite{sewell2010x86}}}{\caption{Модель абстрактной машины процессора x86~\cite{sewell2010x86}}}
 \only<2->{
     \begin{tikzpicture}[overlay]
     \node at (0.1, 3.1) {\fcolorbox{yellow}{yellow}{
@@ -363,37 +359,37 @@ $p_1$: $r_p \leftarrow y$ & $q_1$: $r_q \leftarrow x$\\
 
 
 
-\begin{frame}{Weak memory model-aware analysis} {Event-based program representation}
+\begin{frame}{\double{Weak memory model-aware analysis}{Статический анализ с учетом слабой модели памяти}} {\double{Event-based program representation}{Событийная модель кода}}
 
 \begin{itemize}
   \addtolength{\tabcolsep}{0pt}
-  \item \textbf{Event} $\in \mathbb{E}$, a low-level primitive operation:
+  \item \textbf{\double{Event}}{\textbf{Событие}} $\in \mathbb{E}$, \double{a low-level primitive operation}{низкоуровневая примитивная операция}:
     \begin{itemize}
-      \item \textit{memory event} $\in \mathbb{M} = \mathbb{R} \cup \mathbb{W}$: access to a local/shared memory, \\
-      \item \textit{computational event} $\in \mathbb{C}$: computation over local memory, and \\
-      \item \textit{barrier event} $\in \mathbb{B}$: synchronisation fences;
+      \item \textit{\double{memory event}{событие памяти}} $\in \mathbb{M} = \mathbb{R} \cup \mathbb{W}$: access to a local/shared memory, \\
+      \item \textit{\double{computational event}{событие вычисления}} $\in \mathbb{C}$: \double{computation over local memory, and}{вычисление в локальной памяти} \\
+      \item \textit{\double{barrier event}{событие синхронизации}} $\in \mathbb{B}$: \double{synchronisation fences}{барьеры синхронизации};
      \end{itemize}
-  \item \textbf{Relation} $\subseteq \mathbb{E} \times \mathbb{E}$: 
+  \item \textbf{\double{Relation}{Отношение}} $\subseteq \mathbb{E} \times \mathbb{E}$: 
     \begin{itemize}
-    \item \textit{basic relations}:%, computed from the program model:
+    \item \textit{\double{basic relations}{базовые отношения}}:%, computed from the program model:
       \begin{itemize}
-        \item \textit{program-order} relation $\texttt{po} \subseteq \mathbb{E} \times \mathbb{E}$: (control-flow),
-        \item \textit{read-from} relation $\texttt{rf} \subseteq \mathbb{W} \times \mathbb{R}$: (data-flow), and
-        \item \textit{coherence-order} relation $\texttt{co} \subseteq \mathbb{W} \times \mathbb{W}$: (data-flow);
+        \item \textit{program-order} \double{relation}{отношение} $\texttt{po} \subseteq \mathbb{E} \times \mathbb{E}$: (\double{control-flow}{поток управления}),
+        \item \textit{read-from} \double{relation}{отношение} $\texttt{rf} \subseteq \mathbb{W} \times \mathbb{R}$: (\double{data-flow, and}{поток данных, и})
+        \item \textit{coherence-order} \double{relation}{отношение} $\texttt{co} \subseteq \mathbb{W} \times \mathbb{W}$: (\double{data-flow}{поток данных});
       \end{itemize}
-    \item \textit{derived relations}:%, computed from the basic relations using the following operators:
+    \item \textit{\double{derived relations}{производные отношения}}:%, computed from the basic relations using the following operators:
       \begin{itemize}
-        \item \textit{union} \texttt{r1\,|\,r2},
-        \item \textit{sequence} \texttt{r1} ; \texttt{r2},
+        \item \textit{\double{union}{объединение}} \texttt{r1\,|\,r2},
+        \item \textit{\double{sequence}{последовательность}} \texttt{r1} ; \texttt{r2},
         %\item \textit{inverse} \texttt{r}\^{\texttt{-1}},
-        \item \textit{transitive closure} \texttt{r+},
+        \item \textit{\double{transitive closure}{транзитивное замыкание}} \texttt{r+},
         \item $\cdots$;
       \end{itemize}
     \end{itemize}
   %\item \textbf{Candidate execution}, a sequence of guesses of relations;
-  \item \textbf{Assertion} over relations or sets of events: 
+  \item \double{\textbf{Assertion} over relations or sets of events}{\textbf{Ограничение} модели памяти, сформулированное в терминах отношений или множеств событий} : 
     \begin{itemize}
-    \item \textit{acyclicity}, \textit{irreflexivity} or \textit{emptiness} 
+    \item \textit{\double{acyclicity}{ацикличность}}, \textit{\double{irreflexivity}{антирефлексивность}} or \textit{\double{emptiness}{отсутствие элементов во множестве}}.
     \end{itemize}
 \end{itemize}
 
@@ -401,7 +397,7 @@ $p_1$: $r_p \leftarrow y$ & $q_1$: $r_q \leftarrow x$\\
 
 
 
-\begin{frame}{Weak memory model-aware analysis} {Testing candidate executions}
+\begin{frame}{\double{Weak memory model-aware analysis}{Статический анализ с учетом слабой модели памяти}} {\double{Testing candidate executions}{Тестирование путей выполнения программы}}
 \vspace{10pt}
 \begin{minipage}{.33\linewidth}
 \hfill
@@ -426,7 +422,7 @@ $p_1$: $r_p \leftarrow y$ & $q_1$: $r_q \leftarrow x$\\
 \noindent\begin{minipage}{.23\linewidth}
 \only<2->{
 \scriptsize
-SC model: \\
+SC \double{model}{модель}: \\
 ... \\
 \texttt{fr = (rf\^\,-1; co)} \\
 \color{red}\texttt{acyclic(fr $\cup$ po)}
@@ -437,14 +433,14 @@ SC model: \\
 \begin{figure}
 %\centering
 \includegraphics[width=\linewidth]{img/candidate.png}
-\caption{The four candidate executions allowed under x86-TSO}
+\double{\caption{The four candidate executions allowed under x86-TSO}}{\caption{Четыре возможных выполнения программы, допустимых моделью x86-TSO}}
 \end{figure}
 }
 \only<2->{
 \begin{figure}
 %\centering
 \includegraphics[width=\linewidth]{img/candidate-red.png}
-\caption{The four candidate executions allowed under x86-TSO}
+\double{\caption{The four candidate executions allowed under x86-TSO}}{\caption{Четыре возможных выполнения программы, допустимых моделью x86-TSO}}
 \end{figure}
 }
 \only<3>{
@@ -478,12 +474,12 @@ SC model: \\
 
 
 
-\begin{frame}{Portability analysis} {The \tool{Porthos} tool}
+\begin{frame}{\double{Portability analysis}{Анализ портируемости}} {\double{The \tool{Porthos} tool}{Анализатор \tool{Porthos}}}
 \begin{minipage}{.49\textwidth}
 \only<1->{
   \begin{figure}
   \includegraphics[height=0.4\textheight,keepaspectratio]{img/the-problem.png}
-  \caption{The illustration of the portability problem~\cite{Porthos17slides}}
+  \caption{\double{The illustration of the portability problem~\cite{Porthos17slides}}{Иллюстрация проблемы определения портируемости программы~\cite{Porthos17slides}}}
   \end{figure}
 }
 \end{minipage}
@@ -491,15 +487,16 @@ SC model: \\
 \begin{minipage}{.5\textwidth}
 \only<2->{
   \begin{itemize}
-    \begin{definition}[Portability~\cite{Porthos17a}]
+    \begin{definition}[\double{Portability}{Портируемость}~\cite{Porthos17a}]
     %SAY: Let $\textit{cons}_{\mathcal{M}}(P)$ be a function that calculates the set of executions of the program $P$ that are consistent under the memory model $\mathcal{M}$
     %Let $\mathcal{M_S}$, $\mathcal{M_T}$ be two weak memory models.
-    The program $P$ is portable from the source memory model $\mathcal{M_S}$ to the target one $\mathcal{M_T}$ if
+    \double{The program $P$ is portable from the source memory model $\mathcal{M_S}$ to the target model $\mathcal{M_T}$ if}
+    {Программа $P$ называется портируемой с платформы $\mathcal{M_S}$ на платформу $\mathcal{M_T}$, если}
     $\textit{cons}_{\mathcal{M_T}}(P) \subseteq \textit{cons}_{\mathcal{M_S}}(P)$
     \end{definition}
-    \item Portability as an SMT-based bounded reachability problem: \\
+    \item \double{Portability as an SMT-based bounded reachability problem}{Портируемость как проблема ограниченной достижимости на основе SMT}: \\
     $\phi = $\only<3>\yellowemph{$\phi_{CF}$}$\land $\only<3>\yellowemph{$\phi_{DF}$}$\land \phi_{\mathcal{M_T}} \land \phi_{\lnot\mathcal{M_S}}$
-    \item $\texttt{SAT}(\phi) \Longrightarrow $ portability bug
+    \item $\texttt{SAT}(\phi) \Longrightarrow $ \double{portability bug}{ошибка портирования}
   \end{itemize}
 }
 \end{minipage}
@@ -507,11 +504,11 @@ SC model: \\
 
 
 
-\begin{frame}{\tool{PorthosC}: Architecture}{Main components}
+\begin{frame}{\double{\tool{PorthosC}: Architecture}{\tool{PorthosC}: Архитектура}} {\double{Main components}{Основные компоненты}}
 \vspace{-30pt}
 \begin{minipage}{.49\textwidth}
 \begin{itemize}
-\item The enhanced version of \tool{Porthos}, that is able to analyse C programs, has got a new name \textit{PorthosC}.
+\item \double{The enhanced version of \tool{Porthos}, that is able to analyse C programs, has got a new name \textit{PorthosC}.}{Усовершенственная версия \tool{Porthos}, способная анализировать программы на языке программирования С, была названа \tool{PorthosC}.}
 \end{itemize}
 \hfill
 \end{minipage}
@@ -537,11 +534,11 @@ SC model: \\
 
 
 
-\begin{frame}{\tool{PorthosC}: Architecture}{Abstract interpretation module}
+\begin{frame}{\double{\tool{PorthosC}: Architecture}{\tool{PorthosC}: Архитектура}} {\double{Abstract interpretation module}{Модуль абстрактной интерпретации}}
   \vspace{-40pt}
 \begin{minipage}{.4\textwidth}
 \begin{itemize}
-\item The abstract interpretation module is an essential part of the compiler of C code into the event-flow graph representation (\texttt{X-graph}).
+\item \double{The abstract interpretation module is an essential part of the compiler of C code into the event-flow graph representation}{Модуль абстрактной интерпретации является ключевым компонентом компилятора, преобразующего программы на С в низкоуровневое событийное представление} (\texttt{X-graph}).
 \end{itemize}
 \hfill
 \end{minipage}
@@ -567,56 +564,56 @@ SC model: \\
 
 
 
-\begin{frame}{\tool{Porthos\,v1}: The input language}
+\begin{frame}{\double{\tool{Porthos\,v1}: The input language}{\tool{Porthos\,v1}: Входной язык}}
 {
 \only<1-2>{ }
-\only<3>{Static syntactic determination of the variables kind}
-\only<4>{Lack of support for functions invocations}
-\only<5>{Lack of support for unconditional jumps}
+\only<3>{\double{Static syntactic determination of the variables kind}{Статическое определение вида переменных на синтаксическом уровне}}
+\only<4>{\double{Lack of support for functions invocations}{Отсутствие поддержки вызовов функций}}
+\only<5>{\double{Lack of support for unconditional jumps}{Отсутствие поддержки безусловных переходов}}
 }
 {\noindent\centering
-\begin{minipage}{.45\textwidth}
+\begin{minipage}{.46\textwidth}
   \begin{figure}
   \only<1-2>{\lstinputlisting[language=Java,basicstyle=\ttfamily\tiny,columns=fullflexible]{img/lst/input-old/example-old.c}}
     \only<3>{\lstinputlisting[language=Java,basicstyle=\ttfamily\tiny,columns=fullflexible]{img/lst/input-old/example-old-2.c}}
     \only<4>{\lstinputlisting[language=Java,basicstyle=\ttfamily\tiny,columns=fullflexible]{img/lst/input-old/example-old-3.c}}
     \only<5>{\lstinputlisting[language=Java,basicstyle=\ttfamily\tiny,columns=fullflexible]{img/lst/input-old/example-old.c}}
-  \caption{A program example in the \tool{Porthos\,v1} input language}
+  \double{\caption{A program example in the \tool{Porthos\,v1} input language}}{\caption{Пример программы на входном языке анализатора \tool{Porthos\,v1}}}
   \end{figure}
 \end{minipage}
 %
-\begin{minipage}{.45\textwidth}
+\begin{minipage}{.47\textwidth}
   \begin{figure}
   \only<2,5>{\lstinputlisting[basicstyle=\ttfamily\Tiny,columns=fullflexible,literate={<}{{$\langle$}}1{>}{{$\rangle$}}1,escapeinside={[*}{*]}]{img/lst/input-grammar/grammar.txt}}
   \only<3>{\lstinputlisting[basicstyle=\ttfamily\Tiny,columns=fullflexible,literate={<}{{$\langle$}}1{>}{{$\rangle$}}1,escapeinside={[*}{*]}]{img/lst/input-grammar/grammar-2.txt}}
   \only<4>{\lstinputlisting[basicstyle=\ttfamily\Tiny,columns=fullflexible,literate={<}{{$\langle$}}1{>}{{$\rangle$}}1,escapeinside={[*}{*]}]{img/lst/input-grammar/grammar-3.txt}}
   \vfill
-  \only<2->{\caption{A sketch of the \tool{Porthos\,v1} input language grammar}}
+  \only<2->{\double{\caption{A sketch of the \tool{Porthos\,v1} input language grammar}}{\caption{Набросок грамматики входного языка анализатора \tool{Porthos\,v1}}}}
   \end{figure}
 \end{minipage}
 }
 \end{frame}
 
 
-\begin{frame}[label={example-new}]{\tool{PorthosC}: The input language}
+\begin{frame}[label={example-new}]{\double{\tool{PorthosC}: The input language}{\tool{PorthosC}: Входной язык}}
 {
 \only<1-2>{ }
-\only<3>{Pre-compilation phase for the syntactic determination of the variables kind}
-\only<4>{Support for functions invocations: The invocation hooking mechanism}
-\only<5>{Support for arbitrary control-flow jumps}
+\only<3>{\double{Pre-compilation phase for the syntactic determination of the variables kind}{Стадия предкомпиляции для синтаксического определения вида переменных}}
+\only<4>{\double{Support for functions invocations: The invocation hooking mechanism}{Поддержка вызовов функций: Механизм перехвата вызовов}}
+\only<5>{\double{Support for an arbitrary control-flow}{Поддержка произвольного ветвления графа потока управления}}
 }
 {\noindent\centering
-\begin{minipage}{.43\textwidth}
+\begin{minipage}{.44\textwidth}
   \begin{figure}
   \only<1-2>{\lstinputlisting[language=Java,basicstyle=\ttfamily\tiny,columns=fullflexible]{img/lst/input-new/example-new.c}}
     \only<3>{\lstinputlisting[language=Java,basicstyle=\ttfamily\tiny,columns=fullflexible]{img/lst/input-new/example-new-2.c}}
     \only<4>{\lstinputlisting[language=Java,basicstyle=\ttfamily\tiny,columns=fullflexible]{img/lst/input-new/example-new-3.c}}
     \only<5>{\lstinputlisting[language=Java,basicstyle=\ttfamily\tiny,columns=fullflexible]{img/lst/input-new/example-new-4.c}}
-  \caption{A program example in the \tool{Porthos\,v1} input language}
+  \double{\caption{A program example in C}}{\caption{Пример программы на языке~С}}
   \end{figure}
 \end{minipage}
 %
-\begin{minipage}{.55\textwidth}
+\begin{minipage}{.54\textwidth}
 %  \only<1>{\begin{itemize}
 %  \item The grammar used by \texttt{PorthosC} was taken from the C11 standard~\cite{c11}.
 %  \end{itemize}}
@@ -654,14 +651,14 @@ SC model: \\
   \only<5>{
     \scalebox{0.75}{\includegraphics[height=\textheight,keepaspectratio]{img/lst/input-new/t0-5.png}}
   }
-  \only<2->{\caption{The compiled event-flow graph}}
+  \only<2->{\double{\caption{The compiled event-flow graph}}{\caption{Скомпилированный граф потока событий}}}
   \end{figure}
 \end{minipage}
 }
 \end{frame}
 
 
-\begin{frame}{\texttt{PorthosC}: The new control-flow encoding scheme}
+\begin{frame}{\double{\texttt{PorthosC}: The new control-flow encoding scheme}{\texttt{PorthosC}: Новая схема кодирования потока управления}}
 \begin{figure}
 \begin{minipage}{.2\textwidth}
 \centering
@@ -700,7 +697,7 @@ SC model: \\
                  \ & \land \lnot [\fx(e_3) \land \fx(e_{nop_{2}})]
 \end{align*}
 \end{minipage}
-\caption{Example of encoding for the control-flow of the event-flow graph}
+\double{\caption{Example of encoding for the control-flow of the event-flow graph}}{\caption{Пример кодирования потока управления с произвольным ветвлением}}
 \end{figure}
 \end{frame}
 
@@ -726,7 +723,7 @@ The data-flow of an event is encoded as following:
 
 
 
-\begin{frame}{\texttt{PorthosC}: The new DFS-based \texttt{X-graph} unrolling scheme}
+\begin{frame}{\double{\texttt{PorthosC}: The new DFS-based \texttt{X-graph} unrolling scheme}{\texttt{PorthosC}: Новая схема развертки циклов, основанная на обходе графа в глубину}}
 \only<1>{
 \begin{figure}[t]
 \centering
@@ -792,7 +789,7 @@ The data-flow of an event is encoded as following:
 ;
 \end{tikzpicture}
 }
-\caption{Example of the flow graph unrolling up to bound $k = 6$}
+\double{\caption{Example of the flow graph unrolling up to bound $k = 6$}}{\caption{Пример развертки цикла до границы $k=6$}}
 \end{figure}
 }
 %
@@ -806,98 +803,98 @@ The data-flow of an event is encoded as following:
 
 
 
-\begin{frame}{Evaluation}{The new unrolling scheme}
-\begin{minipage}{.23\linewidth}
+\begin{frame}{\double{Evaluation}{Анализ программы}}{\double{The new unrolling scheme}{Новая схема развертки циклов}}
+\begin{minipage}{.3\linewidth}
 \hfill
 \end{minipage}
 %
-\noindent\begin{minipage}{.75\linewidth}
+\noindent\begin{minipage}{.65\linewidth}
 \begin{figure}
   \vspace{-20pt}
   \centering
   \scalebox{.8}{
     \colorbox{white}{\includegraphics[height=\textheight,keepaspectratio]{img/lst/unrolled/collage.jpg}}
   }
-\caption{Illustration of differences in unrolling schemes of \tool{PorthosC}~(left) and \tool{Porthos\,v1}~(right)}
+\double{\caption{Illustration of differences in unrolling schemes of \tool{PorthosC}~(left) and \tool{Porthos\,v1}~(right)}}{\caption{Иллюстрация различий в алгоритмах развертки циклов используемых \tool{PorthosC}~(слева) и \tool{Porthos\,v1}~(справа)}}
 \end{figure}
 \end{minipage}
 \end{frame}
 
 
-\begin{frame}{Evaluation}{Overhead of the new unrolling scheme: Number of events}
+\begin{frame}{\double{Evaluation}{Анализ программы}}{\double{Overhead of the new unrolling scheme: Number of events}{Сравнение схем развертки циклов: Количество событий}}
 \begin{figure}[t]
 \begin{subfigure}{.47\textwidth}
 \includegraphics[width=\textwidth,keepaspectratio]{../img/my/performance/new/new-e.png}
-\caption{The graph unrolled by \tool{PorthosC}}
-\label{dep:events:new}
+\double{\caption{The graph unrolled by \tool{PorthosC}}}{\caption{Граф, развернутый анализатором \tool{PorthosC}}}
 \end{subfigure}
 \hfill
 %
 \begin{subfigure}{.47\textwidth}
 \includegraphics[width=\textwidth,keepaspectratio]{../img/my/performance/new/old-e.png}
-\caption{The graph unrolled by \tool{Porthos\,v1}}
-\label{dep:events:old}
+\double{\caption{The graph unrolled by \tool{Porthos\,v1}}}{\caption{Граф, развернутый анализатором \tool{Porthos\,v1}}}
 \end{subfigure}
 %
-\caption{Dependency of unrolled events number on the unrolling bound $k$}
-\label{dep:events}
+\double{\caption{Dependency of unrolled events number on the unrolling bound $k$}}{\caption{Зависимость количества событий от границы развертки циклов $k$}}
 \end{figure}
 \end{frame}
 
 
-\begin{frame}{Evaluation}{Overhead of the new unrolling scheme: Execution time}
+\begin{frame}{\double{Evaluation}{Анализ программы}}{\double{Overhead of the new unrolling scheme: Execution time}{Сравнение схем развертки циклов: Время кодирования программы}}
 \begin{figure}[t]
 \begin{subfigure}{.45\textwidth}
 \includegraphics[width=\textwidth,keepaspectratio]{../img/my/performance/new/new-t.png}
-\caption{Program domain encoding time of the graph unrolled by \tool{PorthosC}}
-\label{dep:time:new}
+\double{\caption{Program domain encoding time of the graph unrolled by \tool{PorthosC}}}{\caption{Время кодирования программы в SMT-формулы, произведенное анализатором \tool{PorthosC}}}
 \end{subfigure}
 \hfill
 %
 \begin{subfigure}{.45\textwidth}
 \includegraphics[width=\textwidth,keepaspectratio]{../img/my/performance/new/old-t.png}
-\caption{Program domain encoding time of the graph unrolled by \tool{Porthos\,v1}}
-\label{dep:time:old}
+\double{\caption{Program domain encoding time of the graph unrolled by \tool{PorthosC}}}{\caption{Время кодирования программы в SMT-формулы, произведенное анализатором \tool{Porthos\,v1}}}
 \end{subfigure}
 %
-\caption{Dependency of program domain encoding time (in seconds) on the unrolling bound}
-\label{dep:time}
+\double{\caption{Dependency of program domain encoding time (in seconds) on the unrolling bound}}{\caption{Зависимость времени кодирования программы от границы развертки циклов $k$}}
 \end{figure}
 \end{frame}
 
 %\section*{Summary}
 
-\begin{frame}{Summary}
+\begin{frame}{\double{Summary}{Заключение}}
 \begin{itemize}
-\item The result of the work is the generalised framework for memory model-aware analysis \textbf{\tool{PorthosC}};
+\item \double{The result of the work is the generalised framework for memory model-aware analysis \textbf{\tool{PorthosC}}}{Результатом выпускной квалификационной работы является платформа для проведения статического анализа кода с учетом слабых моделей памяти сред выполнения \textbf{\tool{PorthosC}}};
   \begin{itemize}
-  \item The \textit{input language} has been extended to a higher subset of C language (including unconditional control-flow jumps);
-  \item The old \textit{architecture} of \texttt{Porthos} has been revised and redesigned for \texttt{PorthosC};
-  \item The \textit{new unrolling scheme} produces complete state space of the analysing program within the user-defined bound $k$, though the encoding time growth rapidly (exponentially) as the unrolling bound grows.
-  \item The \textit{invocation hooking mechanism} serves as a knowledge base for the program domain, it is to be filled and extended in future.
+  \item \double{The \textit{input language} has been extended to a higher subset of C language (including unconditional control-flow jumps)}{В рамках работы над анализатором была расширена поддержка \textit{входной языка С} (включая поддержку безусловных переходов)};
+  \item \double{The old \textit{architecture} of \texttt{Porthos} has been revised and redesigned for \texttt{PorthosC}}{Была пересмотрена и модифицирована общая \textit{архитектура} анализатора};
+  \item \double{The \textit{new unrolling scheme} produces complete state space of the analysing program within the user-defined bound $k$, though the encoding time growth rapidly (exponentially) as the unrolling bound grows}{Измененная \textit{схема развертки циклов}, работающая на нерекурсивной структуре графа событий, производит \textit{полное множество} выполнений программы, что улучшает качество производимого анализа};
+  \item \double{The \textit{invocation hooking mechanism} is an important part of the abstract interpretation engine, that serves as a knowledge base for the program domain and increases the extensibility of the tool}{\textit{Механизм перехвата вызовов}, являющийся важным элементом модуля абстрактной интерпретации, служит в качестве базы знаний семантики функций и таким образом повышает расширяемость анализатора}.
   \end{itemize}
 \end{itemize}
 \end{frame}
 
 
-\begin{frame}{Directions for future work}
+\begin{frame}{\double{Directions for future work}{Направления работы в будущем}}
 \begin{itemize}
-\item Extending the \textit{knowledge base} of domain-specific functions to model synchronisation primitives;
-\item Supporting \textit{new input languages} (e.g., different assembly languages);
-\item Supporting \textit{complex data types} (s.a. arrays, pointers, structures, etc.);
-\item Adding the \textit{inter-procedural analysis mode};
-\item Handling the \textit{state explosion problem} (with standard model-checking techniques adjusted by the information about the weak memory model of the execution environment).
+\item \double{Extending the \textit{knowledge base} of domain-specific functions to model synchronisation primitives}{Расширение \textit{базы знаний} функций для моделирования различных примитивов синхронизации};
+\item \double{Supporting \textit{new input languages} (e.g., different assembly languages)}{Поддержка новых \textit{входных языков} (напр., языков ассемблера различных архитектур)};
+\item \double{Supporting \textit{complex data types} (s.a. arrays, pointers, structures, etc.)}{Поддержка \textit{комплексных структур данных} (таких как массивы, структуры, указатели, и т.д.)};
+\item \double{Adding the \textit{inter-procedural analysis mode}}{Добавление режима \textit{кросс-процедурного анализа}};
+\item \double{Handling the \textit{state explosion problem} (with standard model-checking techniques adjusted by the information about the weak memory model of the execution environment)}{Решение проблемы \textit{комбинаторного взрыва пространства состояний} (с помощью стандартных техник анализа кода, модифицированных с целью учитывания модели памяти среды выполнения)}.
 \end{itemize}
 \end{frame}
 
 
+\begin{frame}{\double{Thank you for attention}{Спасибо за внимание}}
+  \centering
+  \includegraphics[height=.8\textheight]{img/thank-you-smirnitsky.jpg}
+\end{frame}
+
 % All of the following is optional and typically not needed. 
-\appendix
-\section<presentation>*{\appendixname}
-\subsection<presentation>*{For Further Reading}
+%\appendix
+%\section<presentation>*{\appendixname}
+%\subsection<presentation>*{For Further Reading}
 
 \begin{frame}[allowframebreaks]
-  \frametitle<presentation>{Bibliography}
+  %\frametitle<presentation>{Bibliography}
+  \frametitle{Bibliography}
   \printbibliography
 \end{frame}
 
